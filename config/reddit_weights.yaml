@@ -1,0 +1,34 @@
+# Reddit Quant Scraper - Dynamic Weight Configuration
+# Weights are configurable at runtime and optimized via backtesting
+
+subreddit_weights:
+  macro_geopolitical:
+    geopolitics: 0.35
+    economics: 0.30
+    supplychain: 0.35
+  fundamental_institutional:
+    SecurityAnalysis: 0.55
+    ValueInvesting: 0.45
+  tech_product:
+    hardware: 0.50
+    LocalLLaMA: 0.50
+  retail_options:
+    wallstreetbets: 0.40
+    stocks: 0.25
+    investing: 0.20
+    options: 0.15
+
+# Category-level blending (sums to 1.0)
+category_weights:
+  macro_geopolitical: 0.25
+  fundamental_institutional: 0.25
+  tech_product: 0.30
+  retail_options: 0.20
+
+# Backtesting optimization
+optimization:
+  enabled: true
+  lookback_days: 252
+  objective: "information_coefficient"  # or "sharpe", "hit_rate"
+  rebalance_frequency: "monthly"
+  method: "bayesian_optimization"  # or "grid_search", "random_search"

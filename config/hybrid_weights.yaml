@@ -1,0 +1,52 @@
+# Hybrid Architecture Weight Configuration
+
+# Source-level weights (must sum to 1.0)
+source_weights:
+  stocktwits: 0.50
+  apewisdom: 0.30
+  reddit: 0.20
+
+# Category weights (applied within each source)
+category_weights:
+  macro_geopolitical: 0.25
+  fundamental_institutional: 0.25
+  tech_product: 0.30
+  retail_options: 0.20
+
+# Subreddit weights (for Reddit fallback only)
+subreddit_weights:
+  macro_geopolitical:
+    geopolitics: 0.35
+    economics: 0.30
+    supplychain: 0.35
+  fundamental_institutional:
+    SecurityAnalysis: 0.55
+    ValueInvesting: 0.45
+  tech_product:
+    hardware: 0.50
+    LocalLLaMA: 0.50
+  retail_options:
+    wallstreetbets: 0.40
+    stocks: 0.25
+    investing: 0.20
+    options: 0.15
+
+# Fusion parameters
+fusion:
+  recency_half_life_hours: 24
+  engagement_log_scale: true
+  min_messages_per_ticker: 3
+  confidence_threshold: 0.3
+
+# Backtesting optimization
+optimization:
+  enabled: true
+  lookback_days: 252
+  objective: "information_coefficient"
+  rebalance_frequency: "monthly"
+  method: "bayesian_optimization"
+  optimize_source_weights: true
+  source_weight_bounds:
+    stocktwits: [0.3, 0.7]
+    apewisdom: [0.1, 0.5]
+    reddit: [0.0, 0.4]
