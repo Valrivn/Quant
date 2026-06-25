@@ -1,0 +1,219 @@
+# Hybrid Architecture Configuration
+# All public endpoints - no credentials needed
+
+endpoints:
+  stocktwits:
+    base_url: "https://api.stocktwits.com/api/2"
+    symbol_stream: "/streams/symbol/{ticker}.json"
+    trending: "/trending/symbols.json"
+  apewisdom:
+    base_url: "https://apewisdom.io/api/v1.0"
+    ticker_filter: "/filter/ticker/{ticker}"
+    trending: "/filter/all"
+  glassdoor:
+    base_url: "https://www.glassdoor.com"
+    public_index: "/api/public/index.htm"
+  comparably:
+    base_url: "https://www.comparably.com"
+    public_badges: "/companies/{company}/badges"
+
+retry:
+  max_retries: 3
+  base_delay_seconds: 1.0
+  timeout_seconds: 10
+
+scenarios:
+  A:
+    name: "Reddit Primary"
+    description: "Native Reddit mirrors accessible, full category taxonomy active"
+    weights:
+      reddit: 1.0
+      stocktwits: 0.0
+      apewisdom: 0.0
+    category_weights:
+      macro_geopolitical: 0.25
+      fundamental_institutional: 0.25
+      tech_product: 0.30
+      retail_options: 0.20
+
+  B:
+    name: "Fintech Fallback"
+    description: "Reddit mirrors blocked/throttled, using pre-scraped Reddit (ApeWisdom) + StockTwits"
+    weights:
+      reddit: 0.0
+      apewisdom: 0.60
+      stocktwits: 0.40
+    category_weights:
+      macro_geopolitical: 0.25
+      fundamental_institutional: 0.25
+      tech_product: 0.30
+      retail_options: 0.20
+
+fallback:
+  trigger_on: ["429", "timeout", "connection_error"]
+  per_ticker: true
+  always_query_both_fintech: true
+  reddit_priority_subreddits:
+    - "wallstreetbets"
+    - "stocks"
+    - "options"
+    - "SecurityAnalysis"
+    - "ValueInvesting"
+    - "LocalLLaMA"
+    - "hardware"
+    - "geopolitics"
+    - "economics"
+    - "supplychain"
+
+fusion:
+  recency_half_life_hours: 24
+  engagement_log_scale: true
+  min_messages_per_ticker: 3
+  confidence_threshold: 0.3
+
+optimization:
+  enabled: true
+  lookback_days: 252
+  objective: "information_coefficient"
+  rebalance_frequency: "monthly"
+  method: "bayesian_optimization"
+  optimize_scenario_b: true
+  scenario_b_bounds:
+    apewisdom: [0.4, 0.8]
+    stocktwits: [0.2, 0.6]
+
+github_mappings:
+  NVDA: "NVIDIA/cuda-samples"
+  AMD: "amd/gaia"
+  MSFT: "microsoft/vscode"
+  GOOGL: "google/jax"
+  META: "facebookresearch/llama"
+  TSLA: "teslamotors/linux"
+
+adzuna:
+  app_id: "${ADZUNA_APP_ID}"
+  app_key: "${ADZUNA_APP_KEY}"
+  base_url: "https://api.adzuna.com/v1/api/jobs"
+  country: "us"
+
+psychological:
+  bullish_terms:
+    "call": 1.0
+    "moon": 1.5
+    "long": 1.0
+    "tendies": 1.2
+    "diamond hands": 2.0
+    "yolo": 1.0
+    "undervalued": 1.0
+    "bullish": 1.5
+    "rip": 1.0
+    "green": 0.5
+
+  bearish_terms:
+    "put": 1.0
+    "crash": 1.5
+    "short": 1.0
+    "bagholder": 1.5
+    "paper hands": 2.0
+    "overvalued": 1.0
+    "dump": 1.2
+    "bearish": 1.5
+    "red": 0.5
+    "tank": 1.0
+
+  velocity_windows:
+    short_hours: 1
+    medium_hours: 4
+    long_hours: 24
+
+  regime_thresholds:
+    panic_ratio: 0.25
+    panic_velocity_sigma: 2.0
+    euphoria_ratio: 4.0
+    euphoria_velocity_sigma: 2.5
+    apathy_ratio_min: 0.8
+    apathy_ratio_max: 1.5
+    apathy_velocity_sigma: 0.5
+    asymmetric_employee_sigma: -1.5
+    asymmetric_git_velocity_sigma: 1.0
+
+  fusion_weights:
+    psychological_regime: 0.60
+    fintech_confirmation: 0.25
+    quantitative_value: 0.15
+
+glassdoor:
+  company_slugs:
+    NVDA: "nvidia"
+    AMD: "advanced-micro-devices"
+    MSFT: "microsoft"
+    GOOGL: "google"
+    META: "meta"
+    TSLA: "tesla-motors"
+    AAPL: "apple"
+    AMZN: "amazon"
+
+comparably:
+  company_slugs:
+    NVDA: "nvidia"
+    AMD: "advanced-micro-devices"
+    MSFT: "microsoft"
+    GOOGL: "google"
+    META: "meta"
+    TSLA: "tesla"
+    AAPL: "apple"
+    AMZN: "amazon"
+
+validation_gate:
+  kappa: 5.0
+  divergence_threshold: 0.20
+  confidence_floor: 0.40
+  max_penalty: 0.1
+
+hiring_velocity:
+  lookback_runs_30d: 8
+  baseline_runs_1y: 252
+  min_baseline_count: 1
+  sources:
+    - "linkedin"
+    - "indeed"
+    - "themuse"
+  throttle_per_source: 10
+  ghost_job_threshold: 0.0
+  operational_fracture:
+    delta_threshold: 0.9
+    zscore_threshold: 3.0
+    sentiment_threshold: 0.0
+
+g2_capterra:
+  platforms:
+    - "g2"
+    - "capterra"
+  keywords:
+    - "rushed updates"
+    - "broken builds"
+    - "regression bugs"
+    - "technical debt"
+    - "legacy code"
+  date_filter_days: 90
+
+app_store:
+  platforms:
+    - "apple"
+  flagship_apps:
+    NVDA: "NVIDIA"
+    AMD: "AMD"
+    MSFT: "Microsoft"
+    GOOGL: "Google"
+    META: "Meta"
+    TSLA: "Tesla"
+    AAPL: "Apple"
+    AMZN: "Amazon"
+  date_filter_days: 90
+
+quantitative_dcf:
+  model_version: "stub_v1"
+  default_wacc: 0.10
+  default_terminal_growth: 0.03
+  projection_years: 5
+  margin_of_safety: 0.25
