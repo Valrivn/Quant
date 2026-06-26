@@ -44,7 +44,8 @@ class FintechClientFactory:
         for source in sources:
             try:
                 client = self.get_client(source)
-                results[source] = await client.health_check()
+                async with client:
+                    results[source] = await client.health_check()
             except Exception as e:
                 logger.error(f"Health check failed for {source}: {e}")
                 results[source] = FintechHealth(
