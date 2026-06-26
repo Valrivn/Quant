@@ -152,6 +152,7 @@ glassdoor:
     TSLA: "tesla-motors"
     AAPL: "apple"
     AMZN: "amazon"
+    AVGO: "broadcom"
 
 comparably:
   company_slugs:
@@ -163,6 +164,7 @@ comparably:
     TSLA: "tesla"
     AAPL: "apple"
     AMZN: "amazon"
+    AVGO: "broadcom"
 
 validation_gate:
   kappa: 5.0
@@ -210,6 +212,26 @@ app_store:
     AAPL: "Apple"
     AMZN: "Amazon"
   date_filter_days: 90
+
+browserless:
+  enabled: true
+  host: "http://127.0.0.1:3000"
+  timeout: 60000
+  block_ads: true
+  block_resources: ["image", "stylesheet", "font"]
+  stealth: true
+  viewport:
+    width: 1920
+    height: 1080
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+proxy_pool:
+  enabled: true
+  rotate_per_request: false
+  proxies:
+    - "http://127.0.0.1:8080"
+  providers:
+    - env: "PROXY_POOL"
 
 quantitative_dcf:
   model_version: "stub_v1"
