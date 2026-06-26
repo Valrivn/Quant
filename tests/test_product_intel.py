@@ -80,14 +80,10 @@ class TestG2Scraper:
         bing_html = """
         <html>
             <li class="b_algo">
-                <div class="b_caption">
-                    <p>NVIDIA Reviews - Rating: 4.5/5 - Great product, very fast!</p>
-                </div>
+                <p>NVIDIA Reviews - Rating: 4.5/5 - Great product, very fast!</p>
             </li>
             <li class="b_algo">
-                <div class="b_caption">
-                    <p>NVIDIA Reviews - Rating: 3.0/5 - Has some bugs but okay</p>
-                </div>
+                <p>NVIDIA Reviews - Rating: 3.0/5 - Has some bugs but okay</p>
             </li>
         </html>
         """
@@ -175,7 +171,7 @@ class TestCapterraScraper:
         </html>
         """
         scraper._curl_session.set_response(
-            "https://www.bing.com/search?q=site:capterra.com/p/nvidia+reviews+rating",
+            "https://www.bing.com/search?q=site:capterra.com/p/apple+reviews+rating",
             status_code=200,
             text=bing_html
         )

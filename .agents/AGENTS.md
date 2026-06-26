@@ -26,3 +26,15 @@ To prevent constant active polling and excessive token usage when running the `/
 - On each scheduled wakeup, the agent must first read the file system for `.guard_lock`.
   - If `.guard_lock` does NOT exist, the agent must immediately end its turn without running any other commands or calling other subagents. This maintains an idle state and preserves your token budget.
   - If `.guard_lock` exists, the agent must proceed to execute the self-healing cascade to analyze the log, write the patch, and validate the code. Only after the validation successfully passes and `.guard_lock` is deleted should the agent return to its idle scheduling state.
+
+# Phase 2.5: Central Oversight & Policing Protocol
+
+## 1. Architectural Separation of Concerns
+- **The Hub (Oversight):** Claude 3.5 Sonnet / Gemini Pro (Day) or Nemotron 3 Ultra (Night). Responsible for sub-5-second structural validation or deep macro cross-lane synthesis.
+- **The Lanes (Execution Workers):** Headless workers running in completely isolated Git Worktrees to prevent filesystem state contamination and write collisions.
+
+## 2. Invariants & Guardrails
+- **Git Worktree Isolation:** Workers must never execute actions directly inside the main workspace repository trunk (`/Users/hayden/Desktop/quant-py`). All tasks must happen in `/Users/hayden/Desktop/lane_alpha`, `_beta`, or `_gamma`.
+- **Shift Rotation Strategy:** 
+  - `DAY`: Prioritize rapid, sub-5-second execution cycles via high-speed API endpoints.
+  - `NIGHT`: Prioritize exhaustive, unmetered deep-thinking loops with cross-lane tip injection.
