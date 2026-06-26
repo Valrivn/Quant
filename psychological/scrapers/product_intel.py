@@ -272,7 +272,7 @@ class CapterraScraper:
             soup = BeautifulSoup(html, "html.parser")
             reviews = []
             
-            for result_elem in soup.select("li.b_algo, div.b_caption")[:10]:
+            for result_elem in soup.select("li.b_algo")[:10]:
                 text = result_elem.get_text()
                 
                 rating_match = re.search(r'Rating:\s*(\d+\.?\d*)\s*/\s*5', text, re.IGNORECASE)

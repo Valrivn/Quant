@@ -1,7 +1,16 @@
 from psychological.scrapers.reddit_primary import RedditPrimaryScraper, create_reddit_scraper
 from psychological.scrapers.github_tracker import GitHubTracker, create_github_tracker
 from psychological.scrapers.corp_anonymous import CorpAnonymousScraper, create_corp_anonymous_scraper
-from psychological.scrapers.corp_audit import GlassdoorScraper, ComparablyScraper, CorpAuditEngine, create_corp_audit_engine, create_glassdoor_scraper, create_comparably_scraper
+from psychological.scrapers.corp_audit import (
+    GlassdoorScraper,
+    CorpAuditEngine,
+    create_corp_audit_engine,
+    create_glassdoor_scraper,
+    G2EmployerScraper,
+    create_g2_employer_scraper,
+    ComparablyScraper,
+    create_comparably_scraper,
+)
 from psychological.scrapers.product_intel import G2Scraper, CapterraScraper, AppStoreScraper, ProductIntelEngine, create_product_intel_engine
 from psychological.scrapers.reddit_custom import RedditScraper, create_reddit_scraper as create_old_reddit_scraper
 from psychological.scrapers.lightweight_scraper import UnifiedScraperSession, ScraperConfig, ScraperSessionPool, create_scraper_session
@@ -24,10 +33,12 @@ __all__ = [
     "CorpAnonymousScraper",
     "create_corp_anonymous_scraper",
     "GlassdoorScraper",
-    "ComparablyScraper",
+    "G2EmployerScraper",
     "CorpAuditEngine",
     "create_corp_audit_engine",
     "create_glassdoor_scraper",
+    "create_g2_employer_scraper",
+    "ComparablyScraper",
     "create_comparably_scraper",
     "G2Scraper",
     "CapterraScraper",

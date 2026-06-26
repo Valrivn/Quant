@@ -82,12 +82,33 @@ class PsychologicalOrchestrator:
             min_delay=0.1,
             max_delay=0.2
         )
-        self.reddit_scraper = await create_old_reddit_scraper(self.config, scraper_config)
-        self.github_tracker = await create_github_tracker(self.config)
-        self.corp_scraper = await create_corp_anonymous_scraper(self.config)
-        self.glassdoor_scraper = await create_glassdoor_scraper(self.config, scraper_config)
-        self.comparably_scraper = await create_comparably_scraper(self.config, scraper_config)
-        self.product_intel_engine = await create_product_intel_engine(self.config)
+        try:
+            self.reddit_scraper = await create_old_reddit_scraper(self.config, scraper_config)
+        except Exception as e:
+            logger.warning(f"Failed to initialize Reddit scraper: {e}")
+            self.reddit_scraper = None
+        
+        try:
+            self.github_tracker = await create_github_tracker(self.config)
+        except Exception as e:
+            logger.warning(f"Failed to initialize GitHub tracker: {e}")
+            self.github_tracker = None
+        
+        try:
+            self.corp_scraper = await create_corp_anonymous_scraper(self.config)
+        except Exception as e:
+            logger.warning(f"Failed to initialize corp anonymous scraper: {e}")
+            self.corp_scraper = None
+        
+        # Glassdoor and Comparably are slow/blocked - initialize lazily or skip
+        self.glassdoor_scraper = None
+        self.comparably_scraper = None
+        
+        try:
+            self.product_intel_engine = await create_product_intel_engine(self.config)
+        except Exception as e:
+            logger.warning(f"Failed to initialize product intel engine: {e}")
+            self.product_intel_engine = None
 
     async def run_primary_pipeline(self, tickers: List[str]) -> PsychologicalScrapeResult:
         """Primary pipeline: Reddit -> NLP -> Velocity -> State Machine -> Feature Store"""
