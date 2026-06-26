@@ -135,11 +135,80 @@ class HybridOrchestrator:
 
     def _collect_all_messages(self, results: Dict[str, ScrapeResult]) -> List[FintechMessage]:
         """Collect messages from all successful scrapes."""
+        # This is a placeholder - messages should be collected from the clients directly
         return []
+
+    async def _persist_fintech_messages(self, messages: List[FintechMessage], source: str) -> int:
+        """Persist fintech messages to database."""
+        if not messages:
+            return 0
+            
+        import sqlite3
+        conn = sqlite3.connect("reddit_quant.db")
+        cursor = conn.cursor()
+        
+        count = 0
+        for msg in messages:
+            try:
+                import json
+                cursor.execute("""
+                    INSERT OR REPLACE INTO fintech_messages 
+                    (source, source_id, ticker, text, sentiment_score, author, created_utc, scraped_at,
+                     engagement_likes, engagement_comments, engagement_shares, url, metadata_json)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    msg.source,
+                    msg.source_id,
+                    msg.ticker,
+                    msg.text,
+                    msg.sentiment_score,
+                    msg.author,
+                    int(msg.created_at.timestamp()),
+                    int(datetime.utcnow().timestamp()),
+                    msg.engagement.get("likes", msg.engagement.get("upvotes", 0)),
+                    msg.engagement.get("comments", 0),
+                    msg.engagement.get("shares", 0),
+                    msg.url,
+                    json.dumps(msg.metadata)
+                ))
+                count += 1
+            except Exception as e:
+                logger.error(f"Error inserting message: {e}")
+        
+        conn.commit()
+        conn.close()
+        return count
 
     async def _persist_fused_signals(self, signals: List[Dict]) -> None:
         """Persist fused signals to database with provenance."""
-        pass
+        if not signals:
+            return
+            
+        import sqlite3
+        import json
+        conn = sqlite3.connect("reddit_quant.db")
+        cursor = conn.cursor()
+        
+        for signal in signals:
+            try:
+                cursor.execute("""
+                    INSERT OR REPLACE INTO signal_provenance
+                    (ticker, date, source, source_weight, message_count, weighted_sentiment, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    signal["ticker"],
+                    signal["date"],
+                    json.dumps(signal["sources"]),
+                    signal["total_weight"],
+                    signal["message_count"],
+                    signal["composite_sentiment"],
+                    int(datetime.utcnow().timestamp())
+                ))
+            except Exception as e:
+                logger.error(f"Error inserting signal: {e}")
+        
+        conn.commit()
+        conn.close()
 
     async def _scrape_fintech_only(self, tickers: List[str] = None) -> Dict[str, ScrapeResult]:
         """Scrape only fintech sources (no psychological primary)."""

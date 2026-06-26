@@ -11,82 +11,13 @@ from bs4 import BeautifulSoup
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from curl_cffi import AsyncSession
 
+import json
 from psychological.scrapers.validation_gate import CrossValidationGate, ValidationGateResult
 from psychological.scrapers.browserless_client import BrowserlessClient, create_browserless_client
 from config import load_hybrid_config
+from psychological.scrapers.proxy_manager import ProxyManager, RateLimiter, RateLimiterConfig, build_ja4_headers
 
 logger = logging.getLogger(__name__)
-
-
-class RotatingProxyPool:
-    """Rotating proxy pool ensuring no outbound request originates from host IP.
-    All scraped targets receive traffic through anonymized proxy endpoints,
-    matching the anonymity mandate: never make direct raw calls to target hosts.
-    """
-
-    def __init__(self, proxies: Optional[List[str]] = None):
-        self._proxies: List[str] = proxies or []
-        self._index = 0
-        self._lock = asyncio.Lock()
-        self._session_proxy: Optional[str] = None
-
-    @classmethod
-    def from_config(cls, config_dict: dict) -> "RotatingProxyPool":
-        proxy_config = config_dict.get("proxy_pool", {})
-        proxies = proxy_config.get("proxies", [])
-        if not proxies or proxies == ["http://127.0.0.1:8080"]:
-            env_proxies = os.environ.get("PROXY_POOL", "")
-            if env_proxies:
-                proxies = [p.strip() for p in env_proxies.split(",") if p.strip()]
-        
-        # If no custom proxies configured, dynamically fetch free public proxies
-        if not proxies or proxies == ["http://127.0.0.1:8080"]:
-            logger.info("No custom proxies configured. Fetching free proxy lists dynamically...")
-            proxies = cls.fetch_free_proxies()
-
-        if not proxies:
-            logger.warning("No proxies configured in proxy_pool or PROXY_POOL env. "
-                           "Falling back to localhost — anonymity will be degraded.")
-            proxies = ["http://127.0.0.1:8080"]
-        return cls(proxies=proxies)
-
-    @staticmethod
-    def fetch_free_proxies() -> List[str]:
-        import urllib.request
-        import ssl
-        urls = [
-            "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/http.txt",
-            "https://api.proxyscrape.com/v2/?request=displayproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all"
-        ]
-        proxies = []
-        ctx = ssl._create_unverified_context()
-        for url in urls:
-            try:
-                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-                with urllib.request.urlopen(req, context=ctx, timeout=5) as response:
-                    text = response.read().decode('utf-8')
-                    found = re.findall(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+\b', text)
-                    for f in found:
-                        proxies.append(f"http://{f}")
-            except Exception as e:
-                logger.debug(f"Failed to fetch proxy list from {url}: {e}")
-        logger.info(f"Fetched {len(proxies)} free proxies dynamically.")
-        return proxies
-
-    async def acquire(self) -> Optional[str]:
-        if not self._proxies:
-            return None
-        async with self._lock:
-            proxy = self._proxies[self._index % len(self._proxies)]
-            self._index += 1
-            return proxy
-
-    def attach_to_session(self, session: AsyncSession) -> None:
-        self._session_proxy = None
-
-    @property
-    def proxy_count(self) -> int:
-        return len(self._proxies)
 
 
 @dataclass
@@ -129,27 +60,37 @@ class GlassdoorScraper:
             "TSLA": "Tesla",
             "AAPL": "Apple",
             "AMZN": "Amazon",
+        
+            "AVGO": "broadcom",
+        
+            "INTC": "intel",
         }
         self._curl_session: Optional[AsyncSession] = None
-        self._proxy_pool: Optional[RotatingProxyPool] = None
+        self._proxy_manager: Optional[ProxyManager] = None
         self._browserless: Optional[BrowserlessClient] = None
+        self._rate_limiter = RateLimiter(RateLimiterConfig(
+            min_delay=12.0,
+            max_delay=25.0,
+            jitter=2.0,
+        ))
 
     async def initialize(self) -> None:
-        self._proxy_pool = RotatingProxyPool.from_config(self.config)
-        proxy_url = await self._proxy_pool.acquire()
+        self._proxy_manager = ProxyManager(self.config)
+        await self._proxy_manager.initialize()
         self._curl_session = AsyncSession(
             impersonate="chrome124",
-            proxy=proxy_url,
             timeout=30
         )
         self._browserless = await create_browserless_client(self.config)
-        logger.info("GlassdoorScraper initialized with curl_cffi chrome124 + rotating proxy pool (%d proxies) + browserless",
-                     self._proxy_pool.proxy_count)
+        logger.info("GlassdoorScraper initialized with curl_cffi chrome124 + dynamic proxy manager + browserless")
 
     async def close(self) -> None:
         if self._curl_session:
             await self._curl_session.close()
             self._curl_session = None
+        if self._proxy_manager:
+            await self._proxy_manager.close()
+            self._proxy_manager = None
         if self._browserless:
             await self._browserless.close()
             self._browserless = None
@@ -184,19 +125,6 @@ class GlassdoorScraper:
             pass
         return None
 
-    async def _rotate_proxy(self) -> None:
-        if not self._proxy_pool or not self._curl_session:
-            return
-        proxy_url = await self._proxy_pool.acquire()
-        if proxy_url:
-            await self._curl_session.close()
-            self._curl_session = AsyncSession(
-                impersonate="chrome124",
-                proxy=proxy_url,
-                timeout=30
-            )
-            logger.debug("Rotated to new proxy: %s", proxy_url)
-
     async def scrape_company(self, ticker: str) -> GlassdoorScore:
         slug = self.company_slugs.get(ticker)
         if not slug:
@@ -229,8 +157,7 @@ class GlassdoorScraper:
         normalized = raw_score / 5.0 if raw_score else None
 
         if raw_score is None:
-            logger.info("Glassdoor direct scrape failed for %s, retrying with proxy rotation...", ticker)
-            await self._rotate_proxy()
+            logger.info("Glassdoor direct scrape failed for %s, retrying with next rotating proxy...", ticker)
             try:
                 result = await self._scrape_glassdoor_direct(slug)
                 if result:
@@ -239,12 +166,26 @@ class GlassdoorScraper:
                     ceo_approval = result.get("ceo_approval")
                     recommend_to_friend = result.get("recommend_to_friend")
                     normalized = raw_score / 5.0 if raw_score else None
-                    logger.info("Glassdoor proxy-rotate retry success for %s: score=%s", ticker, raw_score)
+                    logger.info("Glassdoor proxy retry success for %s: score=%s", ticker, raw_score)
             except Exception as e:
-                logger.warning("Glassdoor proxy-rotate retry also failed for %s: %s", ticker, e)
+                logger.warning("Glassdoor proxy retry also failed for %s: %s", ticker, e)
+
+        if raw_score is None:
+            logger.info("Glassdoor direct scrape and proxy retry failed, attempting Bing search fallback for %s...", ticker)
+            try:
+                result = await self._bing_search_glassdoor(company_name, slug)
+                if result:
+                    raw_score = result.get("raw_score")
+                    review_count = result.get("review_count")
+                    ceo_approval = result.get("ceo_approval")
+                    recommend_to_friend = result.get("recommend_to_friend")
+                    normalized = raw_score / 5.0 if raw_score else None
+                    logger.info("Glassdoor Bing search fallback success for %s: score=%s", ticker, raw_score)
+            except Exception as e:
+                logger.warning("Glassdoor Bing search fallback also failed for %s: %s", ticker, e)
 
         if raw_score is None and self._browserless:
-            logger.info("Glassdoor proxy-rotate failed for %s, attempting browserless fallback...", ticker)
+            logger.info("Glassdoor proxy retry and Bing fallback failed for %s, attempting browserless fallback...", ticker)
             try:
                 result = await self._scrape_glassdoor_browserless(slug)
                 if result:
@@ -341,18 +282,15 @@ class GlassdoorScraper:
         try:
             url = f"{self.BASE_URL}/Reviews/{slug}-reviews-SRCH_KE0,{len(slug)}.htm"
 
-            headers = {
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "Accept-Language": "en-US,en;q=0.9",
-                "Referer": "https://www.glassdoor.com/index.htm",
-                "Sec-Fetch-Dest": "document",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "same-origin",
-                "Sec-Fetch-User": "?1",
-                "Upgrade-Insecure-Requests": "1",
-            }
+            await self._rate_limiter.acquire()
+            proxy = await self._proxy_manager.get_proxy() if self._proxy_manager else None
+            headers = build_ja4_headers({"Referer": "https://www.glassdoor.com/index.htm"})
 
-            response = await self._curl_session.get(url, headers=headers)
+            kwargs = {"headers": headers}
+            if proxy:
+                kwargs["proxy"] = proxy
+
+            response = await self._curl_session.get(url, **kwargs)
             if response.status_code != 200:
                 logger.warning("Glassdoor direct fetch returned %d for slug=%s", response.status_code, slug)
                 return None
@@ -401,6 +339,60 @@ class GlassdoorScraper:
             logger.warning("Glassdoor direct scrape exception: %s", e)
             return None
 
+    async def _bing_search_glassdoor(self, company_name: str, slug: str) -> Optional[Dict]:
+        """Parse Glassdoor data from Bing search results through proxy chain"""
+        try:
+            query = f"site:glassdoor.com \"{company_name}\" reviews rating"
+            url = f"https://www.bing.com/search?q={query.replace(' ', '+')}"
+
+            await self._rate_limiter.acquire()
+            proxy = await self._proxy_manager.get_proxy() if self._proxy_manager else None
+            headers = build_ja4_headers()
+
+            kwargs = {"headers": headers}
+            if proxy:
+                kwargs["proxy"] = proxy
+
+            response = await self._curl_session.get(url, **kwargs)
+            if response.status_code != 200:
+                return None
+
+            html = response.text
+            soup = BeautifulSoup(html, "html.parser")
+            result = {"raw_score": None, "review_count": None, "ceo_approval": None, "recommend_to_friend": None}
+
+            seen = set()
+            for result_elem in soup.select("li.b_algo, div.b_caption"):
+                raw_text = result_elem.get_text()
+                text_key = raw_text.strip()[:100]
+                if text_key in seen:
+                    continue
+                seen.add(text_key)
+
+                rating_match = re.search(r'(\d+\.?\d*)\s*(?:out of|/)\s*5', raw_text, re.IGNORECASE)
+                if rating_match:
+                    result["raw_score"] = float(rating_match.group(1))
+
+                review_match = re.search(r'([\d,]+)\s*reviews?', raw_text, re.IGNORECASE)
+                if review_match:
+                    result["review_count"] = int(review_match.group(1).replace(',', ''))
+
+                ceo_match = re.search(r'(\d+)%\s*(?:CEO|approve)', raw_text, re.IGNORECASE)
+                if ceo_match:
+                    result["ceo_approval"] = int(ceo_match.group(1))
+
+                recommend_match = re.search(r'(\d+)%\s*(?:recommend|friend)', raw_text, re.IGNORECASE)
+                if recommend_match:
+                    result["recommend_to_friend"] = int(recommend_match.group(1))
+
+                if result["raw_score"]:
+                    return result
+
+            return None
+        except Exception as e:
+            logger.warning(f"Bing search failed for Glassdoor: {e}")
+            return None
+
     async def scrape_all(self, tickers: List[str]) -> Dict[str, GlassdoorScore]:
         results = {}
         for ticker in tickers:
@@ -429,26 +421,39 @@ class G2EmployerScraper:
             "TSLA": "tesla",
             "AAPL": "apple",
             "AMZN": "amazon",
-        }
+        
+            "AVGO": "broadcom",
+            "INTC": "intel-corporation",}
         self.vader = SentimentIntensityAnalyzer()
         self._curl_session: Optional[AsyncSession] = None
-        self._proxy_pool: Optional[RotatingProxyPool] = None
+        self._proxy_manager: Optional[ProxyManager] = None
+        self._browserless: Optional[BrowserlessClient] = None
+        self._rate_limiter = RateLimiter(RateLimiterConfig(
+            min_delay=8.0,
+            max_delay=18.0,
+            jitter=2.0,
+        ))
 
     async def initialize(self) -> None:
-        self._proxy_pool = RotatingProxyPool.from_config(self.config)
-        proxy_url = await self._proxy_pool.acquire()
+        self._proxy_manager = ProxyManager(self.config)
+        await self._proxy_manager.initialize()
         self._curl_session = AsyncSession(
             impersonate="chrome124",
-            proxy=proxy_url,
             timeout=30
         )
-        logger.info("G2EmployerScraper initialized with curl_cffi chrome124 + rotating proxy pool (%d proxies)",
-                     self._proxy_pool.proxy_count)
+        self._browserless = await create_browserless_client(self.config)
+        logger.info("G2EmployerScraper initialized with curl_cffi chrome124 + dynamic proxy manager + browserless")
 
     async def close(self) -> None:
         if self._curl_session:
             await self._curl_session.close()
             self._curl_session = None
+        if self._proxy_manager:
+            await self._proxy_manager.close()
+            self._proxy_manager = None
+        if self._browserless:
+            await self._browserless.close()
+            self._browserless = None
 
     async def __aenter__(self) -> "G2EmployerScraper":
         await self.initialize()
@@ -456,19 +461,6 @@ class G2EmployerScraper:
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.close()
-
-    async def _rotate_proxy(self) -> None:
-        if not self._proxy_pool or not self._curl_session:
-            return
-        proxy_url = await self._proxy_pool.acquire()
-        if proxy_url:
-            await self._curl_session.close()
-            self._curl_session = AsyncSession(
-                impersonate="chrome124",
-                proxy=proxy_url,
-                timeout=30
-            )
-            logger.debug("G2 rotated to new proxy: %s", proxy_url)
 
     def _parse_rating(self, text: str) -> Optional[float]:
         try:
@@ -519,8 +511,7 @@ class G2EmployerScraper:
             logger.warning("Direct G2 scrape failed for %s: %s", ticker, e)
 
         if overall_rating is None:
-            logger.info("G2 direct scrape failed for %s, retrying with proxy rotation...", ticker)
-            await self._rotate_proxy()
+            logger.info("G2 direct scrape failed for %s, retrying with next rotating proxy...", ticker)
             try:
                 result = await self._scrape_g2_direct(slug)
                 if result:
@@ -528,9 +519,22 @@ class G2EmployerScraper:
                     review_count = result.get("review_count", 0)
                     would_recommend_pct = result.get("would_recommend_pct")
                     categories = result.get("categories", {})
-                    logger.info("G2 proxy-rotate retry success for %s: rating=%s", ticker, overall_rating)
+                    logger.info("G2 proxy retry success for %s: rating=%s", ticker, overall_rating)
             except Exception as e:
-                logger.warning("G2 proxy-rotate retry also failed for %s: %s", ticker, e)
+                logger.warning("G2 proxy retry also failed for %s: %s", ticker, e)
+
+        if overall_rating is None:
+            logger.info("G2 direct scrape and proxy retry failed, attempting Bing search fallback for %s...", ticker)
+            try:
+                result = await self._bing_search_g2(ticker, slug)
+                if result:
+                    overall_rating = result.get("overall_rating")
+                    review_count = result.get("review_count", 0)
+                    would_recommend_pct = result.get("would_recommend_pct")
+                    categories = result.get("categories", {})
+                    logger.info("G2 Bing search fallback success for %s: rating=%s", ticker, overall_rating)
+            except Exception as e:
+                logger.warning("G2 Bing search fallback also failed for %s: %s", ticker, e)
 
         return G2EmployerScore(
             ticker=ticker,
@@ -547,18 +551,15 @@ class G2EmployerScraper:
         try:
             url = f"{self.BASE_URL}/products/{slug}/reviews"
 
-            headers = {
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "Accept-Language": "en-US,en;q=0.9",
-                "Referer": "https://www.g2.com/",
-                "Sec-Fetch-Dest": "document",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "same-origin",
-                "Sec-Fetch-User": "?1",
-                "Upgrade-Insecure-Requests": "1",
-            }
+            await self._rate_limiter.acquire()
+            proxy = await self._proxy_manager.get_proxy() if self._proxy_manager else None
+            headers = build_ja4_headers({"Referer": "https://www.g2.com/"})
 
-            response = await self._curl_session.get(url, headers=headers)
+            kwargs = {"headers": headers}
+            if proxy:
+                kwargs["proxy"] = proxy
+
+            response = await self._curl_session.get(url, **kwargs)
             if response.status_code != 200:
                 logger.warning("G2 direct fetch returned %d for slug=%s", response.status_code, slug)
                 return None
@@ -610,6 +611,56 @@ class G2EmployerScraper:
 
         except Exception as e:
             logger.warning("G2 direct scrape exception: %s", e)
+            return None
+
+    async def _bing_search_g2(self, company_name: str, slug: str) -> Optional[Dict]:
+        """Parse G2 ratings and review counts from Bing search results"""
+        try:
+            query = f"site:g2.com/products/{slug} reviews rating"
+            url = f"https://www.bing.com/search?q={query.replace(' ', '+')}"
+
+            await self._rate_limiter.acquire()
+            proxy = await self._proxy_manager.get_proxy() if self._proxy_manager else None
+            headers = build_ja4_headers()
+
+            kwargs = {"headers": headers}
+            if proxy:
+                kwargs["proxy"] = proxy
+
+            response = await self._curl_session.get(url, **kwargs)
+            if response.status_code != 200:
+                return None
+
+            html = response.text
+            soup = BeautifulSoup(html, "html.parser")
+            result = {"overall_rating": None, "review_count": 0, "would_recommend_pct": None, "categories": {}}
+
+            seen = set()
+            for result_elem in soup.select("li.b_algo, div.b_caption"):
+                raw_text = result_elem.get_text()
+                text_key = raw_text.strip()[:100]
+                if text_key in seen:
+                    continue
+                seen.add(text_key)
+
+                rating_match = re.search(r'(\d+\.?\d*)\s*(?:out of|/)\s*5', raw_text, re.IGNORECASE)
+                if rating_match:
+                    result["overall_rating"] = float(rating_match.group(1))
+
+                count_match = re.search(r'([\d,]+)\s*(?:review|Review|Reviews)', raw_text, re.IGNORECASE)
+                if count_match:
+                    result["review_count"] = int(count_match.group(1).replace(",", ""))
+
+                recommend_match = re.search(r'(\d+)%\s*(?:would recommend|recommend)', raw_text, re.IGNORECASE)
+                if recommend_match:
+                    result["would_recommend_pct"] = float(recommend_match.group(1))
+
+                if result["overall_rating"]:
+                    return result
+
+            return None
+        except Exception as e:
+            logger.warning(f"Bing search failed for G2: {e}")
             return None
 
     async def scrape_all(self, tickers: List[str]) -> Dict[str, G2EmployerScore]:
