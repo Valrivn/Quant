@@ -59,18 +59,28 @@ class HybridOrchestrator:
             await self.initialize()
             
         logger.info("Running primary psychological pipeline...")
-        psych_results = await self.psychological_orchestrator.run_full_pipeline(
-            tickers or ["AAPL", "MSFT", "NVDA", "TSLA", "GOOGL", "AMD", "META"]
-        )
-        
-        primary_result = psych_results["primary_result"]
-        results["psychological_primary"] = ScrapeResult(
-            source="psychological_primary",
-            messages_count=primary_result.vectors_committed,
-            tickers_found=primary_result.tickers_processed,
-            duration_ms=0,
-            errors=primary_result.errors
-        )
+        try:
+            psych_results = await self.psychological_orchestrator.run_full_pipeline(
+                tickers or ["AAPL", "MSFT", "NVDA", "TSLA", "GOOGL", "AMD", "META"]
+            )
+            
+            primary_result = psych_results["primary_result"]
+            results["psychological_primary"] = ScrapeResult(
+                source="psychological_primary",
+                messages_count=primary_result.vectors_committed,
+                tickers_found=primary_result.tickers_processed,
+                duration_ms=0,
+                errors=primary_result.errors
+            )
+        except Exception as e:
+            logger.error(f"Psychological pipeline failed: {e}")
+            results["psychological_primary"] = ScrapeResult(
+                source="psychological_primary",
+                messages_count=0,
+                tickers_found=[],
+                duration_ms=0,
+                errors=[str(e)]
+            )
 
         # Phase 2: Supplementary - Fintech APIs (confirmation only)
         logger.info("Running supplementary fintech validation...")
@@ -100,8 +110,9 @@ class HybridOrchestrator:
             start = datetime.utcnow()
             client = self.factory.get_client(source)
             try:
-                messages = await client.fetch_messages(tickers or [], limit=200)
-                trending = await client.fetch_trending(limit=50)
+                async with client:
+                    messages = await client.fetch_messages(tickers or [], limit=200)
+                    trending = await client.fetch_trending(limit=50)
                 all_msgs = self.normalizer.normalize_batch(messages + trending)
                 all_msgs = self.normalizer.deduplicate(all_msgs)
 

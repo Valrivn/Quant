@@ -6,7 +6,12 @@ from .rate_limiter import TokenBucketRateLimiter
 
 
 class ApeWisdomClient(BaseFintechClient):
-    """ApeWisdom API client for WallStreetBets mentions and sentiment - no API key required for public endpoints."""
+    """ApeWisdom API client for WallStreetBets mentions and sentiment - no API key required for public endpoints.
+    
+    Note: The ApeWisdom API provides trending data with aggregated metrics (mentions, upvotes)
+    but does not provide individual message content via public endpoints. We synthesize
+    messages from trending data for sentiment analysis.
+    """
 
     BASE_URL = "https://apewisdom.io/api/v1.0"
 
@@ -28,23 +33,87 @@ class ApeWisdomClient(BaseFintechClient):
         since: Optional[datetime] = None,
         limit: int = 100
     ) -> List[FintechMessage]:
-        """Fetch mentions for tickers from WallStreetBets (public endpoint, no auth)."""
+        """Fetch trending data and synthesize messages for requested tickers."""
         all_messages = []
+        url = f"{self.BASE_URL}/filter/all"
+        params = {"limit": 200}
+        data = await self._rate_limited_request(self._get, url, params)
+        trending = data.get("results", [])
+        
+        trending_map = {item["ticker"].upper(): item for item in trending}
+        
         for ticker in tickers:
-            url = f"{self.BASE_URL}/filter/ticker/{ticker.upper()}"
-            params = {"limit": min(limit, 100)}
-            data = await self._rate_limited_request(self._get, url, params)
-            mentions = data.get("results", [])
-            all_messages.extend([self.normalize_message(m, ticker) for m in mentions])
+            ticker_upper = ticker.upper()
+            if ticker_upper in trending_map:
+                item = trending_map[ticker_upper]
+                messages = self._synthesize_messages_from_trending(item, ticker_upper)
+                all_messages.extend(messages)
+        
         return all_messages[:limit]
 
     async def fetch_trending(self, limit: int = 50) -> List[FintechMessage]:
-        """Fetch trending tickers from WallStreetBets (public endpoint, no auth)."""
+        """Fetch trending tickers and synthesize messages from aggregated data."""
         url = f"{self.BASE_URL}/filter/all"
         params = {"limit": limit}
         data = await self._rate_limited_request(self._get, url, params)
-        top_tickers = [r["ticker"] for r in data.get("results", [])[:limit]]
-        return await self.fetch_messages(top_tickers, limit=limit)
+        trending = data.get("results", [])
+        
+        all_messages = []
+        for item in trending:
+            messages = self._synthesize_messages_from_trending(item, item["ticker"])
+            all_messages.extend(messages)
+        
+        return all_messages[:limit]
+
+    def _synthesize_messages_from_trending(self, item: Dict[str, Any], ticker: str) -> List[FintechMessage]:
+        """Create synthetic messages from trending aggregated data."""
+        mentions = item.get("mentions", 0)
+        upvotes = item.get("upvotes", 0)
+        rank = item.get("rank", 0)
+        rank_change = item.get("rank_24h_ago", 0) - rank if item.get("rank_24h_ago") else 0
+        
+        sentiment = self._estimate_sentiment(upvotes, mentions, rank_change)
+        
+        text = f"{item.get('name', ticker)} ({ticker}) trending on WallStreetBets: {mentions} mentions, {upvotes} upvotes, rank #{rank}"
+        if rank_change > 0:
+            text += f" (up {rank_change} spots in 24h)"
+        elif rank_change < 0:
+            text += f" (down {abs(rank_change)} spots in 24h)"
+        
+        msg = FintechMessage(
+            source="apewisdom",
+            source_id=f"trending_{ticker}_{int(datetime.now(timezone.utc).timestamp())}",
+            ticker=ticker,
+            text=text,
+            sentiment_score=sentiment,
+            author="apewisdom_trending",
+            created_at=datetime.now(timezone.utc),
+            engagement={"upvotes": upvotes, "mentions": mentions},
+            url=f"https://apewisdom.io/ticker/{ticker}",
+            metadata={
+                "subreddit": "wallstreetbets",
+                "rank": rank,
+                "mentions_24h_ago": item.get("mentions_24h_ago", 0),
+                "rank_24h_ago": item.get("rank_24h_ago", 0),
+                "synthesized": True
+            }
+        )
+        return [msg]
+
+    def _estimate_sentiment(self, upvotes: int, mentions: int, rank_change: int) -> float:
+        """Estimate sentiment from trending metrics."""
+        if mentions == 0:
+            return 0.0
+        
+        upvote_ratio = upvotes / max(mentions, 1)
+        base_sentiment = min(upvote_ratio / 20.0, 1.0)
+        
+        if rank_change > 5:
+            base_sentiment += 0.2
+        elif rank_change < -5:
+            base_sentiment -= 0.2
+        
+        return max(-1.0, min(1.0, base_sentiment))
 
     async def health_check(self) -> FintechHealth:
         try:
