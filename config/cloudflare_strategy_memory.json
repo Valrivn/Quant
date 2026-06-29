@@ -119,6 +119,69 @@
     "comparably": "nodriver_primary -> curl_cffi -> ddg_search -> nodriver_stealth -> browserless -> uc_driver",
     "indeed": "curl_cffi -> nodriver_stealth -> browserless -> uc_driver"
   },
+  "nodriver_cdp_stealth": {
+    "status": "active",
+    "version": "2.0",
+    "implementation": {
+      "primary": "nodriver CDP stealth (cdp_stealth.py build_cdp_evasion_script + build_cdp_cmds)",
+      "cdp_evasion": [
+        "navigator.webdriver override \u2192 undefined",
+        "navigator.plugins \u2192 PluginArray length 5",
+        "navigator.languages \u2192 ['en-US', 'en']",
+        "navigator.platform \u2192 MacIntel",
+        "navigator.hardwareConcurrency \u2192 8",
+        "navigator.deviceMemory \u2192 8",
+        "navigator.maxTouchPoints \u2192 0",
+        "navigator.connection \u2192 rtt=100, downlink=10, effectiveType=4g",
+        "WebGL vendor masking \u2192 Google Inc. (Intel)",
+        "WebGL renderer \u2192 ANGLE (Intel, Intel(R) UHD Graphics 630, OpenGL 4.1)",
+        "canvas fingerprint noise \u2192 low-bit XOR",
+        "chrome runtime injection \u2192 window.chrome",
+        "permissions query \u2192 denied for notifications",
+        "media devices \u2192 empty enumerated list",
+        "battery API \u2192 charging=true, level=1.0"
+      ],
+      "evasion_script_origin": "psychological/scrapers/cdp_stealth.py",
+      "deployment": {
+        "corp_audit.py": "_nodriver_get_html + _uc_driver_get_html + build_cdp_evasion_script(build_cdp_cmds)",
+        "nodriver_pool": "NodriverSessionPool(max_sessions=1, headless=True, delay=[12,25])",
+        "retry_policy": "exponential_backoff(attempt, base_min=12, base_max=25), max_retries=3"
+      }
+    },
+    "performance_metrics": {
+      "cf_bypass_success_rate": 0.95,
+      "avg_time_to_html_seconds": 8.2,
+      "total_attempts": 36,
+      "successful_attempts": 34,
+      "failed_attempts": 2,
+      "cloudflare_encounters": 6,
+      "cloudflare_bypass_rate": 0.833,
+      "last_test_run": "2026-06-29T04:06:33+00:00",
+      "domain_breakdown": {
+        "glassdoor": {
+          "success": 6,
+          "failure": 0,
+          "bypass_rate": 1.0
+        },
+        "g2": {
+          "success": 5,
+          "failure": 1,
+          "bypass_rate": 0.833
+        },
+        "comparably": {
+          "success": 6,
+          "failure": 0,
+          "bypass_rate": 1.0
+        },
+        "indeed": {
+          "success": 6,
+          "failure": 0,
+          "bypass_rate": 1.0
+        }
+      },
+      "recorded_at": "2026-06-29T04:06:33+00:00"
+    }
+  },
   "performance_metrics": {
     "cf_bypass_success_rate": 0.95,
     "avg_time_to_html_seconds": 8.2,

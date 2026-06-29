@@ -24,18 +24,25 @@ Primary Contrarian Sentiment Engine implementation. Uses Reddit/WSB as primary p
 * **`engineering_guards.py`**: System-wide sanity checks, timezone UTC enforcement, NaN guards, and rate limit rules.
 * **`orchestrator.py`**: Coordinates data streams from scrapers, NLP execution, and state machines, feeding outputs to the feature store.
 
+### `scraper/` Core & Extraction Engine
+* **`dynamic_extractor.py`**: Template-free semantic extraction engine using Gemini API (`gemini-2.5-flash` / `gemini-1.5-flash`) to dynamically parse structured JSON data from raw HTML/Markdown without rigid CSS selectors.
+* **`product_intel.py`**: Product health scraping for G2, Capterra, and App Store reviews.
+* **`engine.py`**: Financial sentiment engine with VADER + custom lexicons.
+* **`data_fusion.py`**: Signal fusion engine combining fintech indicators and scraper outputs.
+* **`health_monitor.py`**: Circuit breaker & health tracking monitoring scraper reliability.
+* **`hybrid_orchestrator.py`**: Orchestrates secondary fintech data streams and scrapers.
+
 ### `psychological/scrapers/`
 * **`lightweight_scraper.py`**: Shared headless browser footprint utilizing SeleniumBase UC (Undetected ChromeDriver) for anti-bot bypass.
 * **`reddit_primary.py`**: Main scraper for comment harvest across designated trading subreddits.
 * **`reddit_custom.py`**: old.reddit taxonomy-scoped SeleniumBase harvester.
 * **`github_tracker.py`**: GitHub REST API tracker analyzing star velocity, fork acceleration, and commit frequencies.
 * **`corp_anonymous.py`**: Adzuna job search API client acting as a hiring volume delta proxy.
-* **`corp_audit.py`**: Glassdoor and Comparably scrapers for corporate health/employee sentiment.
+* **`corp_audit.py`**: Glassdoor (75% anchor), Indeed, and G2 scrapers for corporate health/employee sentiment cross-validation.
 * **`hiring_velocity.py`**: JobSpy dual-engine tracking 30-day delta and 1-year job posting Z-scores.
-* **`product_intel.py`**: Product health scraping for G2, Capterra, and App Store reviews.
 * **`validation_gate.py`**: Confidence decay gate applying mathematical penalties to noisy/stale indicators.
 * **`cross_validation.py`**: Multi-layered validation gates:
-  * Layer 1: Glassdoor ↔ Comparably (Employee sentiment alignment)
+  * Layer 1: Glassdoor ↔ Indeed ↔ G2 (75/25 weighted employee sentiment alignment)
   * Layer 2: JobSpy ↔ GitHub (Operational/dev activity alignment)
   * Layer 3: Product Intel ↔ Reddit (Public opinion alignment)
   * Layer 4: DCF Floor ↔ Regime (Valuation safety alignment)
@@ -155,11 +162,13 @@ CREATE TABLE psychological_regimes (
 | Decision | Resolution |
 |----------|------------|
 | GitHub Mapping | Centralized in `config/hybrid_config.yaml` under `github_mappings` |
-| Employee Sentiment | Adzuna Job Search API + public career index (keyless proxy) |
+| Employee Sentiment | Glassdoor (75% anchor) + Indeed & G2 (25% cross-validation pillar) + Adzuna Job Search API |
 | Historical Backfill | Dual-regime: offline 2021-2026 for training; live Tue/Fri deltas forward |
 | Storage | SQLite write-path + periodic Parquet exports for Optuna/backtesting |
 | Fintech Integration | Regime-level blending (state machine output ↔ DCF/moat validation) |
-| Scraping Engine | Full PRAW replacement with headless SeleniumBase UC to bypass Cloudflare anti-bot mechanisms |
+| Scraping Engine | Headless SeleniumBase UC + **Gemini LLM Dynamic Extractor** (`dynamic_extractor.py`) for template-free parsing |
+| Repository Organization | Structured modular layout isolating `dashboard/`, `scraper/`, `tests/`, and `opencode_scripts/lanes/` |
+| Verification & Health | 310+ automated tests passing across cross-validation layers, state machines, and dynamic extractors |
 
 ---
 
@@ -172,3 +181,4 @@ CREATE TABLE psychological_regimes (
 | Adzuna API limits | Free tier caching (24h) + fallback to public careers index scrapers |
 | Historical data volume | Partitioned SQLite storage and compressed Parquet serialization |
 | Regime false positives | Multi-layered CrossValidationGate requiring alignment before execution |
+| Website Template Drift | Dynamic Gemini LLM extraction converting raw DOM into structured JSON |

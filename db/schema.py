@@ -462,3 +462,50 @@ def migrate_existing_schema(conn: sqlite3.Connection) -> None:
 def migrate_psychological_schema(conn: sqlite3.Connection) -> None:
     create_psychological_tables(conn)
     create_phase1_tables(conn)
+
+def create_lane_gamma_tables(conn: sqlite3.Connection) -> None:
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS sec_xbrl_facts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticker TEXT NOT NULL,
+            cik TEXT NOT NULL,
+            accession_number TEXT,
+            filing_date TEXT,
+            fact_name TEXT,
+            fact_value REAL,
+            unit TEXT,
+            segment TEXT,
+            fiscal_year INTEGER,
+            fiscal_period TEXT,
+            source_url TEXT,
+            fetched_at INTEGER NOT NULL,
+            UNIQUE(ticker, filing_date, fact_name, segment)
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_sec_xbrl_ticker_date ON sec_xbrl_facts(ticker, filing_date)")
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS github_org_metrics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticker TEXT NOT NULL,
+            org_name TEXT NOT NULL,
+            repo_name TEXT,
+            stars INTEGER DEFAULT 0,
+            forks INTEGER DEFAULT 0,
+            open_issues INTEGER DEFAULT 0,
+            watchers INTEGER DEFAULT 0,
+            language TEXT,
+            description TEXT,
+            topics TEXT,
+            created_at_api TEXT,
+            updated_at_api TEXT,
+            fetched_at INTEGER NOT NULL,
+            UNIQUE(ticker, repo_name)
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_github_metrics_ticker ON github_org_metrics(ticker)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_github_metrics_stars ON github_org_metrics(stars DESC)")
+
+    conn.commit()
