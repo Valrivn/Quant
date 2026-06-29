@@ -1,0 +1,2611 @@
+[2026-06-29 22:59:53] === RUN 20260629_225953 START ===
+[2026-06-29 22:59:53] 🛸  Antigravity Network Lab — 4-LANE UNIFIED STRAW + HISTORICAL DISCOVERY EDITION
+[2026-06-29 22:59:53] ⚡  Targets: NVDA AVGO INTC AMD MSFT GOOGL META TSLA AAPL AMZN
+[2026-06-29 22:59:53] 🔍 Pre-flight checks...
+[2026-06-29 22:59:53] ✅ opencode: /opt/homebrew/bin/opencode
+[2026-06-29 22:59:53] ✅ python:   /Users/hayden/Desktop/quant-py/.venv/bin/python
+[2026-06-29 22:59:53] ✅ nodriver:   available
+[2026-06-29 22:59:53] ✅ playwright: available
+[2026-06-29 22:59:53] 🧹 Killing stale stream_guard processes...
+[2026-06-29 22:59:55] 🔐 Repairing snapshot directory ownership...
+[2026-06-29 22:59:55] ⚡ Starting stream_guard supervisor...
+[2026-06-29 22:59:55] 🔒 Supervisor PID: 18716
+[2026-06-29 22:59:56] 
+[2026-06-29 22:59:56] 🧹 Cleaning ghost worktrees and branches...
+Deleted branch scraper-glassdoor-indeed (was 10e20c0).
+Deleted branch scraper-g2-bypass (was 10e20c0).
+Deleted branch scraper-alt-sources-cab (was 10e20c0).
+Deleted branch scraper-5y-historical (was 10e20c0).
+[2026-06-29 22:59:56] 🏗️  Provisioning fresh isolated sandboxes...
+HEAD is now at 8302cb4 chore: update opencode_scripts submodule ref
+HEAD is now at 8302cb4 chore: update opencode_scripts submodule ref
+HEAD is now at 8302cb4 chore: update opencode_scripts submodule ref
+HEAD is now at 8302cb4 chore: update opencode_scripts submodule ref
+[2026-06-29 22:59:56] 🔄 Syncing workspace modules to isolated sandboxes...
+Transfer starting: 417 files
+./
+.env
+COMPLIANCE.md
+PsychologicalPillar.md
+README.md
+Unified straw.md
+changes.md
+etf_selection_cache.json
+intresting.md
+reddit_quant.db
+reddit_quant.db-shm
+reddit_quant.db-wal
+runner.log
+session-ses_108a.md
+stream_guard.log
+supervisor.log
+.agents/
+.agents/AGENTS.md
+.github/
+.github/workflows/
+.github/workflows/ci.yml
+.pytest_cache/
+.pytest_cache/.gitignore
+.pytest_cache/CACHEDIR.TAG
+.pytest_cache/README.md
+.pytest_cache/v/
+.pytest_cache/v/cache/
+.pytest_cache/v/cache/lastfailed
+.pytest_cache/v/cache/nodeids
+Instructions/
+Instructions/Doables.md
+Instructions/InvestmentPlan.md
+Instructions/Limtis.md
+Instructions/PsychologicalPillar.md
+Instructions/RedditScraper.md
+__pycache__/
+__pycache__/audit_script.cpython-314.pyc
+__pycache__/product_intel.cpython-314.pyc
+__pycache__/reddit_scraper.cpython-314.pyc
+__pycache__/run_scraper.cpython-314.pyc
+__pycache__/sec_scraper.cpython-314.pyc
+__pycache__/stream_quant.cpython-314.pyc
+__pycache__/test_behavioral_feature_store.cpython-314-pytest-9.1.0.pyc
+__pycache__/test_behavioral_feature_store.cpython-314.pyc
+__pycache__/test_engineering_guards.cpython-314-pytest-9.1.0.pyc
+__pycache__/test_github_tracker.cpython-314-pytest-9.1.0.pyc
+backtesting/
+backtesting/backtest.py
+backtesting/drift_detection.py
+backtesting/__pycache__/
+backtesting/__pycache__/backtest.cpython-314.pyc
+backtesting/__pycache__/drift_detection.cpython-314.pyc
+config/
+config/__init__.py
+config/cloudflare_strategy_memory.json
+config/constants.py
+config/fintech_credentials.yaml
+config/hybrid_config.yaml
+config/hybrid_weights.yaml
+config/logging_config.py
+config/reddit_credentials.yaml
+config/reddit_weights.yaml
+config/weights.py
+config/__pycache__/
+config/__pycache__/__init__.cpython-314.pyc
+config/__pycache__/constants.cpython-314.pyc
+config/__pycache__/logging_config.cpython-314.pyc
+config/__pycache__/weights.cpython-314.pyc
+dashboard/
+dashboard/stream_quant.py
+dashboard/tab_sentiment_risk.py
+dashboard/__pycache__/
+dashboard/__pycache__/tab_sentiment_risk.cpython-314.pyc
+data/
+data/historical_5y_baseline.csv
+db/
+db/__init__.py
+db/connection.py
+db/feature_store.py
+db/jobs.py
+db/schema.py
+db/schema_fintech.py
+db/__pycache__/
+db/__pycache__/__init__.cpython-314.pyc
+db/__pycache__/connection.cpython-314.pyc
+db/__pycache__/feature_store.cpython-314.pyc
+db/__pycache__/jobs.cpython-314.pyc
+db/__pycache__/schema.cpython-314.pyc
+db/__pycache__/schema_fintech.cpython-314.pyc
+lane_results/
+lane_results/conviction_scores.md
+lane_results/data_completeness_audit.md
+lane_results/lane_gamma.md
+lane_results/scraper_audit_report.md
+lane_results/weight_reasoning.md
+logs/
+logs/quant_pipeline.log
+logs/test.log
+opencode_scripts/
+opencode_scripts/.gitignore
+opencode_scripts/.sg_state.json
+opencode_scripts/README.md
+opencode_scripts/__init__.py
+opencode_scripts/antigravity_daemon.py
+opencode_scripts/cleanup_logs.sh
+opencode_scripts/com.antigravity.runner.plist
+opencode_scripts/export_convo.py
+opencode_scripts/install_launchd.sh
+opencode_scripts/live_patcher.py
+opencode_scripts/live_watcher.py
+opencode_scripts/opencode_Script map.md
+opencode_scripts/opencode_convo_cache.md
+opencode_scripts/overnight_runner.sh
+opencode_scripts/policing_hub.py
+opencode_scripts/preflight_gate.py
+opencode_scripts/qualitative_scoring.py
+opencode_scripts/runner_run.log
+opencode_scripts/runner_watchdog.sh
+opencode_scripts/stream_guard.log
+opencode_scripts/stream_guard.py
+opencode_scripts/supervisor.log
+opencode_scripts/watchdog_launchd.log
+opencode_scripts/watchdog_launchd_err.log
+opencode_scripts/__pycache__/
+opencode_scripts/__pycache__/__init__.cpython-314.pyc
+opencode_scripts/__pycache__/config.cpython-314.pyc
+opencode_scripts/__pycache__/db_monitor.cpython-314.pyc
+opencode_scripts/__pycache__/export_convo.cpython-314.pyc
+opencode_scripts/__pycache__/live_patcher.cpython-314.pyc
+opencode_scripts/__pycache__/policing_hub.cpython-314.pyc
+opencode_scripts/__pycache__/preflight_gate.cpython-314.pyc
+opencode_scripts/__pycache__/recovery.cpython-314.pyc
+opencode_scripts/__pycache__/stream_guard.cpython-314.pyc
+opencode_scripts/__pycache__/utils.cpython-314.pyc
+opencode_scripts/lanes/
+opencode_scripts/lanes/central_hub/
+opencode_scripts/lanes/central_hub/central_hub.md
+opencode_scripts/lanes/central_hub/final_live_test_20260627_234723.log
+opencode_scripts/lanes/central_hub/final_live_test_20260628_210812.log
+opencode_scripts/lanes/central_hub/final_live_test_20260628_231915.log
+opencode_scripts/lanes/central_hub/final_live_test_20260629_105639.log
+opencode_scripts/lanes/central_hub/live_watcher.log
+opencode_scripts/lanes/lane_alpha/
+opencode_scripts/lanes/lane_alpha/alpha_worker.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260628_210815.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260628_231918.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260629_225955.log
+opencode_scripts/lanes/lane_alpha/lane_alpha.md
+opencode_scripts/lanes/lane_beta/
+opencode_scripts/lanes/lane_beta/beta_worker.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260628_210815.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260628_231918.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260629_225956.log
+opencode_scripts/lanes/lane_beta/lane_beta.md
+opencode_scripts/lanes/lane_delta/
+opencode_scripts/lanes/lane_delta/delta_worker.log
+opencode_scripts/lanes/lane_delta/delta_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_delta/delta_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_delta/delta_worker_prev_20260629_225956.log
+opencode_scripts/lanes/lane_delta/lane_delta.md
+opencode_scripts/lanes/lane_gamma/
+opencode_scripts/lanes/lane_gamma/gamma_worker.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260628_210815.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260628_231918.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260629_225956.log
+opencode_scripts/lanes/lane_gamma/ingest_all.py
+opencode_scripts/lanes/lane_gamma/lane_gamma.md
+opencode_scripts/lanes/lane_gamma/__pycache__/
+opencode_scripts/lanes/lane_gamma/__pycache__/ingest_all.cpython-314.pyc
+optimization/
+optimization/ab_testing.py
+optimization/optuna_search.py
+optimization/__pycache__/
+optimization/__pycache__/ab_testing.cpython-314.pyc
+optimization/__pycache__/optuna_search.cpython-314.pyc
+psychological/
+psychological/__init__.py
+psychological/behavioral_feature_store.py
+psychological/data_fusion.py
+psychological/dcf_floor.py
+psychological/engineering_guards.py
+psychological/interfaces.py
+psychological/nlp_engine.py
+psychological/orchestrator.py
+psychological/qualitative_scoring.py
+psychological/signal_matrix.py
+psychological/state_machine.py
+psychological/test_engineering_guards.py
+psychological/test_orchestrator.py
+psychological/velocity_tracker.py
+psychological/__pycache__/
+psychological/__pycache__/__init__.cpython-314.pyc
+psychological/__pycache__/behavioral_feature_store.cpython-314.pyc
+psychological/__pycache__/data_fusion.cpython-314.pyc
+psychological/__pycache__/dcf_floor.cpython-314.pyc
+psychological/__pycache__/engineering_guards.cpython-314.pyc
+psychological/__pycache__/interfaces.cpython-314.pyc
+psychological/__pycache__/nlp_engine.cpython-314.pyc
+psychological/__pycache__/orchestrator.cpython-314.pyc
+psychological/__pycache__/qualitative_scoring.cpython-314.pyc
+psychological/__pycache__/signal_matrix.cpython-314.pyc
+psychological/__pycache__/state_machine.cpython-314.pyc
+psychological/__pycache__/velocity_tracker.cpython-314.pyc
+psychological/scrapers/
+psychological/scrapers/__init__.py
+psychological/scrapers/browserless_client.py
+psychological/scrapers/cdp_stealth.py
+psychological/scrapers/circuit_breaker.py
+psychological/scrapers/company_resolver.py
+psychological/scrapers/corp_anonymous.py
+psychological/scrapers/corp_audit.py
+psychological/scrapers/cross_validation.py
+psychological/scrapers/employer_translator.py
+psychological/scrapers/github_tracker.py
+psychological/scrapers/hiring_velocity.py
+psychological/scrapers/lightweight_scraper.py
+psychological/scrapers/metrics_collector.py
+psychological/scrapers/moat_discovery.py
+psychological/scrapers/nodriver_primary.py
+psychological/scrapers/nodriver_scraper.py
+psychological/scrapers/product_intel.py
+psychological/scrapers/proxy_manager.py
+psychological/scrapers/reddit_custom.py
+psychological/scrapers/reddit_primary.py
+psychological/scrapers/redis_cache.py
+psychological/scrapers/test_lightweight_scraper.py
+psychological/scrapers/validation_gate.py
+psychological/scrapers/__pycache__/
+psychological/scrapers/__pycache__/__init__.cpython-314.pyc
+psychological/scrapers/__pycache__/browserless_client.cpython-314.pyc
+psychological/scrapers/__pycache__/cdp_stealth.cpython-314.pyc
+psychological/scrapers/__pycache__/circuit_breaker.cpython-314.pyc
+psychological/scrapers/__pycache__/company_resolver.cpython-314.pyc
+psychological/scrapers/__pycache__/corp_anonymous.cpython-314.pyc
+psychological/scrapers/__pycache__/corp_audit.cpython-314.pyc
+psychological/scrapers/__pycache__/cross_validation.cpython-314.pyc
+psychological/scrapers/__pycache__/employer_translator.cpython-314.pyc
+psychological/scrapers/__pycache__/github_tracker.cpython-314.pyc
+psychological/scrapers/__pycache__/hiring_velocity.cpython-314.pyc
+psychological/scrapers/__pycache__/lightweight_scraper.cpython-314.pyc
+psychological/scrapers/__pycache__/metrics_collector.cpython-314.pyc
+psychological/scrapers/__pycache__/moat_discovery.cpython-314.pyc
+psychological/scrapers/__pycache__/nodriver_primary.cpython-314.pyc
+psychological/scrapers/__pycache__/nodriver_scraper.cpython-314.pyc
+psychological/scrapers/__pycache__/product_intel.cpython-314.pyc
+psychological/scrapers/__pycache__/proxy_manager.cpython-314.pyc
+psychological/scrapers/__pycache__/reddit_custom.cpython-314.pyc
+psychological/scrapers/__pycache__/reddit_primary.cpython-314.pyc
+psychological/scrapers/__pycache__/redis_cache.cpython-314.pyc
+psychological/scrapers/__pycache__/test_lightweight_scraper.cpython-314-pytest-9.1.0.pyc
+psychological/scrapers/__pycache__/test_lightweight_scraper.cpython-314.pyc
+psychological/scrapers/__pycache__/validation_gate.cpython-314.pyc
+scraper/
+scraper/.dockerignore
+scraper/Dockerfile.browserless
+scraper/__init__.py
+scraper/binary_search_scraper.py
+scraper/data_fusion.py
+scraper/docker-compose.yml
+scraper/dynamic_extractor.py
+scraper/engine.py
+scraper/health_monitor.py
+scraper/hybrid_orchestrator.py
+scraper/product_intel.py
+scraper/reddit_client.py
+scraper/risk_detector.py
+scraper/run_scraper.py
+scraper/sec_scraper.py
+scraper/__pycache__/
+scraper/__pycache__/__init__.cpython-314.pyc
+scraper/__pycache__/data_fusion.cpython-314.pyc
+scraper/__pycache__/dynamic_extractor.cpython-314.pyc
+scraper/__pycache__/engine.cpython-314.pyc
+scraper/__pycache__/health_monitor.cpython-314.pyc
+scraper/__pycache__/hybrid_orchestrator.cpython-314.pyc
+scraper/__pycache__/reddit_client.cpython-314.pyc
+scraper/__pycache__/risk_detector.cpython-314.pyc
+scraper/fintech_clients/
+scraper/fintech_clients/__init__.py
+scraper/fintech_clients/apewisdom.py
+scraper/fintech_clients/base.py
+scraper/fintech_clients/factory.py
+scraper/fintech_clients/normalizer.py
+scraper/fintech_clients/rate_limiter.py
+scraper/fintech_clients/stocktwits.py
+scraper/fintech_clients/__pycache__/
+scraper/fintech_clients/__pycache__/__init__.cpython-314.pyc
+scraper/fintech_clients/__pycache__/apewisdom.cpython-314.pyc
+scraper/fintech_clients/__pycache__/base.cpython-314.pyc
+scraper/fintech_clients/__pycache__/factory.cpython-314.pyc
+scraper/fintech_clients/__pycache__/normalizer.cpython-314.pyc
+scraper/fintech_clients/__pycache__/rate_limiter.cpython-314.pyc
+scraper/fintech_clients/__pycache__/stocktwits.cpython-314.pyc
+scripts/
+scripts/audit_script.py
+scripts/com.quant.psychological.plist
+scripts/install_launchd.sh
+scripts/migrate_db.py
+scripts/run_pipeline.sh
+scripts/scheduler.py
+scripts/seed_historical.py
+scripts/__pycache__/
+scripts/__pycache__/migrate_db.cpython-314.pyc
+scripts/__pycache__/scheduler.cpython-314.pyc
+scripts/__pycache__/seed_historical.cpython-314.pyc
+tests/
+tests/conftest.py
+tests/quick_test.py
+tests/test.md
+tests/test_backtest.py
+tests/test_behavioral_store.py
+tests/test_central_translator_integration.py
+tests/test_company_resolver.py
+tests/test_corp_anonymous.py
+tests/test_corp_audit.py
+tests/test_cross_validation.py
+tests/test_dcf_floor.py
+tests/test_dynamic_extractor.py
+tests/test_employer_translator.py
+tests/test_engineering_guards.py
+tests/test_financial_reconstruction.py
+tests/test_fintech_clients.py
+tests/test_github_tracker.py
+tests/test_hiring_velocity.py
+tests/test_hybrid_orchestrator.py
+tests/test_integration.py
+tests/test_lane_gamma.py
+tests/test_live_interceptor.py
+tests/test_live_scraper_validation.py
+tests/test_master_qualitative_audit.py
+tests/test_moat_discovery.py
+tests/test_nlp.py
+tests/test_policing_hub.py
+tests/test_product_intel.py
+tests/test_psychological_integration.py
+tests/test_psychological_nlp.py
+tests/test_qualitative_scoring.py
+tests/test_reddit_custom.py
+tests/test_signal_matrix.py
+tests/test_state_machine.py
+tests/test_trajectory_corridor.py
+tests/test_validation_gate.py
+tests/test_velocity_tracker.py
+tests/__pycache__/
+tests/__pycache__/conftest.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/conftest.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/conftest.cpython-314-pytest-9.1.1.pyc
+tests/__pycache__/conftest.cpython-314.pyc
+tests/__pycache__/quick_test.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_backtest.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_backtest.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_backtest.cpython-314.pyc
+tests/__pycache__/test_behavioral_store.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_behavioral_store.cpython-314.pyc
+tests/__pycache__/test_central_translator_integration.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_company_resolver.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_corp_anonymous.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_corp_anonymous.cpython-314.pyc
+tests/__pycache__/test_corp_audit.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_corp_audit.cpython-314-pytest-9.1.1.pyc
+tests/__pycache__/test_corp_audit.cpython-314.pyc
+tests/__pycache__/test_cross_validation.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_cross_validation.cpython-314.pyc
+tests/__pycache__/test_dcf_floor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_dcf_floor.cpython-314.pyc
+tests/__pycache__/test_dynamic_extractor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_employer_translator.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_engineering_guards.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_engineering_guards.cpython-314.pyc
+tests/__pycache__/test_financial_reconstruction.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_fintech_clients.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_fintech_clients.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_fintech_clients.cpython-314.pyc
+tests/__pycache__/test_github_tracker.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_github_tracker.cpython-314.pyc
+tests/__pycache__/test_hiring_velocity.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_hiring_velocity.cpython-314.pyc
+tests/__pycache__/test_hybrid_orchestrator.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_hybrid_orchestrator.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_hybrid_orchestrator.cpython-314.pyc
+tests/__pycache__/test_integration.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_integration.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_integration.cpython-314.pyc
+tests/__pycache__/test_lane_gamma.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_live_interceptor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_live_scraper_validation.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_live_scraper_validation.cpython-314.pyc
+tests/__pycache__/test_master_qualitative_audit.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_moat_discovery.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_nlp.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_nlp.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_nlp.cpython-314.pyc
+tests/__pycache__/test_policing_hub.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_product_intel.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_product_intel.cpython-314.pyc
+tests/__pycache__/test_psychological_integration.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_psychological_integration.cpython-314.pyc
+tests/__pycache__/test_psychological_nlp.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_psychological_nlp.cpython-314.pyc
+tests/__pycache__/test_qualitative_scoring.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_reddit_custom.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_reddit_custom.cpython-314.pyc
+tests/__pycache__/test_signal_matrix.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_signal_matrix.cpython-314.pyc
+tests/__pycache__/test_state_machine.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_state_machine.cpython-314.pyc
+tests/__pycache__/test_trajectory_corridor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_validation_gate.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_validation_gate.cpython-314.pyc
+tests/__pycache__/test_velocity_tracker.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_velocity_tracker.cpython-314.pyc
+
+sent 19611606 bytes  received 8506 bytes  89141808 bytes/sec
+total size is 19564419  speedup is 1.00
+Transfer starting: 417 files
+./
+.env
+COMPLIANCE.md
+PsychologicalPillar.md
+README.md
+Unified straw.md
+changes.md
+etf_selection_cache.json
+intresting.md
+reddit_quant.db
+reddit_quant.db-shm
+reddit_quant.db-wal
+runner.log
+session-ses_108a.md
+stream_guard.log
+supervisor.log
+.agents/
+.agents/AGENTS.md
+.github/
+.github/workflows/
+.github/workflows/ci.yml
+.pytest_cache/
+.pytest_cache/.gitignore
+.pytest_cache/CACHEDIR.TAG
+.pytest_cache/README.md
+.pytest_cache/v/
+.pytest_cache/v/cache/
+.pytest_cache/v/cache/lastfailed
+.pytest_cache/v/cache/nodeids
+Instructions/
+Instructions/Doables.md
+Instructions/InvestmentPlan.md
+Instructions/Limtis.md
+Instructions/PsychologicalPillar.md
+Instructions/RedditScraper.md
+__pycache__/
+__pycache__/audit_script.cpython-314.pyc
+__pycache__/product_intel.cpython-314.pyc
+__pycache__/reddit_scraper.cpython-314.pyc
+__pycache__/run_scraper.cpython-314.pyc
+__pycache__/sec_scraper.cpython-314.pyc
+__pycache__/stream_quant.cpython-314.pyc
+__pycache__/test_behavioral_feature_store.cpython-314-pytest-9.1.0.pyc
+__pycache__/test_behavioral_feature_store.cpython-314.pyc
+__pycache__/test_engineering_guards.cpython-314-pytest-9.1.0.pyc
+__pycache__/test_github_tracker.cpython-314-pytest-9.1.0.pyc
+backtesting/
+backtesting/backtest.py
+backtesting/drift_detection.py
+backtesting/__pycache__/
+backtesting/__pycache__/backtest.cpython-314.pyc
+backtesting/__pycache__/drift_detection.cpython-314.pyc
+config/
+config/__init__.py
+config/cloudflare_strategy_memory.json
+config/constants.py
+config/fintech_credentials.yaml
+config/hybrid_config.yaml
+config/hybrid_weights.yaml
+config/logging_config.py
+config/reddit_credentials.yaml
+config/reddit_weights.yaml
+config/weights.py
+config/__pycache__/
+config/__pycache__/__init__.cpython-314.pyc
+config/__pycache__/constants.cpython-314.pyc
+config/__pycache__/logging_config.cpython-314.pyc
+config/__pycache__/weights.cpython-314.pyc
+dashboard/
+dashboard/stream_quant.py
+dashboard/tab_sentiment_risk.py
+dashboard/__pycache__/
+dashboard/__pycache__/tab_sentiment_risk.cpython-314.pyc
+data/
+data/historical_5y_baseline.csv
+db/
+db/__init__.py
+db/connection.py
+db/feature_store.py
+db/jobs.py
+db/schema.py
+db/schema_fintech.py
+db/__pycache__/
+db/__pycache__/__init__.cpython-314.pyc
+db/__pycache__/connection.cpython-314.pyc
+db/__pycache__/feature_store.cpython-314.pyc
+db/__pycache__/jobs.cpython-314.pyc
+db/__pycache__/schema.cpython-314.pyc
+db/__pycache__/schema_fintech.cpython-314.pyc
+lane_results/
+lane_results/conviction_scores.md
+lane_results/data_completeness_audit.md
+lane_results/lane_gamma.md
+lane_results/scraper_audit_report.md
+lane_results/weight_reasoning.md
+logs/
+logs/quant_pipeline.log
+logs/test.log
+opencode_scripts/
+opencode_scripts/.gitignore
+opencode_scripts/.sg_state.json
+opencode_scripts/README.md
+opencode_scripts/__init__.py
+opencode_scripts/antigravity_daemon.py
+opencode_scripts/cleanup_logs.sh
+opencode_scripts/com.antigravity.runner.plist
+opencode_scripts/export_convo.py
+opencode_scripts/install_launchd.sh
+opencode_scripts/live_patcher.py
+opencode_scripts/live_watcher.py
+opencode_scripts/opencode_Script map.md
+opencode_scripts/opencode_convo_cache.md
+opencode_scripts/overnight_runner.sh
+opencode_scripts/policing_hub.py
+opencode_scripts/preflight_gate.py
+opencode_scripts/qualitative_scoring.py
+opencode_scripts/runner_run.log
+opencode_scripts/runner_watchdog.sh
+opencode_scripts/stream_guard.log
+opencode_scripts/stream_guard.py
+opencode_scripts/supervisor.log
+opencode_scripts/watchdog_launchd.log
+opencode_scripts/watchdog_launchd_err.log
+opencode_scripts/__pycache__/
+opencode_scripts/__pycache__/__init__.cpython-314.pyc
+opencode_scripts/__pycache__/config.cpython-314.pyc
+opencode_scripts/__pycache__/db_monitor.cpython-314.pyc
+opencode_scripts/__pycache__/export_convo.cpython-314.pyc
+opencode_scripts/__pycache__/live_patcher.cpython-314.pyc
+opencode_scripts/__pycache__/policing_hub.cpython-314.pyc
+opencode_scripts/__pycache__/preflight_gate.cpython-314.pyc
+opencode_scripts/__pycache__/recovery.cpython-314.pyc
+opencode_scripts/__pycache__/stream_guard.cpython-314.pyc
+opencode_scripts/__pycache__/utils.cpython-314.pyc
+opencode_scripts/lanes/
+opencode_scripts/lanes/central_hub/
+opencode_scripts/lanes/central_hub/central_hub.md
+opencode_scripts/lanes/central_hub/final_live_test_20260627_234723.log
+opencode_scripts/lanes/central_hub/final_live_test_20260628_210812.log
+opencode_scripts/lanes/central_hub/final_live_test_20260628_231915.log
+opencode_scripts/lanes/central_hub/final_live_test_20260629_105639.log
+opencode_scripts/lanes/central_hub/live_watcher.log
+opencode_scripts/lanes/lane_alpha/
+opencode_scripts/lanes/lane_alpha/alpha_worker.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260628_210815.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260628_231918.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260629_225955.log
+opencode_scripts/lanes/lane_alpha/lane_alpha.md
+opencode_scripts/lanes/lane_beta/
+opencode_scripts/lanes/lane_beta/beta_worker.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260628_210815.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260628_231918.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260629_225956.log
+opencode_scripts/lanes/lane_beta/lane_beta.md
+opencode_scripts/lanes/lane_delta/
+opencode_scripts/lanes/lane_delta/delta_worker.log
+opencode_scripts/lanes/lane_delta/delta_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_delta/delta_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_delta/delta_worker_prev_20260629_225956.log
+opencode_scripts/lanes/lane_delta/lane_delta.md
+opencode_scripts/lanes/lane_gamma/
+opencode_scripts/lanes/lane_gamma/gamma_worker.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260628_210815.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260628_231918.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260629_225956.log
+opencode_scripts/lanes/lane_gamma/ingest_all.py
+opencode_scripts/lanes/lane_gamma/lane_gamma.md
+opencode_scripts/lanes/lane_gamma/__pycache__/
+opencode_scripts/lanes/lane_gamma/__pycache__/ingest_all.cpython-314.pyc
+optimization/
+optimization/ab_testing.py
+optimization/optuna_search.py
+optimization/__pycache__/
+optimization/__pycache__/ab_testing.cpython-314.pyc
+optimization/__pycache__/optuna_search.cpython-314.pyc
+psychological/
+psychological/__init__.py
+psychological/behavioral_feature_store.py
+psychological/data_fusion.py
+psychological/dcf_floor.py
+psychological/engineering_guards.py
+psychological/interfaces.py
+psychological/nlp_engine.py
+psychological/orchestrator.py
+psychological/qualitative_scoring.py
+psychological/signal_matrix.py
+psychological/state_machine.py
+psychological/test_engineering_guards.py
+psychological/test_orchestrator.py
+psychological/velocity_tracker.py
+psychological/__pycache__/
+psychological/__pycache__/__init__.cpython-314.pyc
+psychological/__pycache__/behavioral_feature_store.cpython-314.pyc
+psychological/__pycache__/data_fusion.cpython-314.pyc
+psychological/__pycache__/dcf_floor.cpython-314.pyc
+psychological/__pycache__/engineering_guards.cpython-314.pyc
+psychological/__pycache__/interfaces.cpython-314.pyc
+psychological/__pycache__/nlp_engine.cpython-314.pyc
+psychological/__pycache__/orchestrator.cpython-314.pyc
+psychological/__pycache__/qualitative_scoring.cpython-314.pyc
+psychological/__pycache__/signal_matrix.cpython-314.pyc
+psychological/__pycache__/state_machine.cpython-314.pyc
+psychological/__pycache__/velocity_tracker.cpython-314.pyc
+psychological/scrapers/
+psychological/scrapers/__init__.py
+psychological/scrapers/browserless_client.py
+psychological/scrapers/cdp_stealth.py
+psychological/scrapers/circuit_breaker.py
+psychological/scrapers/company_resolver.py
+psychological/scrapers/corp_anonymous.py
+psychological/scrapers/corp_audit.py
+psychological/scrapers/cross_validation.py
+psychological/scrapers/employer_translator.py
+psychological/scrapers/github_tracker.py
+psychological/scrapers/hiring_velocity.py
+psychological/scrapers/lightweight_scraper.py
+psychological/scrapers/metrics_collector.py
+psychological/scrapers/moat_discovery.py
+psychological/scrapers/nodriver_primary.py
+psychological/scrapers/nodriver_scraper.py
+psychological/scrapers/product_intel.py
+psychological/scrapers/proxy_manager.py
+psychological/scrapers/reddit_custom.py
+psychological/scrapers/reddit_primary.py
+psychological/scrapers/redis_cache.py
+psychological/scrapers/test_lightweight_scraper.py
+psychological/scrapers/validation_gate.py
+psychological/scrapers/__pycache__/
+psychological/scrapers/__pycache__/__init__.cpython-314.pyc
+psychological/scrapers/__pycache__/browserless_client.cpython-314.pyc
+psychological/scrapers/__pycache__/cdp_stealth.cpython-314.pyc
+psychological/scrapers/__pycache__/circuit_breaker.cpython-314.pyc
+psychological/scrapers/__pycache__/company_resolver.cpython-314.pyc
+psychological/scrapers/__pycache__/corp_anonymous.cpython-314.pyc
+psychological/scrapers/__pycache__/corp_audit.cpython-314.pyc
+psychological/scrapers/__pycache__/cross_validation.cpython-314.pyc
+psychological/scrapers/__pycache__/employer_translator.cpython-314.pyc
+psychological/scrapers/__pycache__/github_tracker.cpython-314.pyc
+psychological/scrapers/__pycache__/hiring_velocity.cpython-314.pyc
+psychological/scrapers/__pycache__/lightweight_scraper.cpython-314.pyc
+psychological/scrapers/__pycache__/metrics_collector.cpython-314.pyc
+psychological/scrapers/__pycache__/moat_discovery.cpython-314.pyc
+psychological/scrapers/__pycache__/nodriver_primary.cpython-314.pyc
+psychological/scrapers/__pycache__/nodriver_scraper.cpython-314.pyc
+psychological/scrapers/__pycache__/product_intel.cpython-314.pyc
+psychological/scrapers/__pycache__/proxy_manager.cpython-314.pyc
+psychological/scrapers/__pycache__/reddit_custom.cpython-314.pyc
+psychological/scrapers/__pycache__/reddit_primary.cpython-314.pyc
+psychological/scrapers/__pycache__/redis_cache.cpython-314.pyc
+psychological/scrapers/__pycache__/test_lightweight_scraper.cpython-314-pytest-9.1.0.pyc
+psychological/scrapers/__pycache__/test_lightweight_scraper.cpython-314.pyc
+psychological/scrapers/__pycache__/validation_gate.cpython-314.pyc
+scraper/
+scraper/.dockerignore
+scraper/Dockerfile.browserless
+scraper/__init__.py
+scraper/binary_search_scraper.py
+scraper/data_fusion.py
+scraper/docker-compose.yml
+scraper/dynamic_extractor.py
+scraper/engine.py
+scraper/health_monitor.py
+scraper/hybrid_orchestrator.py
+scraper/product_intel.py
+scraper/reddit_client.py
+scraper/risk_detector.py
+scraper/run_scraper.py
+scraper/sec_scraper.py
+scraper/__pycache__/
+scraper/__pycache__/__init__.cpython-314.pyc
+scraper/__pycache__/data_fusion.cpython-314.pyc
+scraper/__pycache__/dynamic_extractor.cpython-314.pyc
+scraper/__pycache__/engine.cpython-314.pyc
+scraper/__pycache__/health_monitor.cpython-314.pyc
+scraper/__pycache__/hybrid_orchestrator.cpython-314.pyc
+scraper/__pycache__/reddit_client.cpython-314.pyc
+scraper/__pycache__/risk_detector.cpython-314.pyc
+scraper/fintech_clients/
+scraper/fintech_clients/__init__.py
+scraper/fintech_clients/apewisdom.py
+scraper/fintech_clients/base.py
+scraper/fintech_clients/factory.py
+scraper/fintech_clients/normalizer.py
+scraper/fintech_clients/rate_limiter.py
+scraper/fintech_clients/stocktwits.py
+scraper/fintech_clients/__pycache__/
+scraper/fintech_clients/__pycache__/__init__.cpython-314.pyc
+scraper/fintech_clients/__pycache__/apewisdom.cpython-314.pyc
+scraper/fintech_clients/__pycache__/base.cpython-314.pyc
+scraper/fintech_clients/__pycache__/factory.cpython-314.pyc
+scraper/fintech_clients/__pycache__/normalizer.cpython-314.pyc
+scraper/fintech_clients/__pycache__/rate_limiter.cpython-314.pyc
+scraper/fintech_clients/__pycache__/stocktwits.cpython-314.pyc
+scripts/
+scripts/audit_script.py
+scripts/com.quant.psychological.plist
+scripts/install_launchd.sh
+scripts/migrate_db.py
+scripts/run_pipeline.sh
+scripts/scheduler.py
+scripts/seed_historical.py
+scripts/__pycache__/
+scripts/__pycache__/migrate_db.cpython-314.pyc
+scripts/__pycache__/scheduler.cpython-314.pyc
+scripts/__pycache__/seed_historical.cpython-314.pyc
+tests/
+tests/conftest.py
+tests/quick_test.py
+tests/test.md
+tests/test_backtest.py
+tests/test_behavioral_store.py
+tests/test_central_translator_integration.py
+tests/test_company_resolver.py
+tests/test_corp_anonymous.py
+tests/test_corp_audit.py
+tests/test_cross_validation.py
+tests/test_dcf_floor.py
+tests/test_dynamic_extractor.py
+tests/test_employer_translator.py
+tests/test_engineering_guards.py
+tests/test_financial_reconstruction.py
+tests/test_fintech_clients.py
+tests/test_github_tracker.py
+tests/test_hiring_velocity.py
+tests/test_hybrid_orchestrator.py
+tests/test_integration.py
+tests/test_lane_gamma.py
+tests/test_live_interceptor.py
+tests/test_live_scraper_validation.py
+tests/test_master_qualitative_audit.py
+tests/test_moat_discovery.py
+tests/test_nlp.py
+tests/test_policing_hub.py
+tests/test_product_intel.py
+tests/test_psychological_integration.py
+tests/test_psychological_nlp.py
+tests/test_qualitative_scoring.py
+tests/test_reddit_custom.py
+tests/test_signal_matrix.py
+tests/test_state_machine.py
+tests/test_trajectory_corridor.py
+tests/test_validation_gate.py
+tests/test_velocity_tracker.py
+tests/__pycache__/
+tests/__pycache__/conftest.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/conftest.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/conftest.cpython-314-pytest-9.1.1.pyc
+tests/__pycache__/conftest.cpython-314.pyc
+tests/__pycache__/quick_test.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_backtest.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_backtest.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_backtest.cpython-314.pyc
+tests/__pycache__/test_behavioral_store.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_behavioral_store.cpython-314.pyc
+tests/__pycache__/test_central_translator_integration.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_company_resolver.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_corp_anonymous.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_corp_anonymous.cpython-314.pyc
+tests/__pycache__/test_corp_audit.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_corp_audit.cpython-314-pytest-9.1.1.pyc
+tests/__pycache__/test_corp_audit.cpython-314.pyc
+tests/__pycache__/test_cross_validation.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_cross_validation.cpython-314.pyc
+tests/__pycache__/test_dcf_floor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_dcf_floor.cpython-314.pyc
+tests/__pycache__/test_dynamic_extractor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_employer_translator.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_engineering_guards.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_engineering_guards.cpython-314.pyc
+tests/__pycache__/test_financial_reconstruction.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_fintech_clients.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_fintech_clients.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_fintech_clients.cpython-314.pyc
+tests/__pycache__/test_github_tracker.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_github_tracker.cpython-314.pyc
+tests/__pycache__/test_hiring_velocity.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_hiring_velocity.cpython-314.pyc
+tests/__pycache__/test_hybrid_orchestrator.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_hybrid_orchestrator.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_hybrid_orchestrator.cpython-314.pyc
+tests/__pycache__/test_integration.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_integration.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_integration.cpython-314.pyc
+tests/__pycache__/test_lane_gamma.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_live_interceptor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_live_scraper_validation.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_live_scraper_validation.cpython-314.pyc
+tests/__pycache__/test_master_qualitative_audit.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_moat_discovery.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_nlp.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_nlp.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_nlp.cpython-314.pyc
+tests/__pycache__/test_policing_hub.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_product_intel.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_product_intel.cpython-314.pyc
+tests/__pycache__/test_psychological_integration.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_psychological_integration.cpython-314.pyc
+tests/__pycache__/test_psychological_nlp.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_psychological_nlp.cpython-314.pyc
+tests/__pycache__/test_qualitative_scoring.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_reddit_custom.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_reddit_custom.cpython-314.pyc
+tests/__pycache__/test_signal_matrix.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_signal_matrix.cpython-314.pyc
+tests/__pycache__/test_state_machine.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_state_machine.cpython-314.pyc
+tests/__pycache__/test_trajectory_corridor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_validation_gate.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_validation_gate.cpython-314.pyc
+tests/__pycache__/test_velocity_tracker.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_velocity_tracker.cpython-314.pyc
+
+sent 19633631 bytes  received 8506 bytes  107275461 bytes/sec
+total size is 19586444  speedup is 1.00
+Transfer starting: 417 files
+./
+.env
+COMPLIANCE.md
+PsychologicalPillar.md
+README.md
+Unified straw.md
+changes.md
+etf_selection_cache.json
+intresting.md
+reddit_quant.db
+reddit_quant.db-shm
+reddit_quant.db-wal
+runner.log
+session-ses_108a.md
+stream_guard.log
+supervisor.log
+.agents/
+.agents/AGENTS.md
+.github/
+.github/workflows/
+.github/workflows/ci.yml
+.pytest_cache/
+.pytest_cache/.gitignore
+.pytest_cache/CACHEDIR.TAG
+.pytest_cache/README.md
+.pytest_cache/v/
+.pytest_cache/v/cache/
+.pytest_cache/v/cache/lastfailed
+.pytest_cache/v/cache/nodeids
+Instructions/
+Instructions/Doables.md
+Instructions/InvestmentPlan.md
+Instructions/Limtis.md
+Instructions/PsychologicalPillar.md
+Instructions/RedditScraper.md
+__pycache__/
+__pycache__/audit_script.cpython-314.pyc
+__pycache__/product_intel.cpython-314.pyc
+__pycache__/reddit_scraper.cpython-314.pyc
+__pycache__/run_scraper.cpython-314.pyc
+__pycache__/sec_scraper.cpython-314.pyc
+__pycache__/stream_quant.cpython-314.pyc
+__pycache__/test_behavioral_feature_store.cpython-314-pytest-9.1.0.pyc
+__pycache__/test_behavioral_feature_store.cpython-314.pyc
+__pycache__/test_engineering_guards.cpython-314-pytest-9.1.0.pyc
+__pycache__/test_github_tracker.cpython-314-pytest-9.1.0.pyc
+backtesting/
+backtesting/backtest.py
+backtesting/drift_detection.py
+backtesting/__pycache__/
+backtesting/__pycache__/backtest.cpython-314.pyc
+backtesting/__pycache__/drift_detection.cpython-314.pyc
+config/
+config/__init__.py
+config/cloudflare_strategy_memory.json
+config/constants.py
+config/fintech_credentials.yaml
+config/hybrid_config.yaml
+config/hybrid_weights.yaml
+config/logging_config.py
+config/reddit_credentials.yaml
+config/reddit_weights.yaml
+config/weights.py
+config/__pycache__/
+config/__pycache__/__init__.cpython-314.pyc
+config/__pycache__/constants.cpython-314.pyc
+config/__pycache__/logging_config.cpython-314.pyc
+config/__pycache__/weights.cpython-314.pyc
+dashboard/
+dashboard/stream_quant.py
+dashboard/tab_sentiment_risk.py
+dashboard/__pycache__/
+dashboard/__pycache__/tab_sentiment_risk.cpython-314.pyc
+data/
+data/historical_5y_baseline.csv
+db/
+db/__init__.py
+db/connection.py
+db/feature_store.py
+db/jobs.py
+db/schema.py
+db/schema_fintech.py
+db/__pycache__/
+db/__pycache__/__init__.cpython-314.pyc
+db/__pycache__/connection.cpython-314.pyc
+db/__pycache__/feature_store.cpython-314.pyc
+db/__pycache__/jobs.cpython-314.pyc
+db/__pycache__/schema.cpython-314.pyc
+db/__pycache__/schema_fintech.cpython-314.pyc
+lane_results/
+lane_results/conviction_scores.md
+lane_results/data_completeness_audit.md
+lane_results/lane_gamma.md
+lane_results/scraper_audit_report.md
+lane_results/weight_reasoning.md
+logs/
+logs/quant_pipeline.log
+logs/test.log
+opencode_scripts/
+opencode_scripts/.gitignore
+opencode_scripts/.sg_state.json
+opencode_scripts/README.md
+opencode_scripts/__init__.py
+opencode_scripts/antigravity_daemon.py
+opencode_scripts/cleanup_logs.sh
+opencode_scripts/com.antigravity.runner.plist
+opencode_scripts/export_convo.py
+opencode_scripts/install_launchd.sh
+opencode_scripts/live_patcher.py
+opencode_scripts/live_watcher.py
+opencode_scripts/opencode_Script map.md
+opencode_scripts/opencode_convo_cache.md
+opencode_scripts/overnight_runner.sh
+opencode_scripts/policing_hub.py
+opencode_scripts/preflight_gate.py
+opencode_scripts/qualitative_scoring.py
+opencode_scripts/runner_run.log
+opencode_scripts/runner_watchdog.sh
+opencode_scripts/stream_guard.log
+opencode_scripts/stream_guard.py
+opencode_scripts/supervisor.log
+opencode_scripts/watchdog_launchd.log
+opencode_scripts/watchdog_launchd_err.log
+opencode_scripts/__pycache__/
+opencode_scripts/__pycache__/__init__.cpython-314.pyc
+opencode_scripts/__pycache__/config.cpython-314.pyc
+opencode_scripts/__pycache__/db_monitor.cpython-314.pyc
+opencode_scripts/__pycache__/export_convo.cpython-314.pyc
+opencode_scripts/__pycache__/live_patcher.cpython-314.pyc
+opencode_scripts/__pycache__/policing_hub.cpython-314.pyc
+opencode_scripts/__pycache__/preflight_gate.cpython-314.pyc
+opencode_scripts/__pycache__/recovery.cpython-314.pyc
+opencode_scripts/__pycache__/stream_guard.cpython-314.pyc
+opencode_scripts/__pycache__/utils.cpython-314.pyc
+opencode_scripts/lanes/
+opencode_scripts/lanes/central_hub/
+opencode_scripts/lanes/central_hub/central_hub.md
+opencode_scripts/lanes/central_hub/final_live_test_20260627_234723.log
+opencode_scripts/lanes/central_hub/final_live_test_20260628_210812.log
+opencode_scripts/lanes/central_hub/final_live_test_20260628_231915.log
+opencode_scripts/lanes/central_hub/final_live_test_20260629_105639.log
+opencode_scripts/lanes/central_hub/live_watcher.log
+opencode_scripts/lanes/lane_alpha/
+opencode_scripts/lanes/lane_alpha/alpha_worker.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260628_210815.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260628_231918.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260629_225955.log
+opencode_scripts/lanes/lane_alpha/lane_alpha.md
+opencode_scripts/lanes/lane_beta/
+opencode_scripts/lanes/lane_beta/beta_worker.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260628_210815.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260628_231918.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260629_225956.log
+opencode_scripts/lanes/lane_beta/lane_beta.md
+opencode_scripts/lanes/lane_delta/
+opencode_scripts/lanes/lane_delta/delta_worker.log
+opencode_scripts/lanes/lane_delta/delta_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_delta/delta_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_delta/delta_worker_prev_20260629_225956.log
+opencode_scripts/lanes/lane_delta/lane_delta.md
+opencode_scripts/lanes/lane_gamma/
+opencode_scripts/lanes/lane_gamma/gamma_worker.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260628_210815.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260628_231918.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260629_225956.log
+opencode_scripts/lanes/lane_gamma/ingest_all.py
+opencode_scripts/lanes/lane_gamma/lane_gamma.md
+opencode_scripts/lanes/lane_gamma/__pycache__/
+opencode_scripts/lanes/lane_gamma/__pycache__/ingest_all.cpython-314.pyc
+optimization/
+optimization/ab_testing.py
+optimization/optuna_search.py
+optimization/__pycache__/
+optimization/__pycache__/ab_testing.cpython-314.pyc
+optimization/__pycache__/optuna_search.cpython-314.pyc
+psychological/
+psychological/__init__.py
+psychological/behavioral_feature_store.py
+psychological/data_fusion.py
+psychological/dcf_floor.py
+psychological/engineering_guards.py
+psychological/interfaces.py
+psychological/nlp_engine.py
+psychological/orchestrator.py
+psychological/qualitative_scoring.py
+psychological/signal_matrix.py
+psychological/state_machine.py
+psychological/test_engineering_guards.py
+psychological/test_orchestrator.py
+psychological/velocity_tracker.py
+psychological/__pycache__/
+psychological/__pycache__/__init__.cpython-314.pyc
+psychological/__pycache__/behavioral_feature_store.cpython-314.pyc
+psychological/__pycache__/data_fusion.cpython-314.pyc
+psychological/__pycache__/dcf_floor.cpython-314.pyc
+psychological/__pycache__/engineering_guards.cpython-314.pyc
+psychological/__pycache__/interfaces.cpython-314.pyc
+psychological/__pycache__/nlp_engine.cpython-314.pyc
+psychological/__pycache__/orchestrator.cpython-314.pyc
+psychological/__pycache__/qualitative_scoring.cpython-314.pyc
+psychological/__pycache__/signal_matrix.cpython-314.pyc
+psychological/__pycache__/state_machine.cpython-314.pyc
+psychological/__pycache__/velocity_tracker.cpython-314.pyc
+psychological/scrapers/
+psychological/scrapers/__init__.py
+psychological/scrapers/browserless_client.py
+psychological/scrapers/cdp_stealth.py
+psychological/scrapers/circuit_breaker.py
+psychological/scrapers/company_resolver.py
+psychological/scrapers/corp_anonymous.py
+psychological/scrapers/corp_audit.py
+psychological/scrapers/cross_validation.py
+psychological/scrapers/employer_translator.py
+psychological/scrapers/github_tracker.py
+psychological/scrapers/hiring_velocity.py
+psychological/scrapers/lightweight_scraper.py
+psychological/scrapers/metrics_collector.py
+psychological/scrapers/moat_discovery.py
+psychological/scrapers/nodriver_primary.py
+psychological/scrapers/nodriver_scraper.py
+psychological/scrapers/product_intel.py
+psychological/scrapers/proxy_manager.py
+psychological/scrapers/reddit_custom.py
+psychological/scrapers/reddit_primary.py
+psychological/scrapers/redis_cache.py
+psychological/scrapers/test_lightweight_scraper.py
+psychological/scrapers/validation_gate.py
+psychological/scrapers/__pycache__/
+psychological/scrapers/__pycache__/__init__.cpython-314.pyc
+psychological/scrapers/__pycache__/browserless_client.cpython-314.pyc
+psychological/scrapers/__pycache__/cdp_stealth.cpython-314.pyc
+psychological/scrapers/__pycache__/circuit_breaker.cpython-314.pyc
+psychological/scrapers/__pycache__/company_resolver.cpython-314.pyc
+psychological/scrapers/__pycache__/corp_anonymous.cpython-314.pyc
+psychological/scrapers/__pycache__/corp_audit.cpython-314.pyc
+psychological/scrapers/__pycache__/cross_validation.cpython-314.pyc
+psychological/scrapers/__pycache__/employer_translator.cpython-314.pyc
+psychological/scrapers/__pycache__/github_tracker.cpython-314.pyc
+psychological/scrapers/__pycache__/hiring_velocity.cpython-314.pyc
+psychological/scrapers/__pycache__/lightweight_scraper.cpython-314.pyc
+psychological/scrapers/__pycache__/metrics_collector.cpython-314.pyc
+psychological/scrapers/__pycache__/moat_discovery.cpython-314.pyc
+psychological/scrapers/__pycache__/nodriver_primary.cpython-314.pyc
+psychological/scrapers/__pycache__/nodriver_scraper.cpython-314.pyc
+psychological/scrapers/__pycache__/product_intel.cpython-314.pyc
+psychological/scrapers/__pycache__/proxy_manager.cpython-314.pyc
+psychological/scrapers/__pycache__/reddit_custom.cpython-314.pyc
+psychological/scrapers/__pycache__/reddit_primary.cpython-314.pyc
+psychological/scrapers/__pycache__/redis_cache.cpython-314.pyc
+psychological/scrapers/__pycache__/test_lightweight_scraper.cpython-314-pytest-9.1.0.pyc
+psychological/scrapers/__pycache__/test_lightweight_scraper.cpython-314.pyc
+psychological/scrapers/__pycache__/validation_gate.cpython-314.pyc
+scraper/
+scraper/.dockerignore
+scraper/Dockerfile.browserless
+scraper/__init__.py
+scraper/binary_search_scraper.py
+scraper/data_fusion.py
+scraper/docker-compose.yml
+scraper/dynamic_extractor.py
+scraper/engine.py
+scraper/health_monitor.py
+scraper/hybrid_orchestrator.py
+scraper/product_intel.py
+scraper/reddit_client.py
+scraper/risk_detector.py
+scraper/run_scraper.py
+scraper/sec_scraper.py
+scraper/__pycache__/
+scraper/__pycache__/__init__.cpython-314.pyc
+scraper/__pycache__/data_fusion.cpython-314.pyc
+scraper/__pycache__/dynamic_extractor.cpython-314.pyc
+scraper/__pycache__/engine.cpython-314.pyc
+scraper/__pycache__/health_monitor.cpython-314.pyc
+scraper/__pycache__/hybrid_orchestrator.cpython-314.pyc
+scraper/__pycache__/reddit_client.cpython-314.pyc
+scraper/__pycache__/risk_detector.cpython-314.pyc
+scraper/fintech_clients/
+scraper/fintech_clients/__init__.py
+scraper/fintech_clients/apewisdom.py
+scraper/fintech_clients/base.py
+scraper/fintech_clients/factory.py
+scraper/fintech_clients/normalizer.py
+scraper/fintech_clients/rate_limiter.py
+scraper/fintech_clients/stocktwits.py
+scraper/fintech_clients/__pycache__/
+scraper/fintech_clients/__pycache__/__init__.cpython-314.pyc
+scraper/fintech_clients/__pycache__/apewisdom.cpython-314.pyc
+scraper/fintech_clients/__pycache__/base.cpython-314.pyc
+scraper/fintech_clients/__pycache__/factory.cpython-314.pyc
+scraper/fintech_clients/__pycache__/normalizer.cpython-314.pyc
+scraper/fintech_clients/__pycache__/rate_limiter.cpython-314.pyc
+scraper/fintech_clients/__pycache__/stocktwits.cpython-314.pyc
+scripts/
+scripts/audit_script.py
+scripts/com.quant.psychological.plist
+scripts/install_launchd.sh
+scripts/migrate_db.py
+scripts/run_pipeline.sh
+scripts/scheduler.py
+scripts/seed_historical.py
+scripts/__pycache__/
+scripts/__pycache__/migrate_db.cpython-314.pyc
+scripts/__pycache__/scheduler.cpython-314.pyc
+scripts/__pycache__/seed_historical.cpython-314.pyc
+tests/
+tests/conftest.py
+tests/quick_test.py
+tests/test.md
+tests/test_backtest.py
+tests/test_behavioral_store.py
+tests/test_central_translator_integration.py
+tests/test_company_resolver.py
+tests/test_corp_anonymous.py
+tests/test_corp_audit.py
+tests/test_cross_validation.py
+tests/test_dcf_floor.py
+tests/test_dynamic_extractor.py
+tests/test_employer_translator.py
+tests/test_engineering_guards.py
+tests/test_financial_reconstruction.py
+tests/test_fintech_clients.py
+tests/test_github_tracker.py
+tests/test_hiring_velocity.py
+tests/test_hybrid_orchestrator.py
+tests/test_integration.py
+tests/test_lane_gamma.py
+tests/test_live_interceptor.py
+tests/test_live_scraper_validation.py
+tests/test_master_qualitative_audit.py
+tests/test_moat_discovery.py
+tests/test_nlp.py
+tests/test_policing_hub.py
+tests/test_product_intel.py
+tests/test_psychological_integration.py
+tests/test_psychological_nlp.py
+tests/test_qualitative_scoring.py
+tests/test_reddit_custom.py
+tests/test_signal_matrix.py
+tests/test_state_machine.py
+tests/test_trajectory_corridor.py
+tests/test_validation_gate.py
+tests/test_velocity_tracker.py
+tests/__pycache__/
+tests/__pycache__/conftest.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/conftest.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/conftest.cpython-314-pytest-9.1.1.pyc
+tests/__pycache__/conftest.cpython-314.pyc
+tests/__pycache__/quick_test.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_backtest.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_backtest.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_backtest.cpython-314.pyc
+tests/__pycache__/test_behavioral_store.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_behavioral_store.cpython-314.pyc
+tests/__pycache__/test_central_translator_integration.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_company_resolver.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_corp_anonymous.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_corp_anonymous.cpython-314.pyc
+tests/__pycache__/test_corp_audit.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_corp_audit.cpython-314-pytest-9.1.1.pyc
+tests/__pycache__/test_corp_audit.cpython-314.pyc
+tests/__pycache__/test_cross_validation.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_cross_validation.cpython-314.pyc
+tests/__pycache__/test_dcf_floor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_dcf_floor.cpython-314.pyc
+tests/__pycache__/test_dynamic_extractor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_employer_translator.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_engineering_guards.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_engineering_guards.cpython-314.pyc
+tests/__pycache__/test_financial_reconstruction.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_fintech_clients.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_fintech_clients.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_fintech_clients.cpython-314.pyc
+tests/__pycache__/test_github_tracker.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_github_tracker.cpython-314.pyc
+tests/__pycache__/test_hiring_velocity.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_hiring_velocity.cpython-314.pyc
+tests/__pycache__/test_hybrid_orchestrator.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_hybrid_orchestrator.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_hybrid_orchestrator.cpython-314.pyc
+tests/__pycache__/test_integration.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_integration.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_integration.cpython-314.pyc
+tests/__pycache__/test_lane_gamma.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_live_interceptor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_live_scraper_validation.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_live_scraper_validation.cpython-314.pyc
+tests/__pycache__/test_master_qualitative_audit.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_moat_discovery.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_nlp.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_nlp.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_nlp.cpython-314.pyc
+tests/__pycache__/test_policing_hub.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_product_intel.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_product_intel.cpython-314.pyc
+tests/__pycache__/test_psychological_integration.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_psychological_integration.cpython-314.pyc
+tests/__pycache__/test_psychological_nlp.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_psychological_nlp.cpython-314.pyc
+tests/__pycache__/test_qualitative_scoring.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_reddit_custom.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_reddit_custom.cpython-314.pyc
+tests/__pycache__/test_signal_matrix.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_signal_matrix.cpython-314.pyc
+tests/__pycache__/test_state_machine.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_state_machine.cpython-314.pyc
+tests/__pycache__/test_trajectory_corridor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_validation_gate.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_validation_gate.cpython-314.pyc
+tests/__pycache__/test_velocity_tracker.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_velocity_tracker.cpython-314.pyc
+
+sent 19651677 bytes  received 8506 bytes  99243730 bytes/sec
+total size is 19604482  speedup is 1.00
+Transfer starting: 417 files
+./
+.env
+COMPLIANCE.md
+PsychologicalPillar.md
+README.md
+Unified straw.md
+changes.md
+etf_selection_cache.json
+intresting.md
+reddit_quant.db
+reddit_quant.db-shm
+reddit_quant.db-wal
+runner.log
+session-ses_108a.md
+stream_guard.log
+supervisor.log
+.agents/
+.agents/AGENTS.md
+.github/
+.github/workflows/
+.github/workflows/ci.yml
+.pytest_cache/
+.pytest_cache/.gitignore
+.pytest_cache/CACHEDIR.TAG
+.pytest_cache/README.md
+.pytest_cache/v/
+.pytest_cache/v/cache/
+.pytest_cache/v/cache/lastfailed
+.pytest_cache/v/cache/nodeids
+Instructions/
+Instructions/Doables.md
+Instructions/InvestmentPlan.md
+Instructions/Limtis.md
+Instructions/PsychologicalPillar.md
+Instructions/RedditScraper.md
+__pycache__/
+__pycache__/audit_script.cpython-314.pyc
+__pycache__/product_intel.cpython-314.pyc
+__pycache__/reddit_scraper.cpython-314.pyc
+__pycache__/run_scraper.cpython-314.pyc
+__pycache__/sec_scraper.cpython-314.pyc
+__pycache__/stream_quant.cpython-314.pyc
+__pycache__/test_behavioral_feature_store.cpython-314-pytest-9.1.0.pyc
+__pycache__/test_behavioral_feature_store.cpython-314.pyc
+__pycache__/test_engineering_guards.cpython-314-pytest-9.1.0.pyc
+__pycache__/test_github_tracker.cpython-314-pytest-9.1.0.pyc
+backtesting/
+backtesting/backtest.py
+backtesting/drift_detection.py
+backtesting/__pycache__/
+backtesting/__pycache__/backtest.cpython-314.pyc
+backtesting/__pycache__/drift_detection.cpython-314.pyc
+config/
+config/__init__.py
+config/cloudflare_strategy_memory.json
+config/constants.py
+config/fintech_credentials.yaml
+config/hybrid_config.yaml
+config/hybrid_weights.yaml
+config/logging_config.py
+config/reddit_credentials.yaml
+config/reddit_weights.yaml
+config/weights.py
+config/__pycache__/
+config/__pycache__/__init__.cpython-314.pyc
+config/__pycache__/constants.cpython-314.pyc
+config/__pycache__/logging_config.cpython-314.pyc
+config/__pycache__/weights.cpython-314.pyc
+dashboard/
+dashboard/stream_quant.py
+dashboard/tab_sentiment_risk.py
+dashboard/__pycache__/
+dashboard/__pycache__/tab_sentiment_risk.cpython-314.pyc
+data/
+data/historical_5y_baseline.csv
+db/
+db/__init__.py
+db/connection.py
+db/feature_store.py
+db/jobs.py
+db/schema.py
+db/schema_fintech.py
+db/__pycache__/
+db/__pycache__/__init__.cpython-314.pyc
+db/__pycache__/connection.cpython-314.pyc
+db/__pycache__/feature_store.cpython-314.pyc
+db/__pycache__/jobs.cpython-314.pyc
+db/__pycache__/schema.cpython-314.pyc
+db/__pycache__/schema_fintech.cpython-314.pyc
+lane_results/
+lane_results/conviction_scores.md
+lane_results/data_completeness_audit.md
+lane_results/lane_gamma.md
+lane_results/scraper_audit_report.md
+lane_results/weight_reasoning.md
+logs/
+logs/quant_pipeline.log
+logs/test.log
+opencode_scripts/
+opencode_scripts/.gitignore
+opencode_scripts/.sg_state.json
+opencode_scripts/README.md
+opencode_scripts/__init__.py
+opencode_scripts/antigravity_daemon.py
+opencode_scripts/cleanup_logs.sh
+opencode_scripts/com.antigravity.runner.plist
+opencode_scripts/export_convo.py
+opencode_scripts/install_launchd.sh
+opencode_scripts/live_patcher.py
+opencode_scripts/live_watcher.py
+opencode_scripts/opencode_Script map.md
+opencode_scripts/opencode_convo_cache.md
+opencode_scripts/overnight_runner.sh
+opencode_scripts/policing_hub.py
+opencode_scripts/preflight_gate.py
+opencode_scripts/qualitative_scoring.py
+opencode_scripts/runner_run.log
+opencode_scripts/runner_watchdog.sh
+opencode_scripts/stream_guard.log
+opencode_scripts/stream_guard.py
+opencode_scripts/supervisor.log
+opencode_scripts/watchdog_launchd.log
+opencode_scripts/watchdog_launchd_err.log
+opencode_scripts/__pycache__/
+opencode_scripts/__pycache__/__init__.cpython-314.pyc
+opencode_scripts/__pycache__/config.cpython-314.pyc
+opencode_scripts/__pycache__/db_monitor.cpython-314.pyc
+opencode_scripts/__pycache__/export_convo.cpython-314.pyc
+opencode_scripts/__pycache__/live_patcher.cpython-314.pyc
+opencode_scripts/__pycache__/policing_hub.cpython-314.pyc
+opencode_scripts/__pycache__/preflight_gate.cpython-314.pyc
+opencode_scripts/__pycache__/recovery.cpython-314.pyc
+opencode_scripts/__pycache__/stream_guard.cpython-314.pyc
+opencode_scripts/__pycache__/utils.cpython-314.pyc
+opencode_scripts/lanes/
+opencode_scripts/lanes/central_hub/
+opencode_scripts/lanes/central_hub/central_hub.md
+opencode_scripts/lanes/central_hub/final_live_test_20260627_234723.log
+opencode_scripts/lanes/central_hub/final_live_test_20260628_210812.log
+opencode_scripts/lanes/central_hub/final_live_test_20260628_231915.log
+opencode_scripts/lanes/central_hub/final_live_test_20260629_105639.log
+opencode_scripts/lanes/central_hub/live_watcher.log
+opencode_scripts/lanes/lane_alpha/
+opencode_scripts/lanes/lane_alpha/alpha_worker.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260628_210815.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260628_231918.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_alpha/alpha_worker_prev_20260629_225955.log
+opencode_scripts/lanes/lane_alpha/lane_alpha.md
+opencode_scripts/lanes/lane_beta/
+opencode_scripts/lanes/lane_beta/beta_worker.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260628_210815.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260628_231918.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_beta/beta_worker_prev_20260629_225956.log
+opencode_scripts/lanes/lane_beta/lane_beta.md
+opencode_scripts/lanes/lane_delta/
+opencode_scripts/lanes/lane_delta/delta_worker.log
+opencode_scripts/lanes/lane_delta/delta_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_delta/delta_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_delta/delta_worker_prev_20260629_225956.log
+opencode_scripts/lanes/lane_delta/lane_delta.md
+opencode_scripts/lanes/lane_gamma/
+opencode_scripts/lanes/lane_gamma/gamma_worker.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260628_210815.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260628_231918.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260629_105641.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260629_225750.log
+opencode_scripts/lanes/lane_gamma/gamma_worker_prev_20260629_225956.log
+opencode_scripts/lanes/lane_gamma/ingest_all.py
+opencode_scripts/lanes/lane_gamma/lane_gamma.md
+opencode_scripts/lanes/lane_gamma/__pycache__/
+opencode_scripts/lanes/lane_gamma/__pycache__/ingest_all.cpython-314.pyc
+optimization/
+optimization/ab_testing.py
+optimization/optuna_search.py
+optimization/__pycache__/
+optimization/__pycache__/ab_testing.cpython-314.pyc
+optimization/__pycache__/optuna_search.cpython-314.pyc
+psychological/
+psychological/__init__.py
+psychological/behavioral_feature_store.py
+psychological/data_fusion.py
+psychological/dcf_floor.py
+psychological/engineering_guards.py
+psychological/interfaces.py
+psychological/nlp_engine.py
+psychological/orchestrator.py
+psychological/qualitative_scoring.py
+psychological/signal_matrix.py
+psychological/state_machine.py
+psychological/test_engineering_guards.py
+psychological/test_orchestrator.py
+psychological/velocity_tracker.py
+psychological/__pycache__/
+psychological/__pycache__/__init__.cpython-314.pyc
+psychological/__pycache__/behavioral_feature_store.cpython-314.pyc
+psychological/__pycache__/data_fusion.cpython-314.pyc
+psychological/__pycache__/dcf_floor.cpython-314.pyc
+psychological/__pycache__/engineering_guards.cpython-314.pyc
+psychological/__pycache__/interfaces.cpython-314.pyc
+psychological/__pycache__/nlp_engine.cpython-314.pyc
+psychological/__pycache__/orchestrator.cpython-314.pyc
+psychological/__pycache__/qualitative_scoring.cpython-314.pyc
+psychological/__pycache__/signal_matrix.cpython-314.pyc
+psychological/__pycache__/state_machine.cpython-314.pyc
+psychological/__pycache__/velocity_tracker.cpython-314.pyc
+psychological/scrapers/
+psychological/scrapers/__init__.py
+psychological/scrapers/browserless_client.py
+psychological/scrapers/cdp_stealth.py
+psychological/scrapers/circuit_breaker.py
+psychological/scrapers/company_resolver.py
+psychological/scrapers/corp_anonymous.py
+psychological/scrapers/corp_audit.py
+psychological/scrapers/cross_validation.py
+psychological/scrapers/employer_translator.py
+psychological/scrapers/github_tracker.py
+psychological/scrapers/hiring_velocity.py
+psychological/scrapers/lightweight_scraper.py
+psychological/scrapers/metrics_collector.py
+psychological/scrapers/moat_discovery.py
+psychological/scrapers/nodriver_primary.py
+psychological/scrapers/nodriver_scraper.py
+psychological/scrapers/product_intel.py
+psychological/scrapers/proxy_manager.py
+psychological/scrapers/reddit_custom.py
+psychological/scrapers/reddit_primary.py
+psychological/scrapers/redis_cache.py
+psychological/scrapers/test_lightweight_scraper.py
+psychological/scrapers/validation_gate.py
+psychological/scrapers/__pycache__/
+psychological/scrapers/__pycache__/__init__.cpython-314.pyc
+psychological/scrapers/__pycache__/browserless_client.cpython-314.pyc
+psychological/scrapers/__pycache__/cdp_stealth.cpython-314.pyc
+psychological/scrapers/__pycache__/circuit_breaker.cpython-314.pyc
+psychological/scrapers/__pycache__/company_resolver.cpython-314.pyc
+psychological/scrapers/__pycache__/corp_anonymous.cpython-314.pyc
+psychological/scrapers/__pycache__/corp_audit.cpython-314.pyc
+psychological/scrapers/__pycache__/cross_validation.cpython-314.pyc
+psychological/scrapers/__pycache__/employer_translator.cpython-314.pyc
+psychological/scrapers/__pycache__/github_tracker.cpython-314.pyc
+psychological/scrapers/__pycache__/hiring_velocity.cpython-314.pyc
+psychological/scrapers/__pycache__/lightweight_scraper.cpython-314.pyc
+psychological/scrapers/__pycache__/metrics_collector.cpython-314.pyc
+psychological/scrapers/__pycache__/moat_discovery.cpython-314.pyc
+psychological/scrapers/__pycache__/nodriver_primary.cpython-314.pyc
+psychological/scrapers/__pycache__/nodriver_scraper.cpython-314.pyc
+psychological/scrapers/__pycache__/product_intel.cpython-314.pyc
+psychological/scrapers/__pycache__/proxy_manager.cpython-314.pyc
+psychological/scrapers/__pycache__/reddit_custom.cpython-314.pyc
+psychological/scrapers/__pycache__/reddit_primary.cpython-314.pyc
+psychological/scrapers/__pycache__/redis_cache.cpython-314.pyc
+psychological/scrapers/__pycache__/test_lightweight_scraper.cpython-314-pytest-9.1.0.pyc
+psychological/scrapers/__pycache__/test_lightweight_scraper.cpython-314.pyc
+psychological/scrapers/__pycache__/validation_gate.cpython-314.pyc
+scraper/
+scraper/.dockerignore
+scraper/Dockerfile.browserless
+scraper/__init__.py
+scraper/binary_search_scraper.py
+scraper/data_fusion.py
+scraper/docker-compose.yml
+scraper/dynamic_extractor.py
+scraper/engine.py
+scraper/health_monitor.py
+scraper/hybrid_orchestrator.py
+scraper/product_intel.py
+scraper/reddit_client.py
+scraper/risk_detector.py
+scraper/run_scraper.py
+scraper/sec_scraper.py
+scraper/__pycache__/
+scraper/__pycache__/__init__.cpython-314.pyc
+scraper/__pycache__/data_fusion.cpython-314.pyc
+scraper/__pycache__/dynamic_extractor.cpython-314.pyc
+scraper/__pycache__/engine.cpython-314.pyc
+scraper/__pycache__/health_monitor.cpython-314.pyc
+scraper/__pycache__/hybrid_orchestrator.cpython-314.pyc
+scraper/__pycache__/reddit_client.cpython-314.pyc
+scraper/__pycache__/risk_detector.cpython-314.pyc
+scraper/fintech_clients/
+scraper/fintech_clients/__init__.py
+scraper/fintech_clients/apewisdom.py
+scraper/fintech_clients/base.py
+scraper/fintech_clients/factory.py
+scraper/fintech_clients/normalizer.py
+scraper/fintech_clients/rate_limiter.py
+scraper/fintech_clients/stocktwits.py
+scraper/fintech_clients/__pycache__/
+scraper/fintech_clients/__pycache__/__init__.cpython-314.pyc
+scraper/fintech_clients/__pycache__/apewisdom.cpython-314.pyc
+scraper/fintech_clients/__pycache__/base.cpython-314.pyc
+scraper/fintech_clients/__pycache__/factory.cpython-314.pyc
+scraper/fintech_clients/__pycache__/normalizer.cpython-314.pyc
+scraper/fintech_clients/__pycache__/rate_limiter.cpython-314.pyc
+scraper/fintech_clients/__pycache__/stocktwits.cpython-314.pyc
+scripts/
+scripts/audit_script.py
+scripts/com.quant.psychological.plist
+scripts/install_launchd.sh
+scripts/migrate_db.py
+scripts/run_pipeline.sh
+scripts/scheduler.py
+scripts/seed_historical.py
+scripts/__pycache__/
+scripts/__pycache__/migrate_db.cpython-314.pyc
+scripts/__pycache__/scheduler.cpython-314.pyc
+scripts/__pycache__/seed_historical.cpython-314.pyc
+tests/
+tests/conftest.py
+tests/quick_test.py
+tests/test.md
+tests/test_backtest.py
+tests/test_behavioral_store.py
+tests/test_central_translator_integration.py
+tests/test_company_resolver.py
+tests/test_corp_anonymous.py
+tests/test_corp_audit.py
+tests/test_cross_validation.py
+tests/test_dcf_floor.py
+tests/test_dynamic_extractor.py
+tests/test_employer_translator.py
+tests/test_engineering_guards.py
+tests/test_financial_reconstruction.py
+tests/test_fintech_clients.py
+tests/test_github_tracker.py
+tests/test_hiring_velocity.py
+tests/test_hybrid_orchestrator.py
+tests/test_integration.py
+tests/test_lane_gamma.py
+tests/test_live_interceptor.py
+tests/test_live_scraper_validation.py
+tests/test_master_qualitative_audit.py
+tests/test_moat_discovery.py
+tests/test_nlp.py
+tests/test_policing_hub.py
+tests/test_product_intel.py
+tests/test_psychological_integration.py
+tests/test_psychological_nlp.py
+tests/test_qualitative_scoring.py
+tests/test_reddit_custom.py
+tests/test_signal_matrix.py
+tests/test_state_machine.py
+tests/test_trajectory_corridor.py
+tests/test_validation_gate.py
+tests/test_velocity_tracker.py
+tests/__pycache__/
+tests/__pycache__/conftest.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/conftest.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/conftest.cpython-314-pytest-9.1.1.pyc
+tests/__pycache__/conftest.cpython-314.pyc
+tests/__pycache__/quick_test.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_backtest.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_backtest.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_backtest.cpython-314.pyc
+tests/__pycache__/test_behavioral_store.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_behavioral_store.cpython-314.pyc
+tests/__pycache__/test_central_translator_integration.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_company_resolver.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_corp_anonymous.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_corp_anonymous.cpython-314.pyc
+tests/__pycache__/test_corp_audit.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_corp_audit.cpython-314-pytest-9.1.1.pyc
+tests/__pycache__/test_corp_audit.cpython-314.pyc
+tests/__pycache__/test_cross_validation.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_cross_validation.cpython-314.pyc
+tests/__pycache__/test_dcf_floor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_dcf_floor.cpython-314.pyc
+tests/__pycache__/test_dynamic_extractor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_employer_translator.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_engineering_guards.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_engineering_guards.cpython-314.pyc
+tests/__pycache__/test_financial_reconstruction.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_fintech_clients.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_fintech_clients.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_fintech_clients.cpython-314.pyc
+tests/__pycache__/test_github_tracker.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_github_tracker.cpython-314.pyc
+tests/__pycache__/test_hiring_velocity.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_hiring_velocity.cpython-314.pyc
+tests/__pycache__/test_hybrid_orchestrator.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_hybrid_orchestrator.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_hybrid_orchestrator.cpython-314.pyc
+tests/__pycache__/test_integration.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_integration.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_integration.cpython-314.pyc
+tests/__pycache__/test_lane_gamma.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_live_interceptor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_live_scraper_validation.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_live_scraper_validation.cpython-314.pyc
+tests/__pycache__/test_master_qualitative_audit.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_moat_discovery.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_nlp.cpython-314-pytest-9.0.3.pyc
+tests/__pycache__/test_nlp.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_nlp.cpython-314.pyc
+tests/__pycache__/test_policing_hub.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_product_intel.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_product_intel.cpython-314.pyc
+tests/__pycache__/test_psychological_integration.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_psychological_integration.cpython-314.pyc
+tests/__pycache__/test_psychological_nlp.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_psychological_nlp.cpython-314.pyc
+tests/__pycache__/test_qualitative_scoring.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_reddit_custom.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_reddit_custom.cpython-314.pyc
+tests/__pycache__/test_signal_matrix.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_signal_matrix.cpython-314.pyc
+tests/__pycache__/test_state_machine.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_state_machine.cpython-314.pyc
+tests/__pycache__/test_trajectory_corridor.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_validation_gate.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_validation_gate.cpython-314.pyc
+tests/__pycache__/test_velocity_tracker.cpython-314-pytest-9.1.0.pyc
+tests/__pycache__/test_velocity_tracker.cpython-314.pyc
+
+sent 19669582 bytes  received 8506 bytes  117762345 bytes/sec
+total size is 19622387  speedup is 1.00
+[2026-06-29 22:59:57] 🔬 Executing pre-flight sanity gates across all 4 lanes...
+[2026-06-29 23:00:10] 
+./opencode_scripts/overnight_runner.sh: line 54: 19803 Terminated: 15          ( sleep "$timeout_secs" && kill -TERM "$pid" 2> /dev/null )
+[2026-06-29 23:00:10] 🏎️  Dispatching Lane Alpha (Branch Composites & Sub-Sector Standardization)...
+[2026-06-29 23:00:10] 🏎️  Dispatching Lane Beta (Financial Model & Scraper Audit)...
+[2026-06-29 23:00:10] 🏎️  Dispatching Lane Gamma (Active Free Scraping & Data Completeness Audit)...
+[2026-06-29 23:00:10] 👁️ Launching real-time Live Log Watcher...
+[2026-06-29 23:00:10] 
+[2026-06-29 23:00:10] ⌛ Waiting for implementation lanes Alpha, Beta, Gamma (max 14400s each)...
+./opencode_scripts/overnight_runner.sh: line 326: 19825 Terminated: 15          "${VENV_PYTHON}" "${WORKSPACE_ROOT}/opencode_scripts/stream_guard.py" run --model="opencode/big-pickle" --dangerously-skip-permissions "<system_role>
+You are a senior quantitative systems architect and a rigid execution engine. 
+Your tone must be direct, deeply technical, and factual. Avoid conversational summaries, conversational pleasantries, and hand-waving explanations. Focus entirely on code accuracy, strict math transformations, and deterministic implementation paths.
+</system_role>
+
+<task_context>
+Unified Qualitative-to-Quantitative Translation Pipeline (Lane Beta: Moat Composite, Financial Reconstruction & Trajectory Engine). We are building structural valuation layers across 10 tech tickers and running automated diagnostic audits across scraper implementations.
+</task_context>
+
+<architectural_constraints>
+1. FLAT DATA STRUCTURE: No intermediate state may bleed between decoupled branches.
+2. DETERMINISTIC LOWER BOUNDS: Every mathematical anomaly transformation must be strictly bounded via scaled hyperbolic functions to prevent runtime arithmetic blowouts.
+3. ABSOLUTE TEMPORAL ALIGNMENT: All historical backtest passes must adhere to a strict publication lag matrix.
+4. ZERO HARDCODED VALUES: Eliminate synthetic fallbacks. Antigravity daemon verifies zero hardcoding and lookahead bias.
+5. CLOUDFLARE BYPASS STRATEGY 2 (NODRIVER CDP STEALTH INJECTION): Implement nodriver / browserless headless Chrome automation with Chrome DevTools Protocol stealth scripts (cdp_stealth.py) overriding navigator.webdriver and WebGL vendor masking. Log performance metric to config/cloudflare_strategy_memory.json under key 'nodriver_cdp_stealth'.
+</architectural_constraints>
+
+<step_by_step_specification>
+1. Implement MoatComposite (60d EMA) aggregating product breadth, developer momentum, and regulatory signals in psychological/qualitative_scoring.py.
+2. Implement FinancialReconstructionInterface in psychological/qualitative_scoring.py computing R&D capitalization rates and SBC drag intensity.
+3. Implement TrajectoryCorridorEngine in psychological/qualitative_scoring.py with tanh(z/2) scaling, piecewise multi-stage growth decay, and asymmetric floor/ceiling boundaries.
+4. Implement AlternativeStrategyPipeline master blender merging moat (40%), financial (35%), and trajectory (25%).
+5. Execute diagnostic audit on corp_audit.py, github_tracker.py, moat_discovery.py and write lane_results/scraper_audit_report.md. Validate via pytest.
+</step_by_step_specification>
+
+<anti_delegation_rules>
+CRITICAL GUARDRAIL: You must NOT spawn abstract exploratory subagents, summarize steps vaguely, or leave placeholders like '# Implement logic here'. Every block of code must be fully written, complete, production-ready, and optimized for parallel sandbox tasks. Execute all code generation, DB operations, and pytest calls directly and sequentially in Python.
+</anti_delegation_rules>
+
+./opencode_scripts/overnight_runner.sh: line 268: 19819 Terminated: 15          "${VENV_PYTHON}" "${WORKSPACE_ROOT}/opencode_scripts/stream_guard.py" run --model="opencode/big-pickle" --dangerously-skip-permissions "<system_role>
+You are a senior quantitative systems architect and a rigid execution engine. 
+Your tone must be direct, deeply technical, and factual. Avoid conversational summaries, conversational pleasantries, and hand-waving explanations. Focus entirely on code accuracy, strict math transformations, and deterministic implementation paths.
+</system_role>
+
+<task_context>
+Unified Qualitative-to-Quantitative Translation Pipeline (Lane Alpha: Signal Processing Core). We are engineering a decoupled observation framework across 10 mega-cap tech tickers (NVDA, AVGO, INTC, AMD, MSFT, GOOGL, META, TSLA, AAPL, AMZN). Lane Alpha implements Branch Composites, EMA smoothing, and sub-sector Double Standardization.
+</task_context>
+
+<architectural_constraints>
+1. FLAT DATA STRUCTURE: No intermediate state may bleed between decoupled branches.
+2. DETERMINISTIC LOWER BOUNDS: Every mathematical anomaly transformation must be strictly bounded via scaled hyperbolic functions to prevent runtime arithmetic blowouts.
+3. ABSOLUTE TEMPORAL ALIGNMENT: All historical backtest passes must adhere to a strict publication lag matrix.
+4. ZERO HARDCODED VALUES: All calculation pipelines must operate dynamically on incoming signals. Never use synthetic data or hardcoded scores in production execution paths. Antigravity daemon enforces zero data leakage.
+5. CLOUDFLARE BYPASS STRATEGY 1 (TLS/JA4 FINGERPRINTING & SERP CACHE): Implement HTTP/2 JA4 fingerprint rotation via curl_cffi and Google/Bing SERP JSON-LD cache extraction for employer scrapers. Log performance metric (success/failure rate per domain) to config/cloudflare_strategy_memory.json under key 'tls_serp_ja4'.
+</architectural_constraints>
+
+<step_by_step_specification>
+1. Formulate the EMAFilter class in psychological/qualitative_scoring.py with configurable halflife (90d/21d/60d) and expanding-mean cold-start protocol.
+2. Implement BranchComposite base class and derived CultureComposite (90d lookback) and HypeComposite (21d lookback) in psychological/qualitative_scoring.py.
+3. Formulate the DoubleStandardizer class in psychological/qualitative_scoring.py implementing Stage 1 time-series z-scoring and Stage 2 sub-sector cross-sectional z-scoring.
+4. Implement SubSectorConfig dataclass loading peer groups (semiconductors, platform_software, hardware_oem) from config/hybrid_config.yaml.
+5. Build unit test suite in tests/test_qualitative_scoring.py and validate via pytest. Record strategy performance to config/cloudflare_strategy_memory.json.
+</step_by_step_specification>
+
+<anti_delegation_rules>
+CRITICAL GUARDRAIL: You must NOT spawn abstract exploratory subagents, summarize steps vaguely, or leave placeholders like '# Implement logic here'. Every block of code must be fully written, complete, production-ready, and optimized for parallel sandbox tasks. Execute all code generation, DB operations, and pytest calls directly and sequentially in Python.
+</anti_delegation_rules>
+
+<output_formatting>
+Return the full output wrapped inside clean Markdown and explicit file reference slots.
+</output_formatting>" >> "${LOG}" 2>&1
+<output_formatting>
+Return the full output wrapped inside clean Markdown and explicit file reference slots.
+</output_formatting>" >> "${LOG}" 2>&1
+./opencode_scripts/overnight_runner.sh: line 384: 19831 Terminated: 15          "${VENV_PYTHON}" "${WORKSPACE_ROOT}/opencode_scripts/stream_guard.py" run --model="opencode/big-pickle" --dangerously-skip-permissions "<system_role>
+You are a senior quantitative systems architect and a rigid execution engine. 
+Your tone must be direct, deeply technical, and factual. Avoid conversational summaries, conversational pleasantries, and hand-waving explanations. Focus entirely on code accuracy, strict math transformations, and deterministic implementation paths.
+</system_role>
+
+<task_context>
+Unified Qualitative-to-Quantitative Translation Pipeline (Lane Gamma: Active Data Ingestion & Schema Auditing). Ingesting live SEC EDGAR XBRL facts, GitHub REST metrics, and sentiment commentary into reddit_quant.db across 10 tech tickers.
+</task_context>
+
+<architectural_constraints>
+1. FLAT DATA STRUCTURE: No intermediate state may bleed between decoupled branches.
+2. DETERMINISTIC LOWER BOUNDS: Every mathematical anomaly transformation must be strictly bounded via scaled hyperbolic functions to prevent runtime arithmetic blowouts.
+3. ABSOLUTE TEMPORAL ALIGNMENT: All historical backtest passes must adhere to a strict publication lag matrix.
+4. ZERO HARDCODED VALUES: Ingest genuine dynamic endpoints. Antigravity daemon audits database tables for mock data injection.
+5. CLOUDFLARE BYPASS STRATEGY 3 (MULTI-STAGE DISTRIBUTED SERP PROXYING & API FALLBACKS): Route scraper requests through multi-engine search indexing (Bing/Google/DuckDuckGo) and official API endpoints (SEC XBRL submissions API, GitHub REST) with 2-7s randomized delays. Log performance metric to config/cloudflare_strategy_memory.json under key 'distributed_serp_api'.
+</architectural_constraints>
+
+<step_by_step_specification>
+1. Ingest SEC EDGAR XBRL facts for all 10 tickers into reddit_quant.db table sec_xbrl_facts (using fallback fact names like RevenueFromContractWithCustomer for AVGO).
+2. Query GitHub Org REST API for org repos across all 10 tickers into reddit_quant.db table github_org_metrics (using handle 'amzn' for Amazon).
+3. Aggregate Reddit daily sentiment metrics into reddit_quant.db table daily_aggregations (verifying INTC entity resolution).
+4. Capture Glassdoor snapshots into reddit_quant.db table glassdoor_snapshots.
+5. Verify db/schema.py tables exist and generate lane_results/data_completeness_audit.md. Validate via pytest.
+</step_by_step_specification>
+
+<anti_delegation_rules>
+CRITICAL GUARDRAIL: You must NOT spawn abstract exploratory subagents, summarize steps vaguely, or leave placeholders like '# Implement logic here'. Every block of code must be fully written, complete, production-ready, and optimized for parallel sandbox tasks. Execute all code generation, DB operations, and pytest calls directly and sequentially in Python.
+</anti_delegation_rules>
+
+<output_formatting>
+Return the full output wrapped inside clean Markdown and explicit file reference slots.
+</output_formatting>" >> "${LOG}" 2>&1
+./opencode_scripts/overnight_runner.sh: line 185: 18716 Terminated: 15          caffeinate -dimsu "${VENV_PYTHON}" "${WORKSPACE_ROOT}/opencode_scripts/stream_guard.py" < /dev/null > "${WORKSPACE_ROOT}/supervisor.log" 2>&1
+[2026-06-29 23:01:01] ✅ Implementation lanes finished! Alpha=0 | Beta=0 | Gamma=0
+[2026-06-29 23:01:01] 
+[2026-06-29 23:01:01] 🏎️  Dispatching Lane Delta (Static Historical Discovery, Weight Optimization & Master Audit)...
+[2026-06-29 23:04:01] ✅ All 4 lanes finished: Mon Jun 29 23:04:01 WIB 2026
+[2026-06-29 23:04:01]    Alpha=0 | Beta=0 | Gamma=0 | Delta=0
+[2026-06-29 23:04:01] 🛑 Terminating Live Log Watcher...
+./opencode_scripts/overnight_runner.sh: line 480: 19832 Terminated: 15          "${VENV_PYTHON}" "${WORKSPACE_ROOT}/opencode_scripts/live_watcher.py" --lanes "lane_alpha:${LANE_DIRS[0]}:${WORKSPACE_ROOT}/${WORKER_LOGS[0]}" "lane_beta:${LANE_DIRS[1]}:${WORKSPACE_ROOT}/${WORKER_LOGS[1]}" "lane_gamma:${LANE_DIRS[2]}:${WORKSPACE_ROOT}/${WORKER_LOGS[2]}" "lane_delta:${LANE_DIRS[3]}:${WORKSPACE_ROOT}/${WORKER_LOGS[3]}" >> "${WORKSPACE_ROOT}/opencode_scripts/lanes/central_hub/live_watcher.log" 2>&1
+[2026-06-29 23:04:01] 🛑 Stopping supervisor...
+[2026-06-29 23:04:03] 
+[2026-06-29 23:04:03] === 👮 CENTRAL HUB COMPLIANCE AUDITS & SUMMARIZATION ===
+[2026-06-29 23:04:03] === 🛡️  ANTIGRAVITY FINAL HARDCODING & LOOKAHEAD GUARD ===
+./opencode_scripts/overnight_runner.sh: line 54: 25039 Terminated: 15          ( sleep "$timeout_secs" && kill -TERM "$pid" 2> /dev/null )
+[2026-06-29 23:04:03] 📊 Generating diff summaries across all 4 lanes...
+./opencode_scripts/overnight_runner.sh: line 54: 25046 Terminated: 15          ( sleep "$timeout_secs" && kill -TERM "$pid" 2> /dev/null )
+[2026-06-29 23:04:04] === 🧪 FINAL VALIDATION FROM MAIN WORKSPACE ===
+=== FINAL TEST RUN AT Mon Jun 29 23:04:04 WIB 2026 — RUN 20260629_225953 ===
+============================= test session starts ==============================
+collecting ... collected 596 items
+
+tests/test_backtest.py::test_backtest_calculation PASSED                 [  0%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_init PASSED [  0%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_commit_vector PASSED [  0%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_commit_vector_minimal PASSED [  0%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_commit_regime PASSED [  0%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_commit_regime_full PASSED [  1%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_get_velocity_history PASSED [  1%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_get_velocity_history_empty PASSED [  1%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_get_psychological_vectors PASSED [  1%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_get_psychological_vectors_date_range PASSED [  1%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_get_regimes PASSED [  1%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_get_regimes_date_range PASSED [  2%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_export_parquet PASSED [  2%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_export_regimes_parquet PASSED [  2%]
+tests/test_behavioral_store.py::TestBehavioralFeatureStore::test_multiple_tickers PASSED [  2%]
+tests/test_behavioral_store.py::TestCreateBehavioralFeatureStore::test_create_behavioral_feature_store PASSED [  2%]
+tests/test_central_translator_integration.py::TestMoatWeightingLayer::test_compute_star_velocity PASSED [  2%]
+tests/test_central_translator_integration.py::TestMoatWeightingLayer::test_compute_star_velocity_none PASSED [  3%]
+tests/test_central_translator_integration.py::TestMoatWeightingLayer::test_apply_star_velocity_decay PASSED [  3%]
+tests/test_central_translator_integration.py::TestMoatWeightingLayer::test_cross_reference_revenue_segments PASSED [  3%]
+tests/test_central_translator_integration.py::TestMoatWeightingLayer::test_cross_reference_no_match PASSED [  3%]
+tests/test_central_translator_integration.py::TestMoatWeightingLayer::test_node_override PASSED [  3%]
+tests/test_central_translator_integration.py::TestMoatWeightingLayer::test_node_override_missing PASSED [  3%]
+tests/test_central_translator_integration.py::TestMoatWeightingLayer::test_compute_node_weight_with_override PASSED [  4%]
+tests/test_central_translator_integration.py::TestMoatWeightingLayer::test_compute_node_weight_no_override PASSED [  4%]
+tests/test_central_translator_integration.py::TestMoatWeightingLayer::test_rank_nodes_respects_max PASSED [  4%]
+tests/test_central_translator_integration.py::TestMoatScoringEngine::test_budget_initial PASSED [  4%]
+tests/test_central_translator_integration.py::TestMoatScoringEngine::test_consume_budget PASSED [  4%]
+tests/test_central_translator_integration.py::TestMoatScoringEngine::test_consume_budget_exceed PASSED [  4%]
+tests/test_central_translator_integration.py::TestMoatScoringEngine::test_score_node_no_budget PASSED [  5%]
+tests/test_central_translator_integration.py::TestMoatScoringEngine::test_score_node_no_scrapers PASSED [  5%]
+tests/test_central_translator_integration.py::TestMoatScoringEngine::test_score_node_g2_exhausted PASSED [  5%]
+tests/test_central_translator_integration.py::TestMoatScoringEngine::test_score_node_reddit_exhausted PASSED [  5%]
+tests/test_central_translator_integration.py::TestMoatScoringEngine::test_score_node_capterra_exhausted PASSED [  5%]
+tests/test_central_translator_integration.py::TestMoatScoringEngine::test_score_node_app_store_exhausted PASSED [  5%]
+tests/test_central_translator_integration.py::TestMoatScoringEngine::test_score_tree_sorts_by_stars PASSED [  6%]
+tests/test_central_translator_integration.py::TestMoatScoringEngine::test_budget_reset_per_tree PASSED [  6%]
+tests/test_central_translator_integration.py::TestCrossValidationMoat::test_validate_moat_convergence_aligned PASSED [  6%]
+tests/test_central_translator_integration.py::TestCrossValidationMoat::test_validate_moat_convergence_divergent PASSED [  6%]
+tests/test_central_translator_integration.py::TestCrossValidationMoat::test_validate_moat_convergence_empty_tree PASSED [  6%]
+tests/test_central_translator_integration.py::TestOrchestratorQualitativePipeline::test_run_qualitative_pipeline_structure PASSED [  6%]
+tests/test_company_resolver.py::TestCompanyResolver::test_init PASSED    [  7%]
+tests/test_company_resolver.py::TestCompanyResolver::test_resolve_existing PASSED [  7%]
+tests/test_company_resolver.py::TestCompanyResolver::test_resolve_case_insensitive PASSED [  7%]
+tests/test_company_resolver.py::TestCompanyResolver::test_resolve_nonexistent PASSED [  7%]
+tests/test_company_resolver.py::TestCompanyResolver::test_resolve_by_slug PASSED [  7%]
+tests/test_company_resolver.py::TestCompanyResolver::test_resolve_by_slug_nonexistent PASSED [  7%]
+tests/test_company_resolver.py::TestCompanyResolver::test_get_slug PASSED [  8%]
+tests/test_company_resolver.py::TestCompanyResolver::test_get_slug_nonexistent PASSED [  8%]
+tests/test_company_resolver.py::TestCompanyResolver::test_get_all_tickers PASSED [  8%]
+tests/test_company_resolver.py::TestCompanyResolver::test_get_all_entities PASSED [  8%]
+tests/test_company_resolver.py::TestCompanyResolver::test_company_entity_frozen PASSED [  8%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_init PASSED [  8%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_get_company_mappings PASSED [  9%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_get_cache_key PASSED [  9%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_fetch_adzuna_success PASSED [  9%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_fetch_adzuna_rate_limit PASSED [  9%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_fetch_adzuna_no_credentials PASSED [  9%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_fetch_career_index_fallback PASSED [  9%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_get_job_count_from_adzuna PASSED [ 10%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_get_job_count_fallback PASSED [ 10%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_get_historical_snapshots PASSED [ 10%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_get_historical_snapshots_failed PASSED [ 10%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_calculate_sentiment_proxy PASSED [ 10%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_calculate_sentiment_proxy_negative PASSED [ 10%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_calculate_sentiment_proxy_none PASSED [ 11%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_calculate_sentiment_proxy_empty PASSED [ 11%]
+tests/test_corp_anonymous.py::TestCorpAnonymousScraper::test_get_all_snapshots PASSED [ 11%]
+tests/test_corp_anonymous.py::TestCreateCorpAnonymousScraper::test_create_corp_anonymous_scraper PASSED [ 11%]
+tests/test_corp_audit.py::TestGlassdoorScraper::test_init PASSED         [ 11%]
+tests/test_corp_audit.py::TestGlassdoorScraper::test_parse_score PASSED  [ 11%]
+tests/test_corp_audit.py::TestGlassdoorScraper::test_parse_percentage PASSED [ 12%]
+tests/test_corp_audit.py::TestGlassdoorScraper::test_scrape_company_success PASSED [ 12%]
+tests/test_corp_audit.py::TestGlassdoorScraper::test_scrape_company_category_and_awards PASSED [ 12%]
+tests/test_corp_audit.py::TestGlassdoorScraper::test_scrape_company_exact_snapshots PASSED [ 12%]
+tests/test_corp_audit.py::TestGlassdoorScraper::test_scrape_company_no_slug PASSED [ 12%]
+tests/test_corp_audit.py::TestGlassdoorScraper::test_scrape_all PASSED   [ 12%]
+tests/test_corp_audit.py::TestComparablyScraper::test_init PASSED        [ 13%]
+tests/test_corp_audit.py::TestComparablyScraper::test_parse_rating PASSED [ 13%]
+tests/test_corp_audit.py::TestComparablyScraper::test_scrape_company_success PASSED [ 13%]
+tests/test_corp_audit.py::TestComparablyScraper::test_scrape_company_no_slug PASSED [ 13%]
+tests/test_corp_audit.py::TestDedicatedComparablyScraper::test_extract_comparably_data PASSED [ 13%]
+tests/test_corp_audit.py::TestCorpAuditEngine::test_init PASSED          [ 13%]
+tests/test_corp_audit.py::TestCorpAuditEngine::test_audit_ticker PASSED  [ 14%]
+tests/test_corp_audit.py::TestCorpAuditEngine::test_audit_all PASSED     [ 14%]
+tests/test_corp_audit.py::TestCreateFunctions::test_create_corp_audit_engine PASSED [ 14%]
+tests/test_corp_audit.py::TestCreateFunctions::test_create_glassdoor_scraper PASSED [ 14%]
+tests/test_corp_audit.py::TestCreateFunctions::test_create_comparably_scraper PASSED [ 14%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_init PASSED [ 14%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_normalize_score PASSED [ 15%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_compute_divergence PASSED [ 15%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_exponential_penalty PASSED [ 15%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_validate_layer1_glassdoor_comparably PASSED [ 15%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_validate_layer1_no_data PASSED [ 15%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_validate_layer2_jobspy_github PASSED [ 15%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_validate_layer3_product_reddit PASSED [ 16%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_validate_layer4_dcf_regime PASSED [ 16%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_validate_apewisdom_reddit_github PASSED [ 16%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_run_all_validations PASSED [ 16%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_compute_aggregate_penalty PASSED [ 16%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_compute_aggregate_penalty_empty PASSED [ 16%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_evaluate_all_layers PASSED [ 17%]
+tests/test_cross_validation.py::TestCrossValidationEngine::test_evaluate_all_layers_override PASSED [ 17%]
+tests/test_cross_validation.py::TestCreateCrossValidationEngine::test_create_cross_validation_engine PASSED [ 17%]
+tests/test_dcf_floor.py::TestDCFFloorStub::test_init PASSED              [ 17%]
+tests/test_dcf_floor.py::TestDCFFloorStub::test_calculate_dcf_floor_basic PASSED [ 17%]
+tests/test_dcf_floor.py::TestDCFFloorStub::test_calculate_dcf_floor_wacc_greater_than_growth PASSED [ 17%]
+tests/test_dcf_floor.py::TestDCFFloorStub::test_calculate_dcf_floor_cache PASSED [ 18%]
+tests/test_dcf_floor.py::TestDCFFloorStub::test_calculate_dcf_floor_different_tickers PASSED [ 18%]
+tests/test_dcf_floor.py::TestDCFFloorStub::test_calculate_dcf_floor_projection_years PASSED [ 18%]
+tests/test_dcf_floor.py::TestDCFFloorClient::test_init PASSED            [ 18%]
+tests/test_dcf_floor.py::TestDCFFloorClient::test_fetch_and_store PASSED [ 18%]
+tests/test_dcf_floor.py::TestDCFFloorClient::test_fetch_and_store_defaults PASSED [ 18%]
+tests/test_dcf_floor.py::TestDCFFloorClient::test_get_latest PASSED      [ 19%]
+tests/test_dcf_floor.py::TestDCFFloorClient::test_get_latest_not_found PASSED [ 19%]
+tests/test_dcf_floor.py::TestCreateFunctions::test_create_dcf_floor_stub PASSED [ 19%]
+tests/test_dcf_floor.py::TestCreateFunctions::test_create_dcf_floor_client PASSED [ 19%]
+tests/test_dynamic_extractor.py::test_html_to_clean_text PASSED          [ 19%]
+tests/test_dynamic_extractor.py::test_dynamic_extractor_initialization PASSED [ 19%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_init PASSED [ 20%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_normalize_score PASSED [ 20%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_compute_agreement_perfect PASSED [ 20%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_compute_agreement_partial PASSED [ 20%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_compute_agreement_single_source PASSED [ 20%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_compute_agreement_no_sources PASSED [ 20%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_compute_agreement_large_divergence PASSED [ 21%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_compute_weighted_all_equal PASSED [ 21%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_compute_weighted_with_none PASSED [ 21%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_compute_weighted_empty PASSED [ 21%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_translate_all_sources PASSED [ 21%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_translate_nonexistent_ticker PASSED [ 21%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_translate_all_multiple PASSED [ 22%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_employer_sentiment_result_dataclass PASSED [ 22%]
+tests/test_employer_translator.py::TestEmployerTranslator::test_employer_sentiment_result_default_raw_scores PASSED [ 22%]
+tests/test_engineering_guards.py::TestGuardNan::test_guard_nan_none PASSED [ 22%]
+tests/test_engineering_guards.py::TestGuardNan::test_guard_nan_nan PASSED [ 22%]
+tests/test_engineering_guards.py::TestGuardNan::test_guard_nan_inf PASSED [ 22%]
+tests/test_engineering_guards.py::TestGuardNan::test_guard_nan_valid PASSED [ 23%]
+tests/test_engineering_guards.py::TestGuardNan::test_guard_nan_int PASSED [ 23%]
+tests/test_engineering_guards.py::TestGuardDivision::test_guard_division_normal PASSED [ 23%]
+tests/test_engineering_guards.py::TestGuardDivision::test_guard_division_by_zero PASSED [ 23%]
+tests/test_engineering_guards.py::TestGuardDivision::test_guard_division_nan_numerator PASSED [ 23%]
+tests/test_engineering_guards.py::TestGuardDivision::test_guard_division_nan_denominator PASSED [ 23%]
+tests/test_engineering_guards.py::TestGuardBounds::test_guard_bounds_within PASSED [ 24%]
+tests/test_engineering_guards.py::TestGuardBounds::test_guard_bounds_below_min PASSED [ 24%]
+tests/test_engineering_guards.py::TestGuardBounds::test_guard_bounds_above_max PASSED [ 24%]
+tests/test_engineering_guards.py::TestGuardBounds::test_guard_bounds_nan PASSED [ 24%]
+tests/test_engineering_guards.py::TestGuardUtcTimestamp::test_guard_utc_timestamp_int PASSED [ 24%]
+tests/test_engineering_guards.py::TestGuardUtcTimestamp::test_guard_utc_timestamp_float PASSED [ 25%]
+tests/test_engineering_guards.py::TestGuardUtcTimestamp::test_guard_utc_timestamp_str_iso PASSED [ 25%]
+tests/test_engineering_guards.py::TestGuardUtcTimestamp::test_guard_utc_timestamp_str_no_z PASSED [ 25%]
+tests/test_engineering_guards.py::TestGuardUtcTimestamp::test_guard_utc_timestamp_none PASSED [ 25%]
+tests/test_engineering_guards.py::TestEnsureUtc::test_ensure_utc_none PASSED [ 25%]
+tests/test_engineering_guards.py::TestEnsureUtc::test_ensure_utc_naive PASSED [ 25%]
+tests/test_engineering_guards.py::TestEnsureUtc::test_ensure_utc_aware PASSED [ 26%]
+tests/test_engineering_guards.py::TestRateLimiter::test_rate_limiter_wait PASSED [ 26%]
+tests/test_engineering_guards.py::TestRateLimiter::test_rate_limiter_first_call_no_wait PASSED [ 26%]
+tests/test_engineering_guards.py::TestRateLimiter::test_rate_limiter_reset PASSED [ 26%]
+tests/test_engineering_guards.py::TestRateLimited::test_rate_limited_decorator PASSED [ 26%]
+tests/test_engineering_guards.py::TestTimedOperation::test_timed_operation PASSED [ 26%]
+tests/test_engineering_guards.py::TestRetryPolicy::test_retry_policy_success PASSED [ 27%]
+tests/test_engineering_guards.py::TestRetryPolicy::test_retry_policy_retry_then_success PASSED [ 27%]
+tests/test_engineering_guards.py::TestRetryPolicy::test_retry_policy_all_fail PASSED [ 27%]
+tests/test_engineering_guards.py::TestSafeFloat::test_safe_float_valid PASSED [ 27%]
+tests/test_engineering_guards.py::TestSafeFloat::test_safe_float_none PASSED [ 27%]
+tests/test_engineering_guards.py::TestSafeFloat::test_safe_float_invalid PASSED [ 27%]
+tests/test_engineering_guards.py::TestSafeInt::test_safe_int_valid PASSED [ 28%]
+tests/test_engineering_guards.py::TestSafeInt::test_safe_int_none PASSED [ 28%]
+tests/test_engineering_guards.py::TestSafeInt::test_safe_int_invalid PASSED [ 28%]
+tests/test_engineering_guards.py::TestSafeDictGet::test_safe_dict_get_exists PASSED [ 28%]
+tests/test_engineering_guards.py::TestSafeDictGet::test_safe_dict_get_missing PASSED [ 28%]
+tests/test_engineering_guards.py::TestSafeDictGet::test_safe_dict_get_not_dict PASSED [ 28%]
+tests/test_engineering_guards.py::TestValidateTicker::test_validate_ticker_valid PASSED [ 29%]
+tests/test_engineering_guards.py::TestValidateTicker::test_validate_ticker_invalid PASSED [ 29%]
+tests/test_engineering_guards.py::TestValidateDateStr::test_validate_date_str_valid PASSED [ 29%]
+tests/test_engineering_guards.py::TestValidateDateStr::test_validate_date_str_invalid PASSED [ 29%]
+tests/test_engineering_guards.py::TestWithTimeout::test_with_timeout_completes PASSED [ 29%]
+tests/test_engineering_guards.py::TestWithTimeout::test_with_timeout_times_out PASSED [ 29%]
+tests/test_engineering_guards.py::TestSanitizeText::test_sanitize_text_normal PASSED [ 30%]
+tests/test_engineering_guards.py::TestSanitizeText::test_sanitize_text_none PASSED [ 30%]
+tests/test_engineering_guards.py::TestSanitizeText::test_sanitize_text_truncated PASSED [ 30%]
+tests/test_engineering_guards.py::TestClamp::test_clamp_within PASSED    [ 30%]
+tests/test_engineering_guards.py::TestClamp::test_clamp_below_min PASSED [ 30%]
+tests/test_engineering_guards.py::TestClamp::test_clamp_above_max PASSED [ 30%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_compute_rd_capitalisation_zero_expense PASSED [ 31%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_compute_rd_capitalisation_basic PASSED [ 31%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_compute_rd_capitalisation_with_history PASSED [ 31%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_compute_rd_capitalisation_no_amortisation PASSED [ 31%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_sbc_drag_zero_revenue PASSED [ 31%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_sbc_drag_zero_shares PASSED [ 31%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_sbc_drag_typical PASSED [ 32%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_sbc_drag_high_intensity PASSED [ 32%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_rd_efficiency_zero_rd PASSED [ 32%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_rd_efficiency_high_margin PASSED [ 32%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_rd_efficiency_low_margin PASSED [ 32%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_evaluate_full PASSED [ 32%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_evaluate_minimal PASSED [ 33%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_evaluate_unknown_sector PASSED [ 33%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_sbc_dilution_risk_thresholds PASSED [ 33%]
+tests/test_financial_reconstruction.py::TestFinancialReconstructionInterface::test_create_factory PASSED [ 33%]
+tests/test_fintech_clients.py::TestRateLimiter::test_token_bucket_initialization PASSED [ 33%]
+tests/test_fintech_clients.py::TestRateLimiter::test_acquire_tokens PASSED [ 33%]
+tests/test_fintech_clients.py::TestStockTwitsClient::test_normalize_message PASSED [ 34%]
+tests/test_fintech_clients.py::TestStockTwitsClient::test_parse_sentiment_bullish PASSED [ 34%]
+tests/test_fintech_clients.py::TestStockTwitsClient::test_parse_sentiment_bearish PASSED [ 34%]
+tests/test_fintech_clients.py::TestStockTwitsClient::test_parse_sentiment_none PASSED [ 34%]
+tests/test_fintech_clients.py::TestApeWisdomClient::test_normalize_message PASSED [ 34%]
+tests/test_fintech_clients.py::TestFintechNormalizer::test_canonicalize_ticker PASSED [ 34%]
+tests/test_fintech_clients.py::TestFintechNormalizer::test_compute_confidence_stocktwits PASSED [ 35%]
+tests/test_fintech_clients.py::TestFintechNormalizer::test_compute_confidence_reddit PASSED [ 35%]
+tests/test_fintech_clients.py::TestFintechNormalizer::test_deduplicate PASSED [ 35%]
+tests/test_fintech_clients.py::TestFintechClientFactory::test_get_client_stocktwits PASSED [ 35%]
+tests/test_fintech_clients.py::TestFintechClientFactory::test_get_client_apewisdom PASSED [ 35%]
+tests/test_fintech_clients.py::TestFintechClientFactory::test_get_healthy_sources PASSED [ 35%]
+tests/test_github_tracker.py::TestGitHubTracker::test_init PASSED        [ 36%]
+tests/test_github_tracker.py::TestGitHubTracker::test_get_headers PASSED [ 36%]
+tests/test_github_tracker.py::TestGitHubTracker::test_fetch PASSED       [ 36%]
+tests/test_github_tracker.py::TestGitHubTracker::test_fetch_rate_limit PASSED [ 36%]
+tests/test_github_tracker.py::TestGitHubTracker::test_discover_repos_for_ticker PASSED [ 36%]
+tests/test_github_tracker.py::TestGitHubTracker::test_get_repo_metrics PASSED [ 36%]
+tests/test_github_tracker.py::TestGitHubTracker::test_update_historical PASSED [ 37%]
+tests/test_github_tracker.py::TestGitHubTracker::test_detect_structural_breaks_insufficient_data PASSED [ 37%]
+tests/test_github_tracker.py::TestGitHubTracker::test_detect_structural_breaks_with_data PASSED [ 37%]
+tests/test_github_tracker.py::TestGitHubTracker::test_get_velocity_history PASSED [ 37%]
+tests/test_github_tracker.py::TestGitHubTracker::test_calculate_velocities PASSED [ 37%]
+tests/test_github_tracker.py::TestGitHubTracker::test_calculate_velocities_no_previous PASSED [ 37%]
+tests/test_github_tracker.py::TestGitHubTracker::test_get_structural_breaks PASSED [ 38%]
+tests/test_github_tracker.py::TestGitHubTracker::test_get_all_metrics_structure PASSED [ 38%]
+tests/test_github_tracker.py::TestCreateGitHubTracker::test_create_github_tracker PASSED [ 38%]
+tests/test_hiring_velocity.py::TestHiringVelocityEngine::test_init PASSED [ 38%]
+tests/test_hiring_velocity.py::TestHiringVelocityEngine::test_get_cache_key PASSED [ 38%]
+tests/test_hiring_velocity.py::TestHiringVelocityEngine::test_calculate_velocity_metrics_empty PASSED [ 38%]
+tests/test_hiring_velocity.py::TestHiringVelocityEngine::test_calculate_velocity_metrics_with_data PASSED [ 39%]
+tests/test_hiring_velocity.py::TestHiringVelocityEngine::test_calculate_velocity_metrics_ghost_job PASSED [ 39%]
+tests/test_hiring_velocity.py::TestHiringVelocityEngine::test_calculate_velocity_metrics_operational_fracture PASSED [ 39%]
+tests/test_hiring_velocity.py::TestHiringVelocityEngine::test_fetch_job_counts_no_jobspy PASSED [ 39%]
+tests/test_hiring_velocity.py::TestHiringVelocityEngine::test_fetch_job_counts_with_history PASSED [ 39%]
+tests/test_hiring_velocity.py::TestHiringVelocityEngine::test_calculate_velocity_metrics_mixed_sources PASSED [ 39%]
+tests/test_hiring_velocity.py::TestCreateHiringVelocity::test_create_hiring_velocity PASSED [ 40%]
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_initial_state_closed PASSED [ 40%]
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_opens_after_threshold_failures PASSED [ 40%]
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_half_open_after_timeout PASSED [ 40%]
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_closes_after_successes_in_half_open PASSED [ 40%]
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_failure_in_half_open_reopens PASSED [ 40%]
+tests/test_hybrid_orchestrator.py::TestHealthMonitor::test_records_results PASSED [ 41%]
+tests/test_hybrid_orchestrator.py::TestHealthMonitor::test_get_all_status PASSED [ 41%]
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_returns_signals PASSED [ 41%]
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_empty_list PASSED [ 41%]
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_multiple_tickers PASSED [ 41%]
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_category_breakdown PASSED [ 41%]
+tests/test_hybrid_orchestrator.py::TestHybridOrchestrator::test_scrape_all_sufficient_coverage PASSED [ 42%]
+tests/test_hybrid_orchestrator.py::TestHybridOrchestrator::test_scrape_all_primary_runs PASSED [ 42%]
+tests/test_hybrid_orchestrator.py::TestHybridOrchestrator::test_scrape_all_no_healthy_sources PASSED [ 42%]
+tests/test_hybrid_orchestrator.py::TestFintechMessage::test_fintech_message_creation PASSED [ 42%]
+tests/test_integration.py::TestDatabaseIntegration::test_init_creates_all_tables PASSED [ 42%]
+tests/test_integration.py::TestDatabaseIntegration::test_partition_creation PASSED [ 42%]
+tests/test_integration.py::TestSentimentEngineIntegration::test_full_pipeline_ticker_extraction PASSED [ 43%]
+tests/test_integration.py::TestSentimentEngineIntegration::test_entity_resolution PASSED [ 43%]
+tests/test_integration.py::TestSentimentEngineIntegration::test_blacklist_filtering PASSED [ 43%]
+tests/test_integration.py::TestSentimentEngineIntegration::test_sentiment_scoring PASSED [ 43%]
+tests/test_integration.py::TestSentimentEngineIntegration::test_risk_detection PASSED [ 43%]
+tests/test_integration.py::TestAggregationIntegration::test_daily_aggregation_flow PASSED [ 43%]
+tests/test_integration.py::TestWeightVersionIntegration::test_weight_version_crud PASSED [ 44%]
+tests/test_integration.py::TestBacktestIntegration::test_backtest_runs_without_error PASSED [ 44%]
+tests/test_integration.py::TestOptimizationIntegration::test_optimization_structure PASSED [ 44%]
+tests/test_integration.py::TestDriftDetectionIntegration::test_drift_check_structure PASSED [ 44%]
+tests/test_integration.py::TestRiskDetectionIntegration::test_risk_narratives_empty PASSED [ 44%]
+tests/test_lane_gamma.py::TestTanhClamp::test_tanh_clamp_bounds PASSED   [ 44%]
+tests/test_lane_gamma.py::TestTanhClamp::test_tanh_clamp_zero PASSED     [ 45%]
+tests/test_lane_gamma.py::TestTanhClamp::test_tanh_clamp_monotonic PASSED [ 45%]
+tests/test_lane_gamma.py::TestTanhClamp::test_tanh_clamp_unit_bounds PASSED [ 45%]
+tests/test_lane_gamma.py::TestTanhClamp::test_tanh_clamp_unit_zero PASSED [ 45%]
+tests/test_lane_gamma.py::TestGuardFunctions::test_guard_float_none PASSED [ 45%]
+tests/test_lane_gamma.py::TestGuardFunctions::test_guard_float_nan PASSED [ 45%]
+tests/test_lane_gamma.py::TestGuardFunctions::test_guard_float_inf PASSED [ 46%]
+tests/test_lane_gamma.py::TestGuardFunctions::test_guard_float_valid PASSED [ 46%]
+tests/test_lane_gamma.py::TestGuardFunctions::test_guard_float_default PASSED [ 46%]
+tests/test_lane_gamma.py::TestGuardFunctions::test_guard_int_none PASSED [ 46%]
+tests/test_lane_gamma.py::TestGuardFunctions::test_guard_int_valid PASSED [ 46%]
+tests/test_lane_gamma.py::TestGuardFunctions::test_guard_int_nan PASSED  [ 46%]
+tests/test_lane_gamma.py::TestBoundedZScore::test_bounded_z_score_zero PASSED [ 47%]
+tests/test_lane_gamma.py::TestBoundedZScore::test_bounded_z_score_extreme PASSED [ 47%]
+tests/test_lane_gamma.py::TestBoundedZScore::test_bounded_z_score_negative PASSED [ 47%]
+tests/test_lane_gamma.py::TestBoundedZScore::test_bounded_z_score_std_guard PASSED [ 47%]
+tests/test_lane_gamma.py::TestExtractGlassdoorRating::test_star_rating PASSED [ 47%]
+tests/test_lane_gamma.py::TestExtractGlassdoorRating::test_out_of_5 PASSED [ 47%]
+tests/test_lane_gamma.py::TestExtractGlassdoorRating::test_rating_num_class PASSED [ 48%]
+tests/test_lane_gamma.py::TestExtractGlassdoorRating::test_overall_rating_json PASSED [ 48%]
+tests/test_lane_gamma.py::TestExtractGlassdoorRating::test_no_rating PASSED [ 48%]
+tests/test_lane_gamma.py::TestConfigLoading::test_load_config PASSED     [ 48%]
+tests/test_lane_gamma.py::TestConfigLoading::test_get_company_config PASSED [ 48%]
+tests/test_lane_gamma.py::TestConfigLoading::test_get_company_config_amzn PASSED [ 48%]
+tests/test_lane_gamma.py::TestConfigLoading::test_get_company_config_intc PASSED [ 49%]
+tests/test_lane_gamma.py::TestConfigLoading::test_get_tickers PASSED     [ 49%]
+tests/test_lane_gamma.py::TestPublicationLagMatrix::test_lag_matrix_defaults PASSED [ 49%]
+tests/test_lane_gamma.py::TestPublicationLagMatrix::test_lag_matrix_adjust PASSED [ 49%]
+tests/test_lane_gamma.py::TestPublicationLagMatrix::test_lag_matrix_zero_lag PASSED [ 49%]
+tests/test_lane_gamma.py::TestPublicationLagMatrix::test_lag_from_config PASSED [ 50%]
+tests/test_lane_gamma.py::TestCoverageMatrix::test_build_coverage_matrix_structure PASSED [ 50%]
+tests/test_lane_gamma.py::TestCoverageMatrix::test_coverage_matrix_missing_ticker PASSED [ 50%]
+tests/test_lane_gamma.py::TestAuditReport::test_write_audit_md_creates_file PASSED [ 50%]
+tests/test_lane_gamma.py::TestCFStrategyMemory::test_log_cf_strategy_performance PASSED [ 50%]
+tests/test_lane_gamma.py::TestMockRun::test_main_mock_only_returns_structure PASSED [ 50%]
+tests/test_lane_gamma.py::TestMockRun::test_main_mock_only_db_tables PASSED [ 51%]
+tests/test_lane_gamma.py::TestMockRun::test_main_mock_only_deterministic PASSED [ 51%]
+tests/test_lane_gamma.py::TestXBRLFactNames::test_xbrl_fact_names_includes_avgo_fallback PASSED [ 51%]
+tests/test_lane_gamma.py::TestUserAgents::test_user_agents_are_diverse PASSED [ 51%]
+tests/test_lane_gamma.py::TestGuardDivisionEdgeCases::test_bounded_z_score_std_guard_not_nan PASSED [ 51%]
+tests/test_lane_gamma.py::TestGuardDivisionEdgeCases::test_guard_float_string_edge PASSED [ 51%]
+tests/test_lane_gamma.py::TestGuardDivisionEdgeCases::test_guard_int_float_string PASSED [ 52%]
+tests/test_live_interceptor.py::test_preflight_gate_on_workspace PASSED  [ 52%]
+tests/test_live_interceptor.py::test_live_patcher_indeed_alias PASSED    [ 52%]
+tests/test_live_interceptor.py::test_live_patcher_async_context PASSED   [ 52%]
+tests/test_live_scraper_validation.py::TestGlassdoorLive::test_glassdoor_rating_live[NVDA] SKIPPED [ 52%]
+tests/test_live_scraper_validation.py::TestGlassdoorLive::test_glassdoor_rating_live[AVGO] SKIPPED [ 52%]
+tests/test_live_scraper_validation.py::TestGlassdoorLive::test_glassdoor_rating_live[INTC] SKIPPED [ 53%]
+tests/test_live_scraper_validation.py::TestGlassdoorLive::test_glassdoor_rating_live[AMD] SKIPPED [ 53%]
+tests/test_live_scraper_validation.py::TestGlassdoorLive::test_glassdoor_ceo_approval_live[NVDA] SKIPPED [ 53%]
+tests/test_live_scraper_validation.py::TestGlassdoorLive::test_glassdoor_ceo_approval_live[AVGO] SKIPPED [ 53%]
+tests/test_live_scraper_validation.py::TestGlassdoorLive::test_glassdoor_ceo_approval_live[INTC] SKIPPED [ 53%]
+tests/test_live_scraper_validation.py::TestGlassdoorLive::test_glassdoor_ceo_approval_live[AMD] SKIPPED [ 53%]
+tests/test_live_scraper_validation.py::TestG2Live::test_g2_rating_live[NVDA] SKIPPED [ 54%]
+tests/test_live_scraper_validation.py::TestG2Live::test_g2_rating_live[AVGO] SKIPPED [ 54%]
+tests/test_live_scraper_validation.py::TestG2Live::test_g2_rating_live[INTC] SKIPPED [ 54%]
+tests/test_live_scraper_validation.py::TestG2Live::test_g2_rating_live[AMD] SKIPPED [ 54%]
+tests/test_live_scraper_validation.py::TestCrossSourceConsistency::test_cross_source_divergence[NVDA] SKIPPED [ 54%]
+tests/test_live_scraper_validation.py::TestCrossSourceConsistency::test_cross_source_divergence[AVGO] SKIPPED [ 54%]
+tests/test_live_scraper_validation.py::TestCrossSourceConsistency::test_cross_source_divergence[INTC] SKIPPED [ 55%]
+tests/test_live_scraper_validation.py::TestCrossSourceConsistency::test_cross_source_divergence[AMD] SKIPPED [ 55%]
+tests/test_live_scraper_validation.py::TestAntigravityHardcodingGuard::test_no_hardcoded_scraper_values SKIPPED [ 55%]
+tests/test_live_scraper_validation.py::TestAntigravityHardcodingGuard::test_scraper_uses_dynamic_parsing SKIPPED [ 55%]
+tests/test_master_qualitative_audit.py::TestLaneAlphaPipelineAudit::test_all_tickers_ingest_and_run PASSED [ 55%]
+tests/test_master_qualitative_audit.py::TestLaneAlphaPipelineAudit::test_cross_sectional_z_scores PASSED [ 55%]
+tests/test_master_qualitative_audit.py::TestLaneAlphaPipelineAudit::test_reset_clears_state PASSED [ 56%]
+tests/test_master_qualitative_audit.py::TestFinancialReconstructionAudit::test_all_tickers_reconstruction PASSED [ 56%]
+tests/test_master_qualitative_audit.py::TestFinancialReconstructionAudit::test_sbc_drag_ordering PASSED [ 56%]
+tests/test_master_qualitative_audit.py::TestTrajectoryCorridorAudit::test_all_tickers_trajectory PASSED [ 56%]
+tests/test_master_qualitative_audit.py::TestTrajectoryCorridorAudit::test_stage_classification_boundaries PASSED [ 56%]
+tests/test_master_qualitative_audit.py::TestTrajectoryCorridorAudit::test_signal_detection_range PASSED [ 56%]
+tests/test_master_qualitative_audit.py::TestTrajectoryCorridorAudit::test_floor_ceiling_boundaries PASSED [ 57%]
+tests/test_master_qualitative_audit.py::TestTrajectoryCorridorAudit::test_invalid_boundaries_reset PASSED [ 57%]
+tests/test_master_qualitative_audit.py::TestAlternativeStrategyPipelineAudit::test_all_tickers_alternative_pipeline PASSED [ 57%]
+tests/test_master_qualitative_audit.py::TestAlternativeStrategyPipelineAudit::test_moat_composite_signal_accumulation PASSED [ 57%]
+tests/test_master_qualitative_audit.py::TestPublicationLagAudit::test_all_signal_keys_have_lags PASSED [ 57%]
+tests/test_master_qualitative_audit.py::TestPublicationLagAudit::test_publication_lag_shift PASSED [ 57%]
+tests/test_master_qualitative_audit.py::TestPublicationLagAudit::test_zero_lag_signals_unchanged PASSED [ 58%]
+tests/test_master_qualitative_audit.py::TestTanhClampingAudit::test_tanh_clamp_absolute_bounds PASSED [ 58%]
+tests/test_master_qualitative_audit.py::TestTanhClampingAudit::test_tanh_clamp_unit_bounds PASSED [ 58%]
+tests/test_master_qualitative_audit.py::TestTanhClampingAudit::test_deterministic_reproducibility PASSED [ 58%]
+tests/test_master_qualitative_audit.py::TestTanhClampingAudit::test_monotonic_increasing PASSED [ 58%]
+tests/test_master_qualitative_audit.py::TestTanhClampingAudit::test_tanh_clamp_unit_center PASSED [ 58%]
+tests/test_master_qualitative_audit.py::TestDoubleStandardizerAudit::test_stage1_time_series_z PASSED [ 59%]
+tests/test_master_qualitative_audit.py::TestDoubleStandardizerAudit::test_stage2_cross_sectional_z PASSED [ 59%]
+tests/test_master_qualitative_audit.py::TestDoubleStandardizerAudit::test_standardize_return_tuple PASSED [ 59%]
+tests/test_master_qualitative_audit.py::TestHistoricalSliceIntegrity::test_50_rows_10_tickers_5_years PASSED [ 59%]
+tests/test_master_qualitative_audit.py::TestHistoricalSliceIntegrity::test_no_2026_data_leakage PASSED [ 59%]
+tests/test_moat_discovery.py::TestMoatNode::test_moat_node_equality PASSED [ 59%]
+tests/test_moat_discovery.py::TestMoatNode::test_moat_node_inequality PASSED [ 60%]
+tests/test_moat_discovery.py::TestMoatNode::test_moat_node_hash PASSED   [ 60%]
+tests/test_moat_discovery.py::TestMoatNode::test_moat_node_creation PASSED [ 60%]
+tests/test_moat_discovery.py::TestMoatTree::test_empty_tree PASSED       [ 60%]
+tests/test_moat_discovery.py::TestMoatTree::test_add_node PASSED         [ 60%]
+tests/test_moat_discovery.py::TestMoatTree::test_add_duplicate_node PASSED [ 60%]
+tests/test_moat_discovery.py::TestMoatTree::test_source_filters PASSED   [ 61%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_guard_namespace_single_word PASSED [ 61%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_guard_namespace_multi_word PASSED [ 61%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_guard_namespace_trimmed PASSED [ 61%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_deduplicate PASSED [ 61%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_deduplicate_no_dupes PASSED [ 61%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_wikipedia_success PASSED [ 62%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_wikipedia_no_products_row PASSED [ 62%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_wikipedia_no_infobox PASSED [ 62%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_wikipedia_no_slug PASSED [ 62%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_wikipedia_http_error PASSED [ 62%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_github_success PASSED [ 62%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_github_low_stars_filtered PASSED [ 63%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_github_empty PASSED [ 63%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_github_no_org PASSED [ 63%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_github_rate_limited PASSED [ 63%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_integration PASSED [ 63%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_deduplicates PASSED [ 63%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_capped_at_eight PASSED [ 64%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_discover_unknown_ticker PASSED [ 64%]
+tests/test_moat_discovery.py::TestMoatDiscoveryEngine::test_create_moat_discovery_engine PASSED [ 64%]
+tests/test_moat_discovery.py::TestNamespaceGuarding::test_guard_single_word_variants PASSED [ 64%]
+tests/test_moat_discovery.py::TestNamespaceGuarding::test_guard_multi_word PASSED [ 64%]
+tests/test_moat_discovery.py::TestNamespaceGuarding::test_guard_edge_case_empty PASSED [ 64%]
+tests/test_moat_discovery.py::TestNamespaceGuarding::test_guard_edge_case_single_letter PASSED [ 65%]
+tests/test_nlp.py::test_ticker_extraction PASSED                         [ 65%]
+tests/test_nlp.py::test_sentiment_scoring PASSED                         [ 65%]
+tests/test_nlp.py::test_risk_detection PASSED                            [ 65%]
+tests/test_policing_hub.py::test_ast_flags_malformed_syntax PASSED       [ 65%]
+tests/test_policing_hub.py::test_ast_passes_clean_syntax PASSED          [ 65%]
+tests/test_product_intel.py::TestG2Scraper::test_init PASSED             [ 66%]
+tests/test_product_intel.py::TestG2Scraper::test_detect_keywords PASSED  [ 66%]
+tests/test_product_intel.py::TestG2Scraper::test_detect_keywords_empty PASSED [ 66%]
+tests/test_product_intel.py::TestG2Scraper::test_scrape_company_success PASSED [ 66%]
+tests/test_product_intel.py::TestG2Scraper::test_scrape_company_not_found PASSED [ 66%]
+tests/test_product_intel.py::TestG2Scraper::test_scrape_company_no_slug PASSED [ 66%]
+tests/test_product_intel.py::TestCapterraScraper::test_init PASSED       [ 67%]
+tests/test_product_intel.py::TestCapterraScraper::test_detect_keywords PASSED [ 67%]
+tests/test_product_intel.py::TestCapterraScraper::test_scrape_company_success PASSED [ 67%]
+tests/test_product_intel.py::TestAppStoreScraper::test_init PASSED       [ 67%]
+tests/test_product_intel.py::TestAppStoreScraper::test_vader_score PASSED [ 67%]
+tests/test_product_intel.py::TestAppStoreScraper::test_scrape_company_success PASSED [ 67%]
+tests/test_product_intel.py::TestAppStoreScraper::test_scrape_company_no_app PASSED [ 68%]
+tests/test_product_intel.py::TestProductIntelEngine::test_init PASSED    [ 68%]
+tests/test_product_intel.py::TestProductIntelEngine::test_gather_intel PASSED [ 68%]
+tests/test_product_intel.py::TestProductIntelEngine::test_compute_product_sentiment_vader_only PASSED [ 68%]
+tests/test_product_intel.py::TestProductIntelEngine::test_compute_product_sentiment_rating_only PASSED [ 68%]
+tests/test_product_intel.py::TestProductIntelEngine::test_compute_product_sentiment_both PASSED [ 68%]
+tests/test_product_intel.py::TestProductIntelEngine::test_compute_product_sentiment_empty PASSED [ 69%]
+tests/test_product_intel.py::TestCreateProductIntelEngine::test_create_product_intel_engine PASSED [ 69%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_init PASSED [ 69%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_initialize_scrapers PASSED [ 69%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_run_primary_pipeline PASSED [ 69%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_run_secondary_pipeline PASSED [ 69%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_get_quantitative_value_signal PASSED [ 70%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_get_quantitative_value_signal_missing PASSED [ 70%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_get_dcf_floor_data PASSED [ 70%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_get_dcf_floor_data_missing PASSED [ 70%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_compute_cross_validation_penalty PASSED [ 70%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_compute_fused_confidence PASSED [ 70%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_run_full_pipeline PASSED [ 71%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_get_regime_status PASSED [ 71%]
+tests/test_psychological_integration.py::TestPsychologicalOrchestrator::test_get_regime_status_empty PASSED [ 71%]
+tests/test_psychological_integration.py::TestCreatePsychologicalOrchestrator::test_create_psychological_orchestrator PASSED [ 71%]
+tests/test_psychological_nlp.py::TestNLPEngine::test_bullish_sentiment PASSED [ 71%]
+tests/test_psychological_nlp.py::TestNLPEngine::test_bearish_sentiment PASSED [ 71%]
+tests/test_psychological_nlp.py::TestNLPEngine::test_zero_division_handling PASSED [ 72%]
+tests/test_psychological_nlp.py::TestNLPEngine::test_empty_text PASSED   [ 72%]
+tests/test_psychological_nlp.py::TestNLPEngine::test_options_signal PASSED [ 72%]
+tests/test_psychological_nlp.py::TestNLPEngine::test_position_signal PASSED [ 72%]
+tests/test_psychological_nlp.py::TestNLPEngine::test_emoji_detection PASSED [ 72%]
+tests/test_psychological_nlp.py::TestNLPEngine::test_slang_detection PASSED [ 72%]
+tests/test_psychological_nlp.py::TestNLPEngine::test_batch_analysis PASSED [ 73%]
+tests/test_qualitative_scoring.py::TestEMAFilter::test_alpha_computation PASSED [ 73%]
+tests/test_qualitative_scoring.py::TestEMAFilter::test_alpha_zero_halflife PASSED [ 73%]
+tests/test_qualitative_scoring.py::TestEMAFilter::test_cold_start_expanding_mean PASSED [ 73%]
+tests/test_qualitative_scoring.py::TestEMAFilter::test_warm_ema_after_min_observations PASSED [ 73%]
+tests/test_qualitative_scoring.py::TestEMAFilter::test_get_returns_none_for_unknown_key PASSED [ 73%]
+tests/test_qualitative_scoring.py::TestEMAFilter::test_get_returns_ema PASSED [ 74%]
+tests/test_qualitative_scoring.py::TestEMAFilter::test_reset_single_key PASSED [ 74%]
+tests/test_qualitative_scoring.py::TestEMAFilter::test_reset_all PASSED  [ 74%]
+tests/test_qualitative_scoring.py::TestSubSectorConfig::test_default_tickers PASSED [ 74%]
+tests/test_qualitative_scoring.py::TestSubSectorConfig::test_from_config_loads_yaml PASSED [ 74%]
+tests/test_qualitative_scoring.py::TestSubSectorConfig::test_get_subsector_for_ticker PASSED [ 75%]
+tests/test_qualitative_scoring.py::TestSubSectorConfig::test_as_dict PASSED [ 75%]
+tests/test_qualitative_scoring.py::TestSubSectorConfig::test_get_peers_excludes_self PASSED [ 75%]
+tests/test_qualitative_scoring.py::TestSubSectorConfig::test_get_peers_unknown_sector PASSED [ 75%]
+tests/test_qualitative_scoring.py::TestBranchComposite::test_compute_returns_none_for_empty_signals PASSED [ 75%]
+tests/test_qualitative_scoring.py::TestBranchComposite::test_compute_weighted_average PASSED [ 75%]
+tests/test_qualitative_scoring.py::TestBranchComposite::test_compute_unweighted PASSED [ 76%]
+tests/test_qualitative_scoring.py::TestCultureComposite::test_default_halflife_and_weights PASSED [ 76%]
+tests/test_qualitative_scoring.py::TestCultureComposite::test_compute_with_mock_signals PASSED [ 76%]
+tests/test_qualitative_scoring.py::TestCultureComposite::test_score_after_cold_start PASSED [ 76%]
+tests/test_qualitative_scoring.py::TestHypeComposite::test_default_halflife_and_weights PASSED [ 76%]
+tests/test_qualitative_scoring.py::TestHypeComposite::test_compute_with_mock_signals PASSED [ 76%]
+tests/test_qualitative_scoring.py::TestHypeComposite::test_smoothed_ema_tracks_trend PASSED [ 77%]
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_stage1_returns_none_with_insufficient_history PASSED [ 77%]
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_stage1_zscore_after_sufficient_history PASSED [ 77%]
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_stage1_constant_values_return_zero PASSED [ 77%]
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_stage2_returns_none_for_unknown_ticker PASSED [ 77%]
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_stage2_cross_sectional_zscore PASSED [ 77%]
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_stage2_isolated_ticker_returns_stage1 PASSED [ 78%]
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_standardize_returns_both_stages PASSED [ 78%]
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_standardize_returns_none_for_insufficient_history PASSED [ 78%]
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_reset_single_ticker PASSED [ 78%]
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_reset_all_tickers PASSED [ 78%]
+tests/test_qualitative_scoring.py::TestMockDataMatrices::test_culture_composite_over_mock_matrix PASSED [ 78%]
+tests/test_qualitative_scoring.py::TestMockDataMatrices::test_hype_composite_over_mock_matrix PASSED [ 79%]
+tests/test_qualitative_scoring.py::TestMockDataMatrices::test_double_standardizer_mock_matrix PASSED [ 79%]
+tests/test_qualitative_scoring.py::TestMockDataMatrices::test_full_pipeline_integration PASSED [ 79%]
+tests/test_qualitative_scoring.py::TestTanhClamp::test_tanh_clamp_bounds PASSED [ 79%]
+tests/test_qualitative_scoring.py::TestTanhClamp::test_tanh_clamp_zero PASSED [ 79%]
+tests/test_qualitative_scoring.py::TestTanhClamp::test_tanh_clamp_monotonic PASSED [ 79%]
+tests/test_qualitative_scoring.py::TestPublicationLagMatrix::test_default_lags PASSED [ 80%]
+tests/test_qualitative_scoring.py::TestPublicationLagMatrix::test_adjust_timestamp PASSED [ 80%]
+tests/test_qualitative_scoring.py::TestPublicationLagMatrix::test_zero_lag_returns_same PASSED [ 80%]
+tests/test_qualitative_scoring.py::TestPublicationLagMatrix::test_from_config PASSED [ 80%]
+tests/test_qualitative_scoring.py::TestPublicationLagMatrix::test_to_dict PASSED [ 80%]
+tests/test_qualitative_scoring.py::TestLaneAlphaPipeline::test_ingest_culture PASSED [ 80%]
+tests/test_qualitative_scoring.py::TestLaneAlphaPipeline::test_ingest_hype PASSED [ 81%]
+tests/test_qualitative_scoring.py::TestLaneAlphaPipeline::test_blended_branch_score_initially_none PASSED [ 81%]
+tests/test_qualitative_scoring.py::TestLaneAlphaPipeline::test_blended_branch_after_ingest PASSED [ 81%]
+tests/test_qualitative_scoring.py::TestLaneAlphaPipeline::test_run_returns_lane_alpha_result PASSED [ 81%]
+tests/test_qualitative_scoring.py::TestLaneAlphaPipeline::test_run_two_tickers_cross_sectional PASSED [ 81%]
+tests/test_qualitative_scoring.py::TestLaneAlphaPipeline::test_reset_clears_state PASSED [ 81%]
+tests/test_qualitative_scoring.py::TestLaneAlphaPipeline::test_full_multi_ticker_pipeline PASSED [ 82%]
+tests/test_qualitative_scoring.py::TestLaneAlphaPipeline::test_final_score_falls_back_to_blended PASSED [ 82%]
+tests/test_reddit_custom.py::TestRedditScraper::test_init PASSED         [ 82%]
+tests/test_reddit_custom.py::TestRedditScraper::test_extract_tickers PASSED [ 82%]
+tests/test_reddit_custom.py::TestRedditScraper::test_extract_tickers_blacklist PASSED [ 82%]
+tests/test_reddit_custom.py::TestRedditScraper::test_submission_relevant PASSED [ 82%]
+tests/test_reddit_custom.py::TestRedditScraper::test_parse_score PASSED  [ 83%]
+tests/test_reddit_custom.py::TestRedditScraper::test_harvest_raw_commentary PASSED [ 83%]
+tests/test_reddit_custom.py::TestCreateRedditScraper::test_create_reddit_scraper PASSED [ 83%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_init PASSED          [ 83%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_compute_dcf_signal_no_data PASSED [ 83%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_compute_dcf_signal_missing_fields_missing PASSED [ 83%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_compute_dcf_signal_valid PASSED [ 84%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_compute_dcf_signal_above_ceiling PASSED [ 84%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_compute_dcf_signal_below_floor PASSED [ 84%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_map_regime_to_directive_panic_strong_buy PASSED [ 84%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_map_regime_to_directive_panic_weak_buy PASSED [ 84%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_map_regime_to_directive_panic_hold PASSED [ 84%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_map_regime_to_directive_panic_no_dcf PASSED [ 85%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_map_regime_to_directive_euphoria_lockdown PASSED [ 85%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_map_regime_to_directive_euphoria_reduce_risk PASSED [ 85%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_map_regime_to_directive_asymmetric_divergence PASSED [ 85%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_map_regime_to_directive_glassdoor_github PASSED [ 85%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_map_regime_to_directive_apathy PASSED [ 85%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_map_regime_to_directive_neutral PASSED [ 86%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_map_regime_to_directive_validation_override PASSED [ 86%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_map_regime_to_directive_validation_failed PASSED [ 86%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_evaluate_panic_capitulation PASSED [ 86%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_evaluate_crowd_euphoria PASSED [ 86%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_evaluate_asymmetric_divergence PASSED [ 86%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_evaluate_validation_override PASSED [ 87%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_evaluate_apathy PASSED [ 87%]
+tests/test_signal_matrix.py::TestSignalMatrix::test_evaluate_neutral PASSED [ 87%]
+tests/test_signal_matrix.py::TestEnums::test_execution_directive_values PASSED [ 87%]
+tests/test_signal_matrix.py::TestEnums::test_psychological_regime_values PASSED [ 87%]
+tests/test_signal_matrix.py::TestCreateSignalMatrix::test_create_signal_matrix PASSED [ 87%]
+tests/test_state_machine.py::TestPsychologicalStateMachine::test_panic_capitulation PASSED [ 88%]
+tests/test_state_machine.py::TestPsychologicalStateMachine::test_crowd_euphoria PASSED [ 88%]
+tests/test_state_machine.py::TestPsychologicalStateMachine::test_asymmetric_divergence PASSED [ 88%]
+tests/test_state_machine.py::TestPsychologicalStateMachine::test_apathy PASSED [ 88%]
+tests/test_state_machine.py::TestPsychologicalStateMachine::test_neutral PASSED [ 88%]
+tests/test_state_machine.py::TestPsychologicalStateMachine::test_validation_override PASSED [ 88%]
+tests/test_state_machine.py::TestPsychologicalStateMachine::test_glassdoor_github_divergence PASSED [ 89%]
+tests/test_state_machine.py::TestPsychologicalStateMachine::test_panic_boundary_conditions PASSED [ 89%]
+tests/test_state_machine.py::TestPsychologicalStateMachine::test_euphoria_boundary_conditions PASSED [ 89%]
+tests/test_state_machine.py::TestPsychologicalStateMachine::test_apathy_boundary_conditions PASSED [ 89%]
+tests/test_state_machine.py::TestPsychologicalStateMachine::test_validation_penalty_applied PASSED [ 89%]
+tests/test_trajectory_corridor.py::TestMoatComposite::test_init PASSED   [ 89%]
+tests/test_trajectory_corridor.py::TestMoatComposite::test_add_signal PASSED [ 90%]
+tests/test_trajectory_corridor.py::TestMoatComposite::test_add_signal_clamps PASSED [ 90%]
+tests/test_trajectory_corridor.py::TestMoatComposite::test_add_signal_unknown_key PASSED [ 90%]
+tests/test_trajectory_corridor.py::TestMoatComposite::test_compute_raw_composite_empty PASSED [ 90%]
+tests/test_trajectory_corridor.py::TestMoatComposite::test_compute_raw_composite_single PASSED [ 90%]
+tests/test_trajectory_corridor.py::TestMoatComposite::test_compute_raw_composite_multi PASSED [ 90%]
+tests/test_trajectory_corridor.py::TestMoatComposite::test_update_ema PASSED [ 91%]
+tests/test_trajectory_corridor.py::TestMoatComposite::test_update_ema_with_previous PASSED [ 91%]
+tests/test_trajectory_corridor.py::TestMoatComposite::test_ema_static PASSED [ 91%]
+tests/test_trajectory_corridor.py::TestMoatComposite::test_ema_no_previous PASSED [ 91%]
+tests/test_trajectory_corridor.py::TestMoatComposite::test_moat_default_weights PASSED [ 91%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_tanh_scale_zero PASSED [ 91%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_tanh_scale_positive PASSED [ 92%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_tanh_scale_negative PASSED [ 92%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_compute_negative_z PASSED [ 92%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_compute_positive_z PASSED [ 92%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_compute_zero_z PASSED [ 92%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_compute_high_z PASSED [ 92%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_compute_low_z PASSED [ 93%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_low_negative_z_is_distressed PASSED [ 93%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_negative_z_within_same_stage_is_monotonic PASSED [ 93%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_positive_z_within_same_stage_is_monotonic PASSED [ 93%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_high_z_drops_to_declining PASSED [ 93%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_signal_maps_to_correct_range PASSED [ 93%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_custom_boundaries PASSED [ 94%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_invalid_boundaries_corrected PASSED [ 94%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_corridor_width PASSED [ 94%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_create_factory PASSED [ 94%]
+tests/test_trajectory_corridor.py::TestTrajectoryCorridorEngine::test_all_stages_covered PASSED [ 94%]
+tests/test_trajectory_corridor.py::TestAlternativeStrategyPipeline::test_init PASSED [ 94%]
+tests/test_trajectory_corridor.py::TestAlternativeStrategyPipeline::test_run_minimal PASSED [ 95%]
+tests/test_trajectory_corridor.py::TestAlternativeStrategyPipeline::test_run_full PASSED [ 95%]
+tests/test_trajectory_corridor.py::TestAlternativeStrategyPipeline::test_run_poor_signals PASSED [ 95%]
+tests/test_trajectory_corridor.py::TestAlternativeStrategyPipeline::test_run_strong_signals PASSED [ 95%]
+tests/test_trajectory_corridor.py::TestAlternativeStrategyPipeline::test_create_factory PASSED [ 95%]
+tests/test_trajectory_corridor.py::TestMoatCompositeIntegration::test_add_signal_custom_weight PASSED [ 95%]
+tests/test_trajectory_corridor.py::TestMoatCompositeIntegration::test_compute_raw_composite_custom_weights PASSED [ 96%]
+tests/test_trajectory_corridor.py::TestMoatCompositeIntegration::test_n_signals_tracked PASSED [ 96%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_init PASSED [ 96%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_normalize_glassdoor PASSED [ 96%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_normalize_comparably PASSED [ 96%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_compute_divergence PASSED [ 96%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_compute_penalty_below_threshold PASSED [ 97%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_compute_penalty_above_threshold PASSED [ 97%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_check_hard_gate PASSED [ 97%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_evaluate_both_present PASSED [ 97%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_evaluate_divergence PASSED [ 97%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_evaluate_missing_glassdoor PASSED [ 97%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_evaluate_missing_comparably PASSED [ 98%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_evaluate_both_missing PASSED [ 98%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_evaluate_override_triggered PASSED [ 98%]
+tests/test_validation_gate.py::TestCrossValidationGate::test_apply_to_confidence PASSED [ 98%]
+tests/test_validation_gate.py::TestCreateValidationGate::test_create_validation_gate PASSED [ 98%]
+tests/test_velocity_tracker.py::TestVelocityTracker::test_record_snapshot PASSED [ 98%]
+tests/test_velocity_tracker.py::TestVelocityTracker::test_record_provenance PASSED [ 99%]
+tests/test_velocity_tracker.py::TestVelocityTracker::test_calculate_velocity_metrics_insufficient_data PASSED [ 99%]
+tests/test_velocity_tracker.py::TestVelocityTracker::test_calculate_velocity_metrics_with_data PASSED [ 99%]
+tests/test_velocity_tracker.py::TestVelocityTracker::test_sigma_calculation PASSED [ 99%]
+tests/test_velocity_tracker.py::TestVelocityTracker::test_acceleration_calculation PASSED [ 99%]
+tests/test_velocity_tracker.py::TestVelocityTracker::test_multiple_window_types PASSED [100%]
+
+=============================== warnings summary ===============================
+tests/test_corp_audit.py: 19 warnings
+tests/test_product_intel.py: 4 warnings
+tests/test_psychological_integration.py: 14 warnings
+tests/test_psychological_nlp.py: 9 warnings
+  /Users/hayden/Desktop/quant-py/.venv/lib/python3.14/site-packages/vaderSentiment/vaderSentiment.py:201: DeprecationWarning: codecs.open() is deprecated. Use open() instead.
+    with codecs.open(lexicon_full_filepath, encoding='utf-8') as f:
+
+tests/test_corp_audit.py: 19 warnings
+tests/test_product_intel.py: 4 warnings
+tests/test_psychological_integration.py: 14 warnings
+tests/test_psychological_nlp.py: 9 warnings
+  /Users/hayden/Desktop/quant-py/.venv/lib/python3.14/site-packages/vaderSentiment/vaderSentiment.py:206: DeprecationWarning: codecs.open() is deprecated. Use open() instead.
+    with codecs.open(emoji_full_filepath, encoding='utf-8') as f:
+
+tests/test_engineering_guards.py::TestRetryPolicy::test_retry_policy_success
+tests/test_engineering_guards.py::TestRetryPolicy::test_retry_policy_retry_then_success
+tests/test_engineering_guards.py::TestRetryPolicy::test_retry_policy_retry_then_success
+tests/test_engineering_guards.py::TestRetryPolicy::test_retry_policy_all_fail
+tests/test_engineering_guards.py::TestRetryPolicy::test_retry_policy_all_fail
+tests/test_engineering_guards.py::TestRetryPolicy::test_retry_policy_all_fail
+  /Users/hayden/Desktop/quant-py/psychological/engineering_guards.py:145: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(func):
+
+tests/test_fintech_clients.py::TestRateLimiter::test_token_bucket_initialization
+  tests/test_fintech_clients.py:17: PytestWarning: The test <Function test_token_bucket_initialization> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_token_bucket_initialization(self):
+
+tests/test_fintech_clients.py::TestFintechNormalizer::test_canonicalize_ticker
+  tests/test_fintech_clients.py:126: PytestWarning: The test <Function test_canonicalize_ticker> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_canonicalize_ticker(self, normalizer):
+
+tests/test_fintech_clients.py::TestFintechNormalizer::test_compute_confidence_stocktwits
+  tests/test_fintech_clients.py:131: PytestWarning: The test <Function test_compute_confidence_stocktwits> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_compute_confidence_stocktwits(self, normalizer):
+
+tests/test_fintech_clients.py::TestFintechNormalizer::test_compute_confidence_stocktwits
+  /Users/hayden/Desktop/quant-py/tests/test_fintech_clients.py:139: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow(),
+
+tests/test_fintech_clients.py::TestFintechNormalizer::test_compute_confidence_reddit
+  tests/test_fintech_clients.py:147: PytestWarning: The test <Function test_compute_confidence_reddit> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_compute_confidence_reddit(self, normalizer):
+
+tests/test_fintech_clients.py::TestFintechNormalizer::test_compute_confidence_reddit
+  /Users/hayden/Desktop/quant-py/tests/test_fintech_clients.py:155: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow(),
+
+tests/test_fintech_clients.py::TestFintechNormalizer::test_deduplicate
+  tests/test_fintech_clients.py:163: PytestWarning: The test <Function test_deduplicate> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    def test_deduplicate(self, normalizer):
+
+tests/test_fintech_clients.py::TestFintechNormalizer::test_deduplicate
+  /Users/hayden/Desktop/quant-py/tests/test_fintech_clients.py:165: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    sentiment_score=0.5, author="user", created_at=datetime.utcnow(),
+
+tests/test_fintech_clients.py::TestFintechNormalizer::test_deduplicate
+  /Users/hayden/Desktop/quant-py/tests/test_fintech_clients.py:168: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    sentiment_score=0.5, author="user", created_at=datetime.utcnow(),
+
+tests/test_fintech_clients.py::TestFintechNormalizer::test_deduplicate
+  /Users/hayden/Desktop/quant-py/tests/test_fintech_clients.py:171: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    sentiment_score=0.5, author="user", created_at=datetime.utcnow(),
+
+tests/test_fintech_clients.py::TestFintechClientFactory::test_get_client_stocktwits
+  tests/test_fintech_clients.py:179: PytestWarning: The test <Function test_get_client_stocktwits> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    @patch('scraper.fintech_clients.factory.load_fintech_credentials')
+
+tests/test_fintech_clients.py::TestFintechClientFactory::test_get_client_apewisdom
+  tests/test_fintech_clients.py:189: PytestWarning: The test <Function test_get_client_apewisdom> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    @patch('scraper.fintech_clients.factory.load_fintech_credentials')
+
+tests/test_fintech_clients.py::TestFintechClientFactory::test_get_healthy_sources
+  tests/test_fintech_clients.py:199: PytestWarning: The test <Function test_get_healthy_sources> is marked with '@pytest.mark.asyncio' but it is not an async function. Please remove the asyncio mark. If the test is not marked explicitly, check for global marks applied via 'pytestmark'.
+    @patch('scraper.fintech_clients.factory.load_fintech_credentials')
+
+tests/test_fintech_clients.py::TestFintechClientFactory::test_get_healthy_sources
+  /Users/hayden/Desktop/quant-py/tests/test_fintech_clients.py:209: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "stocktwits": FintechHealth(source="stocktwits", is_healthy=True, last_success=datetime.utcnow(),
+
+tests/test_hybrid_orchestrator.py: 12 warnings
+  /Users/hayden/Desktop/quant-py/scraper/health_monitor.py:76: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.last_failure = datetime.utcnow()
+
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_opens_after_threshold_failures
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_half_open_after_timeout
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_closes_after_successes_in_half_open
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_failure_in_half_open_reopens
+  /Users/hayden/Desktop/quant-py/scraper/health_monitor.py:79: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.next_attempt = datetime.utcnow() + timedelta(seconds=self.timeout_seconds)
+
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_opens_after_threshold_failures
+  /Users/hayden/Desktop/quant-py/scraper/health_monitor.py:90: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    if self.next_attempt and datetime.utcnow() >= self.next_attempt:
+
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_closes_after_successes_in_half_open
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_closes_after_successes_in_half_open
+tests/test_hybrid_orchestrator.py::TestHealthMonitor::test_records_results
+tests/test_hybrid_orchestrator.py::TestHealthMonitor::test_get_all_status
+  /Users/hayden/Desktop/quant-py/scraper/health_monitor.py:68: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.last_success = datetime.utcnow()
+
+tests/test_hybrid_orchestrator.py::TestCircuitBreaker::test_failure_in_half_open_reopens
+  /Users/hayden/Desktop/quant-py/scraper/health_monitor.py:83: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.next_attempt = datetime.utcnow() + timedelta(seconds=self.timeout_seconds)
+
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_returns_signals
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_category_breakdown
+  /Users/hayden/Desktop/quant-py/tests/test_hybrid_orchestrator.py:84: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow()
+
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_returns_signals
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_returns_signals
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_returns_signals
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_multiple_tickers
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_multiple_tickers
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_category_breakdown
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_category_breakdown
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_category_breakdown
+  /Users/hayden/Desktop/quant-py/scraper/data_fusion.py:52: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    hours_old = (datetime.utcnow() - msg.created_at).total_seconds() / 3600
+
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_returns_signals
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_multiple_tickers
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_multiple_tickers
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_category_breakdown
+  /Users/hayden/Desktop/quant-py/scraper/data_fusion.py:87: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "created_at": datetime.utcnow().isoformat()
+
+tests/test_hybrid_orchestrator.py::TestDataFusionEngine::test_fuse_multiple_tickers
+  /Users/hayden/Desktop/quant-py/tests/test_hybrid_orchestrator.py:139: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow()
+
+tests/test_hybrid_orchestrator.py::TestHybridOrchestrator::test_scrape_all_sufficient_coverage
+tests/test_hybrid_orchestrator.py::TestHybridOrchestrator::test_scrape_all_primary_runs
+tests/test_hybrid_orchestrator.py::TestHybridOrchestrator::test_scrape_all_no_healthy_sources
+  /Users/hayden/Desktop/quant-py/tests/test_hybrid_orchestrator.py:166: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "stocktwits": FintechHealth(source="stocktwits", is_healthy=True, last_success=datetime.utcnow(),
+
+tests/test_hybrid_orchestrator.py::TestHybridOrchestrator::test_scrape_all_sufficient_coverage
+tests/test_hybrid_orchestrator.py::TestHybridOrchestrator::test_scrape_all_primary_runs
+tests/test_hybrid_orchestrator.py::TestHybridOrchestrator::test_scrape_all_no_healthy_sources
+  /Users/hayden/Desktop/quant-py/tests/test_hybrid_orchestrator.py:168: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "apewisdom": FintechHealth(source="apewisdom", is_healthy=True, last_success=datetime.utcnow(),
+
+tests/test_hybrid_orchestrator.py::TestFintechMessage::test_fintech_message_creation
+  /Users/hayden/Desktop/quant-py/tests/test_hybrid_orchestrator.py:265: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow()
+
+tests/test_master_qualitative_audit.py::TestDoubleStandardizerAudit::test_stage2_cross_sectional_z
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_reset_single_ticker
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_reset_all_tickers
+  /Users/hayden/Desktop/quant-py/.venv/lib/python3.14/site-packages/numpy/_core/_methods.py:219: RuntimeWarning: Degrees of freedom <= 0 for slice
+    ret = _var(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+
+tests/test_master_qualitative_audit.py::TestDoubleStandardizerAudit::test_stage2_cross_sectional_z
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_reset_single_ticker
+tests/test_qualitative_scoring.py::TestDoubleStandardizer::test_reset_all_tickers
+  /Users/hayden/Desktop/quant-py/.venv/lib/python3.14/site-packages/numpy/_core/_methods.py:211: RuntimeWarning: invalid value encountered in scalar divide
+    ret = ret.dtype.type(ret / rcount)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+========== 578 passed, 18 skipped, 162 warnings in 132.69s (0:02:12) ===========
+successfully removed temp profile /var/folders/mn/5h76wch95gj08nwhtjpsl4t40000gn/T/uc_lsxyw_s4
+successfully removed temp profile /var/folders/mn/5h76wch95gj08nwhtjpsl4t40000gn/T/uc_jire_6il
+
+Exit code: 0
+[2026-06-29 23:14:04] Final pytest exit: 0
+./opencode_scripts/overnight_runner.sh: line 557: Unified: command not found
+./opencode_scripts/overnight_runner.sh: line 557: overnight_runner.sh: command not found
+[2026-06-29 23:14:04] 
+[2026-06-29 23:14:04] ╔══════════════════════════════════════════════════════════╗
+[2026-06-29 23:14:04] ║  🏁  OVERNIGHT RUN COMPLETE — 20260629_225953          ║
+[2026-06-29 23:14:04] ╠══════════════════════════════════════════════════════════╣
+[2026-06-29 23:14:04] ║  Alpha: ✅ done
+[2026-06-29 23:14:04] ║  Beta:  ✅ done
+[2026-06-29 23:14:04] ║  Gamma: ✅ done
+[2026-06-29 23:14:04] ║  Delta: ✅ done
+[2026-06-29 23:14:04] ║  Targets: NVDA AVGO INTC AMD MSFT GOOGL META TSLA AAPL AMZN
+[2026-06-29 23:14:04] ║  Final test log: /Users/hayden/Desktop/quant-py/opencode_scripts/lanes/central_hub/final_live_test_20260629_225953.log
+[2026-06-29 23:14:04] ╚══════════════════════════════════════════════════════════╝
