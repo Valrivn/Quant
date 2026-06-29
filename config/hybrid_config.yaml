@@ -89,12 +89,44 @@ github_mappings:
   GOOGL: "google/jax"
   META: "facebookresearch/llama"
   TSLA: "teslamotors/linux"
+  AVGO: "broadcom/broadcom-mcu"  # Broadcom for AVGO
+  INTC: "intel/intel-graphics-compiler"  # Intel for INTC
 
 adzuna:
   app_id: "${ADZUNA_APP_ID}"
   app_key: "${ADZUNA_APP_KEY}"
   base_url: "https://api.adzuna.com/v1/api/jobs"
   country: "us"
+
+sub_sectors:
+  semiconductors:
+    - "NVDA"
+    - "AMD"
+    - "INTC"
+    - "AVGO"
+    - "QCOM"
+    - "MRVL"
+    - "MU"
+    - "SWKS"
+    - "LSCC"
+    - "TSM"
+  platform_software:
+    - "MSFT"
+    - "GOOGL"
+    - "META"
+    - "CRM"
+    - "ADBE"
+    - "NOW"
+    - "SHOP"
+    - "WDAY"
+  hardware_oem:
+    - "AAPL"
+    - "DELL"
+    - "HPQ"
+    - "IBM"
+    - "HPE"
+    - "SMCI"
+    - "ANET"
 
 psychological:
   bullish_terms:
@@ -153,6 +185,8 @@ glassdoor:
     AAPL: "apple"
     AMZN: "amazon"
     AVGO: "broadcom"
+    INTC: "intel"
+    ARM: "arm"
 
 comparably:
   company_slugs:
@@ -165,6 +199,8 @@ comparably:
     AAPL: "apple"
     AMZN: "amazon"
     AVGO: "broadcom"
+    INTC: "intel"
+    ARM: "arm"
 
 validation_gate:
   kappa: 5.0
@@ -191,6 +227,17 @@ g2_capterra:
   platforms:
     - "g2"
     - "capterra"
+  company_slugs:
+    NVDA: "nvidia"
+    AMD: "advanced-micro-devices"
+    MSFT: "microsoft"
+    GOOGL: "google"
+    META: "meta"
+    TSLA: "tesla"
+    AAPL: "apple"
+    AMZN: "amazon"
+    AVGO: "broadcom"
+    INTC: "intel-corporation"
   keywords:
     - "rushed updates"
     - "broken builds"
@@ -225,6 +272,31 @@ browserless:
     height: 1080
   user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
+redis:
+  enabled: true
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: null
+  default_ttl_seconds: 3600
+  key_prefix: "quant:cache:"
+
+circuit_breaker:
+  enabled: true
+  failure_threshold: 5
+  success_threshold: 2
+  timeout_seconds: 60
+
+metrics:
+  enabled: true
+  redis:
+    enabled: true
+    host: "localhost"
+    port: 6379
+    db: 0
+    key_prefix: "quant:metrics:"
+  flush_interval_seconds: 60
+
 proxy_pool:
   enabled: true
   rotate_per_request: false
@@ -239,3 +311,116 @@ quantitative_dcf:
   default_terminal_growth: 0.03
   projection_years: 5
   margin_of_safety: 0.25
+
+companies:
+  NVDA:
+    legal_name: "NVIDIA Corporation"
+    common_name: "NVIDIA"
+    glassdoor_slug: "nvidia"
+    comparably_slug: "nvidia"
+    indeed_slug: "Nvidia"
+    g2_slug: "nvidia"
+    capterra_slug: "nvidia"
+    github_org: "NVIDIA"
+    sec_cik: "0001045810"
+    app_store_name: "NVIDIA"
+  AVGO:
+    legal_name: "Broadcom Inc."
+    common_name: "Broadcom"
+    glassdoor_slug: "broadcom"
+    comparably_slug: "broadcom"
+    indeed_slug: "Broadcom"
+    g2_slug: "broadcom"
+    capterra_slug: "broadcom"
+    github_org: "broadcom"
+    sec_cik: "0001730168"
+    app_store_name: "Broadcom"
+  INTC:
+    legal_name: "Intel Corporation"
+    common_name: "Intel"
+    glassdoor_slug: "intel"
+    comparably_slug: "intel"
+    indeed_slug: "Intel"
+    g2_slug: "intel-corporation"
+    capterra_slug: "intel"
+    github_org: "intel"
+    sec_cik: "0000050863"
+    app_store_name: "Intel"
+    reddit_regex_filter: "\\bINTC\\b"
+  AMD:
+    legal_name: "Advanced Micro Devices, Inc."
+    common_name: "AMD"
+    glassdoor_slug: "advanced-micro-devices"
+    comparably_slug: "advanced-micro-devices"
+    indeed_slug: "AMD"
+    g2_slug: "advanced-micro-devices"
+    capterra_slug: "amd"
+    github_org: "amd"
+    sec_cik: "0000002488"
+    app_store_name: "AMD"
+  MSFT:
+    legal_name: "Microsoft Corporation"
+    common_name: "Microsoft"
+    glassdoor_slug: "microsoft"
+    comparably_slug: "microsoft"
+    indeed_slug: "Microsoft"
+    g2_slug: "microsoft"
+    capterra_slug: "microsoft"
+    github_org: "microsoft"
+    sec_cik: "0000789019"
+    app_store_name: "Microsoft"
+  GOOGL:
+    legal_name: "Alphabet Inc."
+    common_name: "Google"
+    glassdoor_slug: "google"
+    comparably_slug: "google"
+    indeed_slug: "Google"
+    g2_slug: "google"
+    capterra_slug: "google"
+    github_org: "google"
+    sec_cik: "0001652044"
+    app_store_name: "Google"
+  META:
+    legal_name: "Meta Platforms, Inc."
+    common_name: "Meta"
+    glassdoor_slug: "meta"
+    comparably_slug: "meta"
+    indeed_slug: "Meta"
+    g2_slug: "meta"
+    capterra_slug: "meta"
+    github_org: "facebook"
+    sec_cik: "0001326801"
+    app_store_name: "Meta"
+  TSLA:
+    legal_name: "Tesla, Inc."
+    common_name: "Tesla"
+    glassdoor_slug: "tesla-motors"
+    comparably_slug: "tesla"
+    indeed_slug: "Tesla"
+    g2_slug: "tesla"
+    capterra_slug: "tesla"
+    github_org: "teslamotors"
+    sec_cik: "0001318605"
+    app_store_name: "Tesla"
+  AAPL:
+    legal_name: "Apple Inc."
+    common_name: "Apple"
+    glassdoor_slug: "apple"
+    comparably_slug: "apple"
+    indeed_slug: "Apple"
+    g2_slug: "apple"
+    capterra_slug: "apple"
+    github_org: "apple"
+    sec_cik: "0000320193"
+    app_store_name: "Apple"
+  AMZN:
+    legal_name: "Amazon.com, Inc."
+    common_name: "Amazon"
+    glassdoor_slug: "amazon"
+    comparably_slug: "amazon"
+    indeed_slug: "Amazon"
+    g2_slug: "amazon"
+    capterra_slug: "amazon"
+    github_org: "amzn"
+    sec_cik: "0001018724"
+    app_store_name: "Amazon"

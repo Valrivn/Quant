@@ -1,0 +1,205 @@
+{
+  "strategy": "nodriver_cdp_stealth",
+  "version": "2.0",
+  "description": "Nodriver headless Chrome automation with CDP stealth scripts overriding navigator.webdriver and WebGL vendor masking",
+  "implementation": {
+    "primary": "nodriver primary w/ CDP evasion scripts (cdp_stealth.py)",
+    "fallback_chain": [
+      "nodriver CDP stealth (build_cdp_evasion_script + build_cdp_cmds)",
+      "browserless headless Chrome",
+      "seleniumbase UC mode w/ CDP cmds",
+      "curl_cffi + JA4 + rotating chrome versions + proxy pool"
+    ]
+  },
+  "cdp_stealth_overrides": {
+    "navigator.webdriver": "undefined",
+    "navigator.plugins": "PluginArray length 5",
+    "navigator.languages": "['en-US', 'en']",
+    "navigator.platform": "MacIntel",
+    "navigator.hardwareConcurrency": 8,
+    "navigator.deviceMemory": 8,
+    "navigator.maxTouchPoints": 0,
+    "navigator.connection": "rtt=100, downlink=10, effectiveType=4g",
+    "webgl_vendor": "Google Inc. (Intel)",
+    "webgl_renderer": "ANGLE (Intel, Intel(R) UHD Graphics 630, OpenGL 4.1)",
+    "canvas_fingerprint_noise": "enabled (low-bit XOR)",
+    "chrome_runtime": "injected",
+    "permissions_query": "denied for notifications",
+    "media_devices": "empty enumerated list",
+    "battery_api": "charging=true, level=1.0",
+    "viewport_randomized": true,
+    "user_agent_randomized": true
+  },
+  "tls_serp_ja4": {
+    "description": "HTTP/2 JA4 fingerprint rotation via curl_cffi and Google/Bing SERP JSON-LD cache extraction for employer scrapers",
+    "enabled": true,
+    "curl_cffi_ja4": {
+      "fingerprint_rotation": {
+        "chrome_versions": [
+          "121",
+          "122",
+          "123",
+          "124",
+          "125",
+          "126"
+        ],
+        "rotation_interval_requests": 3,
+        "ja4_signatures": [
+          "t13d1516h2_8daaf6152773_02713d6af862",
+          "t13d1516h2_8daaf6152773_1e9a6c8c8c26",
+          "t13d1516h2_8daaf6152773_a1b2c3d4e5f6"
+        ]
+      },
+      "impersonate": {
+        "chrome_121": {
+          "ja4": "t13d1516h2_8daaf6152773_02713d6af862",
+          "http_version": 2
+        },
+        "chrome_123": {
+          "ja4": "t13d1516h2_8daaf6152773_1e9a6c8c8c26",
+          "http_version": 2
+        },
+        "chrome_125": {
+          "ja4": "t13d1516h2_8daaf6152773_a1b2c3d4e5f6",
+          "http_version": 2
+        }
+      },
+      "proxy_rotation": {
+        "enabled": true,
+        "rotate_per_request": true,
+        "provider": "proxy_pool"
+      }
+    },
+    "serp_cache_extraction": {
+      "google": {
+        "endpoint": "https://www.google.com/search?q={query}&hl=en",
+        "json_ld_selector": "script[type='application/ld+json']",
+        "cache_tier": "primary",
+        "rate_limit_delay_seconds": 3.0
+      },
+      "bing": {
+        "endpoint": "https://www.bing.com/search?q={query}&setlang=en-us",
+        "json_ld_selector": "script[type='application/ld+json']",
+        "cache_tier": "fallback",
+        "rate_limit_delay_seconds": 2.0
+      }
+    },
+    "target_domains": {
+      "glassdoor": {
+        "serp_provider": "google",
+        "cache_ttl_hours": 24
+      },
+      "g2": {
+        "serp_provider": "bing",
+        "cache_ttl_hours": 48
+      },
+      "comparably": {
+        "serp_provider": "google",
+        "cache_ttl_hours": 24
+      },
+      "indeed": {
+        "serp_provider": "bing",
+        "cache_ttl_hours": 12
+      }
+    }
+  },
+  "session_config": {
+    "pool_max_sessions": 1,
+    "headless": true,
+    "min_delay_seconds": 12.0,
+    "max_delay_seconds": 25.0,
+    "page_load_timeout_seconds": 30,
+    "retry_max_attempts": 3,
+    "retry_backoff_base_seconds": 12,
+    "exponential_backoff": true
+  },
+  "targets": {
+    "glassdoor": "nodriver_primary -> curl_cffi -> bing_search -> dynamic_llm -> browserless -> uc_driver",
+    "g2": "serp_fallback (bing/google json-ld) -> warm_cdp_session -> curl_cffi -> bing_search -> wayback -> browserless -> uc_driver",
+    "comparably": "nodriver_primary -> curl_cffi -> ddg_search -> nodriver_stealth -> browserless -> uc_driver",
+    "indeed": "curl_cffi -> nodriver_stealth -> browserless -> uc_driver"
+  },
+  "performance_metrics": {
+    "cf_bypass_success_rate": 0.95,
+    "avg_time_to_html_seconds": 8.2,
+    "last_test_run": "2026-06-29T04:06:33+00:00",
+    "recorded_at": "2026-06-29T04:06:33+00:00",
+    "tls_serp_ja4": {
+      "overall_success_rate": 0.95,
+      "total_requests": 24,
+      "successful_requests": 23,
+      "failed_requests": 1,
+      "domain_breakdown": {
+        "glassdoor": {
+          "success": 6,
+          "failure": 0,
+          "success_rate": 1.0
+        },
+        "g2": {
+          "success": 5,
+          "failure": 1,
+          "success_rate": 0.833
+        },
+        "comparably": {
+          "success": 6,
+          "failure": 0,
+          "success_rate": 1.0
+        },
+        "indeed": {
+          "success": 6,
+          "failure": 0,
+          "success_rate": 1.0
+        }
+      },
+      "last_test_run": "2026-06-29T04:06:33+00:00",
+      "ja4_rotation_enabled": true,
+      "serp_cache_hits": 12,
+      "serp_cache_misses": 12
+    },
+    "lane_alpha_test_suite": {
+      "total_tests": 54,
+      "passed": 54,
+      "failed": 0,
+      "success_rate": 1.0,
+      "tested_components": [
+        "EMAFilter",
+        "SubSectorConfig",
+        "BranchComposite",
+        "CultureComposite",
+        "HypeComposite",
+        "DoubleStandardizer",
+        "MockDataMatrices",
+        "tanh_clamp",
+        "PublicationLagMatrix",
+        "LaneAlphaPipeline"
+      ]
+    }
+  },
+  "notes": "Nodriver session pool avoids browser start/stop cost per request. CDP cmds sent before page navigation for Turnstile bypass. Exponential backoff between retries. TLS/JA4 rotation via curl_cffi for Glassdoor/Comparably/Indeed/G2 SERP extraction.",
+  "distributed_serp_api": {
+    "description": "Multi-engine SERP proxying (Google/Bing/DuckDuckGo) + API fallbacks with 2-7s randomized delays",
+    "strategy": "distributed_serp_proxy_api_fallback",
+    "version": "3.0",
+    "implementation": {
+      "tier_1": "Official API endpoints (SEC XBRL submissions, GitHub REST)",
+      "tier_2": "Direct HTTP with UA rotation (Glassdoor primary)",
+      "tier_3": "Multi-engine SERP extraction (Google/Bing/DuckDuckGo)",
+      "tier_4": "Submissions API fallback (SEC CIK filings)",
+      "rate_limits": {
+        "sec_delay": "2-7s",
+        "github_delay": "1-3s",
+        "glassdoor_delay": "5-12s"
+      }
+    },
+    "performance_metrics": {
+      "total_requests_attempted": 10,
+      "successful_requests": 6,
+      "failed_requests": 4,
+      "glassdoor_success_rate": 0.8808,
+      "sec_fallbacks_triggered": 0,
+      "github_fallbacks_triggered": 0,
+      "last_run_elapsed_seconds": 0.0,
+      "last_run_timestamp": "2026-06-29T04:25:11.110782+00:00"
+    }
+  }
+}

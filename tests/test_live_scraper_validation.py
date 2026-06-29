@@ -173,7 +173,7 @@ async def glassdoor_scraper():
     config = {
         "glassdoor": {
             "company_slugs": {
-                "NVDA": "NVIDIA",
+                "NVDA": "nvidia",
                 "AVGO": "broadcom",
                 "INTC": "intel",
                 "AMD": "advanced-micro-devices",
