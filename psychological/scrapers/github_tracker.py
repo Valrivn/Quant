@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass, field
 import aiohttp
+import pandas as pd
 from bs4 import BeautifulSoup
 from config import load_hybrid_config
 
@@ -232,19 +233,21 @@ class GitHubTracker:
         return results
     
     def _update_historical(self, ticker: str, metrics: Dict):
+        if not metrics or "repo" not in metrics:
+            return
         if ticker not in self._historical_metrics:
             self._historical_metrics[ticker] = []
         
         repo_metrics = RepoMetrics(
             repo=metrics["repo"],
-            stars=metrics["stars"],
-            forks=metrics["forks"],
-            commit_count_7d=metrics["commit_count_7d"],
-            commit_count_30d=metrics["commit_count_30d"],
-            contributor_count=metrics["contributor_count"],
-            open_issues=metrics["open_issues"],
+            stars=metrics.get("stars", 0),
+            forks=metrics.get("forks", 0),
+            commit_count_7d=metrics.get("commit_count_7d", 0),
+            commit_count_30d=metrics.get("commit_count_30d", 0),
+            contributor_count=metrics.get("contributor_count", 0),
+            open_issues=metrics.get("open_issues", 0),
             updated_at=metrics.get("updated_at"),
-            fetched_at=metrics["fetched_at"],
+            fetched_at=metrics.get("fetched_at", datetime.now(timezone.utc).isoformat()),
             ticker=ticker
         )
         self._historical_metrics[ticker].append(repo_metrics)
@@ -308,13 +311,27 @@ class GitHubTracker:
     
     def calculate_velocities(self, current: Dict, previous: Dict = None) -> Dict:
         if not previous:
-            return {
+            res_dict = {
                 "dev_fork_acceleration": 0.0,
                 "star_velocity": 0.0,
+                "fork_velocity": 0.0,
                 "commit_velocity": 0.0
             }
+            if current and isinstance(current, dict):
+                current["fork_velocity"] = 0.0
+            return res_dict
             
         time_diff_hours = 1.0
+        curr_ts = current.get("fetched_at")
+        prev_ts = previous.get("fetched_at")
+        if curr_ts and prev_ts:
+            try:
+                dt_curr = datetime.fromisoformat(curr_ts.replace("Z", "+00:00"))
+                dt_prev = datetime.fromisoformat(prev_ts.replace("Z", "+00:00"))
+                diff_sec = (dt_curr - dt_prev).total_seconds()
+                time_diff_hours = max(0.01, diff_sec / 3600.0)
+            except Exception:
+                time_diff_hours = 1.0
         
         star_velocity = (current.get("stars", 0) - previous.get("stars", 0)) / time_diff_hours
         fork_velocity = (current.get("forks", 0) - previous.get("forks", 0)) / time_diff_hours
@@ -322,11 +339,15 @@ class GitHubTracker:
         
         fork_acceleration = fork_velocity - (previous.get("fork_velocity", 0) if "fork_velocity" in previous else 0)
         
-        return {
+        result_dict = {
             "dev_fork_acceleration": fork_acceleration,
             "star_velocity": star_velocity,
+            "fork_velocity": fork_velocity,
             "commit_velocity": commit_velocity
         }
+        if current and isinstance(current, dict):
+            current["fork_velocity"] = fork_velocity
+        return result_dict
     
     def get_structural_breaks(self, ticker: str = None, since: datetime = None) -> List[StructuralBreak]:
         """Get detected structural breaks, optionally filtered by ticker and time."""
@@ -336,6 +357,27 @@ class GitHubTracker:
         if since:
             breaks = [b for b in breaks if datetime.fromisoformat(b.timestamp.replace("Z", "+00:00")) >= since]
         return breaks
+
+    def calculate_commit_velocity(self, current_commit_time: str, last_commit_time: str, calculated_fork_count: int, metrics: dict) -> dict:
+        return calculate_commit_velocity(current_commit_time, last_commit_time, calculated_fork_count, metrics)
+
+
+def calculate_commit_velocity(current_commit_time: str, last_commit_time: str, calculated_fork_count: int, metrics: dict) -> dict:
+    # Handle entry point validation guards defensively
+    if not metrics or "repo" not in metrics:
+        return {}
+        
+    # Calculate real chronological time deltas using datetime parsing
+    t_current = pd.to_datetime(current_commit_time)
+    t_last = pd.to_datetime(last_commit_time)
+    time_diff = t_current - t_last
+    
+    # Clamp lower boundary floor to 0.01 to eliminate zero-division risks
+    time_diff_hours = max(time_diff.total_seconds() / 3600.0, 0.01)
+    
+    result_dict = {}
+    result_dict["fork_velocity"] = float(calculated_fork_count / time_diff_hours)
+    return result_dict
 
 
 async def create_github_tracker(config_dict: dict = None) -> GitHubTracker:

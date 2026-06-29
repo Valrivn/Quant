@@ -182,6 +182,36 @@ class CrossValidationEngine:
         import math
         return math.prod(penalties) ** (1.0 / len(penalties))
 
+    def validate_moat_convergence(
+        self,
+        moat_tree: object,
+        github_metrics: float,
+        product_sentiment: float
+    ) -> Dict:
+        n_github = self._normalize_score(github_metrics, -2, 2)
+        n_product = self._normalize_score(product_sentiment, -1, 1)
+
+        divergence = self._compute_divergence(n_github, n_product)
+        penalty = self._exponential_penalty(divergence)
+
+        if moat_tree and hasattr(moat_tree, "nodes") and moat_tree.nodes:
+            top_nodes = [n.name for n in moat_tree.nodes[:3]]
+        else:
+            top_nodes = []
+
+        return {
+            "layer_name": "moat_convergence",
+            "convergence_score": 1.0 - divergence,
+            "penalty_multiplier": penalty,
+            "details": {
+                "github_dev_momentum_normalized": n_github,
+                "product_sentiment_normalized": n_product,
+                "divergence": divergence,
+                "top_moat_nodes": top_nodes,
+                "aligned": divergence <= self.divergence_threshold
+            }
+        }
+
     def evaluate_all_layers(
         self,
         ticker: str,

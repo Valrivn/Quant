@@ -69,6 +69,7 @@ class VelocityMetrics(TypedDict):
 class CorporateAffinity(TypedDict):
     employee_sentiment_proxy: Optional[float]
     dev_fork_acceleration: Optional[float]
+    product_sentiment_proxy: Optional[float]
 
 
 class RedditCommentPayload(TypedDict):

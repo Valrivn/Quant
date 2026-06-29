@@ -31,6 +31,8 @@ class NodriverSession:
         self._tab: Optional[uc.Tab] = None
         self._initialized = False
         self._last_request_time = 0.0
+        self._viewport = (1920, 1080)
+        self._user_agent = None
 
     async def initialize(self) -> None:
         if self._initialized:
@@ -60,6 +62,14 @@ class NodriverSession:
             "--disable-web-security",
             "--disable-features=IsolateOrigins,site-per-process",
             "--disable-blink-features=AutomationControlled",
+            "--disable-session-crashed-bubble",
+            "--disable-infobars",
+            "--disable-background-timer-throttling",
+            "--disable-renderer-backgrounding",
+            "--disable-background-networking",
+            "--disable-component-update",
+            "--disable-default-apps",
+            "--disable-sync",
         ]
         
         self._browser = await uc.start(
@@ -70,8 +80,36 @@ class NodriverSession:
         )
 
         self._tab = await self._browser.get("about:blank")
+        self._viewport = random.choice([
+            (1920, 1080), (1440, 900), (1366, 768), (1536, 864), (1280, 800),
+        ])
+        self._user_agent = random.choice([
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
+        ])
         self._initialized = True
         logger.info("Nodriver session initialized")
+
+    async def apply_cdp_stealth(self) -> None:
+        if not self._browser or not self._tab:
+            return
+        try:
+            from psychological.scrapers.cdp_stealth import build_cdp_cmds, build_cdp_evasion_script
+            cdp_cmds = build_cdp_cmds(self._viewport)
+            for cmd in cdp_cmds:
+                try:
+                    await self._tab.send(cmd["cmd"], cmd["params"])
+                except Exception as e:
+                    logger.debug("CDP cmd %s failed: %s", cmd["cmd"], e)
+            script = build_cdp_evasion_script(self._viewport, self._user_agent or "")
+            await self._tab.evaluate(script)
+        except ImportError:
+            logger.debug("cdp_stealth not available, skipping")
+        except Exception as e:
+            logger.debug("CDP stealth apply failed: %s", e)
 
     async def close(self) -> None:
         if self._browser and self._initialized:
@@ -105,17 +143,26 @@ class NodriverSession:
 
         self._last_request_time = asyncio.get_event_loop().time()
 
-    async def get(self, url: str, wait_for: str = None, timeout: int = None) -> bool:
+    async def get(self, url: str, wait_for: str = None, timeout: int = None, apply_stealth: bool = True) -> bool:
         await self._apply_rate_limit()
         try:
             if not self._initialized:
                 await self.initialize()
 
             self._tab = await self._browser.get(url)
-            
+
+            if apply_stealth:
+                await self.apply_cdp_stealth()
+
+            initial_wait = random.uniform(3, 6)
+            await asyncio.sleep(initial_wait)
+
             if wait_for:
-                await self._tab.wait_for(wait_for, timeout=timeout or self.config.page_load_timeout)
-            
+                try:
+                    await self._tab.wait_for(wait_for, timeout=timeout or self.config.page_load_timeout)
+                except Exception:
+                    logger.debug("wait_for selector '%s' not found on %s", wait_for, url)
+
             return True
         except Exception as e:
             logger.error(f"Error navigating to {url}: {e}")

@@ -11,6 +11,7 @@ import aiohttp
 from bs4 import BeautifulSoup
 from config import load_hybrid_config
 from curl_cffi import AsyncSession
+from psychological.scrapers.browserless_client import BrowserlessClient, create_browserless_client
 from psychological.engineering_guards import (
     guard_nan, guard_division, guard_bounds, guard_utc_timestamp, ensure_utc,
     RateLimiter, timed_operation, safe_float, safe_int, with_timeout, sanitize_text
@@ -75,18 +76,23 @@ class G2Scraper:
             "AMZN": "amazon",
         }
         self._curl_session: Optional[AsyncSession] = None
+        self._browserless: Optional[BrowserlessClient] = None
 
     async def initialize(self) -> None:
         self._curl_session = AsyncSession(
             impersonate="chrome120",
             timeout=aiohttp.ClientTimeout(total=30)
         )
-        logger.info("G2Scraper initialized with curl_cffi")
+        self._browserless = await create_browserless_client(self.config)
+        logger.info("G2Scraper initialized with curl_cffi + browserless")
 
     async def close(self) -> None:
         if self._curl_session:
             await self._curl_session.close()
             self._curl_session = None
+        if self._browserless:
+            await self._browserless.close()
+            self._browserless = None
 
     async def __aenter__(self) -> "G2Scraper":
         await self.initialize()
@@ -125,7 +131,71 @@ class G2Scraper:
         except Exception as e:
             logger.warning(f"Bing search failed for G2 {ticker}: {e}")
 
+        # Browserless fallback
+        if self._browserless:
+            logger.info(f"Attempting browserless fallback for G2 {ticker}...")
+            try:
+                reviews = await self._scrape_g2_browserless(ticker, slug)
+                if reviews:
+                    logger.info(f"Browserless fallback success for G2 {ticker}: {len(reviews)} reviews")
+                    return reviews
+            except Exception as e:
+                logger.warning(f"Browserless fallback failed for G2 {ticker}: {e}")
+
         return []
+
+    async def _scrape_g2_browserless(self, ticker: str, slug: str) -> List[G2Review]:
+        """G2 scraping via browserless (JavaScript execution for Cloudflare challenges)."""
+        if not self._browserless:
+            return []
+
+        try:
+            url = f"{self.BASE_URL}/products/{slug}/reviews"
+
+            result = await self._browserless.scrape(
+                url=url,
+                wait_for="[data-testid='rating-value'], [class*='star-rating'], [itemprop='ratingValue']",
+                wait_until="networkidle2",
+                timeout=60000,
+                headers={"Referer": "https://www.g2.com/"}
+            )
+
+            if not result.success:
+                logger.warning("Browserless G2 fetch failed for slug=%s: %s", slug, result.error)
+                return []
+
+            html = result.html
+            soup = BeautifulSoup(html, "html.parser")
+            reviews = []
+
+            for result_elem in soup.select("[data-testid='review-card'], [class*='review-card'], [class*='review-item']")[:10]:
+                text = result_elem.get_text()
+
+                rating_match = re.search(r'Rating:\s*(\d+\.?\d*)\s*/\s*5', text, re.IGNORECASE)
+                if not rating_match:
+                    rating_match = re.search(r'(\d+\.?\d*)\s*(?:out of|/)\s*5', text, re.IGNORECASE)
+
+                rating = float(rating_match.group(1)) if rating_match else None
+
+                review_text = text[:500] if len(text) > 50 else ""
+
+                if rating:
+                    keywords = self._detect_keywords(review_text)
+                    reviews.append(G2Review(
+                        ticker=ticker,
+                        platform="g2-browserless",
+                        product_name=slug,
+                        rating=rating,
+                        review_text=review_text,
+                        review_date=None,
+                        keywords_detected=keywords,
+                        fetched_at=datetime.now(timezone.utc).isoformat()
+                    ))
+
+            return reviews
+        except Exception as e:
+            logger.warning(f"Browserless G2 scrape exception: {e}")
+            return []
 
     async def _bing_search_g2(self, ticker: str, slug: str) -> List[G2Review]:
         """Parse G2 reviews from Bing search results"""
@@ -200,18 +270,23 @@ class CapterraScraper:
             "AMZN": "amazon",
         }
         self._curl_session: Optional[AsyncSession] = None
+        self._browserless: Optional[BrowserlessClient] = None
 
     async def initialize(self) -> None:
         self._curl_session = AsyncSession(
             impersonate="chrome120",
             timeout=aiohttp.ClientTimeout(total=30)
         )
-        logger.info("CapterraScraper initialized with curl_cffi")
+        self._browserless = await create_browserless_client(self.config)
+        logger.info("CapterraScraper initialized with curl_cffi + browserless")
 
     async def close(self) -> None:
         if self._curl_session:
             await self._curl_session.close()
             self._curl_session = None
+        if self._browserless:
+            await self._browserless.close()
+            self._browserless = None
 
     async def __aenter__(self) -> "CapterraScraper":
         await self.initialize()
@@ -250,7 +325,71 @@ class CapterraScraper:
         except Exception as e:
             logger.warning(f"Bing search failed for Capterra {ticker}: {e}")
 
+        # Browserless fallback
+        if self._browserless:
+            logger.info(f"Attempting browserless fallback for Capterra {ticker}...")
+            try:
+                reviews = await self._scrape_capterra_browserless(ticker, slug)
+                if reviews:
+                    logger.info(f"Browserless fallback success for Capterra {ticker}: {len(reviews)} reviews")
+                    return reviews
+            except Exception as e:
+                logger.warning(f"Browserless fallback failed for Capterra {ticker}: {e}")
+
         return []
+
+    async def _scrape_capterra_browserless(self, ticker: str, slug: str) -> List[CapterraReview]:
+        """Capterra scraping via browserless (JavaScript execution for Cloudflare challenges)."""
+        if not self._browserless:
+            return []
+
+        try:
+            url = f"{self.BASE_URL}/p/{slug}/reviews"
+
+            result = await self._browserless.scrape(
+                url=url,
+                wait_for="[data-testid='review-card'], [class*='review-card'], [class*='review-item']",
+                wait_until="networkidle2",
+                timeout=60000,
+                headers={"Referer": "https://www.capterra.com/"}
+            )
+
+            if not result.success:
+                logger.warning("Browserless Capterra fetch failed for slug=%s: %s", slug, result.error)
+                return []
+
+            html = result.html
+            soup = BeautifulSoup(html, "html.parser")
+            reviews = []
+
+            for result_elem in soup.select("[data-testid='review-card'], [class*='review-card'], [class*='review-item']")[:10]:
+                text = result_elem.get_text()
+
+                rating_match = re.search(r'Rating:\s*(\d+\.?\d*)\s*/\s*5', text, re.IGNORECASE)
+                if not rating_match:
+                    rating_match = re.search(r'(\d+\.?\d*)\s*(?:out of|/)\s*5', text, re.IGNORECASE)
+
+                rating = float(rating_match.group(1)) if rating_match else None
+
+                review_text = text[:500] if len(text) > 50 else ""
+
+                if rating:
+                    keywords = self._detect_keywords(review_text)
+                    reviews.append(CapterraReview(
+                        ticker=ticker,
+                        platform="capterra-browserless",
+                        product_name=slug,
+                        rating=rating,
+                        review_text=review_text,
+                        review_date=None,
+                        keywords_detected=keywords,
+                        fetched_at=datetime.now(timezone.utc).isoformat()
+                    ))
+
+            return reviews
+        except Exception as e:
+            logger.warning(f"Browserless Capterra scrape exception: {e}")
+            return []
 
     async def _bing_search_capterra(self, ticker: str, slug: str) -> List[CapterraReview]:
         """Parse Capterra reviews from Bing search results"""

@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 class ValidationGateResult:
     normalized_glassdoor: Optional[float]
     normalized_comparably: Optional[float]
+    weighted_score: Optional[float]
     divergence: Optional[float]
     penalty_multiplier: float
     override_triggered: bool
@@ -26,6 +27,9 @@ class CrossValidationGate:
         self.divergence_threshold = self.gate_config.get("divergence_threshold", 0.20)
         self.confidence_floor = self.gate_config.get("confidence_floor", 0.40)
         self.max_penalty = self.gate_config.get("max_penalty", 0.1)
+        # Glassdoor primary weight (75%), Comparably secondary (25%)
+        self.glassdoor_weight = 0.75
+        self.comparably_weight = 0.25
 
     def normalize_glassdoor(self, raw_score: float) -> float:
         if raw_score is None or raw_score < 0:
@@ -56,10 +60,19 @@ class CrossValidationGate:
         n_gd = self.normalize_glassdoor(glassdoor_raw) if glassdoor_raw is not None else None
         n_comp = self.normalize_comparably(comparably_badge) if comparably_badge is not None else None
 
+        weighted_score = None
+        if n_gd is not None and n_comp is not None:
+            weighted_score = (self.glassdoor_weight * n_gd) + (self.comparably_weight * n_comp)
+        elif n_gd is not None:
+            weighted_score = n_gd
+        elif n_comp is not None:
+            weighted_score = n_comp
+
         if n_gd is None or n_comp is None:
             return ValidationGateResult(
                 normalized_glassdoor=n_gd,
                 normalized_comparably=n_comp,
+                weighted_score=weighted_score,
                 divergence=None,
                 penalty_multiplier=1.0,
                 override_triggered=False,
@@ -81,6 +94,7 @@ class CrossValidationGate:
         return ValidationGateResult(
             normalized_glassdoor=n_gd,
             normalized_comparably=n_comp,
+            weighted_score=weighted_score,
             divergence=divergence,
             penalty_multiplier=penalty_multiplier,
             override_triggered=override_triggered,

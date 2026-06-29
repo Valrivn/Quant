@@ -24,6 +24,10 @@ from psychological.interfaces import (
     VelocitySnapshot, NLPMetrics, VelocityMetrics, CorporateAffinity
 )
 from psychological.scrapers.validation_gate import CrossValidationGate
+from psychological.scrapers.moat_discovery import (
+    MoatWeightingLayer, MoatScoringEngine, MoatTree, MoatNode,
+    create_moat_weighting_layer, create_moat_scoring_engine
+)
 from config import load_hybrid_config
 
 logger = logging.getLogger(__name__)
@@ -482,19 +486,68 @@ class PsychologicalOrchestrator:
             "fused_results": results
         }
 
+    async def run_qualitative_pipeline(self, ticker: str) -> Dict:
+        """Merged Branch 1 (Employer Sentiment) and Branch 2 (Moat Discovery) outputs."""
+        await self.initialize_scrapers()
+
+        branch1_result = await self.run_primary_pipeline([ticker])
+        corporate_affinities = await self.run_secondary_pipeline([ticker])
+
+        moat_layer = await create_moat_weighting_layer(self.config)
+        scoring_engine = await create_moat_scoring_engine(self.config)
+        await scoring_engine.initialize(
+            product_intel=self.product_intel_engine,
+            reddit_scraper=self.reddit_scraper
+        )
+
+        company_name = self.config.get("company_name", ticker)
+        sample_nodes = [
+            MoatNode(name=f"{company_name} Core", source="discovered", ticker=ticker, node_type="platform",
+                     stars=5000, description="Core platform product"),
+        ]
+        moat_tree = MoatTree(ticker=ticker, company_name=company_name, nodes=sample_nodes)
+        ranked = moat_layer.rank_nodes(moat_tree)
+        scored = await scoring_engine.score_tree(moat_tree)
+
+        validation_result = {}
+        if self.cross_validation_engine:
+            validation_result = self.cross_validation_engine.validate_moat_convergence(
+                moat_tree=scored,
+                github_metrics=corporate_affinities.get(ticker, {}).get("dev_fork_acceleration", 0.0),
+                product_sentiment=corporate_affinities.get(ticker, {}).get("product_sentiment_proxy", 0.0)
+            )
+
+        return {
+            "ticker": ticker,
+            "branch1_employer_sentiment": corporate_affinities.get(ticker, {}),
+            "branch2_moat_discovery": {
+                "tree": scored,
+                "top_nodes": [n.name for n in scored.nodes],
+                "top_stars": [n.stars for n in scored.nodes],
+            },
+            "moat_convergence": validation_result,
+            "primary_pipeline": branch1_result
+        }
+
     def get_regime_status(self, ticker: str) -> Optional[Dict]:
         """Get current regime status for a ticker"""
         regimes = self.feature_store.get_regimes(ticker)
         if regimes:
             latest = regimes[0]
+            fintech_score = latest.get("fintech_confirmation_score")
+            quant_score = latest.get("quantitative_value_signal")
+            if fintech_score is None:
+                fintech_score = 0.5
+            if quant_score is None:
+                quant_score = 0.5
             latest["fused_confidence"] = self.compute_fused_confidence(
                 RegimeOutput(
                     regime=latest["active_regime"],
                     contrarian_buy_authorized=latest["contrarian_buy_authorized"],
                     confidence=latest["confidence_score"]
                 ),
-                latest.get("fintech_confirmation_score", 0.5),
-                latest.get("quantitative_value_signal", 0.5)
+                fintech_score,
+                quant_score
             )
             return latest
         return None

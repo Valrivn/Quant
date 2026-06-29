@@ -116,11 +116,14 @@ class HybridOrchestrator:
                 all_msgs = self.normalizer.normalize_batch(messages + trending)
                 all_msgs = self.normalizer.deduplicate(all_msgs)
 
+                # Persist messages to database
+                persisted = await self._persist_fintech_messages(all_msgs, source)
+
                 tickers_found = list(set(m.ticker for m in all_msgs))
                 duration = int((datetime.utcnow() - start).total_seconds() * 1000)
 
                 return ScrapeResult(
-                    source=source, messages_count=len(all_msgs),
+                    source=source, messages_count=persisted,
                     tickers_found=tickers_found, duration_ms=duration, errors=[]
                 )
             except Exception as e:

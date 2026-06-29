@@ -66,6 +66,15 @@ class RedditScraper:
         for word in words:
             if word not in self.ticker_blacklist and len(word) >= 2:
                 tickers.add(word)
+        
+        # Strict regex boundary shielding for INTC entity resolution
+        if "INTC" in text.upper() or "INTEL" in text.upper():
+            if re.search(r'\bINTC\b', text):
+                tickers.add("INTC")
+            elif "INTEL" in text.upper():
+                # Decouple raw financial/stock discussions from casual hardware mention phrases
+                if not re.search(r'\b(intel inside|intel core|intel processor|intel arc)\b', text, re.IGNORECASE):
+                    tickers.add("INTC")
         return list(tickers)
 
     def _submission_relevant(self, title: str, selftext: str, ticker_set: Set[str]) -> bool:

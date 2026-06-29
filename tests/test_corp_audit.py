@@ -16,20 +16,6 @@ class MockCurlResponse:
         self.text = text
 
 
-class MockCurlSession:
-    def __init__(self):
-        self._responses = {}
-    
-    async def get(self, url, headers=None, timeout=None):
-        return self._responses.get(url, MockCurlResponse())
-    
-    async def close(self):
-        pass
-    
-    def set_response(self, url, status_code=200, text="<html></html>"):
-        self._responses[url] = MockCurlResponse(status_code, text)
-
-
 class MockSession:
     def __init__(self):
         self._sb = Mock()
@@ -87,6 +73,13 @@ class TestGlassdoorScraper:
             mock_load.return_value = {"glassdoor": mock_config["glassdoor"]}
             scraper = GlassdoorScraper(config_dict=mock_config)
             scraper._curl_session = MockCurlSession()
+            # Mock nodriver primary to prevent real browser launch
+            mock_nodriver = AsyncMock()
+            mock_nodriver.scrape_company.return_value = GlassdoorScore(
+                "NVDA", "", None, None, None, None, None,
+                datetime.now(timezone.utc).isoformat(), {}, []
+            )
+            scraper._nodriver_primary = mock_nodriver
             yield scraper
 
     def test_init(self, scraper):
@@ -127,6 +120,74 @@ class TestGlassdoorScraper:
         assert result.normalized_score == 0.9
 
     @pytest.mark.asyncio
+    async def test_scrape_company_category_and_awards(self, scraper):
+        glassdoor_html = """
+        <html>
+            <div data-test="overallRating">4.5</div>
+            <p>1,000 reviews</p>
+            <h3>Ratings by category</h3>
+            <div>Culture & values 4.4</div>
+            <div>Work/Life balance 4.2</div>
+            <div>Senior management 4.1</div>
+            <h3>Arm awards & accolades</h3>
+            <ul>
+                <li>Glassdoor Best Places to Work UK 2024</li>
+                <li>The Times Top 100 Graduate Employers, #99</li>
+            </ul>
+        </html>
+        """
+        scraper._curl_session.set_response(
+            'https://www.glassdoor.com/Reviews/nvidia-reviews-SRCH_KE0,6.htm',
+            status_code=200,
+            text=glassdoor_html
+        )
+        
+        result = await scraper.scrape_company("NVDA")
+        
+        assert result.ticker == "NVDA"
+        assert result.category_ratings.get("Culture & values") == 4.4
+        assert result.category_ratings.get("Senior management") == 4.1
+    @pytest.mark.asyncio
+    async def test_scrape_company_exact_snapshots(self, scraper):
+        tesla_html = """
+        <html>
+            <div>Tesla Snapshot</div>
+            <div>3.5★ based on 11,980 ratings</div>
+            <div>58% would recommend to a friend</div>
+            <div>Elon Musk 59% approve of CEO</div>
+        </html>
+        """
+        scraper._curl_session.set_response(
+            'https://www.glassdoor.com/Reviews/nvidia-reviews-SRCH_KE0,6.htm',
+            status_code=200,
+            text=tesla_html
+        )
+        result = await scraper.scrape_company("NVDA")
+        assert result.raw_score == 3.5
+        assert result.review_count == 11980
+        assert result.recommend_to_friend == 58
+        assert result.ceo_approval == 59
+
+        intel_html = """
+        <html>
+            <div>Intel Corporation Snapshot</div>
+            <div>3.9★ based on 31,942 ratings</div>
+            <div>68% would recommend to a friend</div>
+            <div>Lip-Bu Tan 66% approve of CEO</div>
+        </html>
+        """
+        scraper._curl_session.set_response(
+            'https://www.glassdoor.com/Reviews/nvidia-reviews-SRCH_KE0,6.htm',
+            status_code=200,
+            text=intel_html
+        )
+        result_intel = await scraper.scrape_company("NVDA")
+        assert result_intel.raw_score == 3.9
+        assert result_intel.review_count == 31942
+        assert result_intel.recommend_to_friend == 68
+        assert result_intel.ceo_approval == 66
+
+    @pytest.mark.asyncio
     async def test_scrape_company_no_slug(self, scraper):
         result = await scraper.scrape_company("NONEXISTENT")
         assert result.ticker == "NONEXISTENT"
@@ -154,13 +215,22 @@ class TestComparablyScraper:
                     "AAPL": "apple",
                     "GOOGL": "google"
                 }
+            },
+            "g2_capterra": {
+                "company_slugs": {
+                    "AAPL": "apple",
+                    "GOOGL": "google"
+                }
             }
         }
 
     @pytest.fixture
     def scraper(self, mock_config):
         with patch('psychological.scrapers.corp_audit.load_hybrid_config') as mock_load:
-            mock_load.return_value = {"glassdoor": mock_config["glassdoor"]}
+            mock_load.return_value = {
+                "glassdoor": mock_config["glassdoor"],
+                "g2_capterra": mock_config["g2_capterra"]
+            }
             scraper = G2EmployerScraper(config_dict=mock_config)
             scraper._curl_session = MockCurlSession()
             yield scraper
@@ -202,11 +272,43 @@ class TestComparablyScraper:
         assert result.overall_rating is None
 
 
+class TestDedicatedComparablyScraper:
+    @pytest.fixture
+    def scraper(self):
+        from psychological.scrapers.corp_audit import ComparablyScraper
+        return ComparablyScraper()
+
+    def test_extract_comparably_data(self, scraper):
+        html = """
+        <html>
+            <div>Overall Company Culture B</div>
+            <div>Tesla Culture 4.1/5</div>
+            <div>CEO Elon Musk 76/100</div>
+            <div>CEO Rating A-</div>
+            <div>Gender C+</div>
+            <div>Diversity B</div>
+            <div>Happiness B</div>
+            <div>eNPS 12</div>
+            <div>81% positive</div>
+            <img alt="Best Company Perks & Benefits 2024" />
+        </html>
+        """
+        data = scraper._extract_comparably_data(html)
+        assert data["overall_rating"] == 4.1
+        assert data["culture_grade"] == "B"
+        assert data["ceo_score"] == 76
+        assert data["category_grades"].get("Gender") == "C+"
+        assert data["category_grades"].get("Diversity") == "B"
+        assert data["recommend_pct"] == 81
+        assert "Best Company Perks & Benefits 2024" in data["awards"]
+
+
 class TestCorpAuditEngine:
     @pytest.fixture
     def mock_config(self):
         return {
             "glassdoor": {"company_slugs": {"AAPL": "Apple"}},
+            "g2_capterra": {"company_slugs": {"AAPL": "apple"}},
             "validation_gate": {"kappa": 5.0, "divergence_threshold": 0.20, "confidence_floor": 0.40}
         }
 
@@ -215,10 +317,12 @@ class TestCorpAuditEngine:
         with patch('psychological.scrapers.corp_audit.load_hybrid_config') as mock_load:
             mock_load.return_value = {
                 "glassdoor": mock_config["glassdoor"],
+                "g2_capterra": mock_config["g2_capterra"],
                 "validation_gate": mock_config["validation_gate"]
             }
             engine = CorpAuditEngine(config_dict=mock_config)
             engine.glassdoor_scraper = Mock()
+            engine.indeed_scraper = Mock()
             engine.g2_scraper = Mock()
             engine.validation_gate = Mock()
             yield engine
@@ -226,20 +330,25 @@ class TestCorpAuditEngine:
     def test_init(self, engine):
         assert engine is not None
         assert engine.glassdoor_scraper is not None
+        assert engine.indeed_scraper is not None
         assert engine.g2_scraper is not None
         assert engine.validation_gate is not None
 
     @pytest.mark.asyncio
     async def test_audit_ticker(self, engine):
+        from psychological.scrapers.corp_audit import IndeedScore
         mock_gd = GlassdoorScore("AAPL", "Apple", 4.5, 0.9, 1000, 90, 85, datetime.now(timezone.utc).isoformat())
+        mock_ind = IndeedScore("AAPL", "Apple", 4.2, 81, 86, "Tim Cook", 319, {"Happiness": "High"}, datetime.now(timezone.utc).isoformat())
         mock_g2 = G2EmployerScore("AAPL", "apple", 4.25, 1000, 85.0, {"Culture": 4.5}, datetime.now(timezone.utc).isoformat())
         
         engine.glassdoor_scraper.scrape_company = AsyncMock(return_value=mock_gd)
+        engine.indeed_scraper.scrape_company = AsyncMock(return_value=mock_ind)
         engine.g2_scraper.scrape_company = AsyncMock(return_value=mock_g2)
         
         mock_validation = Mock()
         mock_validation.normalized_glassdoor = 0.9
-        mock_validation.normalized_comparably = 0.85
+        mock_validation.normalized_comparably = 0.84
+        mock_validation.weighted_score = 0.885
         mock_validation.divergence = 0.05
         mock_validation.penalty_multiplier = 1.0
         mock_validation.override_triggered = False
@@ -251,14 +360,15 @@ class TestCorpAuditEngine:
         
         assert result["ticker"] == "AAPL"
         assert result["glassdoor"]["raw_score"] == 4.5
+        assert result["indeed"]["overall_rating"] == 4.2
         assert result["g2"]["overall_rating"] == 4.25
         assert result["validation_gate"]["override_triggered"] is False
 
     @pytest.mark.asyncio
     async def test_audit_all(self, engine):
         engine.audit_ticker = AsyncMock(side_effect=[
-            {"ticker": "AAPL", "glassdoor": {"raw_score": 4.5}, "g2": {"overall_rating": 4.25}, "validation_gate": {"override_triggered": False}},
-            {"ticker": "MSFT", "glassdoor": {"raw_score": 4.3}, "g2": {"overall_rating": 4.00}, "validation_gate": {"override_triggered": False}}
+            {"ticker": "AAPL", "glassdoor": {"raw_score": 4.5}, "indeed": {"overall_rating": 4.2}, "g2": {"overall_rating": 4.25}, "validation_gate": {"override_triggered": False}},
+            {"ticker": "MSFT", "glassdoor": {"raw_score": 4.3}, "indeed": {"overall_rating": 4.1}, "g2": {"overall_rating": 4.00}, "validation_gate": {"override_triggered": False}}
         ])
         
         results = await engine.audit_all(["AAPL", "MSFT"])
@@ -273,8 +383,10 @@ class TestCreateFunctions:
         with patch('psychological.scrapers.corp_audit.load_hybrid_config') as mock_load:
             mock_load.return_value = {"glassdoor": {}, "validation_gate": {}}
             with patch('psychological.scrapers.corp_audit.GlassdoorScraper') as mock_gd, \
+                 patch('psychological.scrapers.corp_audit.IndeedScraper') as mock_ind, \
                  patch('psychological.scrapers.corp_audit.G2EmployerScraper') as mock_g2:
                 mock_gd.return_value.initialize = AsyncMock()
+                mock_ind.return_value.initialize = AsyncMock()
                 mock_g2.return_value.initialize = AsyncMock()
                 
                 engine = await create_corp_audit_engine()
@@ -302,7 +414,7 @@ class TestCreateFunctions:
                 mock_session_class.return_value = mock_instance
                 
                 scraper = await create_comparably_scraper()
-                assert isinstance(scraper, G2EmployerScraper)
+                assert isinstance(scraper, ComparablyScraper)
 
 
 if __name__ == "__main__":
