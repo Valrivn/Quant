@@ -86,8 +86,6 @@ class TestPsychologicalOrchestrator:
         with patch('psychological.orchestrator.create_old_reddit_scraper', new_callable=AsyncMock) as mock_reddit, \
              patch('psychological.orchestrator.create_github_tracker', new_callable=AsyncMock) as mock_github, \
              patch('psychological.orchestrator.create_corp_anonymous_scraper', new_callable=AsyncMock) as mock_corp, \
-             patch('psychological.orchestrator.create_glassdoor_scraper', new_callable=AsyncMock) as mock_gd, \
-             patch('psychological.orchestrator.create_comparably_scraper', new_callable=AsyncMock) as mock_comp, \
              patch('psychological.orchestrator.create_product_intel_engine', new_callable=AsyncMock) as mock_prod:
             
             await orchestrator.initialize_scrapers()
@@ -95,8 +93,9 @@ class TestPsychologicalOrchestrator:
             assert orchestrator.reddit_scraper is not None
             assert orchestrator.github_tracker is not None
             assert orchestrator.corp_scraper is not None
-            assert orchestrator.glassdoor_scraper is not None
-            assert orchestrator.comparably_scraper is not None
+            # Glassdoor and Comparably are slow/blocked - initialized lazily or skipped
+            assert orchestrator.glassdoor_scraper is None
+            assert orchestrator.comparably_scraper is None
             assert orchestrator.product_intel_engine is not None
 
     @pytest.mark.asyncio
