@@ -107,7 +107,7 @@ class SubSectorConfig:
         "MSFT", "GOOGL", "META", "AMZN", "CRM", "ADBE", "NOW", "SHOP", "WDAY",
     ])
     hardware_oem: List[str] = field(default_factory=lambda: [
-        "AAPL", "TSLA", "DELL", "HPQ", "IBM", "HPE", "SMCI", "ANET",
+        "AAPL", "TSLA", "AMZN", "DELL", "HPQ", "IBM", "HPE", "SMCI", "ANET",
     ])
 
     @classmethod
@@ -208,6 +208,20 @@ class DoubleStandardizer:
         self.ddof = ddof
         self._history: Dict[str, List[float]] = {}
 
+    def _robust_z(self, value: float, history_or_peers: List[float]) -> float:
+        arr = np.array(history_or_peers)
+        med = float(np.median(arr))
+        abs_dev = np.abs(arr - med)
+        mad = float(np.median(abs_dev))
+        if mad > 1e-9:
+            z = 0.6745 * (value - med) / mad
+        else:
+            sigma = float(np.std(arr, ddof=self.ddof))
+            if sigma == 0:
+                return 0.0
+            z = (value - med) / sigma
+        return z
+
     def stage1(self, ticker: str, value: float) -> Optional[float]:
         if ticker not in self._history:
             self._history[ticker] = []
@@ -217,12 +231,7 @@ class DoubleStandardizer:
         if len(hist) < self.min_history:
             return None
 
-        arr = np.array(hist)
-        mu = float(np.mean(arr))
-        sigma = float(np.std(arr, ddof=self.ddof))
-        if sigma == 0:
-            return 0.0
-        z = float((value - mu) / sigma)
+        z = self._robust_z(value, hist)
         return tanh_clamp(z)
 
     def stage2(self, ticker: str,
@@ -239,12 +248,8 @@ class DoubleStandardizer:
         if not peer_values:
             return tanh_clamp(stage1_values[ticker])
 
-        all_vals = np.array(peer_values + [stage1_values[ticker]])
-        mu = float(np.mean(all_vals))
-        sigma = float(np.std(all_vals, ddof=self.ddof))
-        if sigma == 0:
-            return 0.0
-        z = float((stage1_values[ticker] - mu) / sigma)
+        all_vals = peer_values + [stage1_values[ticker]]
+        z = self._robust_z(stage1_values[ticker], all_vals)
         return tanh_clamp(z)
 
     def standardize(self, ticker: str, value: float,
@@ -811,3 +816,43 @@ def create_alternative_strategy_pipeline(
         financial_interface=financial_interface,
         trajectory_engine=trajectory_engine,
     )
+
+
+class QualitativeProbabilisticTranslator:
+    """
+    Translates raw qualitative composites into precise statistical distribution parameters
+    for the downstream corporate finance Monte Carlo engine.
+    """
+    def __init__(self, k_steepness: float = 10.0, midpoint: float = 0.5):
+        self.k = k_steepness
+        self.x0 = midpoint
+
+    def compute_sigmoid_transition(self, score: float) -> float:
+        """Applies a smooth sigmoid transformation to eliminate edge step-errors."""
+        return 1.0 / (1.0 + np.exp(-self.k * (score - self.x0)))
+
+    def map_moat_to_horizon_parameters(self, moat_composite: float) -> dict:
+        """
+        Translates a [0,1] Moat Score into mean and variance for the 
+        Competitive Advantage Period (N_CAP) distribution shape.
+        """
+        # High moat shifts the average longevity of excess returns outward smoothly
+        fuzzy_moat = 1.0 / (1.0 + np.exp(-8.0 * (moat_composite - 0.5)))
+        mean_n_cap = 3.0 + (fuzzy_moat * 12.0)  # Maps smoothly between a 3-year and 15-year horizon
+        std_n_cap = 4.0 * (1.0 - fuzzy_moat)    # Lower moat increases uncertainty around longevity
+        return {"n_cap_mean": mean_n_cap, "n_cap_std": std_n_cap}
+
+    def map_network_to_margin_volatility(self, culture_score: float, concentration_index: float) -> float:
+        # Combines bimodal cultural trends and supply concentrations into a margin volatility modifier
+        # Low culture stability + single point of supply failure = amplified standard errors
+        structural_friction = (1.0 - culture_score) * concentration_index
+        sigma_multiplier = 1.0 + np.log(1.0 + structural_friction)
+        return sigma_multiplier
+
+
+def create_qualitative_probabilistic_translator(
+    k_steepness: float = 10.0,
+    midpoint: float = 0.5,
+) -> QualitativeProbabilisticTranslator:
+    return QualitativeProbabilisticTranslator(k_steepness=k_steepness, midpoint=midpoint)
+
