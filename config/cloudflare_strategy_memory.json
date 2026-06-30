@@ -156,74 +156,75 @@
       "failed_attempts": 2,
       "cloudflare_encounters": 6,
       "cloudflare_bypass_rate": 0.833,
-      "last_test_run": "2026-06-29T04:06:33+00:00",
+      "last_test_run": "2026-06-29T16:37:11+00:00",
       "domain_breakdown": {
         "glassdoor": {
-          "success": 6,
+          "success": 8,
           "failure": 0,
           "bypass_rate": 1.0
         },
         "g2": {
-          "success": 5,
+          "success": 7,
           "failure": 1,
-          "bypass_rate": 0.833
+          "bypass_rate": 0.875
         },
         "comparably": {
-          "success": 6,
+          "success": 8,
           "failure": 0,
           "bypass_rate": 1.0
         },
         "indeed": {
-          "success": 6,
+          "success": 8,
           "failure": 0,
           "bypass_rate": 1.0
         }
       },
-      "recorded_at": "2026-06-29T04:06:33+00:00"
+      "recorded_at": "2026-06-29T16:37:11+00:00"
     }
   },
   "performance_metrics": {
-    "cf_bypass_success_rate": 0.95,
+    "cf_bypass_success_rate": 0.969,
     "avg_time_to_html_seconds": 8.2,
-    "last_test_run": "2026-06-29T04:06:33+00:00",
-    "recorded_at": "2026-06-29T04:06:33+00:00",
+    "last_test_run": "2026-06-29T16:37:11+00:00",
+    "recorded_at": "2026-06-29T16:37:11+00:00",
     "tls_serp_ja4": {
-      "overall_success_rate": 0.95,
-      "total_requests": 24,
-      "successful_requests": 23,
+      "overall_success_rate": 0.969,
+      "total_requests": 32,
+      "successful_requests": 31,
       "failed_requests": 1,
       "domain_breakdown": {
         "glassdoor": {
-          "success": 6,
+          "success": 8,
           "failure": 0,
           "success_rate": 1.0
         },
         "g2": {
-          "success": 5,
+          "success": 7,
           "failure": 1,
-          "success_rate": 0.833
+          "success_rate": 0.875
         },
         "comparably": {
-          "success": 6,
+          "success": 8,
           "failure": 0,
           "success_rate": 1.0
         },
         "indeed": {
-          "success": 6,
+          "success": 8,
           "failure": 0,
           "success_rate": 1.0
         }
       },
-      "last_test_run": "2026-06-29T04:06:33+00:00",
+      "last_test_run": "2026-06-29T16:37:11+00:00",
       "ja4_rotation_enabled": true,
-      "serp_cache_hits": 12,
-      "serp_cache_misses": 12
+      "serp_cache_hits": 16,
+      "serp_cache_misses": 16
     },
     "lane_alpha_test_suite": {
       "total_tests": 54,
       "passed": 54,
       "failed": 0,
       "success_rate": 1.0,
+      "description": "Unified Qualitative-to-Quantitative Translation Pipeline (Lane Alpha)",
       "tested_components": [
         "EMAFilter",
         "SubSectorConfig",
@@ -238,7 +239,7 @@
       ]
     }
   },
-  "notes": "Nodriver session pool avoids browser start/stop cost per request. CDP cmds sent before page navigation for Turnstile bypass. Exponential backoff between retries. TLS/JA4 rotation via curl_cffi for Glassdoor/Comparably/Indeed/G2 SERP extraction.",
+  "notes": "Lane Alpha suite validated (54/54). TLS/JA4 rotation via curl_cffi + HTTP/2 fingerprint rotation across chrome_121/123/125. SERP JSON-LD cache for employer domain extraction. Nodriver CDP stealth active.",
   "distributed_serp_api": {
     "description": "Multi-engine SERP proxying (Google/Bing/DuckDuckGo) + API fallbacks with 2-7s randomized delays",
     "strategy": "distributed_serp_proxy_api_fallback",

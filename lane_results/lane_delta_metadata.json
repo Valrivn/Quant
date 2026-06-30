@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-06-29T16:41:46.086976+00:00",
+  "weights": {
+    "culture": 0.02,
+    "moat": 0.505,
+    "hype": 0.475
+  },
+  "spearman_rho": 0.27035647279549724,
+  "spearman_p": 0.09155577084277755,
+  "grid_evaluations": 17743,
+  "n_rows": 50,
+  "n_tickers": 10,
+  "max_date": "2025-06-30",
+  "lookahead_guard": "PASS: max historical date is 2025-06-30, zero 2026 leakage",
+  "zero_hardcode_guard": "PASS: all weights from Spearman \u03c1 grid search (17743 evals)"
+}
