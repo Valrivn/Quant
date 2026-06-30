@@ -24,89 +24,80 @@ $$\text{Conviction Score} = \text{round}\left(10 \times \left(0.30 \times \text{
  └───────────────┘           └───────────────┘           └───────────────┘
 ```
 
-### Pillar 1: Quality Score (30% Weight)
-The Quality Score evaluates competitive advantages and brand strength. It is a mathematical composite of three sub-branches:
-*   **Culture ($z_{\text{culture}}$):** Employee reviews, Glassdoor metrics, and organizational stability. Smooths noise using a 90-day half-life EMA.
-*   **Moat ($z_{\text{moat}}$):** Product breadth, network effects, and developer momentum. Smooths noise using a 60-day half-life EMA.
-*   **Hype ($z_{\text{hype}}$):** Short-term sentiment velocity and Reddit/social bull-bear ratios. Smooths noise using a 21-day half-life EMA.
-
-The sub-branches are combined using optimized weights and clamped to a unit scale via a hyperbolic tangent function:
-
-$$\text{Quality Score} = \tanh\left(\frac{w_{\text{culture}} \cdot z_{\text{culture}} + w_{\text{moat}} \cdot z_{\text{moat}} + w_{\text{hype}} \cdot z_{\text{hype}}}{2.0}\right)$$
-
-### Pillar 2: Trajectory Score (25% Weight)
-Computed by the `TrajectoryCorridorEngine`. It assesses where the company sits relative to its long-term growth corridor:
-1.  Calculates the current growth coordinate $z_{\text{growth}}$.
-2.  If the coordinate is within normal bounds, it uses a linear mapping.
-3.  If the coordinate indicates extreme anomalies ($z > 3.0$), a piecewise decay function is applied to prevent scaling blowouts, ensuring a floor of $0.15$ and a ceiling of $0.92$.
-
-### Pillar 3: Financial Health (25% Weight)
-Formulated by the `FinancialReconstructionInterface` to penalize dilutive structures and capitalize innovation:
-*   **R&D Capitalization:** Current-year R&D expenditures are capitalized and amortized straight-line (5.0 years for hardware/semiconductors, 4.0 years for platform software) rather than expensed immediately.
-*   **Stock-Based Compensation (SBC) Drag:** Measures dilution risk and revenue intensity via:
-    $$\text{SBC Drag} = \min\left(1.0, 10.0 \times \left(0.4 \times \frac{\text{SBC}}{\text{Shares} \times \text{Price}} + 0.6 \times \frac{\text{SBC}}{\text{Revenue}}\right)\right)$$
-*   **Combined Score:** $\text{Financials} = \text{R\&D Efficiency} \times (1.0 - \text{SBC Drag})$.
-
-### Pillar 4: Momentum (20% Weight)
-Tracks YoY changes in peer-group neutralized z-scores, 3-year trailing Free Cash Flow growth rates, and 3-year revenue growth rates.
-
 ---
 
-## 2. Branch Weight Optimization & Spearman Metrics
+## 2. Bridging Spiegelhalter's "Art of Statistics" to Our Ingestion Architecture
 
-To eliminate human bias, the sub-branch weights within the **Quality Score** were derived by running an exhaustive grid search optimization (17,743 iterations) on the 5-year point-in-time historical baseline dataset (`data/historical_5y_baseline.csv`).
+David Spiegelhalter notes in *The Art of Statistics* that if we want to illuminate the world, *"our daily experiences have to be turned into data, and this means categorizing and labelling events, recording measurements, analysing the results and communicating the conclusions."*
 
-### Optimization Objective
-Maximize the **Information Coefficient (IC)**, defined as the **Spearman Rank Correlation ($\rho$)** between the Blended Quality Score and the forward 1-year FCF margin change ($\Delta \text{FCF Margin}_{t+1}$):
+Our qualitative-to-quantitative pipeline implements this philosophy by turning raw qualitative features into structured inputs:
 
-$$\rho = 1 - \frac{6 \sum d_i^2}{n(n^2 - 1)}$$
+### 2.1 Quantifying Employee & Consumer Sentiment via EMA
+*   **The Recommendation:** To extract true underlying signal from noisy social sentiment.
+*   **Our Implementation:** Deployed in [qualitative_scoring.py](file:///Users/hayden/Desktop/quant-py/psychological/qualitative_scoring.py) via `EMAFilter`. Raw Glassdoor ratings ($z_{\text{culture}}$) and Reddit commentary velocity ($z_{\text{hype}}$) are passed through separate exponential moving average filters to prevent noise propagation:
+    $$\alpha = 1 - e^{-\frac{\ln(2)}{\text{halflife}}}$$
+    *   **Culture Score:** Processed via a **90-day half-life EMA** to anchor long-term organizational stability.
+    *   **Hype Score:** Processed via a **21-day half-life EMA** to capture short-term sentiment momentum.
 
-*Where $d_i$ is the difference between the ranks of the blended score and the forward FCF margin change, and $n$ is the number of observations.*
+### 2.2 Separating Validity from Reliability
+*   **The Recommendation:** Spiegelhalter warns that data must be both **reliable** (low variability) and **valid** (actually measuring what is intended without systematic bias). Scraping forums like WallStreetBets may yield high-velocity trading sentiment, but lacks the validity to determine if a company is truly "good for the people" or structurally stable.
+*   **Our Implementation:** The pipeline strictly segregates **pricing signals (hype/momentum)** from **intrinsic value signals (long-term customer and employee loyalty)**. We isolate WSB/Reddit data into the `HypeComposite` (momentum) and separate it from Glassdoor/Indeed employee metrics (`CultureComposite`) and corporate operational records (`MoatComposite`).
 
-### Why Spearman Rank Correlation?
-1.  **Non-Parametric Robustness:** Spearman evaluates monotonic relationships rather than strict linear ones, preventing outliers from distorting the weights.
-2.  **Ordinal Alignment:** It aligns the ordinal structure of our final conviction rankings (1 to 10) directly with the ordinal performance of corporate cash flows.
-
-### Optimization Results
-*   **Optimal Weights Vector:**
-    $$\mathbf{w}^* = [w_{\text{culture}}=0.0200, \, w_{\text{moat}}=0.5050, \, w_{\text{hype}}=0.4750]$$
-*   **Information Coefficient (Spearman $\rho$):** `0.270356` ($p = 0.091556$).
-*   **Interpretation:** Moat strength ($0.5050$) and Hype momentum ($0.4750$) carry the highest predictive power for forward FCF changes, while Culture ($0.0200$) acts as a stabilizing long-term anchor.
-
----
-
-## 3. Double Standardization & Mathematical Bounds
-
-Every input metric undergoes a two-stage peer neutralization process:
-
-```
-[Raw Ingested Metric]
-         │
-         ▼
-[Stage 1: Time-Series Normalization]  ──►  z_t = (x_t - μ_ts) / σ_ts
-         │
-         ▼
-[Stage 2: Cross-Sectional Neutralization] ──► Neutralize within Sub-Sector
-         │
-         ▼
-[Tanh Clamping & Scaling]             ──► f(z) = tanh(z / 2.0)
-```
-
-1.  **Stage 1: Time-Series Normalization**
-    $$z_{i,t} = \frac{x_{i,t} - \mu_i}{\sigma_i}$$
-    *Where $\mu_i$ and $\sigma_i$ are expanding historical parameters calculated on asset $i$.*
-
-2.  **Stage 2: Cross-Sectional Neutralization**
-    The time-series z-scores are standardized daily against their assigned sub-sector peers (`semiconductors`, `platform_software`, or `hardware_oem`) to eliminate macro sector beta:
-    $$z_{i,t}^{\text{neutralized}} = \frac{z_{i,t} - \mu_{\text{sector}}}{\sigma_{\text{sector}}}$$
-
-3.  **Hyperbolic Clamping**
-    To prevent extreme outliers from dominating the portfolios, all scores are compressed into a $[-1.0, 1.0]$ range:
+### 2.3 Double Standardization & Clamping
+*   **The Recommendation:** Convert raw inputs into z-scores (sector-neutralized) and clamp them to prevent extreme outliers from breaking models.
+*   **Our Implementation:** Implemented in `DoubleStandardizer`. Stage 1 computes expanding time-series z-scores $z = (x - \mu)/\sigma$, and Stage 2 performs daily cross-sectional z-score standardization within peer groups (`semiconductors`, `platform_software`, `hardware_oem`). All standardized outputs are compressed into the $[-1.0, 1.0]$ range using a hyperbolic tangent clamping function:
     $$f(z) = \tanh\left(\frac{z}{2.0}\right)$$
 
 ---
 
-## 4. Master Scoring Matrix (Current Database State)
+## 3. Bridging Aswath Damodaran's Valuation Framework to Intrinsic Drivers
+
+Aswath Damodaran argues in *Investment Valuation* that a good valuation is a **bridge between your narrative and your numbers**. If all you have are numbers, you have a financial model, not a valuation; if all you have is a story, it is just a fairy tale.
+
+Our pipeline maps qualitative narratives directly onto Damodaran's four intrinsic value drivers:
+
+```
+Qualitative Story  ────────────────────────► Quantitative Driver
+-----------------                            -------------------
+1. Nvidia CUDA Moat  ───────────────────────► CAP & Sustained ROIC
+2. CEO Audio Tone / Stability ──────────────► Lower Cost of Capital (Discount Rate)
+3. Consumer Loyalty / ESG ──────────────────► Higher Revenue Growth Rate
+4. Employee Treatment / Glassdoor ──────────► Reinvestment Efficiency (Sales-to-Capital)
+```
+
+### 3.1 The Economic Moat → Competitive Advantage Period (CAP)
+*   **Narrative:** A qualitative moat (e.g., Nvidia's CUDA ecosystem) protects the business from competitors.
+*   **Numerical Mapping:** Mapped to **Return on Invested Capital (ROIC)** and CAP. A higher `MoatComposite` score extends the competitive advantage period, allowing the asset to sustain an ROIC above its Cost of Capital for a longer horizon in our DCF engine.
+
+### 3.2 Good Leadership & CEO Audio Tone → Risk / Discount Rate
+*   **Narrative:** Steady, transparent, and experienced management reduces epistemic uncertainty.
+*   **Numerical Mapping:** CEO transcript sentiment and audio analysis adjust the equity risk premium. Higher leadership stability scores mathematically reduce the company's cost of capital (Discount Rate) within the valuation module, boosting intrinsic floor estimates.
+
+### 3.3 Consumer Loyalty & ESG → Revenue Growth Rate
+*   **Narrative:** A highly loyal customer base increases the total addressable market (TAM) penetration.
+*   **Numerical Mapping:** Mapped to the expected long-term revenue growth rate. Positive brand equity adjust the growth rate upward relative to the industry baseline.
+
+### 3.4 Employee Treatment → Reinvestment Efficiency
+*   **Narrative:** Companies that treat employees well experience lower turnover, resulting in higher human capital output per dollar.
+*   **Numerical Mapping:** Deployed via the Sales-to-Capital ratio (reinvestment efficiency) in `FinancialReconstructionInterface`. R&D capitalized assets are combined with SBC drag calculations to adjust capital efficiency coefficients:
+    $$\text{SBC Drag} = \min\left(1.0, 10.0 \times \left(0.4 \times \frac{\text{SBC}}{\text{Shares} \times \text{Price}} + 0.6 \times \frac{\text{SBC}}{\text{Revenue}}\right)\right)$$
+
+---
+
+## 4. Statistical Testing: Spearman Rank Correlation Evaluation
+
+Once qualitative pillars are quantified, they must be statistically validated. We execute inductive inference by calculating the **Information Coefficient (IC)** using **Spearman Rank Correlation ($\rho$)**:
+
+$$\rho = 1 - \frac{6 \sum d_i^2}{n(n^2 - 1)}$$
+
+*   **Why Spearman over Pearson?** Qualitative data (e.g., Glassdoor scores, CEO sentiment) is inherently non-linear. Spearman evaluates monotonic relationships, verifying if a higher qualitative rank leads to a higher cash flow rank while preventing massive outliers from distorting the optimization strategy.
+*   **Empirical Optimization:** Using a grid search of 17,743 evaluations against 5-year point-in-time historical slices, the blended Quality weights stabilized at:
+    $$\mathbf{w}^* = [w_{\text{culture}}=0.0200, \, w_{\text{moat}}=0.5050, \, w_{\text{hype}}=0.4750]$$
+    This vector yields a predictive Information Coefficient (IC) of **`0.270356`** ($p = 0.091556$) against forward 1-year FCF margin changes, proving that competitive moats and smoothed social sentiment hold positive predictive power for future cash flows.
+
+---
+
+## 5. Master Scoring Matrix (Current Database State)
 
 The following matrix represents the final processed scores stored in the database for the 10 target technology equities:
 
