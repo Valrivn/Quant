@@ -5,6 +5,40 @@ Primary Contrarian Sentiment Engine implementation. Uses Reddit/WSB as primary p
 
 ---
 
+## 4-Lane Parallel Valuation Matrix Integration
+
+To avoid the **"Bermuda Triangle of Valuation"**, the psychological and behavioral metrics are mapped cleanly across the 4-Lane Parallel Valuation Matrix:
+
+```
+                            ┌────────────────────────┐
+                            │ PSYCHOLOGICAL PEERS    │
+                            └───────────┬────────────┘
+                                        │
+           ┌────────────────────────────┼────────────────────────────┐
+           ▼                            ▼                            ▼
+┌──────────────────────┐     ┌──────────────────────┐     ┌──────────────────────┐
+│  Lane 1 (Intrinsic)  │     │   Lane 2 (Pricing)   │     │    Lane 4 (Audit)    │
+│  - CultureComposite  │     │  - HypeComposite     │     │  - Zero leakage of   │
+│     ERP Modifiers     │     │    (21-day EMA)      │     │    Hype into DCF     │
+└──────────────────────┘     └──────────────────────┘     └──────────────────────┘
+```
+
+1. **Lane 1: Intrinsic Valuation Matrix Engine (What to Buy)**:
+   * **Narrative Integration**: Qualitative indicators do not sit beside quantitative parameters as additive terms.
+   * **Modulation Coefficients**: The `CultureComposite` and `LeadershipStability` composites are mapped directly as risk-reduction modifiers scaling the Equity Risk Premium (ERP) and Cost of Capital, while `MoatComposite` scales the Return on Invested Capital (ROIC) Competitive Advantage Period (CAP) horizon years.
+
+2. **Lane 2: Market Mood & Pricing Matrix (When to Buy)**:
+   * **Sentiment Ingestion**: The `HypeComposite` (Reddit/WallStreetBets comment counts) is isolated to track short-term momentum using a **21-day half-life EMA** to smooth noise.
+   * **Catalyst Flagging**: Deeply undervalued intrinsic floors from Lane 1 matching positive hype/sentiment metrics in Lane 2 trigger high-conviction execution timing buy catalysts.
+
+3. **Lane 3: Probabilistic Banding (Uncertainty & Simulation)**:
+   * **Monte Carlo Input**: Core sentiment features shape the standard errors for expected revenue growth distributions in a 10,000-pass simulation.
+
+4. **Lane 4: Framework Audit & Verification Gate**:
+   * **Leakage Detection**: Strict programmatic validation checks block pricing/hype indicators from bleeding into intrinsic cash flow calculations or Cost of Capital equations.
+
+---
+
 ## Skeleton Structure & Module Layout
 
 ### `psychological/`
