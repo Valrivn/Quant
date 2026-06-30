@@ -1,0 +1,82 @@
+{
+  "NVDA": {
+    "conviction": 8,
+    "quality": 0.684,
+    "financial": 0.854,
+    "trajectory": 0.852,
+    "momentum": 0.632,
+    "label": "Strong Buy"
+  },
+  "AVGO": {
+    "conviction": 7,
+    "quality": 0.62,
+    "financial": 0.907,
+    "trajectory": 0.814,
+    "momentum": 0.531,
+    "label": "Buy"
+  },
+  "MSFT": {
+    "conviction": 7,
+    "quality": 0.669,
+    "financial": 0.853,
+    "trajectory": 0.86,
+    "momentum": 0.521,
+    "label": "Buy"
+  },
+  "GOOGL": {
+    "conviction": 7,
+    "quality": 0.654,
+    "financial": 0.767,
+    "trajectory": 0.868,
+    "momentum": 0.516,
+    "label": "Buy"
+  },
+  "META": {
+    "conviction": 7,
+    "quality": 0.65,
+    "financial": 0.558,
+    "trajectory": 0.87,
+    "momentum": 0.537,
+    "label": "Buy"
+  },
+  "TSLA": {
+    "conviction": 7,
+    "quality": 0.609,
+    "financial": 0.805,
+    "trajectory": 0.81,
+    "momentum": 0.53,
+    "label": "Buy"
+  },
+  "AAPL": {
+    "conviction": 7,
+    "quality": 0.662,
+    "financial": 0.893,
+    "trajectory": 0.864,
+    "momentum": 0.508,
+    "label": "Buy"
+  },
+  "AMZN": {
+    "conviction": 7,
+    "quality": 0.655,
+    "financial": 0.776,
+    "trajectory": 0.868,
+    "momentum": 0.497,
+    "label": "Buy"
+  },
+  "AMD": {
+    "conviction": 6,
+    "quality": 0.624,
+    "financial": 0.604,
+    "trajectory": 0.817,
+    "momentum": 0.52,
+    "label": "Buy"
+  },
+  "INTC": {
+    "conviction": 3,
+    "quality": 0.461,
+    "financial": 0.384,
+    "trajectory": 0.1,
+    "momentum": 0.382,
+    "label": "Reduce"
+  }
+}
