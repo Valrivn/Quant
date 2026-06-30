@@ -1,5 +1,5 @@
 # Lane Alpha Conviction Scores — Actionable 0–10 Ratings
-**Timestamp:** 2026-06-29T16:41:46Z
+**Timestamp:** 2026-06-30T10:43:13Z
 **Data Source:** `historical_5y_slice` (2021-06-30 to 2025-06-30)
 **Weight Set:** w_culture=0.0200, w_moat=0.5050, w_hype=0.4750
 ## Conviction Scale
