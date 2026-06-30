@@ -1,41 +1,52 @@
-# Psychological Pillar Implementation - Repository Map & Reference
+# Psychological & Academic Graph Ingestion Architecture (Opus 4.6)
 
 ## Overview
-Primary Contrarian Sentiment Engine implementation. Uses Reddit/WSB as primary psychological indicator, with secondary validation from GitHub repository tracking, job scraping, Glassdoor/Comparably employee metrics, and G2/Capterra/App Store product intelligence.
+Primary Quantitative Portfolio Architecture Engine. Integrates qualitative parameters (Moats, Culture, Leadership) to directly drive quantitative DCF valuation inputs as modulating coefficients. Uses a decoupled two-tier matrix system separating Intrinsic Valuation drivers from Pricing & Momentum indicators.
 
 ---
 
 ## 4-Lane Parallel Valuation Matrix Integration
 
-To avoid the **"Bermuda Triangle of Valuation"**, the psychological and behavioral metrics are mapped cleanly across the 4-Lane Parallel Valuation Matrix:
+To avoid the **"Bermuda Triangle of Valuation"**, the quantitative pipeline strictly segregates intrinsic valuation drivers from pricing/momentum vectors:
 
 ```
                             ┌────────────────────────┐
-                            │ PSYCHOLOGICAL PEERS    │
+                            │  QUALITATIVE MAPPING   │
                             └───────────┬────────────┘
                                         │
            ┌────────────────────────────┼────────────────────────────┐
            ▼                            ▼                            ▼
 ┌──────────────────────┐     ┌──────────────────────┐     ┌──────────────────────┐
 │  Lane 1 (Intrinsic)  │     │   Lane 2 (Pricing)   │     │    Lane 4 (Audit)    │
-│  - CultureComposite  │     │  - HypeComposite     │     │  - Zero leakage of   │
-│     ERP Modifiers     │     │    (21-day EMA)      │     │    Hype into DCF     │
+│  - Culture / Moat    │     │  - HypeComposite     │     │  - Anti-leakage      │
+│    Fuzzy Translators │     │    (21-day EMA)      │     │    sentiment sweep   │
 └──────────────────────┘     └──────────────────────┘     └──────────────────────┘
 ```
 
 1. **Lane 1: Intrinsic Valuation Matrix Engine (What to Buy)**:
-   * **Narrative Integration**: Qualitative indicators do not sit beside quantitative parameters as additive terms.
-   * **Modulation Coefficients**: The `CultureComposite` and `LeadershipStability` composites are mapped directly as risk-reduction modifiers scaling the Equity Risk Premium (ERP) and Cost of Capital, while `MoatComposite` scales the Return on Invested Capital (ROIC) Competitive Advantage Period (CAP) horizon years.
+   * **Narrative-to-Numbers Translation**: Uses `QualitativeProbabilisticTranslator` to map `MoatComposite` into mean and variance for the Competitive Advantage Period ($N_{\text{CAP}}$) distribution shape, preventing step boundary line volatility.
+   * **Reinvestment & Capital Efficiency**: Modulates Return on Invested Capital (ROIC) and Expected Fundamental Growth ($g = \text{Reinvestment Rate} \times \text{ROIC}$), capitalizing R&D assets over 3-to-5 year timelines.
+   * **Discount Rate Adjustments**: Maps `CultureComposite` and `LeadershipStability` to reduce Equity Risk Premium (ERP) and Cost of Capital, and maps Interest Coverage Ratio to automated Cost of Debt ($R_d$).
 
 2. **Lane 2: Market Mood & Pricing Matrix (When to Buy)**:
-   * **Sentiment Ingestion**: The `HypeComposite` (Reddit/WallStreetBets comment counts) is isolated to track short-term momentum using a **21-day half-life EMA** to smooth noise.
-   * **Catalyst Flagging**: Deeply undervalued intrinsic floors from Lane 1 matching positive hype/sentiment metrics in Lane 2 trigger high-conviction execution timing buy catalysts.
+   * **Sentiment & Hype Ingestion**: The `HypeComposite` (WSB/Reddit) is isolated to a 21-day half-life EMA to track short-term timing catalysts.
+   * **Relative Companion Regressions**: Runs cross-sectional regressions of multiples against Companion Variables (e.g. EV/Sales vs Operating Margin, Price/Book vs ROE) to define Justified Multiples and Pricing Deviation Deltas.
 
-3. **Lane 3: Probabilistic Banding (Uncertainty & Simulation)**:
-   * **Monte Carlo Input**: Core sentiment features shape the standard errors for expected revenue growth distributions in a 10,000-pass simulation.
+3. **Lane 3: Probabilistic Banding (Monte Carlo Simulation)**:
+   * Runs a **10,000-pass Monte Carlo simulation** randomizing Expected Growth ($g$), Operating Margin ($Margin$), and $N_{\text{CAP}}$.
+   * Rejects deterministic 1-10 scores, outputting conviction as a probability band (e.g. $P(\text{EVA} > 0 \mid t=5)$).
 
 4. **Lane 4: Framework Audit & Verification Gate**:
-   * **Leakage Detection**: Strict programmatic validation checks block pricing/hype indicators from bleeding into intrinsic cash flow calculations or Cost of Capital equations.
+   * **Anti-Contamination Checks**: Audits Lane 1 and 2 databases to ensure zero sentiment leakage from forums into intrinsic DCF parameters.
+   * **Terminal Stability Rule**: Enforces decay of terminal Year 10 ROIC to the industry baseline cost of capital (WACC).
+
+---
+
+## B2B Knowledge Graph Ingestion Layer (Source C Refactoring)
+*   **OpenAlex & Semantic Scholar REST APIs**: Text-mines the academic abstract_inverted_index and citations block. Implements a textual keyword co-occurrence engine to detect structural bottlenecks (e.g. electomigration, substrate packaging thermal limits) before they register in commercial patent applications:
+    $$\text{Association}_{\text{Tech-Node}} = \frac{\text{Count}(L_{\text{Corporate Lab}} \cap C_{\text{Technical Failure Key}})}{\text{Total Paper Segment Base}}$$
+*   **SEC Form SD (Conflict Minerals)**: Ingests global unredacted tier-3 and tier-4 processing refiners and names.
+*   **Customs Manifest Logs & Bills of Lading**: Pulls Harmonized System (HS) Commodity Codes and shipment origin/destination container logs to track real-time supplier cargo weight allocation.
 
 ---
 
