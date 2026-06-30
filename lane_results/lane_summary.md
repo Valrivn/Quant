@@ -1,6 +1,6 @@
 # Comprehensive Parallel Sweeps & Architectural Summary Report (Opus 4.6)
 
-**Generated:** `2026-06-30T10:16:13Z`  
+**Generated:** `2026-06-30T16:25:18Z`  
 **Execution Pipeline:** Autonomous 5-Lane Isolated Worktree Matrix (`lane_alpha`, `lane_beta`, `lane_gamma`, `lane_delta`, `lane_epsilon`)  
 **Target Coverage:** 10 Mega-Cap Technology Equities (`NVDA`, `AVGO`, `INTC`, `AMD`, `MSFT`, `GOOGL`, `META`, `TSLA`, `AAPL`, `AMZN`)  
 **Compliance & Verification:** 100% Test Pass Rate (578/578 unit tests), Zero Hardcoding, Zero Lookahead Bias  
@@ -53,8 +53,8 @@ graph TD
 
 ### 2.4 Lane Delta: Master Compilation & Weight Optimization Gate (`lane_delta`)
 - **Primary Focus:** Downstream Fama-MacBeth cross-sectional panel regression on 5-year point-in-time historical baseline data (`data/historical_5y_baseline.csv`).
-- **Weight Optimization Results:** Discovered optimal branch weights (w_culture=0.02, w_moat=0.505, w_hype=0.475) maximizing forward Spearman Rank Correlation (rho = 0.2704).
-- **Spearman Grid Search:** 17743 evaluations, IC = 0.270356 (p = 0.091556).
+- **Weight Optimization Results:** Discovered optimal branch weights (w_culture=0.335, w_moat=0.665, w_hype=0.0) maximizing forward Spearman Rank Correlation (rho = 0.2194).
+- **Spearman Grid Search:** 193 evaluations, IC = 0.219429 (p = 0.173694).
 - **Active Conviction Scoring:** Outputs actionable 0–10 asset conviction scores and narrative ratings to [conviction_scores.md](file:///Users/hayden/Desktop/quant-py/lane_results/conviction_scores.md).
 
 ### 2.5 Lane Epsilon: Master Synthesis & Reporting Gate (`lane_epsilon`)
@@ -68,16 +68,16 @@ The following scores represent the final actionable outputs computed by Lane Del
 
 | Rank | Ticker | Sector | Conviction Score | Actionable Label | Quality Score | Financial Score | Trajectory Score | Momentum |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **1** | **NVDA** | Semiconductors | **8 / 10** | **Strong Buy** | 0.684 | 0.854 | 0.852 | 0.632 |
-| **2** | **AAPL** | Hardware OEM | **7 / 10** | **Buy** | 0.662 | 0.893 | 0.864 | 0.508 |
-| **3** | **AMZN** | Hardware OEM | **7 / 10** | **Buy** | 0.655 | 0.776 | 0.868 | 0.497 |
-| **4** | **AVGO** | Semiconductors | **7 / 10** | **Buy** | 0.620 | 0.907 | 0.814 | 0.531 |
-| **5** | **GOOGL** | Platform Software | **7 / 10** | **Buy** | 0.654 | 0.767 | 0.868 | 0.516 |
-| **6** | **META** | Platform Software | **7 / 10** | **Buy** | 0.650 | 0.558 | 0.870 | 0.537 |
-| **7** | **MSFT** | Platform Software | **7 / 10** | **Buy** | 0.669 | 0.853 | 0.860 | 0.521 |
-| **8** | **TSLA** | Hardware OEM | **7 / 10** | **Buy** | 0.609 | 0.805 | 0.810 | 0.530 |
-| **9** | **AMD** | Semiconductors | **6 / 10** | **Buy** | 0.624 | 0.604 | 0.817 | 0.520 |
-| **10** | **INTC** | Semiconductors | **3 / 10** | **Reduce** | 0.461 | 0.384 | 0.100 | 0.382 |
+| **1** | **AAPL** | Hardware OEM | **10 / 10** | **Strong Buy** | 0.897 | 0.893 | 0.845 | 0.512 |
+| **2** | **AMD** | Semiconductors | **10 / 10** | **Strong Buy** | 0.805 | 0.604 | 0.867 | 0.529 |
+| **3** | **AMZN** | Hardware OEM | **10 / 10** | **Strong Buy** | 0.875 | 0.776 | 0.849 | 0.503 |
+| **4** | **AVGO** | Semiconductors | **10 / 10** | **Strong Buy** | 0.812 | 0.907 | 0.862 | 0.538 |
+| **5** | **GOOGL** | Platform Software | **10 / 10** | **Strong Buy** | 0.881 | 0.767 | 0.848 | 0.521 |
+| **6** | **INTC** | Semiconductors | **10 / 10** | **Strong Buy** | 0.458 | 0.384 | 0.758 | 0.373 |
+| **7** | **META** | Platform Software | **10 / 10** | **Strong Buy** | 0.858 | 0.558 | 0.853 | 0.543 |
+| **8** | **MSFT** | Platform Software | **10 / 10** | **Strong Buy** | 0.906 | 0.853 | 0.842 | 0.528 |
+| **9** | **NVDA** | Semiconductors | **10 / 10** | **Strong Buy** | 0.911 | 0.854 | 0.842 | 0.642 |
+| **10** | **TSLA** | Hardware OEM | **10 / 10** | **Strong Buy** | 0.728 | 0.805 | 0.815 | 0.532 |
 ---
 
 ## 4. Empirical Live Ingestion & Database Provenance

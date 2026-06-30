@@ -1,82 +1,102 @@
 {
   "NVDA": {
-    "conviction": 8,
-    "quality": 0.684,
+    "conviction": 10,
+    "quality": 0.911,
     "financial": 0.854,
-    "trajectory": 0.852,
-    "momentum": 0.632,
-    "label": "Strong Buy"
-  },
-  "AVGO": {
-    "conviction": 7,
-    "quality": 0.62,
-    "financial": 0.907,
-    "trajectory": 0.814,
-    "momentum": 0.531,
-    "label": "Buy"
-  },
-  "MSFT": {
-    "conviction": 7,
-    "quality": 0.669,
-    "financial": 0.853,
-    "trajectory": 0.86,
-    "momentum": 0.521,
-    "label": "Buy"
-  },
-  "GOOGL": {
-    "conviction": 7,
-    "quality": 0.654,
-    "financial": 0.767,
-    "trajectory": 0.868,
-    "momentum": 0.516,
-    "label": "Buy"
-  },
-  "META": {
-    "conviction": 7,
-    "quality": 0.65,
-    "financial": 0.558,
-    "trajectory": 0.87,
-    "momentum": 0.537,
-    "label": "Buy"
-  },
-  "TSLA": {
-    "conviction": 7,
-    "quality": 0.609,
-    "financial": 0.805,
-    "trajectory": 0.81,
-    "momentum": 0.53,
-    "label": "Buy"
-  },
-  "AAPL": {
-    "conviction": 7,
-    "quality": 0.662,
-    "financial": 0.893,
-    "trajectory": 0.864,
-    "momentum": 0.508,
-    "label": "Buy"
-  },
-  "AMZN": {
-    "conviction": 7,
-    "quality": 0.655,
-    "financial": 0.776,
-    "trajectory": 0.868,
-    "momentum": 0.497,
-    "label": "Buy"
+    "trajectory": 0.842,
+    "momentum": 0.642,
+    "label": "Strong Buy",
+    "p_eva_t5": 1.0,
+    "p_roic_wacc": 1.0
   },
   "AMD": {
-    "conviction": 6,
-    "quality": 0.624,
+    "conviction": 10,
+    "quality": 0.805,
     "financial": 0.604,
-    "trajectory": 0.817,
-    "momentum": 0.52,
-    "label": "Buy"
+    "trajectory": 0.867,
+    "momentum": 0.529,
+    "label": "Strong Buy",
+    "p_eva_t5": 1.0,
+    "p_roic_wacc": 1.0
+  },
+  "AVGO": {
+    "conviction": 10,
+    "quality": 0.812,
+    "financial": 0.907,
+    "trajectory": 0.862,
+    "momentum": 0.538,
+    "label": "Strong Buy",
+    "p_eva_t5": 1.0,
+    "p_roic_wacc": 1.0
   },
   "INTC": {
-    "conviction": 3,
-    "quality": 0.461,
+    "conviction": 10,
+    "quality": 0.458,
     "financial": 0.384,
-    "trajectory": 0.1,
-    "momentum": 0.382,
-    "label": "Reduce"
+    "trajectory": 0.758,
+    "momentum": 0.373,
+    "label": "Strong Buy",
+    "p_eva_t5": 1.0,
+    "p_roic_wacc": 1.0
+  },
+  "MSFT": {
+    "conviction": 10,
+    "quality": 0.906,
+    "financial": 0.853,
+    "trajectory": 0.842,
+    "momentum": 0.528,
+    "label": "Strong Buy",
+    "p_eva_t5": 1.0,
+    "p_roic_wacc": 1.0
+  },
+  "GOOGL": {
+    "conviction": 10,
+    "quality": 0.881,
+    "financial": 0.767,
+    "trajectory": 0.848,
+    "momentum": 0.521,
+    "label": "Strong Buy",
+    "p_eva_t5": 1.0,
+    "p_roic_wacc": 1.0
+  },
+  "META": {
+    "conviction": 10,
+    "quality": 0.858,
+    "financial": 0.558,
+    "trajectory": 0.853,
+    "momentum": 0.543,
+    "label": "Strong Buy",
+    "p_eva_t5": 1.0,
+    "p_roic_wacc": 1.0
+  },
+  "TSLA": {
+    "conviction": 10,
+    "quality": 0.728,
+    "financial": 0.805,
+    "trajectory": 0.815,
+    "momentum": 0.532,
+    "label": "Strong Buy",
+    "p_eva_t5": 1.0,
+    "p_roic_wacc": 1.0
+  },
+  "AAPL": {
+    "conviction": 10,
+    "quality": 0.897,
+    "financial": 0.893,
+    "trajectory": 0.845,
+    "momentum": 0.512,
+    "label": "Strong Buy",
+    "p_eva_t5": 1.0,
+    "p_roic_wacc": 1.0
+  },
+  "AMZN": {
+    "conviction": 10,
+    "quality": 0.875,
+    "financial": 0.776,
+    "trajectory": 0.849,
+    "momentum": 0.503,
+    "label": "Strong Buy",
+    "p_eva_t5": 1.0,
+    "p_roic_wacc": 1.0
   }
 }
