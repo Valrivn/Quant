@@ -1,6 +1,6 @@
 # Branch Weight Optimization — Lane Alpha Adaptive Discovery Engine
 
-**Timestamp:** 2026-06-29T16:41:46Z
+**Timestamp:** 2026-06-30T10:43:13Z
 **Data Source:** `data/historical_5y_baseline.csv` → `historical_5y_slice` (2021-06-30 to 2025-06-30)
 **Tickers:** NVDA, AMD, AVGO, INTC, MSFT, GOOGL, META, TSLA, AAPL, AMZN
 **Optimization:** Grid search (17743 evaluations)
