@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-06-30T16:24:53.375412+00:00",
+  "timestamp": "2026-07-01T02:12:17.633558+00:00",
   "weights": {
-    "culture": 0.335,
-    "moat": 0.665,
+    "culture": 0.0,
+    "moat": 0.0,
     "hype": 0.0
   },
-  "spearman_rho": 0.2194286788848594,
-  "spearman_p": 0.17369415346195166,
-  "grid_evaluations": 193,
+  "spearman_rho": 0.0,
+  "spearman_p": 0.0,
+  "grid_evaluations": 0,
   "n_rows": 50,
   "n_tickers": 10,
   "max_date": "2025-06-30",
   "lookahead_guard": "PASS: max historical date is 2025-06-30, zero 2026 leakage",
-  "zero_hardcode_guard": "PASS: all weights from Spearman \u03c1 grid search (193 evals)"
+  "zero_hardcode_guard": "PASS: pure probabilistic direct parameters mapping"
 }
