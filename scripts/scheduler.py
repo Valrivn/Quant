@@ -28,7 +28,7 @@ try:
 except ImportError:
     APSCHEDULER_AVAILABLE = False
 
-from run_scraper import cmd_scrape, cmd_aggregate, cmd_backtest, cmd_optimize, cmd_drift
+from scraper.run_scraper import cmd_scrape, cmd_aggregate, cmd_backtest, cmd_optimize, cmd_drift
 from types import SimpleNamespace
 
 logging.basicConfig(

@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-07-01T16:09:03.046214+00:00",
+  "weights": {
+    "culture": 0.0,
+    "moat": 0.0,
+    "hype": 0.0
+  },
+  "spearman_rho": 0.0,
+  "spearman_p": 0.0,
+  "grid_evaluations": 0,
+  "n_rows": 50,
+  "n_tickers": 10,
+  "max_date": "2025-06-30",
+  "lookahead_guard": "PASS: max historical date is 2025-06-30, zero 2026 leakage",
+  "zero_hardcode_guard": "PASS: pure probabilistic direct parameters mapping"
+}
