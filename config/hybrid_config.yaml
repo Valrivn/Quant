@@ -121,6 +121,8 @@ sub_sectors:
     - "WDAY"
   hardware_oem:
     - "AAPL"
+    - "TSLA"
+    - "AMZN"
     - "DELL"
     - "HPQ"
     - "IBM"

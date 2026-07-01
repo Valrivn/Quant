@@ -1,0 +1,11 @@
+.venv
+.git
+.pytest_cache
+lane_results
+__pycache__
+*.log
+*.pyc
+*.pyo
+.DS_Store
+*.json
+*.md

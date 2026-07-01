@@ -15,6 +15,6 @@ def test_lane_epsilon_summary_generation(tmp_path):
 
 def test_lane_epsilon_execution():
     workspace_root = Path(__file__).resolve().parents[1]
-    summary_file = workspace_root / "lane_results" / "lane_summary.md"
+    summary_file = workspace_root / "center" / "lane_summary.md"
     assert summary_file.exists()
     assert summary_file.stat().st_size > 500

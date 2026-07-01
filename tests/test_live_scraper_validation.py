@@ -94,7 +94,7 @@ HARDCODED_SENTINELS = {
     "overall_rating": [4.5, 4.25, 4.0, 3.5],
 }
 
-MISMATCH_LOG = WORKSPACE / "lane_results" / "live_mismatch.json"
+MISMATCH_LOG = WORKSPACE / "center" / "live_mismatch.json"
 
 
 # ---------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 tests/test_audit_lane_beta.py — Lane Beta Extended Fundamental Model Audit Suite
 """
 import pytest
-from opencode_scripts.qualitative_scoring import (
+from psychological.qualitative_scoring import (
     TrajectoryCorridorEngine, FinancialReconstructionInterface
 )
 

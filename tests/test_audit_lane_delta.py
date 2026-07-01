@@ -5,18 +5,18 @@ import pytest
 from pathlib import Path
 
 WORKSPACE_ROOT = Path(__file__).resolve().parents[1]
-LANE_RESULTS_DIR = WORKSPACE_ROOT / "lane_results"
+LANE_RESULTS_DIR = WORKSPACE_ROOT / "center"
 
 class TestLaneDeltaAudit:
     def test_weight_optimization_reasoning_artifacts(self):
         weight_file = LANE_RESULTS_DIR / "weight_reasoning.md"
-        assert weight_file.exists(), "weight_reasoning.md must exist in lane_results/"
+        assert weight_file.exists(), "weight_reasoning.md must exist in center/"
         content = weight_file.read_text()
         assert "Spearman" in content or "weight" in content.lower(), "Weight reasoning must document statistical optimization"
 
     def test_conviction_scores_matrix_structure_and_zero_lookahead(self):
         conviction_file = LANE_RESULTS_DIR / "conviction_scores.md"
-        assert conviction_file.exists(), "conviction_scores.md must exist in lane_results/"
+        assert conviction_file.exists(), "conviction_scores.md must exist in center/"
         content = conviction_file.read_text()
         
         # Verify 0-10 conviction scale and ticker presence
