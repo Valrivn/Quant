@@ -51,8 +51,11 @@ Isolates high-velocity, lower-validity sentiment/hype metrics (WSB counts, RSI, 
     $$\Delta_{\text{Pricing Deviation}} = \text{Actual Multiple} - \text{Justified Multiple}$$
 
 ### 2.3 Lane 3: Uncertainty & Simulation Engine (Probabilistic Risk)
-Rejects static points in favor of probability distributions (normal or log-normal) shaped by historical Spearman Rank standard errors:
-*   Runs a **10,000-pass Monte Carlo simulation** on growth rate ($g$) and terminal operating margins.
+Rejects static points in favor of probability distributions derived from qualitative indicators:
+*   Runs a **10,000-pass Monte Carlo simulation** driven by three core variables:
+    1. **Target Operating Margin ($M$):** Normal Distribution $\mathcal{N}(\mu_M, \sigma_M)$ where margin volatility $\sigma_M = \sigma_{\text{base}} \times \lambda$ ($\sigma_{\text{base}} = 0.04$). Volatility multiplier $\lambda = 1.0 + \frac{1.5}{1 + e^{-10(R - 0.5)}}$ where Risk Index $R = K_c \times (1.0 - C)$.
+    2. **Reinvestment Efficiency / Sales-to-Capital Ratio ($S/C$):** Log-Normal Distribution $\ln\mathcal{N}(\mu_{SC}, \sigma_{SC})$ ($\sigma_{SC} = 0.15$) where expected scale is modulated by $\mu_{SC} = \text{Base Ratio} \times (0.5 + H) \times \text{sc\_penalty}$ to penalize geopolitical supply concentration.
+    3. **Competitive Advantage Period ($N_{\text{CAP}}$):** Discrete / Uniform Distribution $\mathcal{U}(A, B)$ where Ecosystem Health $E = M \times (1.0 - A_{\text{tech}})$, Fuzzy Horizon Modifier $H = \frac{1}{1 + e^{-8(E - 0.5)}}$, boundaries $A = \max(3, \text{Round}(3 + H \times 5))$ and $B = \max(A + 2, \text{Round}(5 + H \times 10))$.
 *   Integrates macro stress condition variables to model supply chain shock probabilities, localized inflation deviations, and geopolitical risk factors.
 
 ### 2.4 Lane 4: Framework Audit & Verification Gate (Compliance Gate)

@@ -44,6 +44,22 @@ from psychological.qualitative_scoring import (
     create_trajectory_corridor_engine,
     create_alternative_strategy_pipeline,
 )
+from psychological.monte_carlo import (
+    MonteCarloEngine,
+    MonteCarloInput,
+    MonteCarloResult,
+    MonteCarloSimRun,
+    create_monte_carlo_engine,
+)
+from psychological.four_lane_pipeline import (
+    FourLanePipeline,
+    FourLaneOutput,
+    Lane1Result,
+    Lane2Result,
+    Lane3Result,
+    Lane4Result,
+    create_four_lane_pipeline,
+)
 
 __all__ = [
     "PsychologicalFeatureVector",
@@ -94,4 +110,16 @@ __all__ = [
     "create_financial_reconstruction_interface",
     "create_trajectory_corridor_engine",
     "create_alternative_strategy_pipeline",
+    "MonteCarloEngine",
+    "MonteCarloInput",
+    "MonteCarloResult",
+    "MonteCarloSimRun",
+    "create_monte_carlo_engine",
+    "FourLanePipeline",
+    "FourLaneOutput",
+    "Lane1Result",
+    "Lane2Result",
+    "Lane3Result",
+    "Lane4Result",
+    "create_four_lane_pipeline",
 ]

@@ -164,6 +164,14 @@ class TestExtractGlassdoorRating:
         html = '<html>No rating found here</html>'
         assert ingest_module._extract_glassdoor_rating(html) is None
 
+    def test_rejects_out_of_range(self, ingest_module):
+        assert ingest_module._extract_glassdoor_rating('<html>60.0 out of 5</html>') is None
+        assert ingest_module._extract_glassdoor_rating('<html>19.0 out of 5</html>') is None
+        assert ingest_module._extract_glassdoor_rating('<html>6.0 out of 5</html>') is None
+        assert ingest_module._extract_glassdoor_rating('<html>0.0 ★</html>') is None
+        assert ingest_module._extract_glassdoor_rating('<html>4.2 ★</html>') == 4.2
+        assert ingest_module._extract_glassdoor_rating('<html>3.0 out of 5</html>') == 3.0
+
 
 class TestConfigLoading:
     def test_load_config(self, ingest_module):
@@ -289,7 +297,7 @@ class TestAuditReport:
         }
         ig.write_audit_md(tickers, matrix, 5, 50, 123.4)
 
-        audit_path = ig.PROJECT_ROOT / "lane_results" / "data_completeness_audit.md"
+        audit_path = ig.PROJECT_ROOT / "center" / "data_completeness_audit.md"
         assert audit_path.exists()
         content = audit_path.read_text()
         assert "NVDA" in content

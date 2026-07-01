@@ -124,12 +124,17 @@ def cmd_drift(args):
         decay_threshold=args.threshold,
         recent_window_days=args.window
     )
-    
-    if result["drift_detected"]:
-        logger.warning(f"Drift detected: {result['decay']:.2%} decay")
+
+    reason = result.get("reason", "")
+    if reason:
+        logger.info(f"Drift check skipped: {reason}")
+    elif result["drift_detected"]:
+        decay = result.get("decay", 0.0)
+        logger.warning(f"Drift detected: {decay:.2%} decay")
         logger.info(f"New challenger Sharpe: {result['new_challenger_sharpe']:.4f}")
     else:
-        logger.info(f"No drift detected. Decay: {result['decay']:.2%}")
+        decay = result.get("decay", 0.0)
+        logger.info(f"No drift detected. Decay: {decay:.2%}")
     return 0
 
 

@@ -463,6 +463,37 @@ def migrate_psychological_schema(conn: sqlite3.Connection) -> None:
     create_psychological_tables(conn)
     create_phase1_tables(conn)
 
+def create_monte_carlo_tables(conn: sqlite3.Connection) -> None:
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS monte_carlo_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticker TEXT NOT NULL,
+            date TEXT NOT NULL,
+            n_simulations INTEGER,
+            positive_eva_probability REAL,
+            mean_intrinsic_value REAL,
+            median_intrinsic_value REAL,
+            std_intrinsic_value REAL,
+            p5_intrinsic_value REAL,
+            p25_intrinsic_value REAL,
+            p75_intrinsic_value REAL,
+            p95_intrinsic_value REAL,
+            mean_growth_rate REAL,
+            std_growth_rate REAL,
+            mean_terminal_margin REAL,
+            mean_terminal_fcf REAL,
+            macro_risk_adjustment REAL,
+            confidence_band TEXT,
+            projection_years INTEGER,
+            computed_at TEXT NOT NULL,
+            UNIQUE(ticker, date)
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_mc_ticker_date ON monte_carlo_results(ticker, date)")
+    conn.commit()
+
+
 def create_lane_gamma_tables(conn: sqlite3.Connection) -> None:
     cursor = conn.cursor()
 

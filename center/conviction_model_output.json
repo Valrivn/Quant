@@ -9,32 +9,12 @@
     "p_eva_t5": 1.0,
     "p_roic_wacc": 1.0
   },
-  "AMD": {
-    "conviction": 10,
-    "quality": 0.76,
-    "financial": 0.604,
-    "trajectory": 0.825,
-    "momentum": 0.527,
-    "label": "Strong Buy",
-    "p_eva_t5": 1.0,
-    "p_roic_wacc": 1.0
-  },
   "AVGO": {
     "conviction": 10,
     "quality": 0.711,
     "financial": 0.907,
     "trajectory": 0.852,
     "momentum": 0.536,
-    "label": "Strong Buy",
-    "p_eva_t5": 1.0,
-    "p_roic_wacc": 1.0
-  },
-  "INTC": {
-    "conviction": 10,
-    "quality": 0.354,
-    "financial": 0.384,
-    "trajectory": 0.512,
-    "momentum": 0.371,
     "label": "Strong Buy",
     "p_eva_t5": 1.0,
     "p_roic_wacc": 1.0
@@ -56,8 +36,8 @@
     "trajectory": 0.909,
     "momentum": 0.52,
     "label": "Strong Buy",
-    "p_eva_t5": 1.0,
-    "p_roic_wacc": 1.0
+    "p_eva_t5": 0.9997,
+    "p_roic_wacc": 0.9997
   },
   "META": {
     "conviction": 10,
@@ -65,16 +45,6 @@
     "financial": 0.558,
     "trajectory": 0.886,
     "momentum": 0.541,
-    "label": "Strong Buy",
-    "p_eva_t5": 1.0,
-    "p_roic_wacc": 1.0
-  },
-  "TSLA": {
-    "conviction": 10,
-    "quality": 0.679,
-    "financial": 0.805,
-    "trajectory": 0.75,
-    "momentum": 0.532,
     "label": "Strong Buy",
     "p_eva_t5": 1.0,
     "p_roic_wacc": 1.0
@@ -90,13 +60,43 @@
     "p_roic_wacc": 1.0
   },
   "AMZN": {
-    "conviction": 10,
+    "conviction": 6,
     "quality": 0.794,
     "financial": 0.776,
     "trajectory": 0.905,
     "momentum": 0.502,
-    "label": "Strong Buy",
-    "p_eva_t5": 1.0,
-    "p_roic_wacc": 1.0
+    "label": "Buy",
+    "p_eva_t5": 0.6248,
+    "p_roic_wacc": 0.6254
+  },
+  "AMD": {
+    "conviction": 3,
+    "quality": 0.76,
+    "financial": 0.604,
+    "trajectory": 0.825,
+    "momentum": 0.527,
+    "label": "Reduce",
+    "p_eva_t5": 0.306,
+    "p_roic_wacc": 0.3061
+  },
+  "TSLA": {
+    "conviction": 3,
+    "quality": 0.679,
+    "financial": 0.805,
+    "trajectory": 0.75,
+    "momentum": 0.532,
+    "label": "Reduce",
+    "p_eva_t5": 0.2714,
+    "p_roic_wacc": 0.2726
+  },
+  "INTC": {
+    "conviction": 0,
+    "quality": 0.354,
+    "financial": 0.384,
+    "trajectory": 0.512,
+    "momentum": 0.371,
+    "label": "Don't Consider",
+    "p_eva_t5": 0.0,
+    "p_roic_wacc": 0.0
   }
 }

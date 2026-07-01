@@ -24,17 +24,20 @@ To avoid the **"Bermuda Triangle of Valuation"**, the quantitative pipeline stri
 ```
 
 1. **Lane 1: Intrinsic Valuation Matrix Engine (What to Buy)**:
-   * **Narrative-to-Numbers Translation**: Uses `QualitativeProbabilisticTranslator` to map `MoatComposite` into mean and variance for the Competitive Advantage Period ($N_{\text{CAP}}$) distribution shape, preventing step boundary line volatility.
-   * **Reinvestment & Capital Efficiency**: Modulates Return on Invested Capital (ROIC) and Expected Fundamental Growth ($g = \text{Reinvestment Rate} \times \text{ROIC}$), capitalizing R&D assets over 3-to-5 year timelines.
-   * **Discount Rate Adjustments**: Maps `CultureComposite` and `LeadershipStability` to reduce Equity Risk Premium (ERP) and Cost of Capital, and maps Interest Coverage Ratio to automated Cost of Debt ($R_d$).
+   * **Narrative-to-Numbers Translation**: Uses `QualitativeProbabilisticTranslator` to map qualitative indicators (Culture, Moat, and Supplier Concentration) into statistical distribution parameters, avoiding categorical step boundaries.
+   * **Reinvestment & Capital Efficiency**: Modulates Return on Invested Capital (ROIC) and Expected Fundamental Growth ($g = \text{Reinvestment Rate} \times \text{ROIC}$), utilizing 3-Year R&D Capitalization.
+   * **Discount Rate Adjustments**: Maps `CultureComposite` to reduce Equity Risk Premium (ERP) and Cost of Capital, and maps Interest Coverage Ratio to automated Cost of Debt ($R_d$).
 
 2. **Lane 2: Market Mood & Pricing Matrix (When to Buy)**:
    * **Sentiment & Hype Ingestion**: The `HypeComposite` (WSB/Reddit) is isolated to a 21-day half-life EMA to track short-term timing catalysts.
    * **Relative Companion Regressions**: Runs cross-sectional regressions of multiples against Companion Variables (e.g. EV/Sales vs Operating Margin, Price/Book vs ROE) to define Justified Multiples and Pricing Deviation Deltas.
 
 3. **Lane 3: Probabilistic Banding (Monte Carlo Simulation)**:
-   * Runs a **10,000-pass Monte Carlo simulation** randomizing Expected Growth ($g$), Operating Margin ($Margin$), and $N_{\text{CAP}}$.
-   * Rejects deterministic 1-10 scores, outputting conviction as a probability band (e.g. $P(\text{EVA} > 0 \mid t=5)$).
+   * Runs a **10,000-pass Monte Carlo simulation** using three core driver connections:
+     * **Connection 1: The Longevity Moat Link**: Rolling MAD slope of GitHub active contributors + G2 Satisfaction scores determines the Competitive Advantage Period ($N_{\text{CAP}}$) discrete uniform boundaries $\mathcal{U}(A, B)$ (shifting from $\mathcal{U}(8, 15)$ for strong lock-in to $\mathcal{U}(3, 5)$ for downward trends).
+     * **Connection 2: The Operational Stability Link**: Skewness / bimodal profiles of employee boards map Execution Risk. Collapse/turnover spikes standard deviation of operating margin from $\sigma_{\text{base}} = 4\%$ up to $10\%$ using risk multiplier $\lambda = 1.0 + \frac{1.5}{1 + e^{-10(R - 0.5)}}$.
+     * **Connection 3: The Supply Chain Risk Link**: Supplier volume concentration ($K_c$) from SEC Form SD and Bills of Lading penalizes the mean expectation of the Sales-to-Capital ratio ($S/C$) via a continuous sigmoid transition to reflect geopolitical manufacturing stress.
+   * Rejects deterministic 1-10 scores, outputting conviction as a confidence band (e.g. $P(\text{EVA} > 0 \mid t=5)$).
 
 4. **Lane 4: Framework Audit & Verification Gate**:
    * **Anti-Contamination Checks**: Audits Lane 1 and 2 databases to ensure zero sentiment leakage from forums into intrinsic DCF parameters.

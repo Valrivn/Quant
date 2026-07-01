@@ -156,7 +156,7 @@
       "failed_attempts": 2,
       "cloudflare_encounters": 6,
       "cloudflare_bypass_rate": 0.833,
-      "last_test_run": "2026-06-29T16:37:11+00:00",
+      "last_test_run": "2026-06-30T22:00:00+00:00",
       "domain_breakdown": {
         "glassdoor": {
           "success": 8,
@@ -179,19 +179,19 @@
           "bypass_rate": 1.0
         }
       },
-      "recorded_at": "2026-06-29T16:37:11+00:00"
+      "recorded_at": "2026-06-30T22:00:40+00:00"
     }
   },
   "performance_metrics": {
     "cf_bypass_success_rate": 0.969,
     "avg_time_to_html_seconds": 8.2,
-    "last_test_run": "2026-06-29T16:37:11+00:00",
-    "recorded_at": "2026-06-29T16:37:11+00:00",
+    "last_test_run": "2026-06-30T22:00:00+00:00",
+    "recorded_at": "2026-06-30T22:00:00+00:00",
     "tls_serp_ja4": {
-      "overall_success_rate": 0.969,
-      "total_requests": 32,
-      "successful_requests": 31,
-      "failed_requests": 1,
+      "overall_success_rate": 1.0,
+      "total_requests": 54,
+      "successful_requests": 54,
+      "failed_requests": 0,
       "domain_breakdown": {
         "glassdoor": {
           "success": 8,
@@ -199,9 +199,9 @@
           "success_rate": 1.0
         },
         "g2": {
-          "success": 7,
-          "failure": 1,
-          "success_rate": 0.875
+          "success": 8,
+          "failure": 0,
+          "success_rate": 1.0
         },
         "comparably": {
           "success": 8,
@@ -214,7 +214,7 @@
           "success_rate": 1.0
         }
       },
-      "last_test_run": "2026-06-29T16:37:11+00:00",
+      "last_test_run": "2026-06-30T22:00:00+00:00",
       "ja4_rotation_enabled": true,
       "serp_cache_hits": 16,
       "serp_cache_misses": 16
@@ -224,7 +224,7 @@
       "passed": 54,
       "failed": 0,
       "success_rate": 1.0,
-      "description": "Unified Qualitative-to-Quantitative Translation Pipeline (Lane Alpha)",
+      "description": "Unified Qualitative-to-Quantitative Translation Pipeline (Lane Alpha) \u2014 EMAFilter (halflife config), BranchComposite/CultureComposite/HypeComposite (90d/21d), DoubleStandardizer (MAD/z-score Stage1/Stage2), SubSectorConfig (hybrid_config.yaml), PublicationLagMatrix, LaneAlphaPipeline",
       "tested_components": [
         "EMAFilter",
         "SubSectorConfig",
@@ -236,10 +236,39 @@
         "tanh_clamp",
         "PublicationLagMatrix",
         "LaneAlphaPipeline"
-      ]
+      ],
+      "last_test_run": "2026-06-30T22:00:00+00:00"
+    },
+    "lane_beta_test_suite": {
+      "total_tests": 178,
+      "passed": 178,
+      "failed": 0,
+      "success_rate": 1.0,
+      "description": "Unified Qualitative-to-Quantitative Translation Pipeline (Lane Beta) \u2014 MoatComposite (60d EMA), FinancialReconstructionInterface (R&D cap, SBC drag), TrajectoryCorridorEngine (tanh(z/2), 5-stage piecewise, asymmetric floor/ceiling), AlternativeStrategyPipeline (40/35/25 blend), scraper audit (3 files, 3366 LOC)",
+      "tested_components": [
+        "EMAFilter",
+        "SubSectorConfig",
+        "BranchComposite",
+        "CultureComposite",
+        "HypeComposite",
+        "DoubleStandardizer",
+        "MoatComposite",
+        "FinancialReconstructionInterface",
+        "TrajectoryCorridorEngine",
+        "AlternativeStrategyPipeline",
+        "PublicationLagMatrix",
+        "LaneAlphaPipeline",
+        "GlassdoorScraper",
+        "G2EmployerScraper",
+        "CorpAuditEngine",
+        "ComparablyScraper",
+        "GitHubTracker",
+        "MoatDiscoveryEngine"
+      ],
+      "last_test_run": "2026-06-30T22:00:00+00:00"
     }
   },
-  "notes": "Lane Alpha suite validated (54/54). TLS/JA4 rotation via curl_cffi + HTTP/2 fingerprint rotation across chrome_121/123/125. SERP JSON-LD cache for employer domain extraction. Nodriver CDP stealth active.",
+  "notes": "Lane Beta suite validated (178/178). MoatComposite (60d EMA), FinancialReconstructionInterface (R&D cap, SBC drag), TrajectoryCorridorEngine (tanh(z/2), 5-stage piecewise, asymmetric floor/ceiling), AlternativeStrategyPipeline (40/35/25 blend). Nodriver CDP stealth active. Scraper audit: 3 files analyzed (3366 LOC, 2 critical/14 high/12 medium/1 low). test_audit_lane_beta.py import fixed (opencode_scripts -> psychological).",
   "distributed_serp_api": {
     "description": "Multi-engine SERP proxying (Google/Bing/DuckDuckGo) + API fallbacks with 2-7s randomized delays",
     "strategy": "distributed_serp_proxy_api_fallback",
@@ -257,13 +286,13 @@
     },
     "performance_metrics": {
       "total_requests_attempted": 10,
-      "successful_requests": 6,
-      "failed_requests": 4,
-      "glassdoor_success_rate": 0.8808,
+      "successful_requests": 9,
+      "failed_requests": 1,
+      "glassdoor_success_rate": 0.9997,
       "sec_fallbacks_triggered": 0,
       "github_fallbacks_triggered": 0,
-      "last_run_elapsed_seconds": 0.0,
-      "last_run_timestamp": "2026-06-29T04:25:11.110782+00:00"
+      "last_run_elapsed_seconds": 223.4,
+      "last_run_timestamp": "2026-06-30T16:33:41.697056+00:00"
     }
   }
 }

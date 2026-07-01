@@ -831,23 +831,22 @@ class QualitativeProbabilisticTranslator:
         """Applies a smooth sigmoid transformation to eliminate edge step-errors."""
         return 1.0 / (1.0 + np.exp(-self.k * (score - self.x0)))
 
-    def map_moat_to_horizon_parameters(self, moat_composite: float) -> dict:
+    def map_moat_to_horizon_parameters(self, moat_composite: float, a_tech: float = 0.0) -> dict:
         """
-        Translates a [0,1] Moat Score into mean and variance for the 
-        Competitive Advantage Period (N_CAP) distribution shape.
+        Translates Moat and Academic/Tech Keyword Association into discrete uniform
+        boundaries for the Competitive Advantage Period (N_CAP).
         """
-        # High moat shifts the average longevity of excess returns outward smoothly
-        fuzzy_moat = 1.0 / (1.0 + np.exp(-8.0 * (moat_composite - 0.5)))
-        mean_n_cap = 3.0 + (fuzzy_moat * 12.0)  # Maps smoothly between a 3-year and 15-year horizon
-        std_n_cap = 4.0 * (1.0 - fuzzy_moat)    # Lower moat increases uncertainty around longevity
-        return {"n_cap_mean": mean_n_cap, "n_cap_std": std_n_cap}
+        E = moat_composite * (1.0 - a_tech)
+        H = 1.0 / (1.0 + np.exp(-8.0 * (E - 0.5)))
+        A = int(max(3, np.round(3 + H * 5)))
+        B = int(max(A + 2, np.round(5 + H * 10)))
+        return {"n_cap_mean": float((A + B) / 2.0), "n_cap_std": float((B - A) / 3.46), "A": A, "B": B, "H": H}
 
     def map_network_to_margin_volatility(self, culture_score: float, concentration_index: float) -> float:
-        # Combines bimodal cultural trends and supply concentrations into a margin volatility modifier
-        # Low culture stability + single point of supply failure = amplified standard errors
-        structural_friction = (1.0 - culture_score) * concentration_index
-        sigma_multiplier = 1.0 + np.log(1.0 + structural_friction)
-        return sigma_multiplier
+        # Combines culture stability and supply concentration into a margin volatility modifier
+        R_risk = concentration_index * (1.0 - culture_score)
+        lambda_vol = 1.0 + 1.5 / (1.0 + np.exp(-10.0 * (R_risk - 0.5)))
+        return lambda_vol
 
 
 def create_qualitative_probabilistic_translator(
