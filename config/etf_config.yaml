@@ -1,0 +1,46 @@
+# Quantitative Bond & Gold ETF Allocation Engine Configuration
+# Target environment: Fidelity Individual Youth Account
+
+account:
+  type: "Fidelity Individual Youth Account"
+  fractional_shares_decimals: 3
+
+fred:
+  api_key: ""  # Set FRED API key here if available. Otherwise, the engine falls back to public scraping.
+  scrape_fallback: true
+  request_timeout_seconds: 30
+
+bond_etf:
+  universe:
+    - BIL
+    - SHY
+    - IEF
+    - VCSH
+    - VCIT
+  disqualified:
+    - HYG
+    - JNK
+  min_daily_volume: 1000000
+  max_bid_ask_spread: 0.0002
+  nav_deviation_bounds: [-0.0010, 0.0010]
+  nav_critical_trigger: -0.0050
+  holdings_lookback_count: 20
+  sec_request_delay: 0.1  # Strict throttle to prevent SEC IP ban
+
+gold_etf:
+  universe:
+    - IAU
+    - GLDM
+  disqualified:
+    - GLD
+  correlation_floor: 0.99
+  max_tracking_error: 0.015
+
+allocation:
+  baseline:
+    bonds: 0.30
+    gold: 0.20
+  rebalance_schedule: "weekly"  # Weekly (Friday night) or Macro-Regime Triggered
+  macro_triggers:
+    inflation_threshold: 0.04
+    regime_shift_spread_widening: 0.015  # 150 bps spread expansion
