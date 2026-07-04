@@ -101,6 +101,31 @@ FINTECH_TICKER_PATTERNS = {
     "reddit": r"\b([A-Z]{1,5})\b"
 }
 
+# Bond & Gold ETF Candidate Universe
+ETF_UNIVERSE_BONDS = ["BIL", "SHY", "IEF", "VCSH", "VCIT"]
+ETF_UNIVERSE_GOLD = ["IAU", "GLDM"]
+ETF_DISQUALIFIED = {"GLD": "Expense ratio drag (0.40%)"}
+
+# FRED Series Keys
+FRED_SERIES = {
+    "gold_spot": "GOLDPMGBD228NLBM",
+    "real_rate_10y": "DFII10",
+    "m2_money_supply": "M2SL",
+    "baa_spread": "BAA10Y",
+    "treasury_10y": "DGS10",
+    "cpi": "CPIAUCSL",
+    "gdp": "GDP",
+    "unemployment": "UNRATE",
+}
+
+# Gatekeeper Thresholds
+LIQUIDITY_GATES = {
+    "adv_min": 1000000,
+    "bid_ask_max": 0.0002,
+    "nav_deviation_bounds": (-0.0010, 0.0010),
+    "nav_critical_trigger": -0.0050,
+}
+
 __all__ = [
     "TICKER_BLACKLIST",
     "VALIDATION_KEYWORDS",
@@ -110,5 +135,10 @@ __all__ = [
     "FINTECH_SOURCES",
     "FINTECH_SOURCE_WEIGHTS",
     "FINTECH_VALIDATION_KEYWORDS",
-    "FINTECH_TICKER_PATTERNS"
+    "FINTECH_TICKER_PATTERNS",
+    "ETF_UNIVERSE_BONDS",
+    "ETF_UNIVERSE_GOLD",
+    "ETF_DISQUALIFIED",
+    "FRED_SERIES",
+    "LIQUIDITY_GATES"
 ]
