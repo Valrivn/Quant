@@ -1,12 +1,17 @@
 # Quantitative Tactical Allocation Engine
 # Macro-regime classification, tactical rebalancing, and Fidelity order generation.
 
-from Quantitative.allocation.tactical_rebalancer import TacticalRebalancer
-from Quantitative.allocation.macro_state_classifier import MacroStateClassifier
-from Quantitative.allocation.order_draft_generator import OrderDraftGenerator
+try:
+    from Quantitative.allocation.tactical_rebalancer import TacticalRebalancer
+except ImportError:
+    pass
 
-__all__ = [
-    "TacticalRebalancer",
-    "MacroStateClassifier",
-    "OrderDraftGenerator",
-]
+try:
+    from Quantitative.allocation.macro_state_classifier import MacroStateClassifier
+except ImportError:
+    pass
+
+try:
+    from Quantitative.allocation.order_draft_generator import OrderDraftGenerator
+except ImportError:
+    pass
