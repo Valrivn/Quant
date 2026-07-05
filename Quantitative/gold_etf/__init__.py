@@ -1,12 +1,17 @@
 # Quantitative Gold ETF Sub-Engine
 # Gold ETF selection, tracking error analysis, and macro valuation monitoring.
 
-from Quantitative.gold_etf.gold_etf_screener import GoldETFScreener
-from Quantitative.gold_etf.spot_gold_tracker import SpotGoldTracker
-from Quantitative.gold_etf.gold_macro_valuation import GoldMacroValuation
+try:
+    from Quantitative.gold_etf.gold_etf_screener import GoldETFScreener
+except ImportError:
+    pass
 
-__all__ = [
-    "GoldETFScreener",
-    "SpotGoldTracker",
-    "GoldMacroValuation",
-]
+try:
+    from Quantitative.gold_etf.spot_gold_tracker import SpotGoldTracker
+except ImportError:
+    pass
+
+try:
+    from Quantitative.gold_etf.gold_macro_valuation import GoldMacroValuation
+except ImportError:
+    pass
