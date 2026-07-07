@@ -57,7 +57,17 @@ $$\text{Drag} = \min\left(1.0, 10.0 \times \left(0.4 \times \frac{\text{SBC}}{\t
 A piecewise multi-stage growth decay model that clamps signals within an asymmetric corridor between a floor ($0.15$) and a ceiling ($0.92$):
 $$\text{Output} = f(\text{clamped\_z})$$
 
----
+### F. Ecosystem Market-Share Displacement Ratio (DR) & Monte Carlo Parameters
+To capture real-time competitive shifts before they result in permanent failures, the engine cross-examines companies within the same sub-sector (e.g., comparing NVDA vs. AMD inside the semiconductors group).
+
+The rolling 2-year developer engagement slope $\Delta$ is calculated from stars, forks, and open issues in `github_org_metrics`:
+$$\Delta = \sum_{\text{repos}} \frac{\text{stars} + \text{forks} + \text{open\_issues}}{\max(0.1, \text{age\_in\_years})}$$
+The relative displacement ratio $DR$ is calculated as:
+$$DR = \frac{\max(0, \; \Delta_{\text{Competitor}})}{\max(0, \; \Delta_{\text{Leader}}) + 1e-6}$$
+When $DR > 1.0$:
+- **Tweak A (Front-Loaded Competitor Moat Penalty)**: Replaces the flat, uniform CAP distribution with a Right-Skewed Beta Distribution ($\alpha = 2, \beta = 5$) on compressed bounds (maxing at 5 or 6 years).
+- **Tweak B (Sales-to-Capital Capital-Efficiency Drag/Boost)**: Scales down the mean of the Sales-to-Capital ($S/C$) ratio for the dominant firm (leader) by up to 30%, while scaling up the capital efficiency parameter for the challenger by up to 30%.
+
 
 ## 3. Folder & File Skeleton Structure
 

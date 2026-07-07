@@ -166,8 +166,13 @@ class LiquidityGatekeeper:
         Returns:
             GatekeeperResult with pass/fail state and gate details
         """
+        from config.constants import ETF_DISQUALIFIED
+        if ticker in ETF_DISQUALIFIED:
+            raise ValueError(f"CRITICAL: Pipeline Violation. {ticker} is explicitly blacklisted.")
+
         if metrics is None:
             metrics = self._fetcher.fetch(ticker)
+
 
         # Run all three gates
         adv_gate = self._evaluate_adv_gate(metrics)
