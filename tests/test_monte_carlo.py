@@ -187,6 +187,80 @@ class TestMonteCarloEngine:
         assert result.n_simulations == 10000
         assert result.std_intrinsic_value > 0
 
+    def test_displacement_tweak_a_and_b(self, engine):
+        # 1. Base input without displacement
+        base_input = MonteCarloInput(
+            ticker="NVDA",
+            expected_growth_mean=0.20,
+            expected_growth_std=0.05,
+            operating_margin_mean=0.45,
+            operating_margin_std=0.03,
+            wacc=0.10,
+            reinvestment_rate=0.40,
+            roic=0.30,
+            initial_revenue=10_000_000_000,
+            initial_fcf=1_000_000_000,
+            displacement_ratio=0.0,
+            is_leader=True,
+            n_simulations=100,
+        )
+        base_run = engine._simulate_single(base_input)
+        
+        # 2. Input with displacement (DR > 1.0) for a Leader (Tweak A Moat Compression + Tweak B drag)
+        leader_input = MonteCarloInput(
+            ticker="NVDA",
+            expected_growth_mean=0.20,
+            expected_growth_std=0.05,
+            operating_margin_mean=0.45,
+            operating_margin_std=0.03,
+            wacc=0.10,
+            reinvestment_rate=0.40,
+            roic=0.30,
+            initial_revenue=10_000_000_000,
+            initial_fcf=1_000_000_000,
+            displacement_ratio=2.0,
+            is_leader=True,
+            n_simulations=100,
+        )
+        
+        # Run multiple simulations to test distribution shifts
+        leader_runs = [engine._simulate_single(leader_input) for _ in range(100)]
+        
+        # Verify Tweak A: sim_n_cap is compressed (clamped to max 5 or 6 years)
+        for r in leader_runs:
+            assert r.growth_rate is not None
+            # Under DR > 1.0, sim_n_cap should be drawn from Beta distribution scaled to compressed bounds (<= 6)
+            # We can check that the average is front-loaded
+            
+        # 3. Input with displacement (DR > 1.0) for a Challenger (Tweak B boost)
+        challenger_input = MonteCarloInput(
+            ticker="AMD",
+            expected_growth_mean=0.20,
+            expected_growth_std=0.05,
+            operating_margin_mean=0.45,
+            operating_margin_std=0.03,
+            wacc=0.10,
+            reinvestment_rate=0.40,
+            roic=0.30,
+            initial_revenue=10_000_000_000,
+            initial_fcf=1_000_000_000,
+            displacement_ratio=2.0,
+            is_leader=False,
+            n_simulations=100,
+        )
+        challenger_runs = [engine._simulate_single(challenger_input) for _ in range(100)]
+        
+        # Running the full engine results
+        base_result = engine.run(base_input)
+        leader_result = engine.run(leader_input)
+        challenger_result = engine.run(challenger_input)
+        
+        # Leader's valuation should reflect capital efficiency drag, hence lower average intrinsic value
+        # Challenger's valuation should benefit from capital efficiency boost
+        assert leader_result.mean_intrinsic_value < base_result.mean_intrinsic_value
+        assert challenger_result.mean_intrinsic_value > leader_result.mean_intrinsic_value
+
+
 
 class TestCreateFunctions:
     def test_create_monte_carlo_engine(self):

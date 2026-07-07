@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import sqlite3
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
@@ -119,16 +119,16 @@ def modulate_cap_horizon(culture_score: float | None, moat_strength: float = 0.5
 TICKERS = ["NVDA", "AMD", "INTC", "AVGO", "MSFT", "GOOGL", "META", "TSLA", "AAPL", "AMZN"]
 
 FUNDAMENTAL_ESTIMATES: Dict[str, Dict[str, float]] = {
-    "NVDA":  {"revenue": 130_000_000_000, "fcf": 65_000_000_000,  "roic": 0.45, "wacc": 0.11, "rr": 0.55, "op_margin": 0.55, "sector": "semiconductor",     "icr": 35.0,  "ebit": 60_000_000_000,  "interest_expense": 1_700_000_000},
-    "AMD":   {"revenue": 25_000_000_000,  "fcf": 5_000_000_000,   "roic": 0.15, "wacc": 0.12, "rr": 0.40, "op_margin": 0.20, "sector": "semiconductor",     "icr": 15.0,  "ebit": 5_000_000_000,   "interest_expense": 330_000_000},
-    "INTC":  {"revenue": 54_000_000_000,  "fcf": -8_000_000_000,  "roic": 0.03, "wacc": 0.13, "rr": 0.60, "op_margin": 0.05, "sector": "semiconductor",     "icr": 3.5,   "ebit": 2_700_000_000,  "interest_expense": 770_000_000},
-    "AVGO":  {"revenue": 50_000_000_000,  "fcf": 25_000_000_000,  "roic": 0.30, "wacc": 0.10, "rr": 0.50, "op_margin": 0.40, "sector": "semiconductor",     "icr": 22.0,  "ebit": 20_000_000_000,  "interest_expense": 910_000_000},
-    "MSFT":  {"revenue": 245_000_000_000, "fcf": 82_000_000_000,  "roic": 0.30, "wacc": 0.09, "rr": 0.45, "op_margin": 0.42, "sector": "platform_software", "icr": 40.0,  "ebit": 103_000_000_000, "interest_expense": 2_600_000_000},
-    "GOOGL": {"revenue": 340_000_000_000, "fcf": 86_000_000_000,  "roic": 0.25, "wacc": 0.09, "rr": 0.40, "op_margin": 0.30, "sector": "platform_software", "icr": 30.0,  "ebit": 102_000_000_000, "interest_expense": 3_400_000_000},
-    "META":  {"revenue": 165_000_000_000, "fcf": 62_000_000_000,  "roic": 0.22, "wacc": 0.10, "rr": 0.35, "op_margin": 0.35, "sector": "platform_software", "icr": 28.0,  "ebit": 58_000_000_000,  "interest_expense": 2_100_000_000},
-    "TSLA":  {"revenue": 97_000_000_000,  "fcf": 5_000_000_000,   "roic": 0.12, "wacc": 0.14, "rr": 0.50, "op_margin": 0.10, "sector": "hardware_oem",      "icr": 8.0,   "ebit": 9_700_000_000,   "interest_expense": 1_200_000_000},
-    "AAPL":  {"revenue": 395_000_000_000, "fcf": 115_000_000_000, "roic": 0.40, "wacc": 0.09, "rr": 0.35, "op_margin": 0.32, "sector": "hardware_oem",      "icr": 25.0,  "ebit": 126_000_000_000, "interest_expense": 5_000_000_000},
-    "AMZN":  {"revenue": 620_000_000_000, "fcf": 64_000_000_000,  "roic": 0.15, "wacc": 0.10, "rr": 0.30, "op_margin": 0.12, "sector": "hardware_oem",      "icr": 12.0,  "ebit": 74_000_000_000,  "interest_expense": 6_200_000_000},
+    "NVDA":  {"revenue": 130_000_000_000, "fcf": 65_000_000_000,  "roic": 0.45, "wacc": 0.11, "rr": 0.55, "op_margin": 0.55, "sector": "semiconductor",     "icr": 35.0,  "ebit": 60_000_000_000,  "interest_expense": 1_700_000_000, "geo_stress": 0.25, "geo_prem_rate": 0.0284},
+    "AMD":   {"revenue": 25_000_000_000,  "fcf": 5_000_000_000,   "roic": 0.15, "wacc": 0.12, "rr": 0.40, "op_margin": 0.20, "sector": "semiconductor",     "icr": 15.0,  "ebit": 5_000_000_000,   "interest_expense": 330_000_000, "geo_stress": 0.10, "geo_prem_rate": 0.015},
+    "INTC":  {"revenue": 54_000_000_000,  "fcf": -8_000_000_000,  "roic": 0.03, "wacc": 0.13, "rr": 0.60, "op_margin": 0.05, "sector": "semiconductor",     "icr": 3.5,   "ebit": 2_700_000_000,  "interest_expense": 770_000_000, "geo_stress": 0.05, "geo_prem_rate": 0.01},
+    "AVGO":  {"revenue": 50_000_000_000,  "fcf": 25_000_000_000,  "roic": 0.30, "wacc": 0.10, "rr": 0.50, "op_margin": 0.40, "sector": "semiconductor",     "icr": 22.0,  "ebit": 20_000_000_000,  "interest_expense": 910_000_000, "geo_stress": 0.12, "geo_prem_rate": 0.018},
+    "MSFT":  {"revenue": 245_000_000_000, "fcf": 82_000_000_000,  "roic": 0.30, "wacc": 0.09, "rr": 0.45, "op_margin": 0.42, "sector": "platform_software", "icr": 40.0,  "ebit": 103_000_000_000, "interest_expense": 2_600_000_000, "geo_stress": 0.0, "geo_prem_rate": 0.0},
+    "GOOGL": {"revenue": 340_000_000_000, "fcf": 86_000_000_000,  "roic": 0.25, "wacc": 0.09, "rr": 0.40, "op_margin": 0.30, "sector": "platform_software", "icr": 30.0,  "ebit": 102_000_000_000, "interest_expense": 3_400_000_000, "geo_stress": 0.0, "geo_prem_rate": 0.0},
+    "META":  {"revenue": 165_000_000_000, "fcf": 62_000_000_000,  "roic": 0.22, "wacc": 0.10, "rr": 0.35, "op_margin": 0.35, "sector": "platform_software", "icr": 28.0,  "ebit": 58_000_000_000,  "interest_expense": 2_100_000_000, "geo_stress": 0.0, "geo_prem_rate": 0.0},
+    "TSLA":  {"revenue": 97_000_000_000,  "fcf": 5_000_000_000,   "roic": 0.12, "wacc": 0.14, "rr": 0.50, "op_margin": 0.10, "sector": "hardware_oem",      "icr": 8.0,   "ebit": 9_700_000_000,   "interest_expense": 1_200_000_000, "geo_stress": 0.05, "geo_prem_rate": 0.008},
+    "AAPL":  {"revenue": 395_000_000_000, "fcf": 115_000_000_000, "roic": 0.40, "wacc": 0.09, "rr": 0.35, "op_margin": 0.32, "sector": "hardware_oem",      "icr": 25.0,  "ebit": 126_000_000_000, "interest_expense": 5_000_000_000, "geo_stress": 0.03, "geo_prem_rate": 0.005},
+    "AMZN":  {"revenue": 620_000_000_000, "fcf": 64_000_000_000,  "roic": 0.15, "wacc": 0.10, "rr": 0.30, "op_margin": 0.12, "sector": "hardware_oem",      "icr": 12.0,  "ebit": 74_000_000_000,  "interest_expense": 6_200_000_000, "geo_stress": 0.03, "geo_prem_rate": 0.005},
 }
 
 CURRENT_PRICES: Dict[str, float] = {
@@ -158,6 +158,8 @@ class Lane1Result:
     supplier_concentration: float = 0.5
     moat_score: float = 0.5
     a_tech: float = 0.0
+    geopolitical_stress_factor: float = 0.0
+    geopolitical_risk_premium_rate: float = 0.0
 
 
 @dataclass
@@ -181,6 +183,11 @@ class Lane3Result:
     positive_eva_prob: float
     macro_risk_adjustment: float
     confidence_band: str
+    survival_probability: float = 1.0
+    catastrophe_event_count: int = 0
+    geopolitical_wacc_premium: float = 0.0
+    displacement_ratio: float = 0.0
+    is_leader: bool = False
 
 
 @dataclass
@@ -277,6 +284,8 @@ class FourLanePipeline:
             supplier_concentration_val = 0.5
             moat_score_val = 0.5
             a_tech_val = 0.0
+            geo_stress_val = est.get("geo_stress", 0.0)
+            geo_prem_val = est.get("geo_prem_rate", 0.0)
 
             if qualitative_modulators and ticker in qualitative_modulators:
                 q = qualitative_modulators[ticker]
@@ -343,6 +352,8 @@ class FourLanePipeline:
                 supplier_concentration=supplier_concentration_val,
                 moat_score=moat_score_val,
                 a_tech=a_tech_val,
+                geopolitical_stress_factor=geo_stress_val,
+                geopolitical_risk_premium_rate=geo_prem_val,
             )
         return results
 
@@ -433,11 +444,83 @@ class FourLanePipeline:
             )
         return results
 
+    def _calculate_developer_engagement_slope(self, ticker: str, conn: sqlite3.Connection) -> float:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT stars, forks, open_issues, created_at_api, fetched_at 
+            FROM github_org_metrics 
+            WHERE ticker = ?
+        """, (ticker,))
+        rows = cursor.fetchall()
+        if not rows:
+            return 0.0
+        
+        total_slope = 0.0
+        for row in rows:
+            stars, forks, open_issues, created_at_api, fetched_at = row
+            stars = stars or 0
+            forks = forks or 0
+            open_issues = open_issues or 0
+            
+            age_years = 2.0
+            if created_at_api:
+                try:
+                    clean_date = created_at_api.replace('Z', '+00:00')
+                    created_dt = datetime.fromisoformat(clean_date)
+                    created_ts = created_dt.timestamp()
+                    diff_sec = fetched_at - created_ts
+                    age_years = max(0.1, diff_sec / (365.25 * 24 * 3600))
+                except Exception:
+                    age_years = 2.0
+            
+            repo_score = stars + forks + open_issues
+            total_slope += repo_score / age_years
+            
+        return total_slope
+
+    def _calculate_displacement_ratio(self, ticker: str) -> Tuple[float, bool]:
+        with sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True) as conn:
+            sub_sectors = self.config.get("sub_sectors", {})
+            target_sector = None
+            for sector, t_list in sub_sectors.items():
+                if ticker in t_list:
+                    target_sector = sector
+                    break
+            
+            if not target_sector:
+                return 0.0, False
+            
+            sector_tickers = sub_sectors[target_sector]
+            slopes = {}
+            for t in sector_tickers:
+                slopes[t] = self._calculate_developer_engagement_slope(t, conn)
+            
+            if not slopes:
+                return 0.0, False
+            
+            leader = max(slopes, key=slopes.get)
+            leader_slope = slopes[leader]
+            
+            if ticker == leader:
+                challengers = {k: v for k, v in slopes.items() if k != leader}
+                if not challengers:
+                    return 0.0, True
+                challenger = max(challengers, key=challengers.get)
+                challenger_slope = challengers[challenger]
+                dr = challenger_slope / (leader_slope + 1e-6)
+                return dr, True
+            else:
+                target_slope = slopes[ticker]
+                dr = target_slope / (leader_slope + 1e-6)
+                return dr, False
+
     def run_lane3(self, lane1_results: Dict[str, Lane1Result]) -> Dict[str, Lane3Result]:
         results: Dict[str, Lane3Result] = {}
         for ticker, l1 in lane1_results.items():
             est = FUNDAMENTAL_ESTIMATES.get(ticker, {})
             mc_wacc = l1.modulated_wacc if l1.qualitative_modulation_applied else est.get("wacc", 0.10)
+
+            dr, is_leader = self._calculate_displacement_ratio(ticker)
 
             mc_input: MonteCarloInput = self.mc_engine.build_input_from_fundamentals(
                 ticker=ticker,
@@ -451,6 +534,10 @@ class FourLanePipeline:
                 supplier_concentration=l1.supplier_concentration,
                 moat_score=l1.moat_score,
                 a_tech=l1.a_tech,
+                geopolitical_stress_factor=l1.geopolitical_stress_factor,
+                geopolitical_risk_premium_rate=l1.geopolitical_risk_premium_rate,
+                displacement_ratio=dr,
+                is_leader=is_leader,
             )
             mc_result: MonteCarloResult = self.mc_engine.run(mc_input)
 
@@ -460,6 +547,11 @@ class FourLanePipeline:
                 positive_eva_prob=mc_result.positive_eva_probability,
                 macro_risk_adjustment=mc_result.macro_risk_adjustment,
                 confidence_band=mc_result.confidence_band,
+                survival_probability=mc_result.survival_probability,
+                catastrophe_event_count=mc_result.catastrophe_event_count,
+                geopolitical_wacc_premium=mc_result.mean_geopolitical_wacc_premium,
+                displacement_ratio=dr,
+                is_leader=is_leader,
             )
         return results
 
@@ -638,7 +730,7 @@ class FourLanePipeline:
             cursor = conn.cursor()
 
             try:
-                cursor.execute("SELECT lane1_synthetic_rating FROM four_lane_results LIMIT 1")
+                cursor.execute("SELECT lane3_displacement_ratio FROM four_lane_results LIMIT 1")
             except sqlite3.OperationalError:
                 cursor.execute("DROP TABLE IF EXISTS four_lane_results")
                 conn.commit()
@@ -655,6 +747,8 @@ class FourLanePipeline:
                     lane1_synthetic_rating TEXT,
                     lane1_modulated_wacc REAL,
                     lane1_cap_horizon_years INTEGER,
+                    lane1_geo_stress_factor REAL,
+                    lane1_geo_premium_rate REAL,
                     lane2_hype_score REAL,
                     lane2_culture_score REAL,
                     lane2_pricing_deviation REAL,
@@ -662,7 +756,12 @@ class FourLanePipeline:
                     lane3_positive_eva_prob REAL,
                     lane3_mean_intrinsic_value REAL,
                     lane3_macro_risk_adj REAL,
+                    lane3_survival_probability REAL,
+                    lane3_catastrophe_count INTEGER,
+                    lane3_geo_wacc_premium REAL,
                     lane3_confidence_band TEXT,
+                    lane3_displacement_ratio REAL,
+                    lane3_is_leader INTEGER,
                     lane4_anti_contamination INTEGER,
                     lane4_terminal_stability INTEGER,
                     lane4_overall_passed INTEGER,
@@ -681,18 +780,24 @@ class FourLanePipeline:
                      lane1_expected_growth, lane1_roic, lane1_wacc,
                      lane1_intrinsic_floor, lane1_intrinsic_ceiling,
                      lane1_synthetic_rating, lane1_modulated_wacc, lane1_cap_horizon_years,
+                     lane1_geo_stress_factor, lane1_geo_premium_rate,
                      lane2_hype_score, lane2_culture_score, lane2_pricing_deviation,
                      lane2_high_conviction_catalyst,
-                     lane3_positive_eva_prob, lane3_mean_intrinsic_value, lane3_macro_risk_adj, lane3_confidence_band,
+                     lane3_positive_eva_prob, lane3_mean_intrinsic_value, lane3_macro_risk_adj,
+                     lane3_survival_probability, lane3_catastrophe_count, lane3_geo_wacc_premium,
+                     lane3_confidence_band, lane3_displacement_ratio, lane3_is_leader,
                      lane4_anti_contamination, lane4_terminal_stability, lane4_overall_passed,
                      conviction_label, computed_at)
                     VALUES (?, ?,
                             ?, ?, ?,
                             ?, ?,
                             ?, ?, ?,
+                            ?, ?,
                             ?, ?, ?,
                             ?,
-                            ?, ?, ?, ?,
+                            ?, ?, ?,
+                            ?, ?, ?,
+                            ?, ?, ?,
                             ?, ?, ?,
                             ?, ?)
                 """, (
@@ -705,6 +810,8 @@ class FourLanePipeline:
                     out.lane1.synthetic_rating,
                     out.lane1.modulated_wacc,
                     out.lane1.cap_horizon_years,
+                    out.lane1.geopolitical_stress_factor,
+                    out.lane1.geopolitical_risk_premium_rate,
                     out.lane2.hype_score,
                     out.lane2.culture_score,
                     out.lane2.pricing_deviation,
@@ -712,7 +819,12 @@ class FourLanePipeline:
                     out.lane3.positive_eva_prob,
                     out.lane3.monte_carlo.mean_intrinsic_value,
                     out.lane3.macro_risk_adjustment,
+                    out.lane3.survival_probability,
+                    out.lane3.catastrophe_event_count,
+                    out.lane3.geopolitical_wacc_premium,
                     out.lane3.confidence_band,
+                    out.lane3.displacement_ratio,
+                    1 if out.lane3.is_leader else 0,
                     1 if out.lane4.anti_contamination_passed else 0,
                     1 if out.lane4.terminal_stability_passed else 0,
                     1 if out.lane4.overall_passed else 0,
@@ -732,8 +844,8 @@ def create_four_lane_pipeline(
 
 def _format_results_table(output: Dict[str, FourLaneOutput]) -> str:
     header = (
-        f"{'Ticker':<8} {'Rating':<6} {'Mod WACC':<9} {'CAP':<4} {'Growth':<8} "
-        f"{'Hype':<6} {'Culture':<8} {'Pricing Dev':<12} {'EVA Prob':<9} "
+        f"{'Ticker':<8} {'Rating':<6} {'Mod WACC':<9} {'GRP':<7} {'Surv':<6} {'CAP':<4} {'Growth':<8} "
+        f"{'Hype':<6} {'Culture':<8} {'EVA Prob':<9} "
         f"{'Catalyst':<9} {'Conviction'}"
     )
     sep = "─" * len(header)
@@ -742,16 +854,17 @@ def _format_results_table(output: Dict[str, FourLaneOutput]) -> str:
         o = output[ticker]
         rating = o.lane1.synthetic_rating
         mwacc = f"{o.lane1.modulated_wacc:.2%}"
+        grp = f"{o.lane3.geopolitical_wacc_premium:.2%}"
+        surv = f"{o.lane3.survival_probability:.0%}"
         cap = str(o.lane1.cap_horizon_years)
         g = f"{o.lane1.expected_growth:.2%}"
         hype = f"{o.lane2.hype_score:.3f}" if o.lane2.hype_score else "N/A"
         cult = f"{o.lane2.culture_score:.3f}" if o.lane2.culture_score else "N/A"
-        pd = f"{o.lane2.pricing_deviation:+.2f}" if o.lane2.pricing_deviation is not None else "N/A"
         eva = f"{o.lane3.positive_eva_prob:.1%}"
-        cat = "⚡ YES" if o.lane2.high_conviction_catalyst else "  no"
+        cat = "YES" if o.lane2.high_conviction_catalyst else "  no"
         rows.append(
-            f"{ticker:<8} {rating:<6} {mwacc:<9} {cap:<4} {g:<8} "
-            f"{hype:<6} {cult:<8} {pd:<12} {eva:<9} {cat:<9} {o.conviction_label}"
+            f"{ticker:<8} {rating:<6} {mwacc:<9} {grp:<7} {surv:<6} {cap:<4} {g:<8} "
+            f"{hype:<6} {cult:<8} {eva:<9} {cat:<9} {o.conviction_label}"
         )
     return "\n".join(rows)
 
