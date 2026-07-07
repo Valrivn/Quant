@@ -1,24 +1,4 @@
 {
-  "NVDA": {
-    "conviction": 10,
-    "quality": 0.858,
-    "financial": 0.854,
-    "trajectory": 0.931,
-    "momentum": 0.641,
-    "label": "Strong Buy",
-    "p_eva_t5": 1.0,
-    "p_roic_wacc": 1.0
-  },
-  "AVGO": {
-    "conviction": 10,
-    "quality": 0.711,
-    "financial": 0.907,
-    "trajectory": 0.852,
-    "momentum": 0.536,
-    "label": "Strong Buy",
-    "p_eva_t5": 1.0,
-    "p_roic_wacc": 1.0
-  },
   "MSFT": {
     "conviction": 10,
     "quality": 0.832,
@@ -27,7 +7,9 @@
     "momentum": 0.527,
     "label": "Strong Buy",
     "p_eva_t5": 1.0,
-    "p_roic_wacc": 1.0
+    "p_roic_wacc": 1.0,
+    "survival_probability": 1.0,
+    "geopolitical_wacc_premium": 0.0
   },
   "GOOGL": {
     "conviction": 10,
@@ -37,7 +19,9 @@
     "momentum": 0.52,
     "label": "Strong Buy",
     "p_eva_t5": 0.9997,
-    "p_roic_wacc": 0.9997
+    "p_roic_wacc": 0.9997,
+    "survival_probability": 1.0,
+    "geopolitical_wacc_premium": 0.0
   },
   "META": {
     "conviction": 10,
@@ -47,7 +31,9 @@
     "momentum": 0.541,
     "label": "Strong Buy",
     "p_eva_t5": 1.0,
-    "p_roic_wacc": 1.0
+    "p_roic_wacc": 1.0,
+    "survival_probability": 1.0,
+    "geopolitical_wacc_premium": 0.0
   },
   "AAPL": {
     "conviction": 10,
@@ -56,8 +42,34 @@
     "trajectory": 0.921,
     "momentum": 0.511,
     "label": "Strong Buy",
-    "p_eva_t5": 1.0,
-    "p_roic_wacc": 1.0
+    "p_eva_t5": 0.9895,
+    "p_roic_wacc": 0.9895,
+    "survival_probability": 0.9895,
+    "geopolitical_wacc_premium": 0.0
+  },
+  "AVGO": {
+    "conviction": 9,
+    "quality": 0.711,
+    "financial": 0.907,
+    "trajectory": 0.852,
+    "momentum": 0.536,
+    "label": "Strong Buy",
+    "p_eva_t5": 0.929,
+    "p_roic_wacc": 0.929,
+    "survival_probability": 0.929,
+    "geopolitical_wacc_premium": 0.0
+  },
+  "NVDA": {
+    "conviction": 8,
+    "quality": 0.858,
+    "financial": 0.854,
+    "trajectory": 0.931,
+    "momentum": 0.641,
+    "label": "Strong Buy",
+    "p_eva_t5": 0.7735,
+    "p_roic_wacc": 0.7735,
+    "survival_probability": 0.7735,
+    "geopolitical_wacc_premium": 0.025
   },
   "AMZN": {
     "conviction": 6,
@@ -66,8 +78,10 @@
     "trajectory": 0.905,
     "momentum": 0.502,
     "label": "Buy",
-    "p_eva_t5": 0.6248,
-    "p_roic_wacc": 0.6254
+    "p_eva_t5": 0.6227,
+    "p_roic_wacc": 0.6233,
+    "survival_probability": 0.9918,
+    "geopolitical_wacc_premium": 0.0
   },
   "AMD": {
     "conviction": 3,
@@ -76,8 +90,10 @@
     "trajectory": 0.825,
     "momentum": 0.527,
     "label": "Reduce",
-    "p_eva_t5": 0.306,
-    "p_roic_wacc": 0.3061
+    "p_eva_t5": 0.2905,
+    "p_roic_wacc": 0.2906,
+    "survival_probability": 0.9485,
+    "geopolitical_wacc_premium": 0.0
   },
   "TSLA": {
     "conviction": 3,
@@ -86,8 +102,10 @@
     "trajectory": 0.75,
     "momentum": 0.532,
     "label": "Reduce",
-    "p_eva_t5": 0.2714,
-    "p_roic_wacc": 0.2726
+    "p_eva_t5": 0.2647,
+    "p_roic_wacc": 0.2657,
+    "survival_probability": 0.9848,
+    "geopolitical_wacc_premium": 0.0
   },
   "INTC": {
     "conviction": 0,
@@ -97,6 +115,8 @@
     "momentum": 0.371,
     "label": "Don't Consider",
     "p_eva_t5": 0.0,
-    "p_roic_wacc": 0.0
+    "p_roic_wacc": 0.0,
+    "survival_probability": 0.9833,
+    "geopolitical_wacc_premium": 0.0
   }
 }

@@ -43,16 +43,23 @@ Three hard statistical gates. Failure on any single gate disqualifies the ETF:
 
 **Critical Trigger:** If Discount to NAV drops below **-0.50%**, flag immediately as an underlying asset liquidity failure (OTC bond freezing or toxic asset decoupling).
 
+### Step 1.5: R^2 (R-Squared) and Stratified Sampling Check
+- **The Concept:** $R^2$ measures how closely the movements of the Bond ETF correlate with the movements of the actual underlying bond index (like the Bloomberg US Aggregate Index).
+- **Stratified Sampling:** Broad bond ETFs like BND do not actually go out and buy all 10,000+ bonds in the index. They use stratified sampling, meaning they buy a representative subset of those bonds.
+- **Why we use it:** During calm markets, the tracking error of this sampling method is tiny (around 0.03%), but individual corporate bonds trade over-the-counter (OTC) and can go days without a single transaction. We track $R^2$ to ensure that during a market crash, the ETF doesn't decouple from its benchmark. If $R^2$ drops and tracking error spikes up to 0.50% or higher, your "safe asset" is failing.
+
 ### Step 2: Peer-Group Filtering via Z-Score
 
 For Corporate Bond ETFs (VCSH, VCIT), execute a bottom-up look-through of the top 10-20 corporate holdings:
 
 1. **Scrape Holdings:** Extract top corporate issuers from ETF fact sheets.
 2. **Pull Financials:** Retrieve EBIT and Interest Expense from SEC EDGAR XBRL for each issuer.
-3. **Compute Weighted Interest Coverage Ratio:**
+3. **Compute Weighted Interest Coverage Ratio (The Look-Through Audit):**
    $$\text{ICR}_{\text{fund}} = \sum_{i=1}^{N} w_i \times \frac{\text{EBIT}_i}{\text{Interest Expense}_i}$$
+   - **Rationale:** Aswath Damodaran recommends using the Interest Coverage Ratio to generate an automated "Synthetic Bond Rating". Instead of trusting the ETF's aggregate credit rating (which are lagging indicators), our engine scrapes the SEC filings of the top corporate holdings to verify if the underlying corporations are generating stable cash flows or if their operating margins are shrinking.
 4. **Z-Score Filter:**
    $$Z_{\text{ICR}} = \frac{\text{ICR}_{\text{fund}} - \mu_{\text{peer}}}{\sigma_{\text{peer}}} \ge +1.0 \quad \text{(significantly safer than average)}$$
+   - **Rationale:** We use Z-scores to isolate top-tier funds mathematically, filtering out junk-distorted averages.
    $$Z_{\text{ER}} = \frac{\text{ER}_{\text{fund}} - \mu_{\text{peer}}}{\sigma_{\text{peer}}} \le -1.0 \quad \text{(significantly cheaper than average)}$$
 5. **Defensive Overlay:** If no corporate ETF passes both Z-score gates, auto-default to SHY/BIL.
 
@@ -64,6 +71,7 @@ Monitor the credit yield spread between Corporate Bond ETFs and equivalent-matur
 
 - FRED Series: `BAA10Y`, `BAMLC0A4CBBB`, `DGS10`
 - **Override Logic:** If credit spreads widen while agency ratings remain unchanged → override the rating and flag hidden market-priced default risk.
+
 
 ---
 

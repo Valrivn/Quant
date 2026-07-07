@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-01T16:09:03.046214+00:00",
+  "timestamp": "2026-07-02T16:50:00.705943+00:00",
   "weights": {
     "culture": 0.0,
     "moat": 0.0,
@@ -12,5 +12,8 @@
   "n_tickers": 10,
   "max_date": "2025-06-30",
   "lookahead_guard": "PASS: max historical date is 2025-06-30, zero 2026 leakage",
-  "zero_hardcode_guard": "PASS: pure probabilistic direct parameters mapping"
+  "zero_hardcode_guard": "PASS: pure probabilistic direct parameters mapping",
+  "risk_model": "Regime-Switching Jump-Diffusion (Strategy A) + Geopolitical Risk Premium (Strategy B)",
+  "p_catastrophe_formula": "Kc * Gs (Bernoulli trial per pass)",
+  "grp_formula": "Base WACC + (Kc * Gs) when Kc > 0.70"
 }
