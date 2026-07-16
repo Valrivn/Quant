@@ -44,3 +44,32 @@ allocation:
   macro_triggers:
     inflation_threshold: 0.04
     regime_shift_spread_widening: 0.015  # 150 bps spread expansion
+
+# Relative Sensitivity Vector Engine
+# Normalizes raw risk metrics into uniform [0, 1] space for cross-ticker comparison
+sensitivity:
+  enabled: true
+  bounds:
+    hhi:
+      xmin: 0.010    # Perfect diversification (e.g., VTI)
+      xmax: 0.065    # Extreme concentration
+      invert: false   # Higher HHI = more fragile
+    icr:
+      xmin: 0.5       # Impending default
+      xmax: 15.0      # Fortress balance sheet
+      invert: true    # Higher ICR = LESS fragile (inverted)
+    macro_inflation:
+      xmin: 0.0       # Deflationary risk
+      xmax: 8.0       # Hyperinflationary cliff
+      invert: false   # Higher inflation = more safe-haven demand
+  composite_weights:
+    hhi: 0.35         # Concentration sensitivity weight
+    icr: 0.35         # Credit/solvency sensitivity weight
+    macro: 0.30       # Macro regime sensitivity weight
+  allocation_adjustment:
+    risk_tolerance: 0.3  # 0.0 = no adjustment, 1.0 = maximum tilt (conservative for youth account)
+  risk_labels:
+    insulated: [0.00, 0.20)           # Safe baseline, no buffer overlay
+    moderate_exposure: [0.20, 0.45)   # Balanced, maintain tactical baseline
+    elevated_fragility: [0.45, 0.75)  # Risk flagged, trim equity exposure
+    acute_cliff_alert: [0.75, 1.00]   # Structural danger, flight-to-safety
