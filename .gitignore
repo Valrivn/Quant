@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Large files / Takeout data
+Takeout/
+
+# Database files
+*.db-shm
+*.db-wal
+
+# Cache files
+data/etf_cache/
+data/fred_cache/
+data/pipeline_cache/
+
+# Logs
+logs/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
