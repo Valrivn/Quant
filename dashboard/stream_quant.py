@@ -742,8 +742,93 @@ with tab2:
     4. Model the primary stock and the holdings' segment distributions as coordinates (vectors) in a multi-dimensional space.
     5. Calculate the straight-line **Euclidean Distance** between vectors:
        $$d = \\sqrt{{\\sum_{{i}} (W_{{\\text{{primary}}, i}} - W_{{\\text{{holding}}, i}})^2}}$$
-       A distance of `0.0` represents identical business segments. The holdings are sorted by distance, recommending the closest 4.
+        A distance of `0.0` represents identical business segments. The holdings are sorted by distance, recommending the closest 4.
     """)
+
+    st.markdown("---")
+    st.markdown("### 🎯 6. Relative Sensitivity Vector (S-Vector) Analysis")
+    st.write("""
+    **What it is:**
+    Following Damodaran's relative tracking principles, the S-Vector normalizes raw risk metrics
+    (HHI concentration, Interest Coverage Ratio, Macro Inflation) into a uniform `[0, 1]` space
+    via Min-Max scaling. This enables apples-to-apples cross-ticker risk comparison.
+
+    **Formula:**
+    $$S = \\max\\left(0, \\min\\left(1, \\frac{X - X_{\\min}}{X_{\\max} - X_{\\min}}\\right)\\right)$$
+
+    **Risk Labels:** INSULATED `[0.0, 0.2)` | MODERATE_EXPOSURE `[0.2, 0.45)` | ELEVATED_FRAGILITY `[0.45, 0.75)` | ACUTE_CLIFF_ALERT `[0.75, 1.0]`
+    """)
+
+    svec_ticker = st.text_input("Enter ETF/Fund ticker for S-Vector analysis:", value="QQQ", key="svec_ticker")
+    svec_inflation = st.slider("Current Inflation Rate (%)", 0.0, 10.0, 2.5, step=0.1, key="svec_inflation") / 100.0
+
+    if st.button("Compute S-Vector", key="compute_svec"):
+        with st.spinner(f"Analyzing {svec_ticker}..."):
+            try:
+                from Quantitative.funds.index_fund_handler import IndexFundHandler
+                from Quantitative.sensitivity.sensitivity_vector import RiskLabel
+
+                handler = IndexFundHandler(max_holdings=15)
+                result = handler.evaluate(svec_ticker, inflation=svec_inflation)
+
+                vec = result.sensitivity_vector
+                if vec is None:
+                    st.error("Sensitivity vector computation failed.")
+                else:
+                    # Risk label colors
+                    label_colors = {
+                        "INSULATED": "#00ff88",
+                        "MODERATE_EXPOSURE": "#ffaa00",
+                        "ELEVATED_FRAGILITY": "#ff6644",
+                        "ACUTE_CLIFF_ALERT": "#ff0044",
+                    }
+
+                    st.subheader(f"S-Vector Breakdown: {svec_ticker}")
+
+                    # Main metrics row
+                    c1, c2, c3, c4 = st.columns(4)
+                    with c1:
+                        color = label_colors.get(vec.label_hhi.value, "#ffffff")
+                        st.markdown(f"<div class='metric-card'><div class='metric-label'>S<sub>HHI</sub> (Concentration)</div><div class='metric-value' style='color:{color}'>{vec.s_hhi:.3f}</div><div style='color:{color};font-size:0.8em'>{vec.label_hhi.value}</div></div>", unsafe_allow_html=True)
+                    with c2:
+                        color = label_colors.get(vec.label_icr.value, "#ffffff")
+                        st.markdown(f"<div class='metric-card'><div class='metric-label'>S<sub>ICR</sub> (Solvency)</div><div class='metric-value' style='color:{color}'>{vec.s_icr:.3f}</div><div style='color:{color};font-size:0.8em'>{vec.label_icr.value}</div></div>", unsafe_allow_html=True)
+                    with c3:
+                        color = label_colors.get(vec.label_macro.value, "#ffffff")
+                        st.markdown(f"<div class='metric-card'><div class='metric-label'>S<sub>Macro</sub> (Inflation)</div><div class='metric-value' style='color:{color}'>{vec.s_macro:.3f}</div><div style='color:{color};font-size:0.8em'>{vec.label_macro.value}</div></div>", unsafe_allow_html=True)
+                    with c4:
+                        color = label_colors.get(vec.label_composite.value, "#ffffff")
+                        st.markdown(f"<div class='metric-card'><div class='metric-label'>Composite S</div><div class='metric-value' style='color:{color}'>{vec.composite:.3f}</div><div style='color:{color};font-size:0.8em'>{vec.label_composite.value}</div></div>", unsafe_allow_html=True)
+
+                    # Raw values table
+                    st.markdown("**Raw Values vs Normalized Scores:**")
+                    raw_df = pd.DataFrame([
+                        {"Metric": "HHI (Concentration)", "Raw Value": f"{vec.raw_hhi:.4f}", "Bounds": "[0.010, 0.065]", "S-Score": f"{vec.s_hhi:.4f}", "Label": vec.label_hhi.value},
+                        {"Metric": "ICR (Interest Coverage)", "Raw Value": f"{vec.raw_icr:.2f}", "Bounds": "[0.5, 15.0] (inverted)", "S-Score": f"{vec.s_icr:.4f}", "Label": vec.label_icr.value},
+                        {"Metric": "Macro Inflation", "Raw Value": f"{vec.raw_macro:.1%}", "Bounds": "[0.0%, 8.0%]", "S-Score": f"{vec.s_macro:.4f}", "Label": vec.label_macro.value},
+                        {"Metric": "COMPOSITE", "Raw Value": "—", "Weights: 0.35/0.35/0.30", "S-Score": f"{vec.composite:.4f}", "Label": vec.label_composite.value},
+                    ])
+                    st.dataframe(raw_df, use_container_width=True, hide_index=True)
+
+                    # Dispatch profile
+                    st.markdown(f"**Allocation Dispatch:** `{vec.dispatch.get('action', 'N/A')}` — {vec.dispatch.get('description', '')}")
+
+                    # Fragility comparison
+                    if result.fragility_output:
+                        fo = result.fragility_output
+                        st.markdown("**Fragility Cross-Reference:**")
+                        frag_df = pd.DataFrame([
+                            {"Component": "Theta Base (Sector Fragility)", "Value": f"{fo.theta_base:.4f}"},
+                            {"Component": "Lifecycle Core (Power)", "Value": f"{fo.lifecycle_core_power:.4f}"},
+                            {"Component": "Leverage Multiplier", "Value": f"{fo.leverage_multiplier:.4f}"},
+                            {"Component": "Phi Adjusted (Composite Fragility)", "Value": f"{fo.phi_adjusted:.4f}"},
+                            {"Component": "Portfolio Beta (Unlevered)", "Value": f"{fo.beta_portfolio:.4f}"},
+                        ])
+                        st.dataframe(frag_df, use_container_width=True, hide_index=True)
+
+            except Exception as e:
+                st.error(f"Error computing S-Vector: {e}")
+                st.exception(e)
 
 # ----------------- TAB 3: SEC AUDIT & VERIFICATION -----------------
 with tab3:
