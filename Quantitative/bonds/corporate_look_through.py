@@ -5,9 +5,10 @@ corporate_look_through.py — SEC EDGAR XBRL Parsing for ETF Holdings
 Implements bottom-up look-through analysis of corporate bond ETF holdings
 to compute the weighted Interest Coverage Ratio (ICR) for each ETF.
 
-Two-tier data acquisition:
-  1. ETF Fact Sheet Scraping: Extract top N holdings from Vanguard/iShares pages
-  2. SEC EDGAR XBRL API: Pull EBIT and Interest Expense per issuer
+Three-tier data acquisition:
+  1. iShares AJAX CSV: Direct download from BlackRock endpoints (most reliable)
+  2. Vanguard/iShares Page Scrape: HTML table parsing with CSV fallback
+  3. SEC EDGAR XBRL API: Pull EBIT and Interest Expense per issuer
 
 Damodaran Principle: The Interest Coverage Ratio serves as an automated
 "Synthetic Bond Rating." Instead of trusting lagging agency credit ratings,
@@ -119,9 +120,13 @@ class CorporateLookThrough:
     SEC_DELAY = 0.1  # 100ms between requests (10 req/sec limit)
 
     # ETFs that hold corporate bonds (need look-through)
+    # Priority: iShares CSV > Vanguard page > Morningstar page
     CORPORATE_ETF_HOLDINGS = {
-        "VCSH": "https://www.morningstar.com/etfs/arcx/vcsh/holdings",
-        "VCIT": "https://www.morningstar.com/etfs/arcx/vcit/holdings",
+        "VCSH": {"vanguard": "https://investor.vanguard.com/investment-products/etfs/profile/vcsh"},
+        "VCIT": {"vanguard": "https://investor.vanguard.com/investment-products/etfs/profile/vcit"},
+        "LQD":  {"ishares_csv": "https://www.ishares.com/us/products/239566/1467271812596.ajax?fileType=csv&fileName=LQD_holdings&dataType=fund"},
+        "IGIB": {"ishares_csv": "https://www.ishares.com/us/products/239463/1467271812596.ajax?fileType=csv&fileName=IGIB_holdings&dataType=fund"},
+        "HYG":  {"ishares_csv": "https://www.ishares.com/us/products/239565/1467271812596.ajax?fileType=csv&fileName=HYG_holdings&dataType=fund"},
     }
 
     # Well-known issuers CIK mapping (fallback if EDGAR lookup fails)
@@ -355,18 +360,198 @@ class CorporateLookThrough:
 
     def _scrape_etf_holdings(self, ticker: str) -> List[HoldingEntry]:
         """
-        Attempt to scrape top holdings from ETF fact sheet / Morningstar.
+        Attempt to scrape top holdings from multiple ETF data sources.
 
-        Falls back to empty list if scraping fails.
+        Priority order:
+          1. iShares AJAX CSV (direct download, most reliable)
+          2. Vanguard page scrape (JS-rendered, less reliable)
+          3. Morningstar page scrape (legacy fallback)
+
+        Falls back to empty list if all sources fail.
         """
-        holdings_url = self.CORPORATE_ETF_HOLDINGS.get(ticker)
-        if not holdings_url:
+        sources = self.CORPORATE_ETF_HOLDINGS.get(ticker)
+        if not sources:
             return []
+
+        # Source 1: iShares AJAX CSV (direct download)
+        if "ishares_csv" in sources:
+            holdings = self._fetch_ishares_csv(ticker, sources["ishares_csv"])
+            if holdings:
+                return holdings
+
+        # Source 2: Vanguard page scrape
+        if "vanguard" in sources:
+            holdings = self._fetch_vanguard_page(ticker, sources["vanguard"])
+            if holdings:
+                return holdings
+
+        # Source 3: Morningstar page scrape (legacy)
+        if "morningstar" in sources:
+            holdings = self._fetch_morningstar_page(ticker, sources["morningstar"])
+            if holdings:
+                return holdings
+
+        return []
+
+    def _fetch_ishares_csv(self, ticker: str, csv_url: str) -> List[HoldingEntry]:
+        """Download holdings CSV from iShares AJAX endpoint."""
+        cache_key = f"ishares_holdings_{ticker}"
+        cached = self._read_cache(cache_key)
+        if cached:
+            return [
+                HoldingEntry(issuer_name=h["name"], weight=h["weight"])
+                for h in cached.get("holdings", [])
+            ]
 
         try:
             self._throttle()
             response = self._session.get(
-                holdings_url,
+                csv_url,
+                headers={"User-Agent": _USER_AGENTS[0]},
+                timeout=30,
+            )
+            response.raise_for_status()
+
+            import csv
+            import io
+            reader = csv.reader(io.StringIO(response.text))
+            holdings = []
+            header_skipped = False
+
+            for row in reader:
+                if not header_skipped:
+                    # Skip iShares header rows (first ~3 rows are metadata)
+                    if row and any("Name" in cell or "Ticker" in cell for cell in row):
+                        header_skipped = True
+                    continue
+
+                if len(row) >= 4:
+                    # iShares CSV format: Name, Ticker, CUSIP, Weight, ...
+                    name = row[0].strip()
+                    weight_str = row[3].strip().replace("%", "") if len(row) > 3 else ""
+                    if not name or not weight_str:
+                        continue
+                    try:
+                        weight = float(weight_str) / 100.0
+                    except ValueError:
+                        continue
+                    if weight > 0.001:  # Filter out negligible holdings
+                        holdings.append(HoldingEntry(issuer_name=name, weight=weight))
+
+            holdings.sort(key=lambda h: h.weight, reverse=True)
+            holdings = holdings[:20]  # Top 20 by weight
+
+            if holdings:
+                self._write_cache(cache_key, {
+                    "ticker": ticker,
+                    "holdings": [{"name": h.issuer_name, "weight": h.weight} for h in holdings],
+                    "source": "ishares_csv",
+                })
+                logger.info(f"Downloaded {len(holdings)} holdings from iShares CSV for {ticker}")
+                return holdings
+
+        except Exception as e:
+            logger.warning(f"iShares CSV download failed for {ticker}: {e}")
+
+        return []
+
+    def _fetch_vanguard_page(self, ticker: str, page_url: str) -> List[HoldingEntry]:
+        """Scrape holdings from Vanguard ETF profile page."""
+        try:
+            self._throttle()
+            response = self._session.get(
+                page_url,
+                headers={"User-Agent": _USER_AGENTS[0]},
+                timeout=30,
+            )
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            # Try to find CSV composition file link
+            for a_tag in soup.find_all("a", href=True):
+                href = a_tag["href"]
+                if "composition" in href.lower() and ("csv" in href.lower() or "xlsx" in href.lower()):
+                    csv_url = href if href.startswith("http") else f"https://investor.vanguard.com{href}"
+                    return self._fetch_vanguard_csv(ticker, csv_url)
+
+            # Fallback: parse HTML table
+            holdings = []
+            tables = soup.find_all("table")
+            for table in tables:
+                rows = table.find_all("tr")
+                for row in rows[1:21]:  # Skip header, take top 20
+                    cells = row.find_all("td")
+                    if len(cells) >= 2:
+                        name = cells[0].get_text(strip=True)
+                        weight_str = cells[-1].get_text(strip=True).replace("%", "")
+                        try:
+                            weight = float(weight_str) / 100.0
+                        except ValueError:
+                            continue
+                        if weight > 0.001:
+                            holdings.append(HoldingEntry(issuer_name=name, weight=weight))
+
+            if holdings:
+                logger.info(f"Scraped {len(holdings)} holdings from Vanguard page for {ticker}")
+                return holdings
+
+        except Exception as e:
+            logger.warning(f"Vanguard page scrape failed for {ticker}: {e}")
+
+        return []
+
+    def _fetch_vanguard_csv(self, ticker: str, csv_url: str) -> List[HoldingEntry]:
+        """Download holdings CSV from Vanguard composition file."""
+        try:
+            self._throttle()
+            response = self._session.get(
+                csv_url,
+                headers={"User-Agent": _USER_AGENTS[0]},
+                timeout=30,
+            )
+            response.raise_for_status()
+
+            import csv
+            import io
+            reader = csv.reader(io.StringIO(response.text))
+            holdings = []
+            header_skipped = False
+
+            for row in reader:
+                if not header_skipped:
+                    if row and any("Name" in cell or "Ticker" in cell or "Weight" in cell for cell in row):
+                        header_skipped = True
+                    continue
+                if len(row) >= 2:
+                    name = row[0].strip()
+                    # Find the weight column (look for % values)
+                    weight = None
+                    for cell in row[1:]:
+                        cell_clean = cell.strip().replace("%", "")
+                        try:
+                            w = float(cell_clean)
+                            if 0 < w < 100:
+                                weight = w / 100.0
+                                break
+                        except ValueError:
+                            continue
+                    if name and weight and weight > 0.001:
+                        holdings.append(HoldingEntry(issuer_name=name, weight=weight))
+
+            holdings.sort(key=lambda h: h.weight, reverse=True)
+            return holdings[:20]
+
+        except Exception as e:
+            logger.warning(f"Vanguard CSV download failed for {ticker}: {e}")
+
+        return []
+
+    def _fetch_morningstar_page(self, ticker: str, page_url: str) -> List[HoldingEntry]:
+        """Scrape holdings from Morningstar ETF page (legacy fallback)."""
+        try:
+            self._throttle()
+            response = self._session.get(
+                page_url,
                 headers={"User-Agent": _USER_AGENTS[0]},
                 timeout=30,
             )
@@ -384,17 +569,14 @@ class CorporateLookThrough:
                         weight = float(weight_str) / 100.0
                     except ValueError:
                         continue
-                    holdings.append(HoldingEntry(
-                        issuer_name=name,
-                        weight=weight,
-                    ))
+                    holdings.append(HoldingEntry(issuer_name=name, weight=weight))
 
             if holdings:
-                logger.info(f"Scraped {len(holdings)} holdings from fact sheet for {ticker}")
+                logger.info(f"Scraped {len(holdings)} holdings from Morningstar for {ticker}")
                 return holdings
 
         except Exception as e:
-            logger.warning(f"Fact sheet scraping failed for {ticker}: {e}")
+            logger.warning(f"Morningstar scrape failed for {ticker}: {e}")
 
         return []
 
