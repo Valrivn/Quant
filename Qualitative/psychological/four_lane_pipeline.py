@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 import sqlite3
 from typing import Dict, List, Optional, Any, Tuple
@@ -34,6 +35,10 @@ from psychological.scrapers.cross_validation import (
     create_cross_validation_engine,
 )
 from psychological.engineering_guards import guard_nan, clamp
+from Quantitative.stochastic.default_probability_table import get_default_probability, get_synthetic_rating
+from Quantitative.stochastic.bernoulli_shock_filter import BernoulliShockFilter
+from Quantitative.stochastic.poisson_blackswan import PoissonBlackSwan
+from Quantitative.stochastic.markov_lifecycle import MarkovLifecycleChain, LifecycleMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -188,6 +193,12 @@ class Lane3Result:
     geopolitical_wacc_premium: float = 0.0
     displacement_ratio: float = 0.0
     is_leader: bool = False
+    bernoulli_shock_count: int = 0
+    poisson_total_shocks: int = 0
+    poisson_lambda_stress: float = 0.0
+    lifecycle_state: str = ""
+    lifecycle_projected_state: str = ""
+    lifecycle_entropy: float = 0.0
 
 
 @dataclass
@@ -478,6 +489,39 @@ class FourLanePipeline:
             
         return total_slope
 
+    def _fetch_source_weights(self, ticker: str) -> Dict[str, float]:
+        """Fetch current qualitative source weights for Bayesian calibration tracking.
+        
+        Returns normalized weights from weight_versions table, or equal-weight
+        defaults if no calibrated weights exist.
+        """
+        sources = [
+            "reddit_sentiment", "glassdoor_score", "comparably_score",
+            "github_velocity", "jobspy_zscore", "product_sentiment",
+            "apewisdom_sentiment",
+        ]
+        try:
+            with sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True) as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT category_weights FROM weight_versions
+                    WHERE is_active = 1
+                    ORDER BY promoted_at DESC LIMIT 1
+                """)
+                row = cursor.fetchone()
+                if row and row[0]:
+                    weights = json.loads(row[0])
+                    # Ensure all sources present
+                    for src in sources:
+                        if src not in weights:
+                            weights[src] = 1.0 / len(sources)
+                    return weights
+        except Exception as e:
+            logger.debug(f"Source weight fetch failed for {ticker}: {e}")
+
+        # Equal-weight defaults
+        return {s: 1.0 / len(sources) for s in sources}
+
     def _calculate_displacement_ratio(self, ticker: str) -> Tuple[float, bool]:
         with sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True) as conn:
             sub_sectors = self.config.get("sub_sectors", {})
@@ -522,6 +566,22 @@ class FourLanePipeline:
 
             dr, is_leader = self._calculate_displacement_ratio(ticker)
 
+            # Fetch current source weights for Bayesian calibration tracking
+            source_weights = self._fetch_source_weights(ticker)
+
+            # Compute default probability from ICR for the Bernoulli shock filter
+            icr = est.get("icr", 5.0)
+            p_default = get_default_probability(icr, horizon=1)
+
+            # Estimate margin variance from sector characteristics
+            sector = est.get("sector", "software")
+            margin_variance_map = {
+                "semiconductor": 0.06,
+                "platform_software": 0.03,
+                "hardware_oem": 0.08,
+            }
+            margin_variance = margin_variance_map.get(sector, 0.05)
+
             mc_input: MonteCarloInput = self.mc_engine.build_input_from_fundamentals(
                 ticker=ticker,
                 revenue=est.get("revenue", 10_000_000_000),
@@ -538,8 +598,13 @@ class FourLanePipeline:
                 geopolitical_risk_premium_rate=l1.geopolitical_risk_premium_rate,
                 displacement_ratio=dr,
                 is_leader=is_leader,
+                interest_coverage_ratio=icr,
+                margin_variance_10y=margin_variance,
+                revenue_growth=est.get("rr", 0.35) * est.get("roic", 0.10),
+                debt_to_capital=0.30,
+                poisson_lambda_base=0.30,
             )
-            mc_result: MonteCarloResult = self.mc_engine.run(mc_input)
+            mc_result: MonteCarloResult = self.mc_engine.run(mc_input, source_weights=source_weights)
 
             results[ticker] = Lane3Result(
                 ticker=ticker,
@@ -552,6 +617,12 @@ class FourLanePipeline:
                 geopolitical_wacc_premium=mc_result.mean_geopolitical_wacc_premium,
                 displacement_ratio=dr,
                 is_leader=is_leader,
+                bernoulli_shock_count=mc_result.bernoulli_shock_count,
+                poisson_total_shocks=mc_result.poisson_total_shocks,
+                poisson_lambda_stress=mc_result.mean_poisson_lambda_stress,
+                lifecycle_state=mc_result.lifecycle_state,
+                lifecycle_projected_state=mc_result.lifecycle_projected_state,
+                lifecycle_entropy=mc_result.lifecycle_entropy,
             )
         return results
 
@@ -730,7 +801,7 @@ class FourLanePipeline:
             cursor = conn.cursor()
 
             try:
-                cursor.execute("SELECT lane3_displacement_ratio FROM four_lane_results LIMIT 1")
+                cursor.execute("SELECT lane3_bernoulli_shock_count FROM four_lane_results LIMIT 1")
             except sqlite3.OperationalError:
                 cursor.execute("DROP TABLE IF EXISTS four_lane_results")
                 conn.commit()
@@ -762,6 +833,12 @@ class FourLanePipeline:
                     lane3_confidence_band TEXT,
                     lane3_displacement_ratio REAL,
                     lane3_is_leader INTEGER,
+                    lane3_bernoulli_shock_count INTEGER,
+                    lane3_poisson_total_shocks INTEGER,
+                    lane3_poisson_lambda_stress REAL,
+                    lane3_lifecycle_state TEXT,
+                    lane3_lifecycle_projected TEXT,
+                    lane3_lifecycle_entropy REAL,
                     lane4_anti_contamination INTEGER,
                     lane4_terminal_stability INTEGER,
                     lane4_overall_passed INTEGER,
@@ -786,6 +863,9 @@ class FourLanePipeline:
                      lane3_positive_eva_prob, lane3_mean_intrinsic_value, lane3_macro_risk_adj,
                      lane3_survival_probability, lane3_catastrophe_count, lane3_geo_wacc_premium,
                      lane3_confidence_band, lane3_displacement_ratio, lane3_is_leader,
+                     lane3_bernoulli_shock_count, lane3_poisson_total_shocks,
+                     lane3_poisson_lambda_stress, lane3_lifecycle_state,
+                     lane3_lifecycle_projected, lane3_lifecycle_entropy,
                      lane4_anti_contamination, lane4_terminal_stability, lane4_overall_passed,
                      conviction_label, computed_at)
                     VALUES (?, ?,
@@ -798,6 +878,7 @@ class FourLanePipeline:
                             ?, ?, ?,
                             ?, ?, ?,
                             ?, ?, ?,
+                            ?, ?, ?, ?, ?, ?,
                             ?, ?, ?,
                             ?, ?)
                 """, (
@@ -825,6 +906,12 @@ class FourLanePipeline:
                     out.lane3.confidence_band,
                     out.lane3.displacement_ratio,
                     1 if out.lane3.is_leader else 0,
+                    out.lane3.bernoulli_shock_count,
+                    out.lane3.poisson_total_shocks,
+                    out.lane3.poisson_lambda_stress,
+                    out.lane3.lifecycle_state,
+                    out.lane3.lifecycle_projected_state,
+                    out.lane3.lifecycle_entropy,
                     1 if out.lane4.anti_contamination_passed else 0,
                     1 if out.lane4.terminal_stability_passed else 0,
                     1 if out.lane4.overall_passed else 0,
