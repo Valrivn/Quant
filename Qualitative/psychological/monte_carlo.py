@@ -10,6 +10,9 @@ import numpy as np
 
 from psychological.engineering_guards import guard_nan, guard_bounds
 from config import load_hybrid_config
+from Quantitative.stochastic.bernoulli_shock_filter import BernoulliShockFilter
+from Quantitative.stochastic.poisson_blackswan import PoissonBlackSwan
+from Quantitative.stochastic.markov_lifecycle import MarkovLifecycleChain, LifecycleMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +46,15 @@ class MonteCarloInput:
     geopolitical_risk_premium_rate: float = 0.0
     displacement_ratio: float = 0.0
     is_leader: bool = False
+    # Stochastic model inputs
+    interest_coverage_ratio: float = 5.0
+    margin_variance_10y: float = 0.05
+    revenue_growth: float = 0.10
+    debt_to_capital: float = 0.30
+    poisson_lambda_base: float = 0.30
+    credit_spread_bps: Optional[float] = None
+    credit_spread_regime: str = "NORMAL"
+    lifecycle_transition_volatility: float = 0.0
 
 
 @dataclass
@@ -55,6 +67,9 @@ class MonteCarloSimRun:
     macro_shock_applied: bool
     regime: str = "normal"
     catastrophe_event: bool = False
+    bernoulli_shock_fired: bool = False
+    poisson_shocks_count: int = 0
+    lifecycle_state_transition: str = ""
 
 
 @dataclass
@@ -79,6 +94,13 @@ class MonteCarloResult:
     survival_probability: float = 1.0
     catastrophe_event_count: int = 0
     mean_geopolitical_wacc_premium: float = 0.0
+    bernoulli_shock_count: int = 0
+    poisson_total_shocks: int = 0
+    mean_poisson_lambda_stress: float = 0.0
+    lifecycle_state: str = ""
+    lifecycle_projected_state: str = ""
+    lifecycle_entropy: float = 0.0
+    source_weights_snapshot: Optional[Dict[str, float]] = None
     computed_at: str = field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
@@ -99,20 +121,40 @@ class MonteCarloEngine:
     def _compute_eva_spread(roic: float, wacc: float) -> float:
         return roic - wacc
 
-    def _apply_macro_shocks(
+    def _apply_poisson_shocks(
         self,
         growth: float,
         margin: float,
         input_data: MonteCarloInput,
-    ) -> Tuple[float, float, bool]:
+        poisson_engine: PoissonBlackSwan,
+    ) -> Tuple[float, float, bool, int]:
+        """Apply Poisson-distributed systemic shocks to growth and margin.
+
+        Replaces the old Bernoulli macro shocks with a regime-aware Poisson
+        process. The number of simultaneous shocks is drawn from
+        Poisson(lambda_stress), where lambda scales with credit spreads.
+        """
         shock_applied = False
-        if random.random() < input_data.macro_inflation_shock_prob:
-            growth -= input_data.macro_inflation_shock_magnitude
+        total_shocks = 0
+
+        lambda_stress = poisson_engine.compute_stress_lambda(
+            input_data.credit_spread_bps, input_data.credit_spread_regime
+        )
+        shock_magnitudes = poisson_engine.sample_per_simulation_shocks(lambda_stress)
+
+        for magnitude in shock_magnitudes:
+            total_shocks += 1
             shock_applied = True
-        if random.random() < input_data.macro_supply_chain_shock_prob:
-            margin -= input_data.macro_supply_chain_margin_impact
-            shock_applied = True
-        return growth, margin, shock_applied
+            # Alternate between growth and margin impacts
+            if total_shocks % 2 == 1:
+                growth += magnitude
+            else:
+                margin += magnitude
+
+        growth = self._clamp_growth(growth)
+        margin = max(0.01, min(0.60, margin))
+
+        return growth, margin, shock_applied, total_shocks
 
     @staticmethod
     def _compute_effective_wacc(
@@ -191,18 +233,32 @@ class MonteCarloEngine:
     def _simulate_single(
         self, input_data: MonteCarloInput
     ) -> MonteCarloSimRun:
-        p_catastrophe = min(1.0, max(0.0, input_data.supplier_concentration * input_data.geopolitical_stress_factor))
-        catastrophe = random.random() < p_catastrophe
+        # --- Bernoulli Shock Filter (replaces hardcoded catastrophe prob) ---
+        bernoulli = BernoulliShockFilter()
+        shock_result = bernoulli.run_trial(
+            icr=input_data.interest_coverage_ratio,
+            supplier_concentration=input_data.supplier_concentration,
+            geopolitical_stress_factor=input_data.geopolitical_stress_factor,
+        )
 
         effective_wacc, grp_premium = self._compute_effective_wacc(input_data)
 
-        if catastrophe:
+        if shock_result.shock_occurred:
             return self._simulate_disrupted(input_data, effective_wacc)
+
+        # --- Poisson Black Swan Engine (replaces old Bernoulli macro shocks) ---
+        poisson_engine = PoissonBlackSwan(
+            lambda_base=input_data.poisson_lambda_base,
+        )
+
+        # --- Markov Lifecycle: modulate margin_std from transition volatility ---
+        lifecycle_vol = input_data.lifecycle_transition_volatility
+        lifecycle_std_boost = 1.0 + lifecycle_vol * 0.3
 
         # Connection 2: Operational Stability Link (Internal Culture)
         R_risk = input_data.supplier_concentration * (1.0 - input_data.culture_score)
         lambda_vol = 1.0 + 1.5 / (1.0 + np.exp(-10.0 * (R_risk - 0.5)))
-        margin_std = 0.04 * lambda_vol
+        margin_std = 0.04 * lambda_vol * lifecycle_std_boost
 
         # Sample operating margin from N(mu_M, sigma_M)
         margin = np.random.normal(input_data.operating_margin_mean, margin_std)
@@ -215,7 +271,6 @@ class MonteCarloEngine:
         B = int(max(A + 2, np.round(5 + H * 10)))
         
         if input_data.displacement_ratio > 1.0:
-            # Tweak A: Front-Loaded Competitor Moat Penalty via right-skewed Beta distribution
             compressed_A = min(A, 5)
             compressed_B = min(B, 6)
             if compressed_B < compressed_A:
@@ -232,7 +287,6 @@ class MonteCarloEngine:
             base_sc_ratio = 1.5
         mu_SC = base_sc_ratio * (0.5 + H) * sc_penalty
         
-        # Tweak B: Sales-to-Capital Capital-Efficiency Drag/Boost
         if input_data.displacement_ratio > 1.0:
             if input_data.is_leader:
                 sc_drag = min(0.30, 0.15 * (input_data.displacement_ratio - 1.0))
@@ -248,7 +302,11 @@ class MonteCarloEngine:
         growth = self._clamp_growth(
             np.random.normal(expected_growth, input_data.expected_growth_std)
         )
-        growth, margin, shock = self._apply_macro_shocks(growth, margin, input_data)
+
+        # Apply Poisson-based systemic shocks (replaces old Bernoulli macro shocks)
+        growth, margin, shock_applied, poisson_shock_count = self._apply_poisson_shocks(
+            growth, margin, input_data, poisson_engine
+        )
 
         projected_fcfs: List[float] = []
         revenue = input_data.initial_revenue
@@ -297,17 +355,24 @@ class MonteCarloEngine:
             terminal_fcf=terminal_fcf,
             intrinsic_value=intrinsic_value,
             eva_positive=eva_positive,
-            macro_shock_applied=shock,
+            macro_shock_applied=shock_applied,
             regime="normal",
             catastrophe_event=False,
+            bernoulli_shock_fired=False,
+            poisson_shocks_count=poisson_shock_count,
         )
 
-    def run(self, input_data: MonteCarloInput) -> MonteCarloResult:
+    def run(
+        self,
+        input_data: MonteCarloInput,
+        source_weights: Optional[Dict[str, float]] = None,
+    ) -> MonteCarloResult:
         n = input_data.n_simulations
         runs: List[MonteCarloSimRun] = []
         shocks = 0
         catastrophes = 0
-        grp_premiums: List[float] = []
+        bernoulli_shocks = 0
+        poisson_total = 0
         for _ in range(n):
             run = self._simulate_single(input_data)
             runs.append(run)
@@ -315,6 +380,9 @@ class MonteCarloEngine:
                 shocks += 1
             if run.catastrophe_event:
                 catastrophes += 1
+            if run.bernoulli_shock_fired:
+                bernoulli_shocks += 1
+            poisson_total += run.poisson_shocks_count
 
         values = [r.intrinsic_value for r in runs]
         eva_positives = [r.eva_positive for r in runs]
@@ -337,6 +405,25 @@ class MonteCarloEngine:
         macro_risk_adj = 1.0 - (shocks / n_vals) if n_vals > 0 else 1.0
         survival_prob = 1.0 - (catastrophes / n_vals) if n_vals > 0 else 1.0
         _, grp_premium = self._compute_effective_wacc(input_data)
+
+        # Compute Poisson stress lambda for reporting
+        poisson_report = PoissonBlackSwan(lambda_base=input_data.poisson_lambda_base)
+        mean_lambda_stress = poisson_report.compute_stress_lambda(
+            input_data.credit_spread_bps, input_data.credit_spread_regime
+        )
+
+        # Run Markov lifecycle analysis for reporting
+        markov = MarkovLifecycleChain(time_horizon=input_data.projection_years)
+        lifecycle_metrics = LifecycleMetrics(
+            reinvestment_rate=input_data.reinvestment_rate,
+            roic=input_data.roic,
+            revenue_growth=input_data.revenue_growth,
+            margin_variance_10y=input_data.margin_variance_10y,
+            operating_margin=input_data.operating_margin_mean,
+            debt_to_capital=input_data.debt_to_capital,
+            interest_coverage_ratio=input_data.interest_coverage_ratio,
+        )
+        markov_result = markov.analyze(input_data.ticker, lifecycle_metrics)
 
         confidence_band = self._format_confidence_band(
             positive_eva_prob, mean_val, median_val, std_val
@@ -363,6 +450,13 @@ class MonteCarloEngine:
             survival_probability=survival_prob,
             catastrophe_event_count=catastrophes,
             mean_geopolitical_wacc_premium=grp_premium,
+            bernoulli_shock_count=bernoulli_shocks,
+            poisson_total_shocks=poisson_total,
+            mean_poisson_lambda_stress=mean_lambda_stress,
+            lifecycle_state=markov_result.current_state.value,
+            lifecycle_projected_state=markov_result.projected_state.value,
+            lifecycle_entropy=markov_result.transition_volatility,
+            source_weights_snapshot=source_weights,
         )
 
     @staticmethod
@@ -397,10 +491,31 @@ class MonteCarloEngine:
         geopolitical_risk_premium_rate: float = 0.0,
         displacement_ratio: float = 0.0,
         is_leader: bool = False,
+        interest_coverage_ratio: float = 5.0,
+        margin_variance_10y: float = 0.05,
+        revenue_growth: float = 0.10,
+        debt_to_capital: float = 0.30,
+        poisson_lambda_base: float = 0.30,
+        credit_spread_bps: Optional[float] = None,
+        credit_spread_regime: str = "NORMAL",
+        n_simulations: int = 10_000,
     ) -> MonteCarloInput:
         expected_growth = reinvestment_rate * roic
         growth_std = growth_std or abs(expected_growth * 0.3)
         margin_std = margin_std or abs(operating_margin * 0.2)
+
+        # Compute lifecycle transition volatility via Markov Chain
+        markov = MarkovLifecycleChain(time_horizon=5)
+        lifecycle_metrics = LifecycleMetrics(
+            reinvestment_rate=reinvestment_rate,
+            roic=roic,
+            revenue_growth=revenue_growth,
+            margin_variance_10y=margin_variance_10y,
+            operating_margin=operating_margin,
+            debt_to_capital=debt_to_capital,
+            interest_coverage_ratio=interest_coverage_ratio,
+        )
+        markov_result = markov.analyze(ticker, lifecycle_metrics)
 
         return MonteCarloInput(
             ticker=ticker,
@@ -421,6 +536,15 @@ class MonteCarloEngine:
             geopolitical_risk_premium_rate=geopolitical_risk_premium_rate,
             displacement_ratio=displacement_ratio,
             is_leader=is_leader,
+            interest_coverage_ratio=interest_coverage_ratio,
+            margin_variance_10y=margin_variance_10y,
+            revenue_growth=revenue_growth,
+            debt_to_capital=debt_to_capital,
+            poisson_lambda_base=poisson_lambda_base,
+            credit_spread_bps=credit_spread_bps,
+            credit_spread_regime=credit_spread_regime,
+            lifecycle_transition_volatility=markov_result.transition_volatility,
+            n_simulations=n_simulations,
         )
 
 
