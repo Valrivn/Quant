@@ -1,0 +1,65 @@
+{
+  "semiconductor": {
+    "p_base": 0.230769,
+    "n_firms": 10,
+    "n_years": 39,
+    "n_shocks": 9,
+    "margin_vol_10y": 0.202449,
+    "shock_years": [
+      2023,
+      2024,
+      2025
+    ],
+    "firm_shocks": {
+      "NVDA": 0,
+      "AMD": 1,
+      "INTC": 2,
+      "AVGO": 0,
+      "QCOM": 1,
+      "MRVL": 1,
+      "MU": 1,
+      "SWKS": 1,
+      "LSCC": 2,
+      "TSM": 0
+    }
+  },
+  "platform_software": {
+    "p_base": 0.0,
+    "n_firms": 8,
+    "n_years": 28,
+    "n_shocks": 0,
+    "margin_vol_10y": 0.144465,
+    "shock_years": [],
+    "firm_shocks": {
+      "MSFT": 0,
+      "GOOGL": 0,
+      "META": 0,
+      "CRM": 0,
+      "ADBE": 0,
+      "NOW": 0,
+      "SHOP": 0,
+      "WDAY": 0
+    }
+  },
+  "hardware_oem": {
+    "p_base": 0.060606,
+    "n_firms": 9,
+    "n_years": 33,
+    "n_shocks": 2,
+    "margin_vol_10y": 0.113599,
+    "shock_years": [
+      2025
+    ],
+    "firm_shocks": {
+      "AAPL": 0,
+      "TSLA": 1,
+      "AMZN": 0,
+      "DELL": 0,
+      "HPQ": 0,
+      "IBM": 0,
+      "HPE": 1,
+      "SMCI": 0,
+      "ANET": 0
+    }
+  }
+}

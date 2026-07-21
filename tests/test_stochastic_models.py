@@ -588,3 +588,219 @@ class TestStochasticIntegration:
         result_crisis = engine.run(mc_crisis)
 
         assert result_crisis.mean_poisson_lambda_stress > result_normal.mean_poisson_lambda_stress
+
+
+# ===================================================================
+# Test 6: Sector Shock Data Loader
+# ===================================================================
+
+class TestSectorShockData:
+
+    def test_load_sector_stats_semiconductor(self):
+        from Quantitative.stochastic.sector_shock_data import get_sector_shock_stats
+        stats = get_sector_shock_stats("semiconductor")
+        assert stats.sector == "semiconductor"
+        assert 0.0 <= stats.p_base <= 0.15
+        assert stats.margin_vol_10y > 0
+
+    def test_load_sector_stats_platform_software(self):
+        from Quantitative.stochastic.sector_shock_data import get_sector_shock_stats
+        stats = get_sector_shock_stats("platform_software")
+        assert stats.sector == "platform_software"
+        assert 0.0 <= stats.p_base <= 0.15
+
+    def test_load_sector_stats_hardware_oem(self):
+        from Quantitative.stochastic.sector_shock_data import get_sector_shock_stats
+        stats = get_sector_shock_stats("hardware_oem")
+        assert stats.sector == "hardware_oem"
+        assert 0.0 <= stats.p_base <= 0.15
+
+    def test_unknown_sector_falls_back(self):
+        from Quantitative.stochastic.sector_shock_data import get_sector_shock_stats
+        stats = get_sector_shock_stats("unknown_sector")
+        assert stats.p_base > 0
+
+    def test_dynamic_shock_probability_semiconductor(self):
+        from Quantitative.stochastic.sector_shock_data import compute_dynamic_shock_probability
+        p = compute_dynamic_shock_probability(
+            sector="semiconductor",
+            current_margin_vol=0.06,
+        )
+        assert p > 0.01
+
+    def test_dynamic_shock_increases_with_margin_vol(self):
+        from Quantitative.stochastic.sector_shock_data import compute_dynamic_shock_probability
+        p_low = compute_dynamic_shock_probability(
+            sector="semiconductor", current_margin_vol=0.03,
+        )
+        p_high = compute_dynamic_shock_probability(
+            sector="semiconductor", current_margin_vol=0.12,
+        )
+        assert p_high > p_low
+
+    def test_dynamic_shock_concentration_amplifier(self):
+        from Quantitative.stochastic.sector_shock_data import compute_dynamic_shock_probability
+        p_low = compute_dynamic_shock_probability(
+            sector="semiconductor", current_margin_vol=0.06,
+            supplier_concentration=0.5,
+        )
+        p_high = compute_dynamic_shock_probability(
+            sector="semiconductor", current_margin_vol=0.06,
+            supplier_concentration=0.9,
+        )
+        assert p_high > p_low
+
+    def test_dynamic_shock_bounded(self):
+        from Quantitative.stochastic.sector_shock_data import compute_dynamic_shock_probability
+        p = compute_dynamic_shock_probability(
+            sector="semiconductor",
+            current_margin_vol=0.50,
+            supplier_concentration=0.95,
+            geopolitical_stress_factor=1.0,
+        )
+        assert 0.0 <= p <= 1.0
+
+
+# ===================================================================
+# Test 7: Dynamic Bernoulli Shock Filter
+# ===================================================================
+
+class TestBernoulliShockFilterDynamic:
+
+    @pytest.fixture
+    def filter_engine(self):
+        return BernoulliShockFilter()
+
+    def test_run_trial_dynamic_nvda(self, filter_engine):
+        rng = random.Random(42)
+        result = filter_engine.run_trial_dynamic(
+            icr=35.0,
+            sector="semiconductor",
+            current_margin_vol=0.06,
+            margin_vol_10y=0.06,
+            rng=rng,
+        )
+        assert isinstance(result, BernoulliShockResult)
+        assert result.shock_probability > 0.005
+        assert result.synthetic_rating == "AAA"
+
+    def test_run_trial_dynamic_sector_dominates_nvda(self, filter_engine):
+        rng = random.Random(42)
+        result = filter_engine.run_trial_dynamic(
+            icr=35.0,
+            sector="semiconductor",
+            current_margin_vol=0.06,
+            rng=rng,
+        )
+        p_default = lookup_rating_tier(35.0).p_default_1yr
+        assert result.shock_probability > p_default
+
+    def test_run_trial_dynamic_credit_dominates_distressed(self, filter_engine):
+        rng = random.Random(42)
+        result = filter_engine.run_trial_dynamic(
+            icr=0.5,
+            sector="platform_software",
+            current_margin_vol=0.03,
+            margin_vol_10y=0.03,
+            rng=rng,
+        )
+        p_default = lookup_rating_tier(0.5).p_default_1yr
+        assert result.shock_probability >= p_default
+
+    def test_run_trial_dynamic_can_fire_shocks(self, filter_engine):
+        rng = random.Random(42)
+        shock_count = 0
+        for _ in range(1000):
+            result = filter_engine.run_trial_dynamic(
+                icr=35.0,
+                sector="semiconductor",
+                current_margin_vol=0.06,
+                margin_vol_10y=0.06,
+                rng=rng,
+            )
+            if result.shock_occurred:
+                shock_count += 1
+        assert shock_count > 0
+
+    def test_run_trial_dynamic_fewer_shocks_for_stable_sector(self, filter_engine):
+        rng_semiconductor = random.Random(42)
+        rng_software = random.Random(42)
+        sem_shocks = sum(
+            1 for _ in range(2000)
+            if filter_engine.run_trial_dynamic(
+                icr=35.0, sector="semiconductor",
+                current_margin_vol=0.06, margin_vol_10y=0.06,
+                rng=rng_semiconductor,
+            ).shock_occurred
+        )
+        sw_shocks = sum(
+            1 for _ in range(2000)
+            if filter_engine.run_trial_dynamic(
+                icr=35.0, sector="platform_software",
+                current_margin_vol=0.03, margin_vol_10y=0.03,
+                rng=rng_software,
+            ).shock_occurred
+        )
+        assert sem_shocks >= sw_shocks
+
+    def test_monte_carlo_input_accepts_sector(self):
+        from unittest.mock import patch as _patch
+        with _patch("psychological.monte_carlo.load_hybrid_config") as mock:
+            mock.return_value = {}
+            from psychological.monte_carlo import create_monte_carlo_engine
+            engine = create_monte_carlo_engine()
+            mc_input = engine.build_input_from_fundamentals(
+                ticker="NVDA",
+                revenue=130_000_000_000,
+                fcf=65_000_000_000,
+                roic=0.45,
+                wacc=0.11,
+                reinvestment_rate=0.55,
+                operating_margin=0.55,
+                interest_coverage_ratio=35.0,
+                sector="semiconductor",
+            )
+            assert mc_input.sector == "semiconductor"
+
+    def test_monte_carlo_nvda_gets_operational_shocks(self):
+        from unittest.mock import patch as _patch
+        with _patch("psychological.monte_carlo.load_hybrid_config") as mock:
+            mock.return_value = {}
+            from psychological.monte_carlo import create_monte_carlo_engine
+            engine = create_monte_carlo_engine()
+            mc_input = engine.build_input_from_fundamentals(
+                ticker="NVDA",
+                revenue=130_000_000_000,
+                fcf=65_000_000_000,
+                roic=0.45,
+                wacc=0.11,
+                reinvestment_rate=0.55,
+                operating_margin=0.55,
+                interest_coverage_ratio=35.0,
+                sector="semiconductor",
+                n_simulations=10_000,
+            )
+            result = engine.run(mc_input)
+            assert result.bernoulli_shock_count > 0
+
+    def test_nvda_shock_count_reasonable(self):
+        from unittest.mock import patch as _patch
+        with _patch("psychological.monte_carlo.load_hybrid_config") as mock:
+            mock.return_value = {}
+            from psychological.monte_carlo import create_monte_carlo_engine
+            engine = create_monte_carlo_engine()
+            mc_input = engine.build_input_from_fundamentals(
+                ticker="NVDA",
+                revenue=130_000_000_000,
+                fcf=65_000_000_000,
+                roic=0.45,
+                wacc=0.11,
+                reinvestment_rate=0.55,
+                operating_margin=0.55,
+                interest_coverage_ratio=35.0,
+                sector="semiconductor",
+                n_simulations=10_000,
+            )
+            result = engine.run(mc_input)
+            shock_rate = result.bernoulli_shock_count / 10_000
+            assert 0.005 < shock_rate < 0.50

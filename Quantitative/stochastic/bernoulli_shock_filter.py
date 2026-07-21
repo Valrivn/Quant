@@ -34,6 +34,10 @@ from Quantitative.stochastic.default_probability_table import (
     get_default_probability,
     get_synthetic_rating,
 )
+from Quantitative.stochastic.sector_shock_data import (
+    compute_dynamic_shock_probability,
+    get_sector_shock_stats,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -154,6 +158,74 @@ class BernoulliShockFilter:
             logger.info(
                 f"BernoulliShockFilter: SHOCK FIRED for ICR={icr:.2f} "
                 f"(rating={tier.rating}, p={p:.4f}, penalty={penalty:.4f})"
+            )
+
+        return BernoulliShockResult(
+            shock_occurred=shock_occurred,
+            shock_probability=p,
+            synthetic_rating=tier.rating,
+            icr_used=icr,
+            penalty_multiplier=penalty,
+            lgd=lgd,
+            recovery_rate=tier.recovery_rate,
+        )
+
+    def run_trial_dynamic(
+        self,
+        icr: float,
+        sector: str,
+        current_margin_vol: float,
+        margin_vol_10y: Optional[float] = None,
+        supplier_concentration: float = 0.5,
+        geopolitical_stress_factor: float = 0.0,
+        shock_severity: float = 1.0,
+        rng: Optional[random.Random] = None,
+    ) -> BernoulliShockResult:
+        """
+        Execute a Bernoulli shock trial using sector-adjusted dynamic probability.
+
+        Uses the max(p_default, p_shock_dynamic) approach to combine credit
+        default risk with sector operational shock risk. For high-quality
+        companies (AAA), the sector operational shock probability dominates.
+        For distressed companies, credit default probability dominates.
+
+        Args:
+            icr: Interest Coverage Ratio
+            sector: Sector name (e.g., "semiconductor")
+            current_margin_vol: Trailing 12-month operating margin volatility
+            margin_vol_10y: 10-year average margin volatility (overrides sector default)
+            supplier_concentration: Supplier concentration [0.0, 1.0]
+            geopolitical_stress_factor: Legacy geopolitical stress
+            shock_severity: Amplifies the penalty when > 1.0
+            rng: Optional seeded RNG for reproducibility
+
+        Returns:
+            BernoulliShockResult with shock outcome and penalty details
+        """
+        p_default = lookup_rating_tier(icr).p_default_1yr
+        p_sector = compute_dynamic_shock_probability(
+            sector=sector,
+            current_margin_vol=current_margin_vol,
+            margin_vol_10y=margin_vol_10y,
+            supplier_concentration=supplier_concentration,
+            geopolitical_stress_factor=geopolitical_stress_factor,
+        )
+        p = max(p_default, p_sector)
+
+        _rng = rng or random
+        u = _rng.random()
+        shock_occurred = u <= p
+
+        tier = lookup_rating_tier(icr)
+        lgd = tier.p_default_1yr * (1.0 - tier.recovery_rate)
+
+        penalty = 1.0
+        if shock_occurred:
+            penalty = compute_shock_penalty_multiplier(icr, shock_severity)
+            logger.info(
+                f"BernoulliShockFilter: SHOCK FIRED for ICR={icr:.2f} "
+                f"sector={sector} (p_default={p_default:.4f}, p_sector={p_sector:.4f}, "
+                f"p_effective={p:.4f}, penalty={penalty:.4f})"
             )
 
         return BernoulliShockResult(
