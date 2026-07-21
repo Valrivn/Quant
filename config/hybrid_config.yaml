@@ -114,6 +114,7 @@ sub_sectors:
     - "MSFT"
     - "GOOGL"
     - "META"
+    - "AMZN"
     - "CRM"
     - "ADBE"
     - "NOW"
@@ -122,7 +123,6 @@ sub_sectors:
   hardware_oem:
     - "AAPL"
     - "TSLA"
-    - "AMZN"
     - "DELL"
     - "HPQ"
     - "IBM"
