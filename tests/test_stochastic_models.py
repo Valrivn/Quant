@@ -804,3 +804,76 @@ class TestBernoulliShockFilterDynamic:
             result = engine.run(mc_input)
             shock_rate = result.bernoulli_shock_count / 10_000
             assert 0.005 < shock_rate < 0.50
+
+    def test_nvda_fewer_shocks_than_intc(self):
+        """NVDA (ICR=35) should have fewer shocks than INTC (ICR=3.5) in same sector."""
+        from unittest.mock import patch as _patch
+        with _patch("psychological.monte_carlo.load_hybrid_config") as mock:
+            mock.return_value = {}
+            from psychological.monte_carlo import create_monte_carlo_engine
+            engine = create_monte_carlo_engine()
+
+            nvda_input = engine.build_input_from_fundamentals(
+                ticker="NVDA", revenue=130e9, fcf=65e9, roic=0.45, wacc=0.11,
+                reinvestment_rate=0.55, operating_margin=0.55,
+                interest_coverage_ratio=35.0, sector="semiconductor",
+                n_simulations=10_000,
+            )
+            intc_input = engine.build_input_from_fundamentals(
+                ticker="INTC", revenue=54e9, fcf=-8e9, roic=0.03, wacc=0.13,
+                reinvestment_rate=0.60, operating_margin=0.05,
+                interest_coverage_ratio=3.5, sector="semiconductor",
+                n_simulations=10_000,
+            )
+            nvda_r = engine.run(nvda_input)
+            intc_r = engine.run(intc_input)
+            assert nvda_r.bernoulli_shock_count < intc_r.bernoulli_shock_count
+
+
+# ===================================================================
+# Test 8: Balance Sheet Resilience Modifier (M_health)
+# ===================================================================
+
+class TestHealthModifier:
+
+    def test_health_modifier_fortress(self):
+        bf = BernoulliShockFilter()
+        m = bf.compute_health_modifier(35.0)
+        assert 0.60 < m < 0.75
+
+    def test_health_modifier_average(self):
+        bf = BernoulliShockFilter()
+        m = bf.compute_health_modifier(4.0)
+        assert 0.65 < m < 0.80
+
+    def test_health_modifier_stressed(self):
+        bf = BernoulliShockFilter()
+        m = bf.compute_health_modifier(1.0)
+        assert m > 1.0
+
+    def test_health_modifier_distressed(self):
+        bf = BernoulliShockFilter()
+        m = bf.compute_health_modifier(0.5)
+        assert m > 1.2
+
+    def test_health_modifier_increases_as_icr_drops(self):
+        bf = BernoulliShockFilter()
+        m_high = bf.compute_health_modifier(35.0)
+        m_low = bf.compute_health_modifier(1.0)
+        assert m_high < m_low
+
+    def test_health_modifier_bounded(self):
+        bf = BernoulliShockFilter()
+        for icr in [-5.0, 0.0, 1.0, 2.0, 5.0, 10.0, 35.0, 100.0]:
+            m = bf.compute_health_modifier(icr)
+            assert 0.5 <= m <= 2.0
+
+    def test_health_modifier_nvda_discount(self):
+        bf = BernoulliShockFilter()
+        m_nvda = bf.compute_health_modifier(35.0)
+        assert m_nvda < 1.0
+
+    def test_health_modifier_intc_penalty(self):
+        bf = BernoulliShockFilter()
+        m_intc = bf.compute_health_modifier(3.5)
+        assert m_intc > 0.7
