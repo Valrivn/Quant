@@ -36,7 +36,7 @@ SUBSECTOR_MAP = {
     "NVDA": "semiconductors", "AMD": "semiconductors", "AVGO": "semiconductors",
     "INTC": "semiconductors", "MSFT": "platform_software", "GOOGL": "platform_software",
     "META": "platform_software", "TSLA": "hardware_oem", "AAPL": "hardware_oem",
-    "AMZN": "hardware_oem",
+    "AMZN": "platform_software",
 }
 
 
@@ -55,8 +55,8 @@ def hist_slice():
 def subsector_cfg():
     return SubSectorConfig(
         semiconductors=["NVDA", "AMD", "AVGO", "INTC"],
-        platform_software=["MSFT", "GOOGL", "META"],
-        hardware_oem=["TSLA", "AAPL", "AMZN"],
+        platform_software=["MSFT", "GOOGL", "META", "AMZN"],
+        hardware_oem=["TSLA", "AAPL"],
     )
 
 

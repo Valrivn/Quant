@@ -107,7 +107,7 @@ class SubSectorConfig:
         "MSFT", "GOOGL", "META", "AMZN", "CRM", "ADBE", "NOW", "SHOP", "WDAY",
     ])
     hardware_oem: List[str] = field(default_factory=lambda: [
-        "AAPL", "TSLA", "AMZN", "DELL", "HPQ", "IBM", "HPE", "SMCI", "ANET",
+        "AAPL", "TSLA", "DELL", "HPQ", "IBM", "HPE", "SMCI", "ANET",
     ])
 
     @classmethod
