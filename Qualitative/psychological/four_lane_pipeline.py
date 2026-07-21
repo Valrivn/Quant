@@ -133,7 +133,7 @@ FUNDAMENTAL_ESTIMATES: Dict[str, Dict[str, float]] = {
     "META":  {"revenue": 165_000_000_000, "fcf": 62_000_000_000,  "roic": 0.22, "wacc": 0.10, "rr": 0.35, "op_margin": 0.35, "sector": "platform_software", "icr": 28.0,  "ebit": 58_000_000_000,  "interest_expense": 2_100_000_000, "geo_stress": 0.0, "geo_prem_rate": 0.0},
     "TSLA":  {"revenue": 97_000_000_000,  "fcf": 5_000_000_000,   "roic": 0.12, "wacc": 0.14, "rr": 0.50, "op_margin": 0.10, "sector": "hardware_oem",      "icr": 8.0,   "ebit": 9_700_000_000,   "interest_expense": 1_200_000_000, "geo_stress": 0.05, "geo_prem_rate": 0.008},
     "AAPL":  {"revenue": 395_000_000_000, "fcf": 115_000_000_000, "roic": 0.40, "wacc": 0.09, "rr": 0.35, "op_margin": 0.32, "sector": "hardware_oem",      "icr": 25.0,  "ebit": 126_000_000_000, "interest_expense": 5_000_000_000, "geo_stress": 0.03, "geo_prem_rate": 0.005},
-    "AMZN":  {"revenue": 620_000_000_000, "fcf": 64_000_000_000,  "roic": 0.15, "wacc": 0.10, "rr": 0.30, "op_margin": 0.12, "sector": "hardware_oem",      "icr": 12.0,  "ebit": 74_000_000_000,  "interest_expense": 6_200_000_000, "geo_stress": 0.03, "geo_prem_rate": 0.005},
+    "AMZN":  {"revenue": 620_000_000_000, "fcf": 64_000_000_000,  "roic": 0.15, "wacc": 0.10, "rr": 0.30, "op_margin": 0.12, "sector": "platform_software", "icr": 12.0,  "ebit": 74_000_000_000,  "interest_expense": 6_200_000_000, "geo_stress": 0.03, "geo_prem_rate": 0.005},
 }
 
 CURRENT_PRICES: Dict[str, float] = {
