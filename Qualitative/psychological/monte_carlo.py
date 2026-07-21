@@ -55,6 +55,7 @@ class MonteCarloInput:
     credit_spread_bps: Optional[float] = None
     credit_spread_regime: str = "NORMAL"
     lifecycle_transition_volatility: float = 0.0
+    sector: str = "technology"
 
 
 @dataclass
@@ -235,16 +236,34 @@ class MonteCarloEngine:
     ) -> MonteCarloSimRun:
         # --- Bernoulli Shock Filter (replaces hardcoded catastrophe prob) ---
         bernoulli = BernoulliShockFilter()
-        shock_result = bernoulli.run_trial(
+
+        # Compute current margin volatility for dynamic sector scaling
+        R_risk = input_data.supplier_concentration * (1.0 - input_data.culture_score)
+        lambda_vol = 1.0 + 1.5 / (1.0 + np.exp(-10.0 * (R_risk - 0.5)))
+        current_margin_vol = 0.04 * lambda_vol
+
+        shock_result = bernoulli.run_trial_dynamic(
             icr=input_data.interest_coverage_ratio,
+            sector=input_data.sector,
+            current_margin_vol=current_margin_vol,
+            margin_vol_10y=input_data.margin_variance_10y,
             supplier_concentration=input_data.supplier_concentration,
             geopolitical_stress_factor=input_data.geopolitical_stress_factor,
         )
 
-        effective_wacc, grp_premium = self._compute_effective_wacc(input_data)
-
+        # Compute FCF penalty vector (graded, not binary)
         if shock_result.shock_occurred:
-            return self._simulate_disrupted(input_data, effective_wacc)
+            fcf_penalty = bernoulli.compute_fcf_vector_penalty(
+                icr=input_data.interest_coverage_ratio,
+                n_years=input_data.projection_years,
+                supplier_concentration=input_data.supplier_concentration,
+                geopolitical_stress_factor=input_data.geopolitical_stress_factor,
+                shock_severity=1.0,
+            )
+        else:
+            fcf_penalty = [1.0] * input_data.projection_years
+
+        effective_wacc, grp_premium = self._compute_effective_wacc(input_data)
 
         # --- Poisson Black Swan Engine (replaces old Bernoulli macro shocks) ---
         poisson_engine = PoissonBlackSwan(
@@ -337,6 +356,7 @@ class MonteCarloEngine:
                 sim_roic = sim_roic * (1.0 - decay_factor) + effective_wacc * decay_factor
 
             fcf = sim_ebit_adj * (1.0 - tax_rate) - reinvestment
+            fcf *= fcf_penalty[min(year - 1, len(fcf_penalty) - 1)]
             pv_fcf = fcf / ((1.0 + effective_wacc) ** year)
             projected_fcfs.append(pv_fcf)
 
@@ -358,7 +378,7 @@ class MonteCarloEngine:
             macro_shock_applied=shock_applied,
             regime="normal",
             catastrophe_event=False,
-            bernoulli_shock_fired=False,
+            bernoulli_shock_fired=shock_result.shock_occurred,
             poisson_shocks_count=poisson_shock_count,
         )
 
@@ -499,6 +519,7 @@ class MonteCarloEngine:
         credit_spread_bps: Optional[float] = None,
         credit_spread_regime: str = "NORMAL",
         n_simulations: int = 10_000,
+        sector: str = "technology",
     ) -> MonteCarloInput:
         expected_growth = reinvestment_rate * roic
         growth_std = growth_std or abs(expected_growth * 0.3)
@@ -545,6 +566,7 @@ class MonteCarloEngine:
             credit_spread_regime=credit_spread_regime,
             lifecycle_transition_volatility=markov_result.transition_volatility,
             n_simulations=n_simulations,
+            sector=sector,
         )
 
 

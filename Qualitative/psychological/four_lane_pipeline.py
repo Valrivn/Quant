@@ -603,6 +603,7 @@ class FourLanePipeline:
                 revenue_growth=est.get("rr", 0.35) * est.get("roic", 0.10),
                 debt_to_capital=0.30,
                 poisson_lambda_base=0.30,
+                sector=sector,
             )
             mc_result: MonteCarloResult = self.mc_engine.run(mc_input, source_weights=source_weights)
 
