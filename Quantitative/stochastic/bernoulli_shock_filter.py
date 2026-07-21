@@ -24,6 +24,7 @@ References:
 """
 
 import logging
+import math
 import random
 from dataclasses import dataclass
 from typing import Optional
@@ -121,6 +122,36 @@ class BernoulliShockFilter:
 
         return p_effective
 
+    @staticmethod
+    def compute_health_modifier(icr: float) -> float:
+        """
+        Compute the Balance Sheet Resilience Modifier (M_health).
+
+        Modulates the sector shock probability based on individual company
+        financial health. Prevents the sector probability from completely
+        masking individual financial strength.
+
+        Formula: M_health = 1 / (σ(ICR - 2.0) + 0.5)
+
+        Where σ(x) = 1 / (1 + e^(-x)) is the logistic sigmoid centered at ICR=2.0.
+
+        Behavior:
+          - Fortress firm (ICR=35): σ(33)≈1.0, M_health=0.67 (33% discount)
+          - Average firm (ICR=4):   σ(2)≈0.88, M_health=0.72 (28% discount)
+          - Stressed firm (ICR=2):  σ(0)=0.50, M_health=0.87 (13% discount)
+          - Distressed (ICR=1):     σ(-1)≈0.27, M_health=1.30 (30% penalty)
+          - Deep distress (ICR=0):  σ(-2)≈0.12, M_health=1.43 (43% penalty)
+
+        Args:
+            icr: Interest Coverage Ratio
+
+        Returns:
+            M_health modifier in (0.5, 2.0]
+        """
+        sig_x = 1.0 / (1.0 + math.exp(-(icr - 2.0)))
+        m_health = 1.0 / (sig_x + 0.5)
+        return max(0.5, min(2.0, m_health))
+
     def run_trial(
         self,
         icr: float,
@@ -210,7 +241,11 @@ class BernoulliShockFilter:
             supplier_concentration=supplier_concentration,
             geopolitical_stress_factor=geopolitical_stress_factor,
         )
-        p = max(p_default, p_sector)
+
+        m_health = self.compute_health_modifier(icr)
+        p_sector_adjusted = p_sector * m_health
+
+        p = max(p_default, p_sector_adjusted)
 
         _rng = rng or random
         u = _rng.random()
@@ -225,7 +260,7 @@ class BernoulliShockFilter:
             logger.info(
                 f"BernoulliShockFilter: SHOCK FIRED for ICR={icr:.2f} "
                 f"sector={sector} (p_default={p_default:.4f}, p_sector={p_sector:.4f}, "
-                f"p_effective={p:.4f}, penalty={penalty:.4f})"
+                f"M_health={m_health:.4f}, p_effective={p:.4f}, penalty={penalty:.4f})"
             )
 
         return BernoulliShockResult(
