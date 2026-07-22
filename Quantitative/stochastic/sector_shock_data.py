@@ -56,14 +56,32 @@ DEFAULTS = {
         n_shocks=24,
         margin_vol_10y=0.06,
     ),
-    "platform_software": SectorShockStats(
-        sector="platform_software",
+    "enterprise_software": SectorShockStats(
+        sector="enterprise_software",
         p_base_raw=0.02,
         p_base=0.02,
         n_firms=30,
         n_years=300,
         n_shocks=6,
         margin_vol_10y=0.03,
+    ),
+    "cloud_internet": SectorShockStats(
+        sector="cloud_internet",
+        p_base_raw=0.03,
+        p_base=0.03,
+        n_firms=30,
+        n_years=300,
+        n_shocks=9,
+        margin_vol_10y=0.05,
+    ),
+    "consumer_electronics": SectorShockStats(
+        sector="consumer_electronics",
+        p_base_raw=0.04,
+        p_base=0.04,
+        n_firms=30,
+        n_years=300,
+        n_shocks=12,
+        margin_vol_10y=0.07,
     ),
     "hardware_oem": SectorShockStats(
         sector="hardware_oem",
@@ -73,6 +91,15 @@ DEFAULTS = {
         n_years=300,
         n_shocks=18,
         margin_vol_10y=0.08,
+    ),
+    "networking": SectorShockStats(
+        sector="networking",
+        p_base_raw=0.03,
+        p_base=0.03,
+        n_firms=30,
+        n_years=300,
+        n_shocks=9,
+        margin_vol_10y=0.05,
     ),
 }
 
@@ -156,8 +183,8 @@ def get_sector_shock_stats(sector: str) -> SectorShockStats:
     data = _get_data()
     stats = data.get(sector)
     if stats is None:
-        logger.warning(f"Unknown sector '{sector}', using platform_software defaults")
-        stats = data.get("platform_software", DEFAULTS["platform_software"].__dict__)
+        logger.warning(f"Unknown sector '{sector}', using enterprise_software defaults")
+        stats = data.get("enterprise_software", DEFAULTS["enterprise_software"].__dict__)
     return SectorShockStats(**stats)
 
 
@@ -178,7 +205,7 @@ def compute_dynamic_shock_probability(
     operational shock probability increases proportionally.
 
     Args:
-        sector: Sector name (e.g., "semiconductor", "platform_software")
+        sector: Sector name (e.g., "semiconductor", "enterprise_software")
         current_margin_vol: Trailing 12-month operating margin volatility
         margin_vol_10y: 10-year average margin volatility (overrides sector default if provided)
         supplier_concentration: Supply chain concentration [0.0, 1.0]

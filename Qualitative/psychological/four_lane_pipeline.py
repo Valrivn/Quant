@@ -38,6 +38,7 @@ from psychological.engineering_guards import guard_nan, clamp
 from Quantitative.stochastic.default_probability_table import get_default_probability, get_synthetic_rating
 from Quantitative.stochastic.bernoulli_shock_filter import BernoulliShockFilter
 from Quantitative.stochastic.poisson_blackswan import PoissonBlackSwan
+from Quantitative.bonds.credit_spread_monitor import CreditSpreadMonitor, SpreadRegime
 from Quantitative.stochastic.markov_lifecycle import MarkovLifecycleChain, LifecycleMetrics
 
 logger = logging.getLogger(__name__)
@@ -129,11 +130,11 @@ FUNDAMENTAL_ESTIMATES: Dict[str, Dict[str, float]] = {
     "INTC":  {"revenue": 54_000_000_000,  "fcf": -8_000_000_000,  "roic": 0.03, "wacc": 0.13, "rr": 0.60, "op_margin": 0.05, "sector": "semiconductor",     "icr": 3.5,   "ebit": 2_700_000_000,  "interest_expense": 770_000_000, "geo_stress": 0.05, "geo_prem_rate": 0.01},
     "AVGO":  {"revenue": 50_000_000_000,  "fcf": 25_000_000_000,  "roic": 0.30, "wacc": 0.10, "rr": 0.50, "op_margin": 0.40, "sector": "semiconductor",     "icr": 22.0,  "ebit": 20_000_000_000,  "interest_expense": 910_000_000, "geo_stress": 0.12, "geo_prem_rate": 0.018},
     "MSFT":  {"revenue": 245_000_000_000, "fcf": 82_000_000_000,  "roic": 0.30, "wacc": 0.09, "rr": 0.45, "op_margin": 0.42, "sector": "platform_software", "icr": 40.0,  "ebit": 103_000_000_000, "interest_expense": 2_600_000_000, "geo_stress": 0.0, "geo_prem_rate": 0.0},
-    "GOOGL": {"revenue": 340_000_000_000, "fcf": 86_000_000_000,  "roic": 0.25, "wacc": 0.09, "rr": 0.40, "op_margin": 0.30, "sector": "platform_software", "icr": 30.0,  "ebit": 102_000_000_000, "interest_expense": 3_400_000_000, "geo_stress": 0.0, "geo_prem_rate": 0.0},
-    "META":  {"revenue": 165_000_000_000, "fcf": 62_000_000_000,  "roic": 0.22, "wacc": 0.10, "rr": 0.35, "op_margin": 0.35, "sector": "platform_software", "icr": 28.0,  "ebit": 58_000_000_000,  "interest_expense": 2_100_000_000, "geo_stress": 0.0, "geo_prem_rate": 0.0},
-    "TSLA":  {"revenue": 97_000_000_000,  "fcf": 5_000_000_000,   "roic": 0.12, "wacc": 0.14, "rr": 0.50, "op_margin": 0.10, "sector": "hardware_oem",      "icr": 8.0,   "ebit": 9_700_000_000,   "interest_expense": 1_200_000_000, "geo_stress": 0.05, "geo_prem_rate": 0.008},
-    "AAPL":  {"revenue": 395_000_000_000, "fcf": 115_000_000_000, "roic": 0.40, "wacc": 0.09, "rr": 0.35, "op_margin": 0.32, "sector": "hardware_oem",      "icr": 25.0,  "ebit": 126_000_000_000, "interest_expense": 5_000_000_000, "geo_stress": 0.03, "geo_prem_rate": 0.005},
-    "AMZN":  {"revenue": 620_000_000_000, "fcf": 64_000_000_000,  "roic": 0.15, "wacc": 0.10, "rr": 0.30, "op_margin": 0.12, "sector": "platform_software", "icr": 12.0,  "ebit": 74_000_000_000,  "interest_expense": 6_200_000_000, "geo_stress": 0.03, "geo_prem_rate": 0.005},
+    "GOOGL": {"revenue": 340_000_000_000, "fcf": 86_000_000_000,  "roic": 0.25, "wacc": 0.09, "rr": 0.40, "op_margin": 0.30, "sector": "cloud_internet",       "icr": 30.0,  "ebit": 102_000_000_000, "interest_expense": 3_400_000_000, "geo_stress": 0.0, "geo_prem_rate": 0.0},
+    "META":  {"revenue": 165_000_000_000, "fcf": 62_000_000_000,  "roic": 0.22, "wacc": 0.10, "rr": 0.35, "op_margin": 0.35, "sector": "cloud_internet",       "icr": 28.0,  "ebit": 58_000_000_000,  "interest_expense": 2_100_000_000, "geo_stress": 0.0, "geo_prem_rate": 0.0},
+    "TSLA":  {"revenue": 97_000_000_000,  "fcf": 5_000_000_000,   "roic": 0.12, "wacc": 0.14, "rr": 0.50, "op_margin": 0.10, "sector": "consumer_electronics", "icr": 8.0,   "ebit": 9_700_000_000,   "interest_expense": 1_200_000_000, "geo_stress": 0.05, "geo_prem_rate": 0.008},
+    "AAPL":  {"revenue": 395_000_000_000, "fcf": 115_000_000_000, "roic": 0.40, "wacc": 0.09, "rr": 0.35, "op_margin": 0.32, "sector": "consumer_electronics", "icr": 25.0,  "ebit": 126_000_000_000, "interest_expense": 5_000_000_000, "geo_stress": 0.03, "geo_prem_rate": 0.005},
+    "AMZN":  {"revenue": 620_000_000_000, "fcf": 64_000_000_000,  "roic": 0.15, "wacc": 0.10, "rr": 0.30, "op_margin": 0.12, "sector": "cloud_internet",       "icr": 43.8,  "ebit": 74_000_000_000,  "interest_expense": 6_200_000_000, "geo_stress": 0.03, "geo_prem_rate": 0.005},
 }
 
 CURRENT_PRICES: Dict[str, float] = {
@@ -231,13 +232,25 @@ def _get_subsector_regression_params(subsector: Optional[str]) -> Dict[str, str]
             "multiple": "EV/Invested Capital",
             "dependent": "ROIC",
         },
-        "platform_software": {
+        "enterprise_software": {
             "multiple": "EV/Sales",
             "dependent": "After-Tax Operating Margin",
+        },
+        "cloud_internet": {
+            "multiple": "EV/EBITDA",
+            "dependent": "Revenue Growth",
+        },
+        "consumer_electronics": {
+            "multiple": "P/E",
+            "dependent": "EPS Growth",
         },
         "hardware_oem": {
             "multiple": "Price-to-Book",
             "dependent": "ROE",
+        },
+        "networking": {
+            "multiple": "EV/Revenue",
+            "dependent": "Operating Margin",
         },
     }
     return params.get(subsector, {})
@@ -560,6 +573,23 @@ class FourLanePipeline:
 
     def run_lane3(self, lane1_results: Dict[str, Lane1Result]) -> Dict[str, Lane3Result]:
         results: Dict[str, Lane3Result] = {}
+
+        # Fetch live credit spread data once for all tickers
+        credit_spread_bps = None
+        credit_spread_regime = "NORMAL"
+        try:
+            monitor = CreditSpreadMonitor()
+            spread_result = monitor.fetch_and_classify()
+            if spread_result.current_spread_bps is not None:
+                credit_spread_bps = spread_result.current_spread_bps
+                credit_spread_regime = spread_result.regime.value
+                logger.info(
+                    f"CreditSpreadMonitor: regime={credit_spread_regime}, "
+                    f"spread={credit_spread_bps:.1f} bps"
+                )
+        except Exception as e:
+            logger.warning(f"CreditSpreadMonitor failed, using default spreads: {e}")
+
         for ticker, l1 in lane1_results.items():
             est = FUNDAMENTAL_ESTIMATES.get(ticker, {})
             mc_wacc = l1.modulated_wacc if l1.qualitative_modulation_applied else est.get("wacc", 0.10)
@@ -577,8 +607,11 @@ class FourLanePipeline:
             sector = est.get("sector", "software")
             margin_variance_map = {
                 "semiconductor": 0.06,
-                "platform_software": 0.03,
+                "enterprise_software": 0.03,
+                "cloud_internet": 0.05,
+                "consumer_electronics": 0.07,
                 "hardware_oem": 0.08,
+                "networking": 0.05,
             }
             margin_variance = margin_variance_map.get(sector, 0.05)
 
@@ -603,6 +636,8 @@ class FourLanePipeline:
                 revenue_growth=est.get("rr", 0.35) * est.get("roic", 0.10),
                 debt_to_capital=0.30,
                 poisson_lambda_base=0.30,
+                credit_spread_bps=credit_spread_bps,
+                credit_spread_regime=credit_spread_regime,
                 sector=sector,
             )
             mc_result: MonteCarloResult = self.mc_engine.run(mc_input, source_weights=source_weights)
