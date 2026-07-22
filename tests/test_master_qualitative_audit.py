@@ -34,9 +34,9 @@ DB_PATH = "reddit_quant.db"
 TARGET_TICKERS = ["NVDA", "AMD", "AVGO", "INTC", "MSFT", "GOOGL", "META", "TSLA", "AAPL", "AMZN"]
 SUBSECTOR_MAP = {
     "NVDA": "semiconductors", "AMD": "semiconductors", "AVGO": "semiconductors",
-    "INTC": "semiconductors", "MSFT": "platform_software", "GOOGL": "platform_software",
-    "META": "platform_software", "TSLA": "hardware_oem", "AAPL": "hardware_oem",
-    "AMZN": "platform_software",
+    "INTC": "semiconductors", "MSFT": "enterprise_software", "GOOGL": "cloud_internet",
+    "META": "cloud_internet", "TSLA": "consumer_electronics", "AAPL": "consumer_electronics",
+    "AMZN": "cloud_internet",
 }
 
 
@@ -55,8 +55,10 @@ def hist_slice():
 def subsector_cfg():
     return SubSectorConfig(
         semiconductors=["NVDA", "AMD", "AVGO", "INTC"],
-        platform_software=["MSFT", "GOOGL", "META", "AMZN"],
-        hardware_oem=["TSLA", "AAPL"],
+        platform_software=["MSFT", "CRM", "ADBE"],
+        cloud_internet=["GOOGL", "META", "AMZN"],
+        consumer_electronics=["AAPL", "TSLA"],
+        hardware_oem=["DELL", "HPQ"],
     )
 
 

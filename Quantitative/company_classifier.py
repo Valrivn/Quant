@@ -65,7 +65,7 @@ class ClassificationOutput:
 class CompanyClassifier:
     CYCLICAL_SECTORS = {
         "autos", "airlines", "tires", "steel", "defense", 
-        "chemicals", "natural_resources", "hardware_oem"
+        "chemicals", "natural_resources", "hardware_oem", "consumer_electronics"
     }
 
     @staticmethod

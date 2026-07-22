@@ -112,22 +112,24 @@ sub_sectors:
     - "TSM"
   platform_software:
     - "MSFT"
-    - "GOOGL"
-    - "META"
-    - "AMZN"
     - "CRM"
     - "ADBE"
     - "NOW"
-    - "SHOP"
     - "WDAY"
-  hardware_oem:
+  cloud_internet:
+    - "GOOGL"
+    - "META"
+    - "AMZN"
+  consumer_electronics:
     - "AAPL"
     - "TSLA"
+  hardware_oem:
     - "DELL"
     - "HPQ"
     - "IBM"
     - "HPE"
     - "SMCI"
+  networking:
     - "ANET"
 
 psychological:
