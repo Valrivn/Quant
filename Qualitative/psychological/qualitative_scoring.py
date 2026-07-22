@@ -104,10 +104,19 @@ class SubSectorConfig:
         "NVDA", "AMD", "INTC", "AVGO", "QCOM", "MRVL", "MU", "SWKS", "LSCC", "TSM",
     ])
     platform_software: List[str] = field(default_factory=lambda: [
-        "MSFT", "GOOGL", "META", "AMZN", "CRM", "ADBE", "NOW", "SHOP", "WDAY",
+        "MSFT", "CRM", "ADBE", "NOW", "WDAY",
+    ])
+    cloud_internet: List[str] = field(default_factory=lambda: [
+        "GOOGL", "META", "AMZN",
+    ])
+    consumer_electronics: List[str] = field(default_factory=lambda: [
+        "AAPL", "TSLA",
     ])
     hardware_oem: List[str] = field(default_factory=lambda: [
-        "AAPL", "TSLA", "DELL", "HPQ", "IBM", "HPE", "SMCI", "ANET",
+        "DELL", "HPQ", "IBM", "HPE", "SMCI",
+    ])
+    networking: List[str] = field(default_factory=lambda: [
+        "ANET",
     ])
 
     @classmethod

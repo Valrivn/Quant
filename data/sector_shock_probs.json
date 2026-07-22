@@ -1,9 +1,9 @@
 {
   "semiconductor": {
-    "p_base": 0.230769,
+    "p_base": 0.282051,
     "n_firms": 10,
     "n_years": 39,
-    "n_shocks": 9,
+    "n_shocks": 11,
     "margin_vol_10y": 0.202449,
     "shock_years": [
       2023,
@@ -16,49 +16,83 @@
       "INTC": 2,
       "AVGO": 0,
       "QCOM": 1,
-      "MRVL": 1,
+      "MRVL": 2,
       "MU": 1,
-      "SWKS": 1,
+      "SWKS": 2,
       "LSCC": 2,
       "TSM": 0
     }
   },
-  "platform_software": {
+  "enterprise_software": {
     "p_base": 0.0,
-    "n_firms": 8,
-    "n_years": 28,
+    "n_firms": 5,
+    "n_years": 17,
     "n_shocks": 0,
-    "margin_vol_10y": 0.144465,
+    "margin_vol_10y": 0.144761,
     "shock_years": [],
     "firm_shocks": {
       "MSFT": 0,
-      "GOOGL": 0,
-      "META": 0,
       "CRM": 0,
       "ADBE": 0,
       "NOW": 0,
-      "SHOP": 0,
       "WDAY": 0
     }
   },
-  "hardware_oem": {
-    "p_base": 0.060606,
-    "n_firms": 9,
-    "n_years": 33,
+  "cloud_internet": {
+    "p_base": 0.0,
+    "n_firms": 3,
+    "n_years": 10,
+    "n_shocks": 0,
+    "margin_vol_10y": 0.128968,
+    "shock_years": [],
+    "firm_shocks": {
+      "GOOGL": 0,
+      "META": 0,
+      "AMZN": 0
+    }
+  },
+  "consumer_electronics": {
+    "p_base": 0.25,
+    "n_firms": 2,
+    "n_years": 8,
     "n_shocks": 2,
-    "margin_vol_10y": 0.113599,
+    "margin_vol_10y": 0.05,
     "shock_years": [
+      2023,
       2025
     ],
     "firm_shocks": {
       "AAPL": 0,
-      "TSLA": 1,
-      "AMZN": 0,
+      "TSLA": 2
+    }
+  },
+  "hardware_oem": {
+    "p_base": 0.157895,
+    "n_firms": 5,
+    "n_years": 19,
+    "n_shocks": 3,
+    "margin_vol_10y": 0.032097,
+    "shock_years": [
+      2023,
+      2024,
+      2025
+    ],
+    "firm_shocks": {
       "DELL": 0,
-      "HPQ": 0,
-      "IBM": 0,
+      "HPQ": 1,
+      "IBM": 1,
       "HPE": 1,
-      "SMCI": 0,
+      "SMCI": 0
+    }
+  },
+  "networking": {
+    "p_base": 0.0,
+    "n_firms": 1,
+    "n_years": 3,
+    "n_shocks": 0,
+    "margin_vol_10y": 0.05,
+    "shock_years": [],
+    "firm_shocks": {
       "ANET": 0
     }
   }

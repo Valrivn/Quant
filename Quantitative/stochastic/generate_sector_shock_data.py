@@ -42,16 +42,25 @@ SECTORS = {
     "semiconductor": [
         "NVDA", "AMD", "INTC", "AVGO", "QCOM", "MRVL", "MU", "SWKS", "LSCC", "TSM",
     ],
-    "platform_software": [
-        "MSFT", "GOOGL", "META", "CRM", "ADBE", "NOW", "SHOP", "WDAY",
+    "enterprise_software": [
+        "MSFT", "CRM", "ADBE", "NOW", "WDAY",
+    ],
+    "cloud_internet": [
+        "GOOGL", "META", "AMZN",
+    ],
+    "consumer_electronics": [
+        "AAPL", "TSLA",
     ],
     "hardware_oem": [
-        "AAPL", "TSLA", "AMZN", "DELL", "HPQ", "IBM", "HPE", "SMCI", "ANET",
+        "DELL", "HPQ", "IBM", "HPE", "SMCI",
+    ],
+    "networking": [
+        "ANET",
     ],
 }
 
 CRISIS_SPREAD_THRESHOLD_BPS = 400.0
-EBIT_SHOCK_THRESHOLD = -0.30
+EBIT_SHOCK_THRESHOLD = -0.20
 
 
 def fetch_annual_ebit(ticker: str, max_retries: int = 3) -> list[dict]:

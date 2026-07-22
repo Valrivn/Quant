@@ -448,8 +448,10 @@ class TestLaneAlphaPipeline:
         )
         cfg = SubSectorConfig(
             semiconductors=["NVDA", "AMD", "INTC"],
-            platform_software=["MSFT", "GOOGL", "META", "AMZN"],
-            hardware_oem=["AAPL", "TSLA"],
+            platform_software=["MSFT", "CRM", "ADBE"],
+            cloud_internet=["GOOGL", "META", "AMZN"],
+            consumer_electronics=["AAPL", "TSLA"],
+            hardware_oem=["DELL", "HPQ"],
         )
         culture = CultureComposite(halflife=90, min_observations=1)
         hype = HypeComposite(halflife=21, min_observations=1)
