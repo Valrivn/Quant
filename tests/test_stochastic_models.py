@@ -603,10 +603,10 @@ class TestSectorShockData:
         assert 0.0 <= stats.p_base <= 0.15
         assert stats.margin_vol_10y > 0
 
-    def test_load_sector_stats_platform_software(self):
+    def test_load_sector_stats_enterprise_software(self):
         from Quantitative.stochastic.sector_shock_data import get_sector_shock_stats
-        stats = get_sector_shock_stats("platform_software")
-        assert stats.sector == "platform_software"
+        stats = get_sector_shock_stats("enterprise_software")
+        assert stats.sector == "enterprise_software"
         assert 0.0 <= stats.p_base <= 0.15
 
     def test_load_sector_stats_hardware_oem(self):
@@ -699,7 +699,7 @@ class TestBernoulliShockFilterDynamic:
         rng = random.Random(42)
         result = filter_engine.run_trial_dynamic(
             icr=0.5,
-            sector="platform_software",
+            sector="enterprise_software",
             current_margin_vol=0.03,
             margin_vol_10y=0.03,
             rng=rng,
