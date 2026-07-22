@@ -38,6 +38,7 @@ from psychological.engineering_guards import guard_nan, clamp
 from Quantitative.stochastic.default_probability_table import get_default_probability, get_synthetic_rating
 from Quantitative.stochastic.bernoulli_shock_filter import BernoulliShockFilter
 from Quantitative.stochastic.poisson_blackswan import PoissonBlackSwan
+from psychological.bayesian_calibration import load_calibration_state
 from Quantitative.bonds.credit_spread_monitor import CreditSpreadMonitor, SpreadRegime
 from Quantitative.stochastic.markov_lifecycle import MarkovLifecycleChain, LifecycleMetrics
 
@@ -590,6 +591,9 @@ class FourLanePipeline:
         except Exception as e:
             logger.warning(f"CreditSpreadMonitor failed, using default spreads: {e}")
 
+        # Load Bayesian-calibrated growth_std/margin_std if available
+        cal_state = load_calibration_state()
+
         for ticker, l1 in lane1_results.items():
             est = FUNDAMENTAL_ESTIMATES.get(ticker, {})
             mc_wacc = l1.modulated_wacc if l1.qualitative_modulation_applied else est.get("wacc", 0.10)
@@ -615,6 +619,11 @@ class FourLanePipeline:
             }
             margin_variance = margin_variance_map.get(sector, 0.05)
 
+            # Use Bayesian-calibrated std if available, else let MC engine compute defaults
+            cal = cal_state.get(ticker, {})
+            cal_growth_std = cal.get("post_calibration_growth_std")
+            cal_margin_std = cal.get("post_calibration_margin_std")
+
             mc_input: MonteCarloInput = self.mc_engine.build_input_from_fundamentals(
                 ticker=ticker,
                 revenue=est.get("revenue", 10_000_000_000),
@@ -639,6 +648,8 @@ class FourLanePipeline:
                 credit_spread_bps=credit_spread_bps,
                 credit_spread_regime=credit_spread_regime,
                 sector=sector,
+                growth_std=cal_growth_std,
+                margin_std=cal_margin_std,
             )
             mc_result: MonteCarloResult = self.mc_engine.run(mc_input, source_weights=source_weights)
 

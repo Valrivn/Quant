@@ -463,37 +463,6 @@ def migrate_psychological_schema(conn: sqlite3.Connection) -> None:
     create_psychological_tables(conn)
     create_phase1_tables(conn)
 
-def create_monte_carlo_tables(conn: sqlite3.Connection) -> None:
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS monte_carlo_results (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ticker TEXT NOT NULL,
-            date TEXT NOT NULL,
-            n_simulations INTEGER,
-            positive_eva_probability REAL,
-            mean_intrinsic_value REAL,
-            median_intrinsic_value REAL,
-            std_intrinsic_value REAL,
-            p5_intrinsic_value REAL,
-            p25_intrinsic_value REAL,
-            p75_intrinsic_value REAL,
-            p95_intrinsic_value REAL,
-            mean_growth_rate REAL,
-            std_growth_rate REAL,
-            mean_terminal_margin REAL,
-            mean_terminal_fcf REAL,
-            macro_risk_adjustment REAL,
-            confidence_band TEXT,
-            projection_years INTEGER,
-            computed_at TEXT NOT NULL,
-            UNIQUE(ticker, date)
-        )
-    """)
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_mc_ticker_date ON monte_carlo_results(ticker, date)")
-    conn.commit()
-
-
 def create_lane_gamma_tables(conn: sqlite3.Connection) -> None:
     cursor = conn.cursor()
 
@@ -538,5 +507,64 @@ def create_lane_gamma_tables(conn: sqlite3.Connection) -> None:
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_github_metrics_ticker ON github_org_metrics(ticker)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_github_metrics_stars ON github_org_metrics(stars DESC)")
+
+    conn.commit()
+
+
+def create_calibration_tables(conn: sqlite3.Connection) -> None:
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS calibration_snapshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticker TEXT NOT NULL,
+            block_id INTEGER NOT NULL,
+            data_end_date TEXT NOT NULL,
+            prediction_horizon_end TEXT NOT NULL,
+            predicted_mean_iv REAL,
+            predicted_std_iv REAL,
+            predicted_p5 REAL,
+            predicted_p95 REAL,
+            predicted_growth_rate REAL,
+            predicted_margin REAL,
+            actual_mean_iv REAL,
+            actual_growth_rate REAL,
+            actual_margin REAL,
+            calibration_error REAL,
+            pct_within_ci REAL,
+            directional_correct INTEGER,
+            source_weights_json TEXT,
+            pre_update_growth_std REAL,
+            post_update_growth_std REAL,
+            pre_update_margin_std REAL,
+            post_update_margin_std REAL,
+            computed_at TEXT NOT NULL,
+            UNIQUE(ticker, block_id)
+        )
+    """)
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_cal_ticker_block "
+        "ON calibration_snapshots(ticker, block_id)"
+    )
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS source_prediction_accuracy (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticker TEXT NOT NULL,
+            block_id INTEGER NOT NULL,
+            source_name TEXT NOT NULL,
+            source_value_at_t REAL,
+            actual_outcome REAL,
+            prediction_error REAL,
+            weight_before REAL,
+            weight_after REAL,
+            computed_at TEXT NOT NULL,
+            UNIQUE(ticker, block_id, source_name)
+        )
+    """)
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_src_pred_ticker "
+        "ON source_prediction_accuracy(ticker, block_id)"
+    )
 
     conn.commit()
