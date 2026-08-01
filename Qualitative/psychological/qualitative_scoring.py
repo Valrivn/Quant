@@ -127,7 +127,10 @@ class SubSectorConfig:
         return cls(
             semiconductors=subsectors.get("semiconductors", default.semiconductors),
             platform_software=subsectors.get("platform_software", default.platform_software),
+            cloud_internet=subsectors.get("cloud_internet", default.cloud_internet),
+            consumer_electronics=subsectors.get("consumer_electronics", default.consumer_electronics),
             hardware_oem=subsectors.get("hardware_oem", default.hardware_oem),
+            networking=subsectors.get("networking", default.networking),
         )
 
     def get_subsector_for_ticker(self, ticker: str) -> Optional[str]:
@@ -140,7 +143,10 @@ class SubSectorConfig:
         return {
             "semiconductors": self.semiconductors,
             "platform_software": self.platform_software,
+            "cloud_internet": self.cloud_internet,
+            "consumer_electronics": self.consumer_electronics,
             "hardware_oem": self.hardware_oem,
+            "networking": self.networking,
         }
 
     def get_peers(self, ticker: str) -> List[str]:

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from contextlib import closing
 from typing import List, Dict, Optional
 from datetime import datetime, timezone
 from dataclasses import dataclass
@@ -285,14 +286,14 @@ class PsychologicalOrchestrator:
     def get_quantitative_value_signal(self, ticker: str) -> float:
         import sqlite3
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT intrinsic_floor, intrinsic_ceiling, current_price FROM quantitative_dcf_floor WHERE ticker = ? ORDER BY date DESC LIMIT 1",
-                (ticker,)
-            )
-            row = cursor.fetchone()
-            conn.close()
+            with closing(sqlite3.connect(self.db_path)) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT intrinsic_floor, intrinsic_ceiling, current_price FROM quantitative_dcf_floor WHERE ticker = ? ORDER BY date DESC LIMIT 1",
+                    (ticker,)
+                )
+                row = cursor.fetchone()
             if row:
                 floor, ceiling, current = row[0], row[1], row[2]
                 if ceiling > floor:
@@ -306,14 +307,14 @@ class PsychologicalOrchestrator:
     def get_dcf_floor_data(self, ticker: str) -> Optional[Dict]:
         import sqlite3
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT intrinsic_floor, intrinsic_ceiling, current_price, margin_of_safety, wacc, fcf_projection, terminal_value, model_version FROM quantitative_dcf_floor WHERE ticker = ? ORDER BY date DESC LIMIT 1",
-                (ticker,)
-            )
-            row = cursor.fetchone()
-            conn.close()
+            with closing(sqlite3.connect(self.db_path)) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT intrinsic_floor, intrinsic_ceiling, current_price, margin_of_safety, wacc, fcf_projection, terminal_value, model_version FROM quantitative_dcf_floor WHERE ticker = ? ORDER BY date DESC LIMIT 1",
+                    (ticker,)
+                )
+                row = cursor.fetchone()
             if row:
                 return {
                     "intrinsic_floor": row[0],

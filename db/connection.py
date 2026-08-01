@@ -6,14 +6,35 @@ from typing import Generator
 DB_PATH = "reddit_quant.db"
 _local = threading.local()
 
+def _open_conn() -> sqlite3.Connection:
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA busy_timeout=5000;")
+    conn.row_factory = sqlite3.Row
+    return conn
+
 def get_connection() -> sqlite3.Connection:
-    """Get thread-local database connection with WAL mode."""
-    if not hasattr(_local, "conn") or _local.conn is None or getattr(_local.conn, 'closed', True):
-        _local.conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-        _local.conn.execute("PRAGMA journal_mode=WAL;")
-        _local.conn.execute("PRAGMA busy_timeout=5000;")
-        _local.conn.row_factory = sqlite3.Row
-    return _local.conn
+    """Get thread-local database connection with WAL mode.
+
+    Reuses the thread-local connection while it is open. ``sqlite3.Connection``
+    has no reliable ``closed`` attribute across Python versions, so liveness is
+    probed with a trivial query instead of ``getattr(conn, 'closed', ...)``
+    (which leaked a fresh connection on every call on Python 3.13).
+    """
+    conn = getattr(_local, "conn", None)
+    if conn is not None and _is_closed(conn):
+        conn = None
+    if conn is None:
+        conn = _open_conn()
+        _local.conn = conn
+    return conn
+
+def _is_closed(conn: sqlite3.Connection) -> bool:
+    try:
+        conn.execute("SELECT 1")
+        return False
+    except sqlite3.ProgrammingError:
+        return True
 
 @contextmanager
 def connection_context() -> Generator[sqlite3.Connection, None, None]:
@@ -21,14 +42,13 @@ def connection_context() -> Generator[sqlite3.Connection, None, None]:
     conn = get_connection()
     try:
         yield conn
-        if not getattr(conn, 'closed', False):
-            conn.commit()
+        conn.commit()
     except Exception:
-        if not getattr(conn, 'closed', False):
+        if not _is_closed(conn):
             conn.rollback()
         raise
     finally:
-        if getattr(conn, 'closed', False):
+        if _is_closed(conn):
             _local.conn = None
 
 def close_connection() -> None:

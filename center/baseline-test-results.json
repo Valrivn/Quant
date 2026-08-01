@@ -1,0 +1,12 @@
+{
+  "command": "python -m pytest tests/ -q",
+  "run_at": "2026-08-01T23:40:22Z",
+  "collected": 717,
+  "passed": 699,
+  "skipped": 18,
+  "failed": 0,
+  "errors": 0,
+  "pass_rate": 0.974,
+  "failing_tests": [],
+  "notes": "First gate pass (self-bootstrapped). Baseline for zero-new-failures comparisons."
+}

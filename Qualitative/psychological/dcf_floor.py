@@ -1,4 +1,5 @@
 import logging
+from contextlib import closing
 from typing import Dict, Optional, Any
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
@@ -116,7 +117,7 @@ class DCFFloorClient:
         import sqlite3
         from datetime import datetime, timezone
         
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT OR REPLACE INTO quantitative_dcf_floor
@@ -141,15 +142,15 @@ class DCFFloorClient:
     def get_latest(self, ticker: str) -> Optional[Dict]:
         import sqlite3
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT intrinsic_floor, intrinsic_ceiling, current_price, margin_of_safety,
-                       wacc, fcf_projection, terminal_value, model_version
-                FROM quantitative_dcf_floor WHERE ticker = ? ORDER BY date DESC LIMIT 1
-            """, (ticker,))
-            row = cursor.fetchone()
-            conn.close()
+            with closing(sqlite3.connect(self.db_path)) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT intrinsic_floor, intrinsic_ceiling, current_price, margin_of_safety,
+                           wacc, fcf_projection, terminal_value, model_version
+                    FROM quantitative_dcf_floor WHERE ticker = ? ORDER BY date DESC LIMIT 1
+                """, (ticker,))
+                row = cursor.fetchone()
             if row:
                 return {
                     "intrinsic_floor": row[0],

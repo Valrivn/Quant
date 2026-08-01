@@ -6,6 +6,12 @@ root = Path(__file__).resolve().parent.parent
 if str(root) not in sys.path:
     sys.path.insert(0, str(root))
 
+# Add Qualitative/ (houses the psychological + scraper packages) so that the
+# documented gate command `python -m pytest tests/ -q` works from repo root.
+qual = root / "Qualitative"
+if str(qual) not in sys.path:
+    sys.path.insert(0, str(qual))
+
 import pytest
 import sqlite3
 import os

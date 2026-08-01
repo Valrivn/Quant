@@ -77,7 +77,7 @@ class TestSubSectorConfig:
         cfg = SubSectorConfig()
         assert "NVDA" in cfg.semiconductors
         assert "MSFT" in cfg.platform_software
-        assert "AAPL" in cfg.hardware_oem
+        assert "AAPL" in cfg.consumer_electronics
 
     def test_from_config_loads_yaml(self):
         cfg = SubSectorConfig.from_config()
@@ -88,7 +88,7 @@ class TestSubSectorConfig:
         cfg = SubSectorConfig()
         assert cfg.get_subsector_for_ticker("NVDA") == "semiconductors"
         assert cfg.get_subsector_for_ticker("MSFT") == "platform_software"
-        assert cfg.get_subsector_for_ticker("AAPL") == "hardware_oem"
+        assert cfg.get_subsector_for_ticker("AAPL") == "consumer_electronics"
         assert cfg.get_subsector_for_ticker("UNKNOWN") is None
 
     def test_as_dict(self):

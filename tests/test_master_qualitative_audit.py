@@ -34,7 +34,7 @@ DB_PATH = "reddit_quant.db"
 TARGET_TICKERS = ["NVDA", "AMD", "AVGO", "INTC", "MSFT", "GOOGL", "META", "TSLA", "AAPL", "AMZN"]
 SUBSECTOR_MAP = {
     "NVDA": "semiconductors", "AMD": "semiconductors", "AVGO": "semiconductors",
-    "INTC": "semiconductors", "MSFT": "enterprise_software", "GOOGL": "cloud_internet",
+    "INTC": "semiconductors", "MSFT": "platform_software", "GOOGL": "cloud_internet",
     "META": "cloud_internet", "TSLA": "consumer_electronics", "AAPL": "consumer_electronics",
     "AMZN": "cloud_internet",
 }

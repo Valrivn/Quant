@@ -1,5 +1,6 @@
 import sqlite3
 import logging
+from contextlib import closing
 from typing import List, Dict, Optional
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,7 +15,7 @@ class BehavioralFeatureStore:
         self.db_path = db_path
         
     def commit_vector(self, vector: PsychologicalFeatureVector) -> int:
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO psychological_vectors 
@@ -49,7 +50,7 @@ class BehavioralFeatureStore:
                       dev_velocity: float = None,
                       fintech_confirmation_score: float = None,
                       quantitative_value_signal: float = None) -> None:
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT OR REPLACE INTO psychological_regimes
@@ -73,7 +74,7 @@ class BehavioralFeatureStore:
             conn.commit()
             
     def get_velocity_history(self, ticker: str, window_hours: int = 24, limit: int = 100) -> List[Dict]:
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cutoff = int((datetime.now(timezone.utc).timestamp() - window_hours * 3600))
@@ -87,7 +88,7 @@ class BehavioralFeatureStore:
             
     def get_psychological_vectors(self, ticker: str, start_date: str = None, 
                                    end_date: str = None) -> List[Dict]:
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             
@@ -109,7 +110,7 @@ class BehavioralFeatureStore:
             return [dict(row) for row in cursor.fetchall()]
             
     def get_regimes(self, ticker: str, start_date: str = None, end_date: str = None) -> List[Dict]:
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             
@@ -131,7 +132,7 @@ class BehavioralFeatureStore:
     def export_parquet(self, start_date: str, end_date: str, output_dir: str = "data") -> str:
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             query = """
                 SELECT * FROM psychological_vectors
                 WHERE timestamp >= ? AND timestamp <= ?
@@ -150,7 +151,7 @@ class BehavioralFeatureStore:
     def export_regimes_parquet(self, start_date: str, end_date: str, output_dir: str = "data") -> str:
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             query = """
                 SELECT * FROM psychological_regimes
                 WHERE date >= ? AND date <= ?
