@@ -1,40 +1,102 @@
-# Antigravity Multi-Agent Context Tree & Self-Healing Instructions
+# The House of Quant — Organization Constitution
 
-When executing the autonomous `/goal` self-healing loop to monitor `stream_guard.log` and resolve failures:
+This file is the company charter. Every agent in this repository operates under it.
+It supersedes the former parallel-lane orchestration (archived at
+`.agents/project/org/legacy/lane-system.md`).
 
-## 1. Asymmetric Model Hierarchy (Division of Labor)
-To maintain a strict **75% maximum token ceiling** (leaving a 25% safety margin), route tasks through this structure:
-- **Gemini Pro (The Context Funnel)**: Ingests the workspace context + recent thoughts retrieved from `opencode.db` SQLite in read-only mode, and slashes the context down to an isolated `<15k` token block containing only the broken function/file and the error. When reading `stream_guard.log` to extract context and tracebacks, the script/agent must compress consecutive repeating spinner or helix characters/lines and replace them with a single placeholder line: `[code helix deleted]`.
-- **Claude 3.5 Sonnet (The Surgical Code Architect)**: Receives the `<15k` token block. Its sole job is to design the fallback code (e.g. `curl_cffi` or socket fallback) or repair deep exceptions.
-- **GPT / Local OSS (The Coder)**: Writes the code to disk and executes `pytest` validation.
-- **Gemini Flash (The Triage Logger)**: Logs execution metrics and clean diff summaries to [changes.md](file:///Users/hayden/Desktop/quant-py/changes.md) upon every successful repair cycle.
-- **Nemotron 3 Ultra**: The primary planner. If the cascade fails to resolve a test block 3 times consecutively, pause the cascade and let Nemotron take over macro diagnosis.
+## 1. Org Chart
 
-## 2. Reading Opencode SQLite DB
-Always connect to `~/.local/share/opencode/opencode.db` using read-only mode to prevent database locks:
-```python
-conn = sqlite3.connect("file:~/.local/share/opencode/opencode.db?mode=ro", uri=True, timeout=15.0)
 ```
-Extract the latest thoughts (`type = 'reasoning'`) and messages to understand the agent's context.
+CEO (the user) — final ruling, discovery direction, audit. Works in the opencode
+primary session (big-pickle). Every RULING is a recorded executive decision.
+ │
+ ├─ discovery-altdata ───────────────► straight to CEO (bypasses all layers)
+ │
+ ├─ conductor            quality gate: ≥90% pass; blocks every "done"
+ ├─ logger               executive decision ledger + cost ledger
+ ├─ data-scientist       tendency/pattern tracker + alt-data analyst
+ │
+ └─ hermes-bridge        top manager — SYNTHESIS ONLY (most efficient token user)
+     │
+     ├─ big-pickle       manager — debate position A + BLUEPRINT CUSTODIAN
+     ├─ gemini-planner   manager — debate position B, PLANNING ONLY (no edits)
+     │
+     └─ workers (build, report to managers):
+         ├─ deepseek-worker       builder (free lane)
+         ├─ gemini-flash-worker   builder (paid/fast lane)
+         ├─ bug-fixer             fixes + regression tests
+         └─ optimizer             efficiency passes, never semantics
+```
 
-## 3. Lock Verification
-Verify that `.guard_lock` exists before applying changes, and delete `.guard_lock` only after the changes are written, validated, and logged to `changes.md`.
+Executive agent definitions (machine-loadable) live in `.opencode/agent/`.
+Org knowledge, contracts, and the decision record live in this `.agents/` folder.
+The general/project split is defined in section 6.
 
-## 4. Background Lifecycle & Token-Saving Scheduling
-To prevent constant active polling and excessive token usage when running the `/goal` daemon:
-- When starting or executing a `/goal` autonomous task, the agent must immediately register a background cron check (e.g. using `schedule` with a 5-minute interval `*/5 * * * *` or similar duration timer) and then end its turn immediately.
-- On each scheduled wakeup, the agent must first read the file system for `.guard_lock`.
-  - If `.guard_lock` does NOT exist, the agent must immediately end its turn without running any other commands or calling other subagents. This maintains an idle state and preserves your token budget.
-  - If `.guard_lock` exists, the agent must proceed to execute the self-healing cascade to analyze the log, write the patch, and validate the code. Only after the validation successfully passes and `.guard_lock` is deleted should the agent return to its idle scheduling state.
+## 2. Routing (tiered escalation)
 
-# Phase 2.5: Central Oversight & Policing Protocol
+| Tier | Share | What qualifies | Flow | Budget cap |
+|------|-------|----------------|------|------------|
+| T1 Routine | ~85% | bug fixes, config tweaks, test additions, single-module refactors | one worker → bug-fixer/optimizer pass → conductor gate → done | 15k tok |
+| T2 Standard | ~12% | new features, cross-module changes | one worker builds → both managers review independently → agree = done; disagree = escalate T3 | 35k tok |
+| T3 Architecture | ~3% | blueprint changes, irreversible decisions, high stakes | full debate → synthesis → CEO ruling → logger → blueprint update → conductor | 60k tok |
+| Discovery | as raised | new data sources, new strategies, paradigm shifts | straight to CEO | 20k tok |
 
-## 1. Architectural Separation of Concerns
-- **The Hub (Oversight):** Claude 3.5 Sonnet / Gemini Pro (Day) or Nemotron 3 Ultra (Night). Responsible for sub-5-second structural validation or deep macro cross-lane synthesis.
-- **The Lanes (Execution Workers):** Headless workers running in completely isolated Git Worktrees to prevent filesystem state contamination and write collisions.
+**Escalation triggers (auto-promote):** task touches ≥2 subsystems; pre-existing
+test failures >10% in the affected area; any blueprint invariant is at risk;
+the CEO says so.
 
-## 2. Invariants & Guardrails
-- **Git Worktree Isolation:** Workers must never execute actions directly inside the main workspace repository trunk (`/Users/hayden/Desktop/quant-py`). All tasks must happen in `/Users/hayden/Desktop/lane_alpha`, `_beta`, or `_gamma`.
-- **Shift Rotation Strategy:** 
-  - `DAY`: Prioritize rapid, sub-5-second execution cycles via high-speed API endpoints.
-  - `NIGHT`: Prioritize exhaustive, unmetered deep-thinking loops with cross-lane tip injection.
+**De-escalation:** if a manager judges a brief is really routine, downgrade it.
+
+## 3. Debate → Ruling protocol (Tier 3 only)
+
+1. A manager writes a **Brief** (contract in `.agents/general/org/contracts.md`).
+2. big-pickle writes Position A; gemini-planner writes Position B — **independently,
+   without reading each other's position**.
+3. big-pickle writes the 200-token **disagreement map**.
+4. hermes-bridge reads ONLY the two positions + the map, emits a 300-token
+   **Synthesis** with one recommendation.
+5. **CEO rules:** APPROVE / REJECT / MODIFY.
+6. logger records the ruling in `.agents/project/org/decisions/`.
+7. big-pickle updates `.agents/project/org/blueprint.md`.
+8. conductor verifies ≥90% before anything merges.
+
+## 4. Token governance (non-negotiable)
+
+- Full rules: `.agents/general/org/token-budget.md`.
+- hermes-bridge (Claude) is the apex but consumes the LEAST context: only the
+  compressed artifacts, output capped at 300 tokens, invoked once per T3.
+- No agent ever loads the full repo or full transcripts. Each starts from a
+  fresh, minimal context: blueprint excerpt + the one artifact it needs.
+- All artifacts are files on disk. Never re-derive them in conversation.
+- Paid models are used ONLY where their cost is justified: gemini-planner for
+  the planning position, hermes-bridge for synthesis, gemini-flash-worker for
+  paid-speed builds. Free models handle everything else.
+- Every decision records its token spend in `cost-ledger.md`. If the debate tier
+  stops paying for itself, tighten the escalation triggers.
+
+## 5. Quality gate
+
+- Definition: `.agents/project/org/quality-gate.md` (Quant: `pytest tests/`
+  pass rate ≥ 90% + no new failures).
+- conductor refuses to mark anything done that fails the gate.
+
+## 6. General vs Project split
+
+- `.agents/general/` — reusable in ANY project opencode runs: the runbook,
+  document contracts, token budgets, and the opencode-only fallback.
+- `.agents/project/` — Quant-specific: blueprint, quality gate, decision ledger,
+  tendencies, cost ledger, portfolio reflections, legacy archive.
+- Agents in `.opencode/agent/` are tagged `scope: general` or `scope: project`.
+  General agents reference `.agents/project/` only for config parameters
+  (quality gate, blueprint path). Project agents bind to Quant structures.
+
+## 7. Antigravity / paid-model wiring
+
+Your Antigravity subscription already includes Claude + Gemini. The
+`opencode-antigravity-auth` plugin (already in `opencode.json`) is the bridge:
+run `opencode auth login` → Google OAuth → "Configure models in opencode.json",
+then swap the three paid agents to `google/antigravity-*` models per
+`.agents/general/org/fallback.md`. Until then the org runs on free `opencode/*`
+models. When paid tokens run dry, fallback.md is the recovery path. Claude must
+stay the most efficient component: synthesis-only, 300-token cap, single
+invocation.

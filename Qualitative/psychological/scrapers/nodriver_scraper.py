@@ -11,7 +11,10 @@ from config import load_hybrid_config
 
 logger = logging.getLogger(__name__)
 
-is_root = os.geteuid() == 0
+try:
+    is_root = os.geteuid() == 0
+except AttributeError:
+    is_root = False
 
 
 @dataclass

@@ -1,5 +1,6 @@
 import sqlite3
 import time
+from contextlib import closing
 from typing import List, Dict, Optional, Tuple
 from statistics import mean, stdev
 from datetime import datetime, timezone
@@ -19,7 +20,7 @@ class VelocityTracker:
         self._ensure_provenance_table()
         
     def _ensure_provenance_table(self) -> None:
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS velocity_provenance (
@@ -46,7 +47,7 @@ class VelocityTracker:
             return "24h"
             
     def record_snapshot(self, snapshot: VelocitySnapshot) -> None:
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT OR REPLACE INTO velocity_snapshots 
@@ -65,7 +66,7 @@ class VelocityTracker:
             
     def record_provenance(self, ticker: str, window_start: int, window_type: str, 
                           source: str, source_weight: float, mention_count: int) -> None:
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT OR REPLACE INTO velocity_provenance 
@@ -79,7 +80,7 @@ class VelocityTracker:
             
     def get_velocity_history(self, ticker: str, window_hours: int, limit: int = 100) -> List[VelocitySnapshot]:
         window_type = self._get_window_type(window_hours)
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute("""
@@ -92,7 +93,7 @@ class VelocityTracker:
             
     def get_provenance_history(self, ticker: str, window_hours: int, limit: int = 100) -> List[Dict]:
         window_type = self._get_window_type(window_hours)
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
             cursor.execute("""

@@ -1,6 +1,6 @@
 import aiohttp
 import asyncio
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 from .base import BaseFintechClient, FintechMessage, FintechHealth
 
