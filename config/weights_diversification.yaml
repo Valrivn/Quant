@@ -1,0 +1,59 @@
+# Pre-registered Phase-3 configuration (D-20260803-005, MODIFY ruling).
+#
+# CEO MODIFY: three test strategies (STATIC-40/20/20/20, STATIC-after-ML,
+# ADAPTIVE) + opportunistic-only baseline, with a risk-constrained ML weight
+# optimizer. EVERY value here is fixed BEFORE any run; nothing is fit to
+# reported outcomes (auditor no-hardcoding/OOS requirement). This file is the
+# single source of truth for Phase-3 parameters — fee_sim3 reads it via
+# diversification.allocator.load_config().
+
+sleeves:
+  spy: ["SPY"]
+  small_mid: ["MDY", "IWM"]
+  dividend: []            # dynamic: membership decided by dividend_audit.audit_basket
+  bonds: ["VCSH", "VCIT", "BIL", "SHY", "SGOV"]
+
+# The CEO's fixed allocation (40 SPY / 20 small-mid / 20 dividend / 20 bonds)
+# with the standing small-cap floor (10-15%, D-20260802-002) applied: the
+# small/mid sleeve is floored at 0.15 and the freed 0.05 goes to SPY (the core
+# large-cap sleeve), making the SPY cash-comparison conservative.
+static_targets:
+  spy: 0.45
+  small_mid: 0.15
+  dividend: 0.20
+  bonds: 0.20
+
+# Sleeve bounds for the gradient-descent optimizer (pre-registered).
+sleeve_bounds:
+  spy: [0.30, 0.70]
+  small_mid: [0.10, 0.15]
+  dividend: [0.10, 0.50]
+  bonds: [0.10, 0.50]
+
+# Gradient-descent optimizer (pre-registered; never tuned to results).
+optimizer:
+  learning_rate: 0.05
+  max_iters: 2000
+  tol: 1.0e-8
+  seed: 42
+  num_grad_eps: 1.0e-6
+  risk_lambda: 2.0        # penalty on annualized variance: punishes risky weights
+  max_drawdown_bound: 0.30  # HARD: portfolio down at most 30% at any point
+  dd_penalty: 50.0        # penalty coefficient when the 30% bound is breached
+  train_end: "2022-12-31"   # in-sample fit uses all data at/under this date
+  oos_start: "2023-01-01"   # OOS validation begins here
+  trailing_window_years: 3  # ADAPTIVE re-fit trailing window
+  embargo_days: 21
+  initial_guesses: ["static", "equal"]
+
+# Profit-change opportunistic OR-gate (CEO: switch only on significant profit
+# changes). Complements the Phase-2 z-gate as an OR; never replaces it.
+profit_change:
+  window_days: 90
+  threshold: 0.15   # |trailing portfolio return| >= 15% over the window = significant
+  state_gate: "bear"  # only considered in the bear macro state
+
+# Cash-shortfall relocation ablation (reported, never a core lever).
+cash_shortfall:
+  min_cash_ratio: 0.01   # relocate when cash < 1% of portfolio value
+  relocation: "macrostate"  # sell toward the macro-state-preferred sleeve
