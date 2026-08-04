@@ -10,6 +10,8 @@ import os
 from datetime import datetime, timedelta
 import yfinance as yf
 from dashboard.tab_sentiment_risk import render_sentiment_risk_tab
+from dashboard.tab_stochastic_risk import render_stochastic_risk_tab
+from dashboard.tab_valuation_alpha import render_valuation_alpha_tab
 
 try:
     from urllib3.exceptions import NotOpenSSLWarning
@@ -546,7 +548,7 @@ for t, data in stocks_data.items():
     data["tot_value"] = tot_value
 
 # ----------------- TABS -----------------
-tab1, tab2, tab3, tab4 = st.tabs(["📊 Analytical Dashboard", "🎓 Learning Sandbox", "🔍 SEC Audit & Verification", "💬 Social Sentiment & Risk"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📊 Analytical Dashboard", "🎓 Learning Sandbox", "🔍 SEC Audit & Verification", "💬 Social Sentiment & Risk", "🎲 Stochastic Risk & Monte Carlo", "🏆 Relative-Alpha Valuation"])
 
 
 # ----------------- TAB 1: ANALYTICAL DASHBOARD -----------------
@@ -806,7 +808,7 @@ with tab2:
                         {"Metric": "HHI (Concentration)", "Raw Value": f"{vec.raw_hhi:.4f}", "Bounds": "[0.010, 0.065]", "S-Score": f"{vec.s_hhi:.4f}", "Label": vec.label_hhi.value},
                         {"Metric": "ICR (Interest Coverage)", "Raw Value": f"{vec.raw_icr:.2f}", "Bounds": "[0.5, 15.0] (inverted)", "S-Score": f"{vec.s_icr:.4f}", "Label": vec.label_icr.value},
                         {"Metric": "Macro Inflation", "Raw Value": f"{vec.raw_macro:.1%}", "Bounds": "[0.0%, 8.0%]", "S-Score": f"{vec.s_macro:.4f}", "Label": vec.label_macro.value},
-                        {"Metric": "COMPOSITE", "Raw Value": "—", "Weights: 0.35/0.35/0.30", "S-Score": f"{vec.composite:.4f}", "Label": vec.label_composite.value},
+                        {"Metric": "COMPOSITE", "Raw Value": "—", "Weights": "0.35/0.35/0.30", "S-Score": f"{vec.composite:.4f}", "Label": vec.label_composite.value},
                     ])
                     st.dataframe(raw_df, use_container_width=True, hide_index=True)
 
@@ -887,3 +889,11 @@ with tab3:
 # ----------------- TAB 4: SOCIAL SENTIMENT & RISK -----------------
 with tab4:
     render_sentiment_risk_tab(primary_ticker)
+
+# ----------------- TAB 5: STOCHASTIC RISK & MONTE CARLO -----------------
+with tab5:
+    render_stochastic_risk_tab(primary_ticker)
+
+# ----------------- TAB 6: RELATIVE-ALPHA VALUATION -----------------
+with tab6:
+    render_valuation_alpha_tab()

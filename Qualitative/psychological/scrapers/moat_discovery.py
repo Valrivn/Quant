@@ -116,9 +116,21 @@ class MoatDiscoveryEngine:
 
     MAX_NODES_PER_TICKER: int = 8
 
-    def __init__(self, config_dict: Optional[dict] = None):
+    def __init__(self, config_dict: Optional[dict] = None,
+                 company_names: Optional[Dict[str, str]] = None,
+                 github_orgs: Optional[Dict[str, str]] = None,
+                 wikipedia_slugs: Optional[Dict[str, str]] = None):
         self.config = config_dict or load_hybrid_config()
         self._curl_session: Optional[AsyncSession] = None
+        # D-20260802-002: allow dynamic small-cap coverage. External maps
+        # (e.g. from the discovery universe / SEC titles) override the megacap
+        # defaults so the moat gate is not limited to the 11 hardcoded names.
+        if company_names:
+            self.COMPANY_NAMES = {**self.COMPANY_NAMES, **company_names}
+        if github_orgs:
+            self.GITHUB_ORGS = {**self.GITHUB_ORGS, **github_orgs}
+        if wikipedia_slugs:
+            self.WIKIPEDIA_SLUGS = {**self.WIKIPEDIA_SLUGS, **wikipedia_slugs}
 
     async def initialize(self) -> None:
         if self._curl_session is None:
@@ -149,11 +161,18 @@ class MoatDiscoveryEngine:
 
     async def discover_wikipedia_nodes(self, ticker: str) -> List[MoatNode]:
         slug = self.WIKIPEDIA_SLUGS.get(ticker)
-        if not slug:
-            logger.warning("No Wikipedia slug for %s", ticker)
-            return []
-
         company_name = self.COMPANY_NAMES.get(ticker, ticker)
+        if not slug:
+            # D-20260802-002 small-cap fallback: derive a likely slug from the
+            # company name (underscored, spaces stripped of punctuation). This
+            # is best-effort; a wrong slug just yields an empty node list.
+            import re as _re
+            candidate = _re.sub(r"[^A-Za-z0-9 ]", "", company_name).strip()
+            if not candidate:
+                logger.warning("No Wikipedia slug for %s", ticker)
+                return []
+            slug = candidate.replace(" ", "_")
+            logger.info("Derived Wikipedia slug for %s: %s", ticker, slug)
         nodes: List[MoatNode] = []
         url = f"https://en.wikipedia.org/wiki/{slug}"
 

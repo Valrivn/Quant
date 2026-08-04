@@ -1,7 +1,7 @@
 ---
 description: gemini-planner — Manager B. PLANNING ONLY, read-only. Writes debate Position B with fresh eyes. Use for the opposing planning position in Tier-3 debates and independent Tier-2 reviews. Never edits code.
 mode: subagent
-model: opencode/nemotron-3-ultra-free
+model: google/antigravity-gemini-3.1-pro
 temperature: 0.7
 permission:
   edit: deny

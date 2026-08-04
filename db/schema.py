@@ -508,6 +508,16 @@ def create_lane_gamma_tables(conn: sqlite3.Connection) -> None:
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_github_metrics_ticker ON github_org_metrics(ticker)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_github_metrics_stars ON github_org_metrics(stars DESC)")
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS sec_cik_map (
+            ticker TEXT PRIMARY KEY,
+            cik TEXT NOT NULL,
+            title TEXT,
+            updated_at INTEGER NOT NULL
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_sec_cik_map_ticker ON sec_cik_map(ticker)")
+
     conn.commit()
 
 

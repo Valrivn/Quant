@@ -45,3 +45,33 @@ python -m pytest tests/ -q
 
 Change the 90% threshold or the command in this file with a CEO ruling
 (T3) — the gate is itself an invariant (blueprint rule 5).
+
+## Gate log
+
+### 2026-08-03 — D-20260803-002 (fee-sim + ledger-recording)
+- Command: `python -m pytest tests/ -q`
+- Result: **841 passed, 18 skipped, 0 failed** (859 collected), 64 warnings, 155.70s
+- Pass rate: 0.979 (≥ 0.90) — PASS
+- New failures vs baseline: 0 (baseline failing set: [])
+- Baseline updated: `center/baseline-test-results.json` (2026-08-03)
+
+### 2026-08-03 — D-20260803-003 (Phase-1 delivery: diversification/sleeves.py, diversification/macro_state.py, diversification/risk_minimizer.py, diversification/fee_sim3.py, tests/test_diversification_phase1.py, datastore.fetch_nasdaq)
+- Command: `python -m pytest tests/ -q`
+- Result: **857 passed, 18 skipped, 0 failed** (875 collected), 64 warnings, 146.97s
+- Pass rate: 0.979 (≥ 0.90) — PASS
+- New failures vs baseline: 0 (baseline failing set: [])
+- Baseline updated: `center/baseline-test-results.json` (2026-08-03)
+
+### 2026-08-03 — D-20260803-004 (Phase-2 delivery: diversification/dividend_audit.py, diversification/opportunistic.py, datastore.fetch_dividend_history additions, sleeves.py, fee_sim3.py DIVIDEND strategy, tests/test_diversification_phase2.py)
+- Command: `python -m pytest tests/ -q`
+- Result: **881 passed, 18 skipped, 0 failed** (899 collected), 64 warnings, 166.63s
+- Pass rate: 0.980 (≥ 0.90) — PASS
+- New failures vs baseline: 0 (baseline failing set: [])
+- Baseline updated: `center/baseline-test-results.json` (2026-08-03)
+
+### 2026-08-03 — D-20260803-005 (Phase-3 delivery: diversification/allocator.py, fee_sim3.py run_sim_phase3 + strategies, config/weights_diversification.yaml, sleeves.py P3_TICKERS + MDY/IWM yields, tests/test_diversification_phase3.py, one edited test in test_diversification_phase1.py)
+- Command: `python -m pytest tests/ -q`
+- Result: **900 passed, 18 skipped, 0 failed** (918 collected), 64 warnings, 163.54s
+- Pass rate: 0.980 (≥ 0.90) — PASS
+- New failures vs baseline: 0 (baseline failing set: [])
+- Baseline updated: `center/baseline-test-results.json` (2026-08-03)

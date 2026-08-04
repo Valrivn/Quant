@@ -1,12 +1,12 @@
 {
   "command": "python -m pytest tests/ -q",
-  "run_at": "2026-08-01T23:40:22Z",
-  "collected": 717,
-  "passed": 699,
+  "run_at": "2026-08-03T00:00:00Z",
+  "collected": 918,
+  "passed": 900,
   "skipped": 18,
   "failed": 0,
   "errors": 0,
-  "pass_rate": 0.974,
+  "pass_rate": 0.98,
   "failing_tests": [],
-  "notes": "First gate pass (self-bootstrapped). Baseline for zero-new-failures comparisons."
+  "notes": "D-20260803-005 Phase-3 delivery gate (diversification/allocator.py, fee_sim3.py run_sim_phase3 + strategies, config/weights_diversification.yaml, sleeves.py P3_TICKERS + MDY/IWM yields, tests/test_diversification_phase3.py, one edited test in test_diversification_phase1.py). Authoritative run: 900 passed / 18 skipped / 0 failed (918 collected) in 163.54s. Pass rate 0.98, zero new failures vs 2026-08-03 baseline. Gate PASS."
 }

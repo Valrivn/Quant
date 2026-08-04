@@ -1,7 +1,7 @@
 ---
 description: gemini-flash-worker — Builder (paid/fast lane). Implements Tier-1/Tier-2 tasks from a brief. In paid mode runs on Gemini Flash for speed; in fallback mode runs free. Use when you want a second build lane or a faster turnaround.
 mode: subagent
-model: opencode/deepseek-v4-flash-free
+model: google/antigravity-gemini-3-flash
 temperature: 0.3
 ---
 

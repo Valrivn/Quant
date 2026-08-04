@@ -1,7 +1,7 @@
 ---
 description: hermes-bridge — Top Manager, synthesis only. Reads exactly the two debate positions + disagreement map and emits a ≤300-token synthesis recommending one option to the CEO. Use ONLY for the Tier-3 synthesis step. Maximum token efficiency required.
 mode: subagent
-model: opencode/nemotron-3-ultra-free
+model: google/antigravity-claude-sonnet-4-6
 temperature: 0.2
 ---
 

@@ -100,3 +100,9 @@ then swap the three paid agents to `google/antigravity-*` models per
 models. When paid tokens run dry, fallback.md is the recovery path. Claude must
 stay the most efficient component: synthesis-only, 300-token cap, single
 invocation.
+
+## 8. Git discipline
+
+- All build work happens on a `feature/` branch, never directly on `main`.
+- Before creating a commit, the building agent ASKS the CEO "commit or not".
+  Never commit, amend, push, or merge without explicit CEO approval.
