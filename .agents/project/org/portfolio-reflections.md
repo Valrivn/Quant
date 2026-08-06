@@ -274,3 +274,23 @@ CEO approved the hermes hybrid as base then MODIFIED into three test strategies 
 **CEO Architect Narrative:**
 
 The gradient-descent allocator (Sharpe-max objective, 2.0 variance penalty punishing risky weights, hard 30% max-drawdown bound) was built and run as the CEO ruled: the fixed 40/20/20/20 static, an opportunistic-only variant, the ML-fitted weights held statically, and the adaptive re-optimizing version. The optimizer fit on data through 2022-12-31 (pre-registered) and went to the risk-constrained corner (30% SPY / 10% small-mid / 12% dividend / 48% bonds) — maxing bonds and cutting equities. STATIC-after-ML beat the CEO's fixed mix on Sharpe (1.16 vs 0.94) and drawdown (-16% vs -21%), and its held-out 2023+ segment validated at Sharpe 1.90 / maxDD -9%, so the fit did not overfit. The hard 30% drawdown bound held everywhere while SPY itself breached -33%. On the CEO's cash question: all Phase-3 strategies generate ~2x SPY's dividend cash (up to 106x fee coverage) but trail SPY on raw total return in this large-cap bull window. Honest falsifications: the profit-change switch never fired, and the opportunistic-only overlay's 28 z-gate switches dragged return ~11 points — switching is not free. SEC XBRL + FRED cross-checks remain degraded pending reachability.
+
+### 2026-08-04 — D-20260804-001 Return-max discovery pivot
+
+**CEO Architect Narrative:**
+
+The return-max discovery pivot shows directional validation of the CEO's thesis: closing half the gap to SPY (+171% vs +217%) while cutting drawdown ~60% lower than SPY. However, the strategy fails all three success bars in the 2018-2026 bull window: it does not beat SPY on raw total cash, and transaction fees exceed the $200 budget by 5-7x. The discovery reveals that return-max optimization in a large-cap bull market faces structural challenges: diversification drag, fee discipline issues, and regime misclassification. The modules built (markov_momentum.py, return_max.py, fee_sim3 run_sim_discovery, 23 tests) provide a foundation for refinement, with the recommendation that any follow-up be a Tier-3 MODIFY brief addressing turnover and bear-market regime improvements.
+
+### 2026-08-04 — D-20260804-002 CEO approved full PIT data-accuracy rebuild after a 3-way council debate (7-phase vs 3-phase vs hybrid); hybrid adopted (probe-gated, per-source fallback); next council inputs will be embedded into implementation plans per CEO instruction; the rebuild re-runs the return-max Discovery on trustworthy data before any T3 promotion call.
+
+**CEO Architect Narrative:**
+
+The CEO's ruling on D-20260804-002 establishes a hybrid approach to the backtest data-layer rebuild: full 7-phase PIT accuracy with a critical API-probe gate before Phase P2, and per-source DEGRADED fallback (never full stop) if FRED/Tiingo/EDGAR keys are unavailable. This balances the CEO's requirement for complete data integrity (all six success criteria S1-S6 pre-registered) with the practical reality of external API dependencies. The hybrid approach converts Position B's blocking risk into a scoped fallback rather than a veto, ensuring the rebuild can proceed while maintaining the highest possible data accuracy. The implementation plan (research/backtest-accuracy-plan.md) embeds the full debate record and ruling, creating a complete audit trail. This rebuild will re-run the return-max Discovery comparison on corrected data, providing % deltas vs the degraded run and re-evaluating success bars honestly before any T3 promotion decisions are made.
+
+**Key architectural innovations:**
+- Hybrid data-layer rebuild: full 7-phase PIT accuracy with API-probe gating and per-source DEGRADED fallback
+- Probe-gate converts external API risk into scoped fallback rather than veto
+- Full debate record embedded in implementation plan for audit trail
+- Discovery re-run on trustworthy data with % deltas vs degraded run
+- Six success criteria (S1-S6) pre-registered and must be met
+- No code merged yet — ruling authorizes the build; 7 phases are the delivery contract

@@ -57,3 +57,93 @@ profit_change:
 cash_shortfall:
   min_cash_ratio: 0.01   # relocate when cash < 1% of portfolio value
   relocation: "macrostate"  # sell toward the macro-state-preferred sleeve
+
+# --- Discovery B-20260804-001: return-max pivot (pre-registered BEFORE any run;
+# invariant 4. Every value is fixed before the backtest; nothing is fit to
+# outcomes. The CEO's Sharpe>=0.70 / maxDD<40% / fees<$200 are SUCCESS bars,
+# not optimizer constraints.) ---
+return_max:
+  # Test-1 objective: maximize expected annualized return of the equity complex.
+  # Vol/Sharpe are NOT penalized (diversifying for Sharpe is out of scope).
+  # The only risk term is the hard drawdown bound at the CEO's new 40% bar.
+  objective: "ann_return"       # ann_mean - dd_penalty*breach, breach=max(0,-maxdd-bound)
+  max_drawdown_bound: 0.40
+  dd_penalty: 20.0
+  learning_rate: 0.05
+  max_iters: 2000
+  tol: 1.0e-8
+  seed: 42
+  num_grad_eps: 1.0e-6
+  train_end: "2022-12-31"       # RM-ML-STATIC in-sample fit cutoff (held statically)
+  oos_start: "2023-01-01"
+  embargo_days: 21
+  trailing_window_years: 3      # RM-ML adaptive re-fit window
+
+  # Equity weight by macro state (HARD anchor - the CEO's rules, not the ML).
+  # Bear = "buy-more" regime; bull rides strong momentum; neutral in between.
+  state_equity:
+    bull: 0.75
+    neutral: 0.65
+    bear: 0.85
+
+  # Within-equity-complex bounds for the ML optimizer (fractions of the equity
+  # total; feasible: 0.25+0.05+0.10 <= 1 <= 0.60+0.25+0.40). High vs low
+  # diversification differ only in the bounds + the bonds residual.
+  within_equity_bounds_high:
+    spy: [0.25, 0.60]
+    small_mid: [0.10, 0.25]
+    dividend: [0.10, 0.40]
+  within_equity_bounds_low:
+    spy: [0.40, 0.80]
+    small_mid: [0.00, 0.10]
+    dividend: [0.00, 0.30]
+  bonds_residual: "1-equity"        # HIGH: bonds = 1 - E always
+  low_diversification_bonds_max: 0.15  # LOW: bonds capped, freed weight stays in equity
+
+  # Static within-equity split for the rule-only (non-ML) variant.
+  static_within:
+    spy: 0.50
+    small_mid: 0.15
+    dividend: 0.35
+
+  # Bear buy-more (CEO rule): in the bear state the equity complex is
+  # concentrated 60/25/15 into the OOS-audited stable-dividend basket (quality
+  # cashflow names) / SPY / small-mid. Names the dividend audit rejects (dividend
+  # cut, weak yield) are EXCLUDED - that is the "moat significantly impacted"
+  # hold-back gate.
+  bear_buy_more:
+    basket_share: 0.60
+    spy_share: 0.25
+    small_mid_share: 0.15
+    moat_gate: "audit-reject"
+
+  # Bullish momentum overweight: lightweight 2-state (up/down) Markov chain per
+  # equity member over the trailing feature-stability window; overweight the
+  # top-K by P(up next | current state) in the bull state. Trailing-only.
+  momentum:
+    enabled: true
+    window_days: 252
+    min_obs: 120
+    tilt: 1.5
+    max_tilted: 3
+    tilt_threshold: 0.5   # only members with P(up|current) > 0.5 are "leaders"
+    gate: "bull"
+
+  # Downside engine (Test-2 / Final): crisis de-risk pulse on SPY's trailing
+  # 21-day return. When <= arm, equity total is capped at max_equity_when_de_risked
+  # (flight to the bonds sleeve) until the pulse recovers above disarm.
+  downside_engine:
+    enabled: true
+    signal: "spy-trailing-21d-return"
+    arm: -0.10
+    disarm: -0.05
+    max_equity_when_de_risked: 0.40
+
+  # Fee discipline (Final bar): event-driven trading only - re-trade on macro
+  # state transitions, crisis arm/disarm, or the quarterly boundary. Expected
+  # ~1-4 trades/yr; target total fees < $200.
+  fee_discipline:
+    enabled: true
+    trade_on: ["state-transition", "crisis-arm-disarm", "quarter-boundary"]
+    max_trades_per_year: 4
+    target_fee_budget: 200

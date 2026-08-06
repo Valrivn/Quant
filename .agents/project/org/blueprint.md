@@ -240,3 +240,26 @@ constrained ML allocator delivering three strategies (static CEO, static-after-
 ML, adaptive); config/weights_diversification.yaml becomes the required
 pre-registration artifact before any optimization run; risk objective is Sharpe
 with a hard 30% max-drawdown bound and risky-weight penalty.
+
+## Ruling D-20260804-002 (T3) — BACKTEST DATA-ACCURACY REBUILD (APPROVE hybrid)
+SUMMARY: CEO APPROVES hybrid on brief B-20260804-002 after a 3-way council
+debate (Position A: full 7-phase PIT rebuild; Position B: minimal 3-phase patch
+on #1/#4/#3; hermes synthesis: hybrid). Scope: 7-phase data-layer-only rebuild
+(P1 multi-provider prices yfinance+Tiingo/Stooq+Nasdaq with dual raw/adjusted
+columns + factor series; P2 real corporate-action dividend/split events replacing
+the static DIVIDEND_YIELDS map; P3 macro PIT via fredapi + ALFRED vintages with
+source-tagged states; P4 EDGAR PIT via edgartools keyed to filing dates; P5
+survivor-free PIT universe incl. delisted retention so the buy-more basket is
+populated from 2018; P6 fill-at-next-open + look-ahead/tripwire tests; P7
+Discovery re-run with % deltas vs degraded + success bars re-evaluated).
+GOVERNANCE: gated on a <=1-hour API probe (FRED/EDGAR/Tiingo keys + quotas)
+before P2; per-source DEGRADED-ledger fallback if a key is unavailable — never a
+full stop for one missing API; zero strategy-logic changes (data layer only);
+invariant-4 pre-registration untouched; success S1-S6 pre-registered; auditor
+OOS/no-hardcoding discipline; data-status ledger on every run (no silent
+fallbacks — Provenance invariant). Plan + full debate record:
+.agents/project/org/research/backtest-accuracy-plan.md.  |  BY: CEO  |  EFFECT:
+blueprint gains a data-integrity rebuild contract (7 phases, probe-gated,
+DEGRADED-tagged fallbacks); all future backtests must carry a data-status
+ledger; the return-max Discovery result is pending re-run on accurate data
+before any T3 promotion call.

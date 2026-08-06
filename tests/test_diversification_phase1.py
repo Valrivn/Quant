@@ -249,3 +249,55 @@ class TestFeeSim3Engine:
         # First rebalance deploys; second has zero turnover and is skipped.
         assert info["trades"] == 1
         assert info["skipped"] >= 1
+
+    def test_real_exdate_dividend_accrual(self):
+        """Real ex-date dividend events credit exactly shares*dividend and are
+        NOT replaced by the static DIVIDEND_YIELDS daily accrual (S4/S6)."""
+        from diversification.fee_sim3 import Portfolio
+
+        idx = pd.date_range("2021-01-01", periods=300, freq="B")
+        prices = pd.DataFrame({"A": 100.0, "B": 100.0}, index=idx)
+        ex_date = idx[150]
+        div_hist = {"A": pd.Series([2.0], index=pd.DatetimeIndex([ex_date]))}
+        pf = Portfolio(prices, initial=10000.0, div_hist=div_hist)
+
+        deployed = {"done": False}
+
+        def target(d, w_cur, V):
+            if not deployed["done"]:
+                deployed["done"] = True
+                return {"A": 1.0, "B": 0.0}, {}
+            return None, {}
+
+        vpath, info = pf.run([idx[0]], target)
+        # ~100 shares of A @ 100 (fees trim the buy slightly) -> one $2.00/share
+        # dividend lump on the ex-date, not a daily static-yield drip.
+        assert info["dividends"] == pytest.approx(200.0, rel=0.01)
+        # Static daily-yield path is untouched: no div_hist -> zero dividends.
+        pf2 = Portfolio(prices, initial=10000.0)
+        vpath2, info2 = pf2.run([idx[0]], target)
+        assert info2["dividends"] == 0.0
+
+    def test_real_exdate_uses_event_not_static_yield(self):
+        """A held asset with real events accrues the event total, not the
+        static-yield accrual, even when DIVIDEND_YIELDS has a yield for it."""
+        from diversification.fee_sim3 import Portfolio
+
+        idx = pd.date_range("2021-01-01", periods=300, freq="B")
+        prices = pd.DataFrame({"A": 100.0, "B": 100.0}, index=idx)
+        ex_date = idx[150]
+        div_hist = {"A": pd.Series([4.0], index=pd.DatetimeIndex([ex_date]))}
+        pf = Portfolio(prices, initial=10000.0, div_hist=div_hist)
+
+        deployed = {"done": False}
+
+        def target(d, w_cur, V):
+            if not deployed["done"]:
+                deployed["done"] = True
+                return {"A": 1.0, "B": 0.0}, {}
+            return None, {}
+
+        vpath, info = pf.run([idx[0]], target)
+        assert info["dividends"] == pytest.approx(400.0, rel=0.01)
+        # Real event total dominates any static-yield accrual.
+        assert info["dividends"] > 300.0

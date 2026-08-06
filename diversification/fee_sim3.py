@@ -60,6 +60,13 @@ from diversification.dividend_audit import (
     xbrl_crosscheck_all,
 )
 from diversification.macro_state import classify_state, classify_state_price, macro_target_weights
+from diversification.markov_momentum import momentum_overweight
+from diversification.return_max import (
+    ORDER as RM_ORDER,
+    complex_return_series,
+    fit_static_return_weights,
+    optimize_return_weights,
+)
 from diversification.opportunistic import (
     TILT_MULT,
     _trailing_z,
@@ -125,6 +132,13 @@ def fetch_all():
     return prices, baa10y, dgs10, gold_fix, credit_ratio
 
 
+def _fetch_div_hist(traded):
+    """Dividend histories for every traded ticker (candidates + ETFs), so the
+    sim accrues REAL ex-date events instead of the static DIVIDEND_YIELDS map."""
+    syms = list(dict.fromkeys(list(DIVIDEND_CANDIDATES) + list(traded)))
+    return fetch_dividend_history(syms, START, END)
+
+
 def sleeve_target(date, rets, spread_series, credit_ratio, within_fx):
     """Asset weight dict from macro state + within-sleeve risk minimizer.
 
@@ -184,11 +198,14 @@ class Portfolio:
     """Share-accounting portfolio with dividends; executes rebalances on the
     first trading day strictly after each calendar rebalance date."""
 
-    def __init__(self, prices, initial=INITIAL):
+    def __init__(self, prices, initial=INITIAL, div_hist=None):
         self.prices = prices
         self.idx = prices.index
         self.initial = initial
         self.rets = prices.pct_change(fill_method=None)
+        self._div_events = {
+            c: s for c, s in (div_hist or {}).items() if s is not None and len(s)
+        }
 
     def _price(self, c, d):
         s = self.prices[c].asof(d)
@@ -208,8 +225,16 @@ class Portfolio:
             out.append(c) if not last.empty else None
         return out
 
-    def run(self, rebal_dates, target_fn, fee_rate=FEE_RATE, min_turnover=MIN_TURNOVER):
-        """target_fn(d) -> (asset_weight_dict, meta) or (None, meta) to hold."""
+    def run(self, rebal_dates, target_fn, fee_rate=FEE_RATE, min_turnover=MIN_TURNOVER,
+            gate="variance"):
+        """target_fn(d) -> (asset_weight_dict, meta) or (None, meta) to hold.
+
+        ``gate``: "variance" (Phase-1/2/3) trades only when the rebalance lowers
+        expected variance enough to clear the fee; "turnover" (Discovery
+        B-20260804-001 return-max) trades whenever the target differs by at
+        least ``min_turnover`` — the fee is charged honestly and the strategy
+        itself decides when moving is worth it.
+        """
         assets = [c for c in self.prices.columns]
         shares = {c: 0.0 for c in assets}
         cash = self.initial
@@ -250,11 +275,15 @@ class Portfolio:
                         fees += fee_rate * 0.5 * V
                         trades += 1
                     elif turnover >= min_turnover:
-                        var_cur = self._variance(w_cur, d)
-                        var_tar = self._variance(target, d)
-                        improvement = (var_cur - var_tar) * ANNUALIZE * V
                         fee = fee_rate * turnover * V
-                        if improvement > fee:
+                        if gate == "turnover":
+                            approved = True
+                        else:
+                            var_cur = self._variance(w_cur, d)
+                            var_tar = self._variance(target, d)
+                            improvement = (var_cur - var_tar) * ANNUALIZE * V
+                            approved = improvement > fee
+                        if approved:
                             V_after = V - fee
                             cash = V_after - sum(target.get(c, 0.0) * V_after for c in assets)
                             for c in assets:
@@ -268,10 +297,19 @@ class Portfolio:
                         skipped += 1
                 pending = None
 
-            # dividend accrual
+            # dividend accrual (real ex-date events from dividend history when
+            # available; static DIVIDEND_YIELDS fallback otherwise)
             for c in assets:
+                if shares[c] <= 0:
+                    continue
+                ev = self._div_events.get(c)
+                if ev is not None and d in ev.index:
+                    inc = shares[c] * float(np.sum(np.atleast_1d(ev.loc[d])))
+                    cash += inc
+                    dividends += inc
+                    continue
                 p = self._price(c, d)
-                if p > 0 and shares[c] > 0:
+                if p > 0:
                     y = DIVIDEND_YIELDS.get(c, 0.0)
                     if y > 0:
                         inc = shares[c] * p * y / ANNUALIZE
@@ -352,9 +390,9 @@ def run_sim():
     start_idx = prices.index[prices.index > pd.Timestamp(REBAL_START)][0]
     traded = [c for c in prices.columns if c in ALL_TICKERS or c in DIVIDEND_CANDIDATES]
 
-    div_hist = fetch_dividend_history(DIVIDEND_CANDIDATES, START, END)
+    div_hist = _fetch_div_hist(traded)
 
-    pf = Portfolio(prices[traded])
+    pf = Portfolio(prices[traded], div_hist=div_hist)
 
     def target_baseline(date, w_cur, V):
         target = {c: 0.0 for c in traded}
@@ -556,9 +594,9 @@ def run_sim_phase3():
     oos_idx = prices.index[prices.index >= oos_start]
     oos_start_idx = oos_idx[0] if len(oos_idx) else prices.index[-1]
 
-    div_hist = fetch_dividend_history(DIVIDEND_CANDIDATES, START, END)
+    div_hist = _fetch_div_hist(P3_TICKERS)
     traded = [c for c in prices.columns if c in P3_TICKERS]
-    pf = Portfolio(prices[traded])
+    pf = Portfolio(prices[traded], div_hist=div_hist)
     order = allocator._sleeve_order(cfg)
 
     def _state(date):
@@ -796,5 +834,393 @@ def rebal_dates(infos):
     return []
 
 
+# ---------------------------------------------------------------------------
+# Discovery B-20260804-001: return-max pivot (all params pre-registered in
+# config/weights_diversification.yaml return_max block; nothing fit to outcomes).
+# ---------------------------------------------------------------------------
+
+def run_sim_discovery():
+    """Discovery comparison: return-max rules + ML variants vs SPY and Phase-3.
+
+    Strategies (all params pre-registered):
+      BASELINE SPY, STATIC-after-ML (Phase-3 ref), RM-STATIC (CEO rules, static
+      within-equity split), RM-ML-STATIC (ML fit once <= train_end, held),
+      RM-ML-ADAPTIVE-HIGH / LOW (trailing re-fit, diversified vs equity-heavy
+      bounds), RM-GUARD (adaptive-high + crisis de-risk engine; Test-2 bar),
+      RM-FINAL (guard + event-driven fee discipline; Final bar).
+    """
+    cfg = load_config()
+    rm = cfg["return_max"]
+    prices, baa10y, dgs10, gold_fix, credit_ratio = fetch_all()
+    rets = prices.pct_change(fill_method=None)
+    rets.index = _localize(rets.index)
+    rebal = pd.date_range(REBAL_START, END, freq="ME")
+    start_idx = prices.index[prices.index > pd.Timestamp(REBAL_START)][0]
+    oos_idx = prices.index[prices.index >= pd.Timestamp(rm["oos_start"])]
+    oos_start_idx = oos_idx[0] if len(oos_idx) else prices.index[-1]
+
+    div_hist = _fetch_div_hist(P3_TICKERS)
+    traded = [c for c in prices.columns if c in P3_TICKERS]
+    pf = Portfolio(prices[traded], div_hist=div_hist)
+
+    def basket_fx(d):
+        return _p3_basket_members(d, prices, div_hist)
+
+    rm_static = fit_static_return_weights(rets, cfg, basket_fx, rm["train_end"])
+    p3_ml = fit_static_ml_weights(rets, cfg, basket_fx, cfg["optimizer"]["train_end"])
+
+    def _state(date):
+        equity = rets.get("SPY", pd.Series(dtype=float))
+        if baa10y is not None and not baa10y.empty:
+            return classify_state(baa10y, equity, date)
+        return classify_state_price(equity, credit_ratio, date)
+
+    def _crisis_pulse(date):
+        s = prices.get("SPY", pd.Series(dtype=float))
+        prior = s[s.index <= pd.Timestamp(date)]
+        if len(prior) < 22:
+            return None
+        cur = float(prior.iloc[-1])
+        past = float(prior.iloc[-22])
+        return cur / past - 1.0 if past > 0 else None
+
+    def _within_split(date, state, mode, low_div):
+        if state == "bear":
+            bb = rm["bear_buy_more"]
+            return {"spy": float(bb["spy_share"]),
+                    "small_mid": float(bb["small_mid_share"]),
+                    "dividend": float(bb["basket_share"])}
+        if mode == "static":
+            return dict(rm["static_within"])
+        if mode == "ml-static" and rm_static:
+            return dict(rm_static)
+        if mode.startswith("ml"):
+            win_days = int(rm["trailing_window_years"]) * 252
+            sr = complex_return_series(rets, date, cfg, basket_fx, window_days=win_days)
+            w = optimize_return_weights(sr, cfg, low_div=low_div) if sr is not None else None
+            if w is not None:
+                return dict(zip(RM_ORDER, w))
+        return dict(rm["static_within"])
+
+    def _build_target(date, state, sleeve_w, low_div, engine_armed, apply_momentum):
+        E = float(rm["state_equity"][state])
+        if engine_armed:
+            E = min(E, float(rm["downside_engine"]["max_equity_when_de_risked"]))
+        if low_div:
+            E = max(E, 1.0 - float(rm["low_diversification_bonds_max"]))
+        eq = {}
+        shy_fb = 0.0
+        sw = sleeve_w.get("spy", 0.0)
+        if sw > 0 and _has_price(rets, "SPY", date):
+            eq["SPY"] = sw
+        sw = sleeve_w.get("small_mid", 0.0)
+        if sw > 0:
+            sm = [t for t in cfg["sleeves"]["small_mid"] if _has_price(rets, t, date)]
+            if sm:
+                for t in sm:
+                    eq[t] = sw / len(sm)
+        sw = sleeve_w.get("dividend", 0.0)
+        if sw > 0:
+            avail = [t for t in basket_fx(date) if _has_price(rets, t, date)]
+            if avail:
+                for t in avail:
+                    eq[t] = sw / len(avail)
+            else:
+                shy_fb = sw
+        tilted = False
+        if apply_momentum and state == rm["momentum"]["gate"] and eq:
+            before = dict(eq)
+            eq = momentum_overweight(list(eq), prices, date, cfg, eq)
+            tilted = eq != before
+        total = sum(eq.values()) + shy_fb
+        if total <= 0:
+            return None, False
+        target = {}
+        for t, v in eq.items():
+            target[t] = v / total * E
+        if shy_fb > 0:
+            target["SHY"] = target.get("SHY", 0.0) + shy_fb / total * E
+        bonds_w = 1.0 - E
+        if bonds_w > 0:
+            b = [t for t in cfg["sleeves"]["bonds"] if _has_price(rets, t, date)]
+            if b:
+                for t in b:
+                    target[t] = target.get(t, 0.0) + bonds_w / len(b)
+        return target, tilted
+
+    def _make_target(mode, low_div, engine, fee):
+        last = {"state": None, "armed": False, "last_trade": None}
+        de = rm["downside_engine"]
+
+        def fn(date, w_cur, V):
+            state = _state(date)
+            pulse = _crisis_pulse(date)
+            armed = last["armed"]
+            if pulse is not None:
+                if not armed and pulse <= float(de["arm"]):
+                    armed = True
+                elif armed and pulse > float(de["disarm"]):
+                    armed = False
+            if fee and last["state"] is not None:
+                event = (state != last["state"]) or (armed != last["armed"]) or (
+                    date.month in (1, 4, 7, 10) and date != last["last_trade"])
+                if not event:
+                    last["state"] = state
+                    last["armed"] = armed
+                    return None, {"state": state, "hold": True}
+            sleeve_w = _within_split(date, state, mode, low_div)
+            target, tilted = _build_target(date, state, sleeve_w, low_div,
+                                           armed and engine,
+                                           rm["momentum"].get("enabled", False))
+            last["state"] = state
+            last["armed"] = armed
+            if target is not None:
+                last["last_trade"] = date
+            return target, {"state": state, "armed": armed, "mode": mode,
+                            "low_div": low_div, "engine": engine, "fee": fee,
+                            "tilted": tilted, "weights": sleeve_w}
+        return fn
+
+    def target_baseline(date, w_cur, V):
+        target = {c: 0.0 for c in traded}
+        target["SPY"] = 1.0
+        return target, {"state": _state(date), "strategy": "baseline"}
+
+    def target_static_ml_ref(date, w_cur, V):
+        sleeve_w = p3_ml if p3_ml else dict(cfg["static_targets"])
+        state = _state(date)
+        target = _p3_sleeve_target(sleeve_w, date, rets, prices, div_hist, cfg)
+        return target, {"state": state, "strategy": "static-ml-ref"}
+
+    strategies = [
+        ("BASELINE SPY", target_baseline, False, "variance"),
+        ("STATIC-after-ML (P3 ref)", target_static_ml_ref, False, "variance"),
+        ("RM-STATIC", _make_target("static", False, False, False), False, "turnover"),
+        ("RM-ML-STATIC", _make_target("ml-static", False, False, False), True, "turnover"),
+        ("RM-ML-ADAPTIVE-HIGH", _make_target("ml", False, False, False), False, "turnover"),
+        ("RM-ML-ADAPTIVE-LOW", _make_target("ml", True, False, False), False, "turnover"),
+        ("RM-GUARD (Test-2 bar)", _make_target("ml", False, True, False), False, "turnover"),
+        ("RM-FINAL (Final bar)", _make_target("ml", False, True, True), False, "turnover"),
+    ]
+
+    results = []
+    infos = {}
+    for label, fn, report_oos, gate in strategies:
+        vpath, info = pf.run(rebal, fn, gate=gate)
+        infos[label] = info
+        results.append(summarize(label, vpath, info, start_idx, prices.index[-1], rets, baa10y))
+        if report_oos:
+            oos_row = summarize(f"{label} [OOS {rm['oos_start']}+]", vpath, info,
+                                oos_start_idx, prices.index[-1], rets, baa10y)
+            if oos_row:
+                oos_row["strategy"] = f"{label} OOS segment"
+                results.append(oos_row)
+
+    meta = {"fred_source": "FRED" if not baa10y.empty else "PRICE FALLBACK",
+            "rm_static": rm_static, "train_end": rm["train_end"],
+            "oos_start": rm["oos_start"], "p3_ml": p3_ml}
+    return (pd.DataFrame([r for r in results if r]), prices, rets, gold_fix, baa10y,
+            div_hist, infos, meta)
+
+
+def main_discovery():
+    """Discovery report: return-max variants vs SPY, the three success bars,
+    head-to-head vs STATIC-after-ML, and decision counts."""
+    out, prices, rets, gold_fix, baa10y, div_hist, infos, meta = run_sim_discovery()
+    pd.set_option("display.width", 240)
+    print("=== Discovery B-20260804-001: return-max pivot ===")
+    print(out.to_string(float_format=lambda x: f"{x:,.2f}"))
+    out.to_csv(f"{OUT}\\discovery_results.csv", index=False)
+
+    rows = {r["strategy"]: r for r in out.to_dict("records")}
+    baseline = rows.get("BASELINE SPY")
+    if baseline:
+        spy_ret = baseline["total_return"]
+        print(f"\n  SPY total return: {spy_ret:.1%}")
+        print("  Success bars (Discovery brief):")
+        for label in ["RM-STATIC", "RM-ML-STATIC", "RM-ML-ADAPTIVE-HIGH",
+                      "RM-ML-ADAPTIVE-LOW", "RM-GUARD (Test-2 bar)",
+                      "RM-FINAL (Final bar)"]:
+            if label not in rows:
+                continue
+            r = rows[label]
+            budget = float(load_config()["return_max"]["fee_discipline"]["target_fee_budget"])
+            t1 = r["total_return"] > spy_ret
+            t2 = t1 and r["sharpe"] > 0.70 and -r["maxdd"] < 0.40
+            final = t2 and r["fees"] < budget
+            print(f"  {label:22s} T1-beatSPY={'Y' if t1 else 'N'} "
+                  f"T2(+Sharpe>0.70,DD<40%)={'Y' if t2 else 'N'} "
+                  f"FINAL(+fees<${budget:.0f})={'Y' if final else 'N'} "
+                  f"fees=${r['fees']:.2f} trades={r['trades']}")
+
+    print("\n  Head-to-head vs STATIC-after-ML (Phase-3):")
+    for label in ["RM-ML-STATIC", "RM-ML-ADAPTIVE-HIGH", "RM-GUARD (Test-2 bar)",
+                  "RM-FINAL (Final bar)"]:
+        if label in rows and "STATIC-after-ML (P3 ref)" in rows:
+            ref = rows["STATIC-after-ML (P3 ref)"]
+            r = rows[label]
+            print(f"  {label:22s} gain {r['gain']:>10,.2f} vs {ref['gain']:>10,.2f} "
+                  f"| Sharpe {r['sharpe']:5.2f} vs {ref['sharpe']:5.2f} "
+                  f"| maxDD {r['maxdd']:6.1%} vs {ref['maxdd']:6.1%}")
+
+    print("\n  Decision counts (monthly rebalances):")
+    for label, info in infos.items():
+        if not info["states"]:
+            continue
+        st = info["states"]
+        n = len(st)
+        bear = sum(1 for _, m in st if m.get("state") == "bear")
+        bull = sum(1 for _, m in st if m.get("state") == "bull")
+        armed = sum(1 for _, m in st if m.get("armed"))
+        holds = sum(1 for _, m in st if m.get("hold"))
+        tilted = sum(1 for _, m in st if m.get("tilted"))
+        print(f"  {label:24s} n {n:3d} | bull {bull:3d} bear {bear:3d} | "
+              f"armed {armed:3d} | tilted {tilted:3d} | holds {holds:3d}")
+
+    return out, infos, meta
+
+
+DEGRADED_BASELINE_DISCOVERY = {
+    # Degraded-reference results (B-20260804-001, static DIVIDEND_YIELDS +
+    # price-proxy macro): used to report % deltas for the Discovery suite.
+    "BASELINE SPY": 31700.0, "STATIC-after-ML (P3 ref)": 21882.0,
+    "RM-STATIC": 26933.0, "RM-ML-STATIC": 26802.0,
+    "RM-ML-ADAPTIVE-HIGH": 26841.0, "RM-ML-ADAPTIVE-LOW": 27144.0,
+    "RM-GUARD (Test-2 bar)": 25579.0, "RM-FINAL (Final bar)": 27016.0,
+}
+
+
+def data_status(prices, rets, gold_fix, baa10y, div_hist, meta):
+    """Print the DATA CHALLENGES report for this run: every degradation is
+    tagged, never silent (S1). Order: data challenges first, per CEO."""
+    rows = []
+
+    def note(metric, status, detail):
+        rows.append((metric, status, detail))
+
+    fred_ok = not baa10y.empty
+    note("FRED macro (BAA10Y, gold)", "OK" if fred_ok else "DEGRADED",
+         f"{len(baa10y)} BAA10Y obs" if fred_ok else
+         "FRED unreachable; HYG/LQD price-proxy fallback (DEGRADED tag). "
+         "No ALFRED vintages (fredapi not installed) - macro state is not PIT.")
+
+    import urllib.request as _ur
+    edgar_ok = False
+    try:
+        _ur.urlopen(
+            "https://data.sec.gov/api/xbrl/companyconcept/CIK0000320193/"
+            "us-gaap/Revenues.json", timeout=15)
+        edgar_ok = True
+    except Exception:
+        edgar_ok = False
+    note("SEC EDGAR (second dividend source)", "OK" if edgar_ok else "DEGRADED",
+         "XBRL reachable; cross-check running live" if edgar_ok else
+         "EDGAR unreachable; yfinance dividends are the sole dividend source")
+
+    real, static = [], []
+    for c in prices.columns:
+        if c in div_hist and len(div_hist.get(c, pd.Series(dtype=float))):
+            real.append(c)
+        elif DIVIDEND_YIELDS.get(c, 0.0) > 0:
+            static.append(c)
+    note("Dividend source (S4/S6)", "PARTIAL" if static else "OK",
+         f"REAL ex-date events for {len(real)} tickers ({', '.join(real)}); "
+         f"STATIC DIVIDEND_YIELDS fallback still applied to {len(static)} "
+         f"({', '.join(static)}) - real-events coverage is not total.")
+
+    survivors = [c for c in prices.columns if c not in ("SPY", "MDY", "IWM")]
+    note("Survivor-free universe (S4)", "LIMITED",
+         "yfinance history ends at today's constituents; delisted names are "
+         "absent. Basket membership is expanding-window OOS, but the price "
+         "universe itself is survivorship-biased (no fja05680/sp500 PIT list).")
+
+    note("Fill discipline (S3/P6)", "OK",
+         "Execution uses the first trading day strictly after the calendar "
+         "rebalance date (portfolio prices at next day; signals at month-end). "
+         "No same-close fills.")
+
+    note("Multi-source prices (S2)", "CHECKING",
+         "Nasdaq cross-check below; gold cross-checked against FRED gold fix "
+         "when FRED is up.")
+
+    print("=== DATA CHALLENGES REPORT (S1-S4 tags; degraded legs explicit) ===")
+    for metric, status, detail in rows:
+        print(f"  [{status:9s}] {metric}")
+        if detail:
+            print(f"             {detail}")
+    return rows
+
+
+def pool_all_results():
+    """Re-run every historical sim on the corrected data layer and pool the
+    results: Phase-1/2, Phase-3, and Discovery. Prints the data-challenges
+    report first, then one pooled table. Writes the pooled CSV to OUT."""
+    pd.set_option("display.width", 240)
+
+    out, prices, rets, gold_fix, baa10y, div_hist, div_info, meta = run_sim()
+    data_status(prices, rets, gold_fix, baa10y, div_hist, meta)
+
+    print("\n--- Multi-source price checks (S2) ---")
+    _nasdaq_crosscheck(prices, rets)
+    if not gold_fix.empty:
+        gld = rets.get("GLD", pd.Series(dtype=float))
+        gf = gold_fix.pct_change(fill_method=None)
+        joined = pd.concat([gld.rename("gld"), gf.rename("fix")], axis=1).dropna()
+        if len(joined) > 30:
+            print(f"  GLD vs FRED gold-fix return corr: "
+                  f"{float(joined['gld'].corr(joined['fix'])):.3f} "
+                  f"(n={len(joined)})")
+
+    out3, prices3, rets3, gold_fix3, baa10y3, div_hist3, infos3, meta3 = run_sim_phase3()
+    outd, pricesd, retsd, gold_fixd, baa10yd, div_histd, infosd, metad = run_sim_discovery()
+
+    print("\n--- SEC XBRL stable-dividend cross-check (live) ---")
+    try:
+        from valuation_alpha.datastore import xbrl_financials
+        from valuation_alpha.universe import cik_resolver
+        rows = xbrl_crosscheck_all(
+            DIVIDEND_CANDIDATES, div_hist, pd.Timestamp(END),
+            resolve_cik=cik_resolver.resolve_cik,
+            fetch_companyfacts=xbrl_financials.fetch_companyfacts,
+            extract=xbrl_financials.extract_quarterly_financials,
+        )
+        n_na = sum(1 for _, s, _ in rows if s == "NA")
+        if rows and n_na == len(rows):
+            print("  EDGAR CIK resolution unavailable - XBRL cross-check SKIPPED (DEGRADED)")
+        else:
+            print("  ticker | status | detail")
+            for name, status, detail in rows:
+                print(f"  {name:6s} | {status:4s} | {detail}")
+    except Exception as e:
+        print(f"  XBRL cross-check failed: {type(e).__name__}: {e} (DEGRADED)")
+
+    pool = pd.concat([out, out3, outd], ignore_index=True, sort=False)
+    pool["phase"] = (["P1/P2"] * len(out)) + (["P3"] * len(out3)) + (["DISCOVERY"] * len(outd))
+    pool["div_src"] = "real-events+static-fallback"
+
+    d_ref = DEGRADED_BASELINE_DISCOVERY
+    pool["degraded_end_value"] = pool["strategy"].map(d_ref)
+    pool["delta_vs_degraded_%"] = (pool["end_value"] / pool["degraded_end_value"] - 1) * 100
+
+    pd.set_option("display.max_rows", None)
+    cols = ["phase", "strategy", "end_value", "gain", "total_return", "ann_return",
+            "sharpe", "maxdd", "ir", "fees", "fees_pct_of_gain", "dividends",
+            "coverage", "trades", "delta_vs_degraded_%"]
+    show = pool[cols].copy()
+    show["delta_vs_degraded_%"] = show["delta_vs_degraded_%"].round(2)
+    print("\n=== POOLED RESULTS — every historical test on the corrected "
+          "data layer ===")
+    print(show.to_string(float_format=lambda x: f"{x:,.2f}",
+                         formatters={"delta_vs_degraded_%": lambda x:
+                                     (f"{x:+.2f}" if x == x else "n/a")}))
+
+    pool.to_csv(f"{OUT}\\pooled_results.csv", index=False)
+    return pool, meta, meta3, metad
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "pool":
+        pool_all_results()
+    else:
+        main()
