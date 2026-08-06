@@ -65,6 +65,9 @@ allocations, surfaced through a Streamlit dashboard.
 
 Reddit, StockTwits, ApeWisdom, Glassdoor, G2, Capterra, App Store, GitHub,
 SEC EDGAR, FRED, yfinance. Credentials: Reddit, StockTwits, ApeWisdom.
+Discovery trend feed (SEC EDGAR new-filers, Reddit, StockTwits, ApeWisdom
+structured; IG/TikTok video gated) — PENDING (falsification-first,
+D-20260806-001): research-only, NOT wired into the pipeline pending P1–P5 gates.
 
 ## Open questions / contested areas (escalate to T3)
 
@@ -263,3 +266,24 @@ blueprint gains a data-integrity rebuild contract (7 phases, probe-gated,
 DEGRADED-tagged fallbacks); all future backtests must carry a data-status
 ledger; the return-max Discovery result is pending re-run on accurate data
 before any T3 promotion call.
+
+## Ruling D-20260806-001 (T3) — DISCOVERY TREND FEED (MODIFY; falsification-first)
+SUMMARY: CEO MODIFIES on brief B-20260806-001 (synthesis S-20260806-001). Build a
+deterministic trend-ranked discovery feed — NO epsilon-greedy RNG. Immediate scope:
+structured sources (SEC EDGAR new-filers, Reddit, StockTwits); IG/TikTok video gated
+on P1 sandbox evidence (≥1 qualitative-gate pass). IG/TikTok hygiene: clout-chaser
+filter, niche/minimal-popularity + tandem/ecosystem preference (monopoly+dependents,
+ASML example), ad/sponsored exclusion. Every mentioned ticker MUST run the FULL
+pipeline (qualitative engine + quant baseline) before candidate/allocation. Core
+baseline RM-FINAL and ML weights in config/weights*.yaml must NOT change; baseline
+rerun bit-identical (hash-asserted). Pipeline stays offgrid/off-main on
+feature/b-20260806-001. No-regression bar is RELATIVE-vs-baseline (metrics ≥
+baseline), not absolute floors. Plan:
+.agents/project/org/decisions/_drafts/impl-plan-B-20260806-001.md (gates P1 sandbox
+census → P2 deterministic ranker → P3 integration ablation → P4 OOS purge-and-embargo
+→ P5 go/no-go; every phase fails closed, research-only on fail). | BY: CEO | EFFECT:
+blueprint gains a PENDING discovery trend-feed pillar (research-only, NOT wired);
+new additive top-level discovery/ module planned; existing config/weights*.yaml,
+diversification/, portfolio/, Quantitative/stochastic/, backtesting/ cores frozen
+with SHA-256 manifest + auditor bit-identical check; no integration until P1–P5 pass
+and a separate APPROVE ruling.

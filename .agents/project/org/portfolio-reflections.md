@@ -294,3 +294,18 @@ The CEO's ruling on D-20260804-002 establishes a hybrid approach to the backtest
 - Discovery re-run on trustworthy data with % deltas vs degraded run
 - Six success criteria (S1-S6) pre-registered and must be met
 - No code merged yet — ruling authorizes the build; 7 phases are the delivery contract
+
+### 2026-08-06 — D-20260806-001 Modify discovery pipeline with deterministic trend-ranked feed
+
+**CEO Architect Narrative:**
+
+The CEO's ruling on D-20260806-001 modifies the discovery pipeline to implement a deterministic trend-ranked feed with SEC/Reddit/StockTwits as immediate scope, gating IG/TikTok video sources on sandbox evidence of ≥1 qualitative-gate pass, removing epsilon-greedy RNG in favor of deterministic ranked-priority selection, and amending the pre-registered no-regression bar to require metrics ≥ eps=0 baseline. This preserves falsifiability while eliminating unprincipled variance, ensuring trend data serves as inspiration only gated by the qualitative engine, and protecting the RM-FINAL edge (end $34,246, Sharpe 1.22, maxDD -11.7%, 48 trades) from degradation.
+
+**Key architectural innovations:**
+- Deterministic trend-ranked discovery feed replacing epsilon-greedy RNG
+- Structured sources immediate scope (SEC/Reddit/StockTwits) with IG/TikTok gated on sandbox evidence
+- Relative-vs-baseline no-regression bar amendment preventing silent degradation
+- Falsification-first sequencing with qualitative engine gating for all trend data
+- Feature/b-20260806-001 branch for dedicated test isolation from main
+
+This ruling demonstrates the CEO's disciplined approach to discovery: adopting hermes's hybrid recommendation to balance exploration with risk management, maintaining the RM-FINAL edge while expanding discovery capabilities through structured, falsifiable methods.
