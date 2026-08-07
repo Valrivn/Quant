@@ -1,12 +1,12 @@
 {
   "command": "python -m pytest tests/ -q",
-  "run_at": "2026-08-04T00:00:00Z",
-  "collected": 943,
-  "passed": 925,
+  "run_at": "2026-08-06T00:00:00Z",
+  "collected": 985,
+  "passed": 967,
   "skipped": 18,
   "failed": 0,
   "errors": 0,
-  "pass_rate": 0.981,
+  "pass_rate": 0.982,
   "failing_tests": [],
-  "notes": "D-20260804-002 data-accuracy rebuild pooled re-run gate (fee_sim3.py: Portfolio real ex-date dividend accrual via _fetch_div_hist, data_status(), pool_all_results(); tests/test_diversification_phase1.py +2 real-exdate tests). Authoritative run: 925 passed / 18 skipped / 0 failed (943 collected) in 159.64s. Pass rate 0.981, zero new failures vs 2026-08-04 morning baseline. Gate PASS."
+  "notes": "B-20260806-001 discovery trend feed (falsification-first plan P1-P5). New discovery tests added on this branch: tests/test_discovery_ledger.py, tests/test_discovery_sources.py, tests/test_discovery_taxonomy.py (41 tests, all passing). Authoritative run: 967 passed / 18 skipped / 0 failed (985 collected) in 184.66s. Pass rate 0.982, zero new failures vs 2026-08-05 baseline. Gate PASS."
 }
