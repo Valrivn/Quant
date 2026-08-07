@@ -1,0 +1,91 @@
+# Pre-registered Discovery Trend Feed configuration (D-20260806-001, P2).
+# Pre-registration date: 2026-08-07. RULING: D-20260806-001 (MODIFY).
+#
+# EVERY value here is fixed BEFORE any run; nothing is fit to reported
+# outcomes (auditor no-hardcoding/OOS requirement, invariant 4). This is the
+# ONLY new config file for the discovery feed; all existing config/weights*.yaml
+# are FROZEN and untouched. The discovery feed is research-only: kill-switch
+# discovery.enabled defaults to false and must stay false until a separate
+# APPROVE ruling after P5.
+#
+# The ranker (discovery/ranker.py) validates this file at load: unknown keys,
+# NaN, non-normalized positive weights, or a missing required key => load error
+# (fail closed, never silently defaulted).
+
+discovery:
+  enabled: false          # kill-switch: feed research-only until APPROVE ruling
+
+# --- SEC 3.4 deterministic ranker -------------------------------------------
+ranker:
+  # Source weights for the positive term sum. Positive weights are normalized:
+  # sum(source_weights) + w_vel + w_cross + w_topic == 1.0 (validated at load).
+  source_weights:
+    sec_edgar_new_filers: 0.20
+    reddit: 0.15
+    stocktwits: 0.10
+    apewisdom: 0.05
+  w_vel: 0.20             # velocity_z (7d vs trailing 28d mentions, z within topic)
+  w_cross: 0.15           # agreement_count (live independent sources flagging)
+  w_topic: 0.15           # topic_relevance (topic priority position)
+
+  # Penalty weights are SEPARATE from the positive sum (subtracted in score).
+  penalty_weights:
+    w_ad: 0.50            # ad/sponsored flag
+    w_clout: 0.50         # clout-chaser flag
+
+  # Deterministic rank normalization within a source: 1/rank (rank is 1-based;
+  # first place = 1.0, second = 0.5, ...).
+  norm_rank: "1/rank"
+
+  # Deterministic velocity window (calendar days).
+  velocity_window_days: 7
+  velocity_trailing_days: 28
+
+  # Topic priority order == fixed 8-topic taxonomy order (SEC 3.2). Used for
+  # topic_relevance and the deterministic tie-break.
+  topic_priority:
+    - "LLM"
+    - "Statistics"
+    - "Opensource AI"
+    - "AI"
+    - "Stocks"
+    - "Applied Math"
+    - "Quant trading"
+    - "Datascience"
+
+  # How sanitizer verdicts are applied (per SEC 4): ad = hard exclusion,
+  # clout = penalty within the score (or "exclude" to make it hard too).
+  sanitizer_apply:
+    ad: "exclude"
+    clout: "penalty"
+
+# --- SEC 4 video-signal hygiene sanitizers ----------------------------------
+sanitizers:
+  clout_chaser:
+    runup_ratio_floor: 0.85      # price / 52-week-high floor
+    mention_velocity_floor: 3.0  # mentions_7d / mentions_prior_28d floor
+    explosion_lag_min_days: 0    # video spike must LAG run-up start by > 0 days
+
+  niche:
+    views_ceiling: 100000        # prefer low absolute popularity (views)
+    comment_to_view_band: [0.001, 0.10]   # healthy (non-viral) engagement band
+    view_to_follower_band: [0.5, 20.0]
+
+  ad:
+    hashtags: ["#ad", "#sponsored", "#spon", "#partner"]   # case-insensitive
+    affiliate_patterns: ["/ref=", "bit.ly", "linktr.ee", "?utm_", "shop."]
+    brand_account_signals: ["verified_brand", "bio_product_link"]
+    # Engagement anomaly OR-rule: ratios outside these bands => ad signal.
+    engagement_anomaly_bands:
+      comment_to_view: [0.0, 0.25]
+      view_to_follower: [0.0, 50.0]
+
+# --- SEC 7.4 pre-registered caps ---------------------------------------------
+caps:
+  max_candidates_per_cycle: 5     # gated candidates entering a cycle
+  max_position_share_per_cycle: 0.20  # discovery-initiated positions share
+  top_k: 10                       # ranker output before full pass
+
+# --- SEC 3.5 concept backlog -------------------------------------------------
+concepts:
+  default_status: "research_backlog"
