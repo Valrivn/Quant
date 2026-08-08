@@ -23,6 +23,11 @@ logs/
 # Environment
 .env
 .env.local
+config/instagram_cookies.json
+
+# Raw browser cookie exports (contain session cookies for many sites)
+cookiesinstagram.txt
+*cookies*.txt
 
 # IDE
 .vscode/

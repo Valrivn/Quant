@@ -178,6 +178,49 @@ psychological:
     fintech_confirmation: 0.25
     quantitative_value: 0.15
 
+  instagram:
+    session_file: "config/instagram_cookies.json"
+    browser_executable_path: "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
+    headless: true
+    min_delay: 2.0
+    max_delay: 5.0
+    max_pages_per_session: 10
+    session_cool_down_seconds: 300
+    app_id: "936619743392459"
+    hashtags:
+      - "stocks"
+      - "investing"
+      - "trading"
+      - "wallstreetbets"
+      - "stockmarket"
+      - "finance"
+      - "options"
+      - "crypto"
+    finance_accounts: []
+    sentiment_lexicon:
+      bullish:
+        "call": 1.0
+        "moon": 1.5
+        "long": 1.0
+        "tendies": 1.2
+        "diamond hands": 2.0
+        "yolo": 1.0
+        "undervalued": 1.0
+        "bullish": 1.5
+        "rip": 1.0
+        "green": 0.5
+      bearish:
+        "put": 1.0
+        "crash": 1.5
+        "short": 1.0
+        "bagholder": 1.5
+        "paper hands": 2.0
+        "overvalued": 1.0
+        "dump": 1.2
+        "bearish": 1.5
+        "red": 0.5
+        "tank": 1.0
+
 glassdoor:
   company_slugs:
     NVDA: "nvidia"

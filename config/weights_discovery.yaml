@@ -19,11 +19,14 @@ discovery:
 ranker:
   # Source weights for the positive term sum. Positive weights are normalized:
   # sum(source_weights) + w_vel + w_cross + w_topic == 1.0 (validated at load).
+  # D-20260807-002: added instagram (independent experimental channel) and
+  # re-normalized the existing four sources down by equal absolute deltas.
   source_weights:
-    sec_edgar_new_filers: 0.20
-    reddit: 0.15
-    stocktwits: 0.10
-    apewisdom: 0.05
+    sec_edgar_new_filers: 0.18
+    reddit: 0.14
+    stocktwits: 0.09
+    apewisdom: 0.04
+    instagram: 0.05
   w_vel: 0.20             # velocity_z (7d vs trailing 28d mentions, z within topic)
   w_cross: 0.15           # agreement_count (live independent sources flagging)
   w_topic: 0.15           # topic_relevance (topic priority position)

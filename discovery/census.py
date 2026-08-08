@@ -32,6 +32,7 @@ from .structured_sources import (
     RedditSource,
     StockTwitsSource,
     ApeWisdomSource,
+    InstagramSource,
     live_enabled,
 )
 from .ledger import Mention
@@ -201,6 +202,7 @@ def run_census(limit: int = MAX_MENTIONS_PER_SOURCE) -> Dict:
         RedditSource(registry),
         StockTwitsSource(registry),
         ApeWisdomSource(registry),
+        InstagramSource(registry),
     ]
 
     rows: List[SourceCensusRow] = []
