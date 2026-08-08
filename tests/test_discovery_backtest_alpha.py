@@ -1,9 +1,10 @@
 """Tests for discovery.backtest_alpha (D-20260807-001).
 
-Offline-only: fetchers are injected, so no network is touched. Covers the
-no-fabrication IG runway (unfed <=> empty feed), the like-for-like screen on the
-traditional lane (SAME gates), alpha fail-closed on empty data, and the
-human-readable report.
+Offline-only: fetchers are injected and ``discovery.gate_data`` is patched
+per-test against the real module (consumers resolve ``gate_data`` lazily, so
+patching module attributes is sufficient). Covers the no-fabrication IG runway
+(unfed <=> empty feed), the like-for-like screen on the traditional lane (SAME
+gates), alpha fail-closed on empty data, and the human-readable report.
 """
 
 import pandas as pd
@@ -17,6 +18,54 @@ from discovery.backtest_alpha import (
     report_each,
     _equal_weight_returns,
 )
+
+_MOAT_KEYS = [
+    "product_breadth",
+    "developer_momentum",
+    "employee_sentiment",
+    "revenue_concentration",
+    "network_effect_proxy",
+    "regulatory_barrier",
+]
+
+
+@pytest.fixture(autouse=True)
+def _patch_gate_data(monkeypatch):
+    """Neutral gates + plain names frame so no test touches the network or DB."""
+    import discovery.gate_data as gd
+
+    monkeypatch.setattr(
+        gd,
+        "qualitative_signals",
+        lambda _t: (
+            {k: 0.5 for k in _MOAT_KEYS},
+            {k: "default_neutral" for k in _MOAT_KEYS},
+        ),
+    )
+
+    def _plain(tickers):
+        df = pd.DataFrame(
+            {
+                "ticker": tickers,
+                "alpha_3y_ann": [0.05] * len(tickers),
+                "cash_burn_months_pct": [20.0] * len(tickers),
+                "interest_coverage_ratio_pct": [5.0] * len(tickers),
+                "mahalanobis": [0.2] * len(tickers),
+            }
+        )
+        df.attrs["provenance"] = {
+            t: {
+                "alpha_3y_ann": "live_ff5",
+                "cash_burn_months_pct": "NaN",
+                "interest_coverage_ratio_pct": "NaN",
+                "mahalanobis": "NaN",
+            }
+            for t in tickers
+        }
+        return df
+
+    monkeypatch.setattr(gd, "build_names_frame", _plain)
+    monkeypatch.setattr(gd, "normalize_mahalanobis", lambda df: df)
 
 
 def _mk_prices(tickers):
@@ -124,3 +173,12 @@ def test_report_each_renders_table():
     )
     table = report_each(res)
     assert "ticker" in table and "AAA" in table and "POOL" in table
+
+
+def test_compare_cohorts_provenance_and_coverage():
+    result = compare_cohorts(ig_tickers=["AAPL", "MSFT"])
+    assert "provenance" in result
+    assert "ig" in result["provenance"]
+    assert "traditional" in result["provenance"]
+    assert "coverage" in result
+    assert "megacap" in result["coverage"]
