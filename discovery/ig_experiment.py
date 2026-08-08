@@ -124,33 +124,58 @@ def run_ig_experiment(
         return {"status": "unfed", "candidates": [], "pass_cohort": [], "reasons": {}}
 
     candidates = []
+    plausible_tickers = []
     for raw in ig_tickers:
         t = (str(raw or "")).strip().upper()
         if not _plausible_ticker(t):
             candidates.append(IgCandidate(ticker=t, validated=False))
             continue
+        plausible_tickers.append(t)
         validated = _validate_ticker(t)
         qual_pass, qual_reason = _screen_qual(t)
-        quant_pass, quant_reason = _screen_quant(t)
         candidates.append(
             IgCandidate(
                 ticker=t,
                 validated=validated,
                 qual_pass=qual_pass,
                 qual_reason=qual_reason,
-                quant_pass=quant_pass,
-                quant_reason=quant_reason,
+                quant_pass=False,
             )
         )
 
+    qual_passers = [c for c in candidates if c.validated and c.qual_pass]
+    qual_passing_tickers = [c.ticker for c in qual_passers]
+
+    if qual_passing_tickers:
+        try:
+            qfails = _quant_baseline_gate(qual_passing_tickers)
+            for c in qual_passers:
+                if c.ticker in qfails:
+                    c.quant_pass = False
+                    c.quant_reason = f"quant:{qfails[c.ticker]}"
+                else:
+                    c.quant_pass = True
+        except Exception as exc:
+            for c in qual_passers:
+                c.quant_pass = False
+                c.quant_reason = f"quant_error:{type(exc).__name__}"
+
     pass_cohort = [c.ticker for c in candidates if c.passed]
     reasons = {c.ticker: c.reason_chain for c in candidates if not c.passed}
-    return {
+    
+    res = {
         "status": "gated" if live else "dry",
         "candidates": candidates,
         "pass_cohort": pass_cohort,
         "reasons": reasons,
     }
+    if live:
+        try:
+            from . import gate_data
+            res["provenance"] = gate_data.coverage_summary(plausible_tickers)
+        except Exception:
+            res["provenance"] = {}
+    return res
 
 
 def current_scraper_cohort(limit: int = 50) -> List[str]:

@@ -91,9 +91,14 @@ def _qualitative_gate(ticker: str) -> tuple:
     from Qualitative.psychological.qualitative_scoring import (
         create_alternative_strategy_pipeline,
     )
+    try:
+        from . import gate_data
+        moat_signals, _prov = gate_data.qualitative_signals(ticker)
+    except Exception:
+        moat_signals = {}
 
     pipeline = create_alternative_strategy_pipeline()
-    out = pipeline.run(ticker=ticker, moat_signals={}, financial_inputs=None, z_score=None)
+    out = pipeline.run(ticker=ticker, moat_signals=moat_signals, financial_inputs=None, z_score=None)
     if out.recommendation in QUAL_PASS_RECS:
         return True, out.recommendation
     return False, f"qual:{out.recommendation}"
@@ -105,12 +110,19 @@ def _quant_baseline_gate(tickers: List[str]) -> Dict[str, str]:
     Returns {ticker: reason} for tickers that FAIL the quant baseline. Names
     missing fundamental data are flagged (no_alpha_data) rather than passed.
     """
+    if not tickers:
+        return {}
     import pandas as pd
 
     from valuation_alpha.discovery_screen import quant_baseline_flags
+    try:
+        from . import gate_data
+        df = gate_data.build_names_frame(tickers)
+        df = gate_data.normalize_mahalanobis(df)
+    except Exception as exc:
+        raise exc
 
-    names = pd.DataFrame({"ticker": tickers})
-    flagged = quant_baseline_flags(names)
+    flagged = quant_baseline_flags(df)
     flagged = flagged.set_index("ticker")
     fails: Dict[str, str] = {}
     for t in tickers:
@@ -155,19 +167,23 @@ def _fetch_with_timeout(source, limit: int, timeout_s: int = SOURCE_FETCH_TIMEOU
             return FetchResult(source.source_id, [], degraded=True, reason=str(exc))
 
 
-def _run_source(source, registry: DegradedRegistry, limit: int = MAX_MENTIONS_PER_SOURCE) -> SourceCensusRow:
-    """Fetch one source and run its validated tickers through the gates."""
+def _run_source(source, registry: DegradedRegistry, limit: int = MAX_MENTIONS_PER_SOURCE) -> tuple:
+    """Fetch and validate one source, run its tickers through the qualitative gate.
+
+    Returns (SourceCensusRow, list of qual-passing tickers).
+    """
     row = SourceCensusRow(source_id=source.source_id)
     result = _fetch_with_timeout(source, limit)
     if result.degraded:
         row.reason = result.reason or "degraded"
-        return row
+        return row, []
 
     row.status = LIVE
     row.raw_mentions = len(result.mentions)
     validated = _validate_tickers(result.mentions)
     row.validated = len(validated)
 
+    qual_passers = []
     for ticker in validated[:MAX_GATE_TICKERS_PER_SOURCE]:
         try:
             passed, reason = _qualitative_gate(ticker)
@@ -177,18 +193,9 @@ def _run_source(source, registry: DegradedRegistry, limit: int = MAX_MENTIONS_PE
         if not passed:
             row.reject_reasons[reason] = row.reject_reasons.get(reason, 0) + 1
             continue
-        # Quant baseline gate (read-only).
-        try:
-            qfails = _quant_baseline_gate([ticker])
-        except Exception as exc:  # noqa: BLE001 - skip-with-reason on failure
-            row.reject_reasons[f"quant_error:{ticker}"] = row.reject_reasons.get(f"quant_error:{ticker}", 0) + 1
-            continue
-        if ticker in qfails:
-            qreason = f"quant:{qfails[ticker]}"
-            row.reject_reasons[qreason] = row.reject_reasons.get(qreason, 0) + 1
-            continue
-        row.gated += 1
-    return row
+        qual_passers.append(ticker)
+
+    return row, qual_passers
 
 
 def run_census(limit: int = MAX_MENTIONS_PER_SOURCE) -> Dict:
@@ -206,8 +213,34 @@ def run_census(limit: int = MAX_MENTIONS_PER_SOURCE) -> Dict:
     ]
 
     rows: List[SourceCensusRow] = []
+    source_qual_passers = []
     for src in sources:
-        rows.append(_run_source(src, registry, limit=limit))
+        row, qual_passers = _run_source(src, registry, limit=limit)
+        rows.append(row)
+        source_qual_passers.append(qual_passers)
+
+    ticker_to_rows = {}
+    for row, qual_passers in zip(rows, source_qual_passers):
+        for ticker in qual_passers:
+            ticker_to_rows.setdefault(ticker, []).append(row)
+
+    all_qual_passers = list(ticker_to_rows.keys())
+    if all_qual_passers:
+        try:
+            qfails = _quant_baseline_gate(all_qual_passers)
+            for ticker in all_qual_passers:
+                if ticker in qfails:
+                    qreason = f"quant:{qfails[ticker]}"
+                    for row in ticker_to_rows[ticker]:
+                        row.reject_reasons[qreason] = row.reject_reasons.get(qreason, 0) + 1
+                else:
+                    for row in ticker_to_rows[ticker]:
+                        row.gated += 1
+        except Exception as exc:
+            for ticker in all_qual_passers:
+                qreason = f"quant_error:{ticker}"
+                for row in ticker_to_rows[ticker]:
+                    row.reject_reasons[qreason] = row.reject_reasons.get(qreason, 0) + 1
 
     return {
         "run_at": datetime.now(timezone.utc).isoformat(),

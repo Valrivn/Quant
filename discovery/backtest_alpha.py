@@ -185,11 +185,24 @@ def compare_cohorts(
         trad_lane.cohort, fetch_prices, fetch_factors, fetch_sp500, start, end
     )
 
+    try:
+        from . import gate_data
+        ig_prov = gate_data.coverage_summary(list(ig_tickers) if ig_tickers else [])
+        trad_prov = gate_data.coverage_summary(trad_tickers)
+    except Exception:
+        ig_prov = {}
+        trad_prov = {}
+
     return {
         "run_at": datetime.now(timezone.utc).isoformat(),
         "window": {"start": start, "end": end},
         "ig": ig_lane,
         "traditional": trad_lane,
+        "provenance": {
+            "ig": ig_prov,
+            "traditional": trad_prov,
+        },
+        "coverage": "Qualitative signals are cached and only cover the megacap cohort.",
     }
 
 
