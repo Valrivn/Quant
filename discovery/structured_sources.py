@@ -1,8 +1,9 @@
 """Structured source fetchers for the discovery feed (D-20260806-001 P1).
 
-Wraps SEC EDGAR new-filers, Reddit, StockTwits and ApeWisdom in the DEGRADED
-registry pattern (``deg_registry.py``): an unavailable source is DEGRADED-tagged
-with a zeroed contribution and a ledger entry, never a hard stop.
+Wraps SEC EDGAR new-filers, Reddit, StockTwits, ApeWisdom and Instagram in the
+DEGRADED registry pattern (``deg_registry.py``): an unavailable source is
+DEGRADED-tagged with a zeroed contribution and a ledger entry, never a hard
+stop.
 
 Each source takes an injectable ``fetcher`` callable so tests use fixtures and
 never hit the network. The default fetchers reuse existing scraper/ infrastructure
@@ -183,6 +184,24 @@ def _apewisdom_default_fetcher(limit: int = 100) -> List[dict]:
     return []
 
 
+def _instagram_default_fetcher(limit: int = 100) -> List[dict]:
+    """Live Instagram fetcher (reuses the psychological IG anti-bot scraper).
+
+    Gated behind ``DISCOVERY_LIVE=1``. The scraper is fail-closed: with no
+    cookie file it raises ``InstagramCookieMissing`` before any browser launch,
+    which the wrapper records as a DEGRADED status.
+    """
+    if not live_enabled():
+        raise LiveFetchDisabled("Instagram live fetch disabled (set DISCOVERY_LIVE=1)")
+    from Qualitative.psychological.scrapers.instagram_primary import (
+        fetch_instagram_mentions,
+        InstagramConfig,
+    )
+
+    config = InstagramConfig()
+    return fetch_instagram_mentions(limit=limit, config=config)
+
+
 class SecEdgarNewFilersSource(StructuredSource):
     def __init__(self, registry: DegradedRegistry, fetcher: Optional[Callable] = None):
         super().__init__("sec_edgar_new_filers", fetcher or _sec_edgar_default_fetcher, registry)
@@ -201,3 +220,8 @@ class StockTwitsSource(StructuredSource):
 class ApeWisdomSource(StructuredSource):
     def __init__(self, registry: DegradedRegistry, fetcher: Optional[Callable] = None):
         super().__init__("apewisdom", fetcher or _apewisdom_default_fetcher, registry)
+
+
+class InstagramSource(StructuredSource):
+    def __init__(self, registry: DegradedRegistry, fetcher: Optional[Callable] = None):
+        super().__init__("instagram", fetcher or _instagram_default_fetcher, registry)
