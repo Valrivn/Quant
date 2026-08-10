@@ -63,13 +63,18 @@ def _altman_z(latest: dict) -> Tuple[Optional[float], str]:
 def g1_survival_solvency(
     fundamentals: pd.DataFrame, as_of: str,
     z_floor: float = 1.1, runway_quarters_floor: int = 4,
-    min_quarters_data: int = 4,
+    min_quarters_data: int = 4, z_book_equity_floor: Optional[float] = None,
 ) -> Tuple[bool, str, Dict]:
     """Fail-closed survival & solvency gate.
 
-    Requires ``min_quarters_data`` PIT quarters, Altman Z >= ``z_floor`` on the
-    latest quarter, and a cash runway >= ``runway_quarters_floor`` (infinite
-    when the trailing burn is zero).
+    Requires ``min_quarters_data`` PIT quarters, Altman Z >= the applicable
+    floor on the latest quarter, and a cash runway >= ``runway_quarters_floor``
+    (infinite when the trailing burn is zero).
+
+    The Z floor is mode-aware: the market-value Altman Z cutoff is
+    ``z_floor``, while the conservative book-equity variant (used when no
+    price data is wired, see ``uses_book_equity``) uses the lower
+    ``z_book_equity_floor`` cutoff (config ``gates.g1_survival``).
     """
     df = pit_filter(fundamentals, as_of)
     if df.empty or len(df) < min_quarters_data:
@@ -95,6 +100,10 @@ def g1_survival_solvency(
         "fiscal_end": str(latest.get("fiscal_end", "")),
         "uses_book_equity": True,
     }
+    z_floor_applied = z_book_equity_floor if metrics["uses_book_equity"] else z_floor
+    if z_floor_applied is None:
+        z_floor_applied = z_floor
+    metrics["z_floor"] = z_floor_applied
 
     ocf_rows = [dict(r) for r in df.to_dict("records") if _num(r.get("ocf")) is not None]
     burn = 0.0
@@ -124,8 +133,8 @@ def g1_survival_solvency(
     else:
         metrics["runway_quarters"] = None  # no burn -> self-sustaining
 
-    if z < z_floor:
-        return False, f"g1:altman_z<{z_floor}({z:.2f})", metrics
+    if z < z_floor_applied:
+        return False, f"g1:altman_z<{z_floor_applied}({z:.2f})", metrics
 
     return True, "", metrics
 
@@ -194,6 +203,7 @@ def run_gates(
         z_floor=cfg["gates"]["g1_survival"]["altman_z_floor"],
         runway_quarters_floor=cfg["gates"]["g1_survival"]["cash_runway_quarters_floor"],
         min_quarters_data=cfg["gates"]["g1_survival"]["min_quarters_data"],
+        z_book_equity_floor=cfg["gates"]["g1_survival"].get("z_book_equity_floor"),
     )
     g2 = g2_fundamentals(
         fundamentals, as_of,

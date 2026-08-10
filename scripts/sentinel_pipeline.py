@@ -7,6 +7,7 @@ Commands:
   pass                 run one funnel pass over pending queue items
   sec-sync [--years N] bulk SEC quarterly sync for the roster
   ig-harvest [--limit] single-account IG harvest -> enqueue (fail-closed)
+  github-sync           GitHub star snapshots for the roster (G3 source)
   status               queue + funnel summary
 """
 
@@ -21,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "Qualitative"))
 from discovery.sentinel import governor, queue as q
 from discovery.sentinel.config import load_sentinel_config
 from discovery.sentinel.orchestrator import (
-    run_ig_harvest, run_pass, run_sec_sync,
+    run_github_sync, run_ig_harvest, run_pass, run_sec_sync,
 )
 from valuation_alpha.universe.roster import get_cik, get_universe
 
@@ -85,6 +86,14 @@ def cmd_ig_harvest(cfg, limit):
     rconn.close()
 
 
+def cmd_github_sync(cfg):
+    conn = _conn(cfg)
+    tickers = [r["ticker"] for r in get_universe()]
+    res = run_github_sync(conn, _scfg(cfg), tickers)
+    print(json.dumps(res, indent=2))
+    conn.close()
+
+
 def cmd_status(cfg):
     conn = _conn(cfg)
     print("queue:", json.dumps(q.queue_status(conn), indent=2))
@@ -110,6 +119,7 @@ def main():
     ps.add_argument("--years", type=int, default=3)
     ph = sub.add_parser("ig-harvest")
     ph.add_argument("--limit", type=int, default=30)
+    pg = sub.add_parser("github-sync")
     sub.add_parser("status")
 
     args = ap.parse_args()
@@ -125,6 +135,8 @@ def main():
         cmd_sec_sync(cfg, args.years)
     elif args.cmd == "ig-harvest":
         cmd_ig_harvest(cfg, args.limit)
+    elif args.cmd == "github-sync":
+        cmd_github_sync(cfg)
     elif args.cmd == "status":
         cmd_status(cfg)
 

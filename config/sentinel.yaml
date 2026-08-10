@@ -65,6 +65,11 @@ sentinel:
       session_cool_down_seconds: 300
       challenge_cooldown_seconds: 900
 
+    github:
+      rate_per_second: 0.15
+      burst: 3
+      user_agent: "Quant Research (contact@example.com)"
+
   governor:
     circuit_failure_threshold: 5
     circuit_success_threshold: 2

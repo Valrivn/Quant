@@ -56,8 +56,8 @@ def _validate_gates(gates: Dict) -> None:
 
 
 def _validate_lanes(lanes: Dict) -> None:
-    _require(lanes, {"sec", "altdata", "enrich", "ig"}, "lanes")
-    for name in ("sec", "altdata", "enrich", "ig"):
+    _require(lanes, {"sec", "altdata", "enrich", "ig", "github"}, "lanes")
+    for name in ("sec", "altdata", "enrich", "ig", "github"):
         lane = lanes[name]
         _check_nan(lane.get("rate_per_second", 0.0), f"lanes.{name}.rate_per_second")
         _check(lane.get("rate_per_second", 0.0) > 0, f"lanes.{name}.rate_per_second must be > 0")

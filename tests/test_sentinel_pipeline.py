@@ -137,6 +137,26 @@ class TestG1Survival:
         assert ok, reason
         assert metrics["altman_z"] > 1.1
 
+    def test_book_equity_floor_mode(self):
+        # Book-equity Altman Z of ~0.95 (between the market-value 1.1 cutoff
+        # and the conservative 0.6 book-equity cutoff): passes only when the
+        # book-equity floor is applied.
+        rows = [
+            _qtr(f"2024-0{i}-01", f"2024-0{i}-15", total_assets=1000.0,
+                 total_liabilities=600.0, equity=250.0, current_assets=500.0,
+                 current_liabilities=400.0, retained_earnings=150.0,
+                 ebit=50.0, revenue=200.0)
+            for i in range(1, 5)
+        ]
+        ok, reason, metrics = gates.g1_survival_solvency(
+            _fund_rows(rows), "2026-02-01", z_floor=1.1)
+        assert not ok
+        assert reason.startswith("g1:altman_z<1.1")
+        ok2, reason2, metrics2 = gates.g1_survival_solvency(
+            _fund_rows(rows), "2026-02-01", z_floor=1.1, z_book_equity_floor=0.6)
+        assert ok2, reason2
+        assert metrics2["z_floor"] == 0.6
+
     def test_sparse_latest_row_falls_back_to_complete_row(self):
         # companyfacts outer join can emit a fiscal end with only some fields
         # (e.g. cash only, no balance sheet). The gate must evaluate the most
@@ -536,6 +556,30 @@ class TestAltdataLane:
 
 
 # --------------------------------------------------------------------------- #
+# GitHub snapshots: one row per repo per UTC day
+# --------------------------------------------------------------------------- #
+
+
+class TestGithubSnapshots:
+    def _conn(self):
+        return q.connect(":memory:")
+
+    def test_upsert_dedupes_within_day_and_exists_today(self):
+        conn = self._conn()
+        now = int(time.time())
+        q.upsert_github_snapshot(conn, "MSFT", "microsoft/vscode", 100)
+        q.upsert_github_snapshot(conn, "MSFT", "microsoft/vscode", 101)
+        rows = conn.execute(
+            "SELECT repo_name, stars FROM sentinel_github_snapshots WHERE ticker = 'MSFT'"
+        ).fetchall()
+        assert len(rows) == 1
+        assert rows[0]["stars"] == 101
+        assert q.github_snapshot_exists_today(conn, "MSFT")
+        assert not q.github_snapshot_exists_today(conn, "NVDA")
+        conn.close()
+
+
+# --------------------------------------------------------------------------- #
 # Governor: fail-closed circuit breaker
 # --------------------------------------------------------------------------- #
 
@@ -567,6 +611,24 @@ class TestGovernor:
     def test_throttle_first_call_allowed(self):
         conn = q.connect(":memory:")
         assert governor.throttle(conn, "bucket", rate=1.0, burst=2.0, max_wait_seconds=0)
+        conn.close()
+
+    def test_throttle_refills_after_burst_exhausted(self):
+        # A lane whose refill interval exceeds its request latency must still
+        # accrue tokens across polls (regression: the fail path used to reset
+        # last_refill and discard the accrued time, so the bucket never
+        # refilled and slow lanes always timed out).
+        conn = q.connect(":memory:")
+        assert governor.throttle(conn, "bucket", rate=0.5, burst=1.0, max_wait_seconds=0)
+        # Drain the bucket; the next call must NOT mint a token instantly.
+        conn.execute(
+            "UPDATE sentinel_rate_limits SET tokens = 0, last_refill = ? WHERE bucket_key = 'bucket'",
+            (int(time.time()),),
+        )
+        conn.commit()
+        assert not governor.throttle(conn, "bucket", rate=0.5, burst=1.0, max_wait_seconds=0)
+        # But it must refill within the wait budget by accruing across polls.
+        assert governor.throttle(conn, "bucket", rate=0.5, burst=1.0, max_wait_seconds=5)
         conn.close()
 
 
