@@ -1,0 +1,73 @@
+# Sentinel discovery pipeline configuration (B-20260809-003).
+# All thresholds are pre-registered; unknown/missing keys are a load error.
+# Fail-closed: no network gate defaults silently to "pass".
+
+sentinel:
+  enabled: true
+  db_path: "data/sentinel.db"
+  as_of_drift_days: 5
+
+  queue:
+    batch_size: 50
+    max_attempts: 3
+
+  gates:
+    g1_survival:
+      altman_z_floor: 1.1
+      cash_runway_quarters_floor: 4
+      min_quarters_data: 4
+      z_book_equity_floor: 0.6
+    g2_fundamentals:
+      ocf_positive_quarters: 3
+      gross_margin_floor: 0.20
+      capex_tracked_quarters: 3
+      min_quarters_trend: 3
+    g3_altdata:
+      reddit_z_floor: 0.0
+      reddit_window_days: 90
+      github_star_growth_floor: 0.05
+      github_lookback_days: 180
+      min_coverage_sources: 1
+      min_observations: 5
+    g4_enrich:
+      jina_base_url: "https://r.jina.ai"
+      max_text_chars: 8000
+      advisory: true
+
+  lanes:
+    sec:
+      user_agent: "Quant Research (contact@example.com)"
+      dataset_base: "https://www.sec.gov/files/dera/data/financial-statement-data-sets"
+      default_start_year: 2024
+      per_cik_fallback: true
+      # Bulk quarterly datasets cannot yield reliable per-company totals for
+      # filers that disaggregate (NVDA/AMD report segment+geo revenue rows, up
+      # to ~50 per fiscal end). companyfacts is the sole fundamentals source.
+      use_bulk_datasets: false
+      rate_per_second: 0.5
+      burst: 5
+      zip_cache_dir: "data/sec_datasets"
+      keep_zip: false
+
+    altdata:
+      reddit_db_path: "reddit_quant.db"
+      rate_per_second: 0.2
+      burst: 2
+
+    enrich:
+      rate_per_second: 0.5
+      burst: 2
+
+    ig:
+      rate_per_second: 0.02
+      burst: 1
+      max_pages_per_session: 10
+      session_cool_down_seconds: 300
+      challenge_cooldown_seconds: 900
+
+  governor:
+    circuit_failure_threshold: 5
+    circuit_success_threshold: 2
+    circuit_timeout_seconds: 60
+    wait_poll_seconds: 0.25
+    max_wait_seconds: 60.0
