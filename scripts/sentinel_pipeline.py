@@ -196,8 +196,8 @@ def cmd_run_all(cfg):
             print("=" * 50)
 
             # Human-like session break after the 100 reels batch
-            sleep_time = random.uniform(60, 120)
-            print(f"[*] Sleeping for {int(sleep_time)}s (1-2 min session break)...")
+            sleep_time = random.uniform(30, 120)
+            print(f"[*] Sleeping for {int(sleep_time)}s (30s - 2m session break)...")
             sleep_start = time.time()
             while time.time() - sleep_start < sleep_time:
                 remaining = int(sleep_time - (time.time() - sleep_start))

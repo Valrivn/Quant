@@ -1009,13 +1009,19 @@ def _fetch_clips_home(limit: int, config: InstagramConfig) -> List[dict]:
             # Dynamically size the number of chunks to fetch so we can meet the requested limit
             num_chunks = max(5, int(limit / 6) + 2)
             chunks = [random.randint(4, 10) for _ in range(num_chunks)]
-            for count in chunks:
+            for idx, count in enumerate(chunks):
                 if len(rows) >= limit:
                     break
                 try:
                     # Optimized micro-delay with human-like jitter
                     delay = random.uniform(2.0, 7.0)
                     time.sleep(delay)
+
+                    # Simulate random human session breaks mid-batch (15% chance to pause)
+                    if idx > 0 and random.random() < 0.15:
+                        mid_break = random.randint(30, 120)
+                        logger.info("Simulating human pause for %ds...", mid_break)
+                        time.sleep(mid_break)
 
                     resp = session.post(
                         "https://i.instagram.com/api/v1/clips/home/",
