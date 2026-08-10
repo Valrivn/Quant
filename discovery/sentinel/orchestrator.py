@@ -14,7 +14,9 @@ from typing import Dict, List, Optional
 
 import pandas as pd
 
-from discovery.sentinel import altdata_lane, enrich_lane, governor, queue as q, sec_lane
+from discovery.sentinel import (
+    altdata_lane, enrich_lane, github_lane, governor, queue as q, sec_lane,
+)
 from discovery.sentinel.gates import pit_filter, run_gates
 
 logger = logging.getLogger(__name__)
@@ -213,6 +215,18 @@ def run_sec_sync(conn, cfg, tickers: List[str], cik_resolver,
                                     start_year=start_year, years_back=years_back)
         q.end_run(conn, run_id, counts["bulk"] + counts["fallback"],
                   counts["bulk"], counts["fallback"], "done")
+        return counts
+    except Exception as exc:
+        q.end_run(conn, run_id, 0, 0, 0, "error", str(exc))
+        raise
+
+
+def run_github_sync(conn, cfg, tickers: List[str], token: Optional[str] = None) -> Dict:
+    """One GitHub star snapshot pass over the roster (G3 second source)."""
+    run_id = q.start_run(conn, "github_sync")
+    try:
+        counts = github_lane.sync_github_snapshots(conn, tickers, cfg, token=token)
+        q.end_run(conn, run_id, counts["mapped"], counts["snapshotted"], counts["error"], "done")
         return counts
     except Exception as exc:
         q.end_run(conn, run_id, 0, 0, 0, "error", str(exc))

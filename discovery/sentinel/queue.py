@@ -223,6 +223,41 @@ def upsert_fundamental(conn: sqlite3.Connection, row: Dict) -> None:
     conn.commit()
 
 
+def upsert_github_snapshot(
+    conn: sqlite3.Connection, ticker: str, repo_name: str, stars: int,
+) -> None:
+    """Insert one (ticker, repo, fetched_at) snapshot row idempotently.
+
+    Keeps a single row per repo per UTC day: an earlier snapshot of the same
+    repo taken today is replaced, so repeated sync passes do not fatten the
+    time series.
+    """
+    day_start = int(time.time()) - int(time.time()) % 86400
+    conn.execute(
+        """DELETE FROM sentinel_github_snapshots
+           WHERE ticker = ? AND repo_name = ? AND fetched_at >= ?""",
+        (ticker, repo_name, day_start),
+    )
+    conn.execute(
+        """INSERT INTO sentinel_github_snapshots
+           (ticker, repo_name, stars, fetched_at)
+           VALUES (?, ?, ?, ?)""",
+        (ticker, repo_name, int(stars), int(time.time())),
+    )
+    conn.commit()
+
+
+def github_snapshot_exists_today(conn: sqlite3.Connection, ticker: str) -> bool:
+    """True when the ticker already has a snapshot taken in the current UTC day."""
+    day_start = int(time.time()) - int(time.time()) % 86400
+    row = conn.execute(
+        """SELECT 1 FROM sentinel_github_snapshots
+           WHERE ticker = ? AND fetched_at >= ? LIMIT 1""",
+        (ticker, day_start),
+    ).fetchone()
+    return row is not None
+
+
 def get_fundamentals(
     conn: sqlite3.Connection, ticker: str, as_of: Optional[str] = None,
 ) -> List[sqlite3.Row]:

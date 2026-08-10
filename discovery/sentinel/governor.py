@@ -78,8 +78,9 @@ def throttle(
                 conn.commit()
                 return True
             conn.execute(
-                "UPDATE sentinel_rate_limits SET last_refill = ? WHERE bucket_key = ?",
-                (int(now), bucket_key),
+                """UPDATE sentinel_rate_limits SET tokens = ?, last_refill = ?
+                   WHERE bucket_key = ?""",
+                (tokens, int(now), bucket_key),
             )
             conn.commit()
         except Exception:
