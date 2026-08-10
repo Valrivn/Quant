@@ -8,6 +8,7 @@ Commands:
   sec-sync [--years N] bulk SEC quarterly sync for the roster
   ig-harvest [--limit] single-account IG harvest -> enqueue (fail-closed)
   github-sync           GitHub star snapshots for the roster (G3 source)
+  run-all              run the entire pipeline end-to-end (highly cached)
   status               queue + funnel summary
 """
 
@@ -94,6 +95,75 @@ def cmd_github_sync(cfg):
     conn.close()
 
 
+def cmd_run_all(cfg):
+    """Run the entire pipeline end-to-end: enqueuing, syncing SEC, syncing GitHub,
+
+    harvesting IG, executing the funnel pass, and displaying final progress.
+    All API sync lanes are cached to make repeated local runs instant.
+    """
+    conn = _conn(cfg)
+    tickers = [r["ticker"] for r in get_universe()]
+
+    print("Step 1/5: Enqueuing missing roster tickers...")
+    enqueued = 0
+    for t in tickers:
+        if q.enqueue(conn, t.upper(), "cli", f"cli:{t.upper()}"):
+            enqueued += 1
+    print(f"  Enqueued {enqueued} new tickers.")
+
+    print("\nStep 2/5: Resetting queue failed/processing items to pending...")
+    conn.execute(
+        "UPDATE sentinel_queue SET stage='pending', attempts=0 WHERE stage IN ('failed', 'processing')"
+    )
+    conn.commit()
+
+    print("\nStep 3/5: Running SEC CIK sync (7-day caching)...")
+    res_sec = run_sec_sync(conn, _scfg(cfg), tickers, get_cik, years_back=3)
+    print(f"  SEC sync complete: {json.dumps(res_sec)}")
+
+    print("\nStep 4/5: Running GitHub snapshots (daily caching)...")
+    res_gh = run_github_sync(conn, _scfg(cfg), tickers)
+    print(f"  GitHub sync complete: {json.dumps(res_gh)}")
+
+    print("\nStep 5/5: Running Instagram harvest...")
+    try:
+        rconn = _reddit_conn(cfg)
+        res_ig = run_ig_harvest(conn, rconn, _scfg(cfg), limit=15)
+        print(f"  Instagram harvest complete: {json.dumps(res_ig)}")
+        rconn.close()
+    except Exception as exc:
+        print(f"  Instagram harvest skipped or failed (unconfigured/challenge): {exc}")
+
+    print("\nExecuting Sentinel Funnel Pass...")
+    rconn = _reddit_conn(cfg)
+    res_pass = run_pass(conn, rconn, _scfg(cfg), get_cik)
+    rconn.close()
+
+    print("\n" + "=" * 50)
+    print("Sentinel Pipeline Execution Summary:")
+    print(f"  Processed queue items: {res_pass.get('processed', 0)}")
+    print(f"  Passed this run: {res_pass.get('passed', 0)}")
+    print(f"  Failed this run: {res_pass.get('failed', 0)}")
+
+    queue_status = q.queue_status(conn)
+    total = sum(queue_status.values())
+    passed_cnt = queue_status.get("passed", 0)
+    failed_cnt = queue_status.get("failed", 0)
+    completed = passed_cnt + failed_cnt
+    pct = (completed / total * 100) if total > 0 else 0
+
+    print(f"  Overall Funnel Completion: {pct:.1f}% ({completed}/{total} tickers evaluated)")
+
+    passed_rows = conn.execute(
+        "SELECT ticker FROM sentinel_queue WHERE stage = 'passed'"
+    ).fetchall()
+    passed_tickers = [r["ticker"] for r in passed_rows]
+    print(f"  Current Passed Cohort: {sorted(passed_tickers)}")
+    print("=" * 50)
+
+    conn.close()
+
+
 def cmd_status(cfg):
     conn = _conn(cfg)
     print("queue:", json.dumps(q.queue_status(conn), indent=2))
@@ -120,6 +190,7 @@ def main():
     ph = sub.add_parser("ig-harvest")
     ph.add_argument("--limit", type=int, default=30)
     pg = sub.add_parser("github-sync")
+    sub.add_parser("run-all")
     sub.add_parser("status")
 
     args = ap.parse_args()
@@ -137,6 +208,8 @@ def main():
         cmd_ig_harvest(cfg, args.limit)
     elif args.cmd == "github-sync":
         cmd_github_sync(cfg)
+    elif args.cmd == "run-all":
+        cmd_run_all(cfg)
     elif args.cmd == "status":
         cmd_status(cfg)
 

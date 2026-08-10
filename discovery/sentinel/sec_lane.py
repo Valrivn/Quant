@@ -17,7 +17,7 @@ from typing import Dict, List, Optional
 import pandas as pd
 import requests
 
-from discovery.sentinel import queue as q
+from discovery.sentinel import governor, queue as q
 
 # friendly -> US-GAAP tag (first candidate that yields a value wins).
 TAG_MAP = {
@@ -219,12 +219,18 @@ def sync_per_cik_fallback(
     sec = cfg["lanes"]["sec"]
 
     stored = 0
+    import time
     for ticker in tickers:
+        if governor.cooldown_blocked(conn, f"sec:{ticker}"):
+            continue
         cik = cik_resolver(ticker)
         if not cik:
             continue
         facts = xbrl_financials.fetch_companyfacts(cik, user_agent=sec["user_agent"])
         if not facts:
+            # Set a shorter 1-day cooldown on failure so we don't spam the SEC
+            # API with failing requests.
+            governor.cooldown_set(conn, f"sec:{ticker}", int(time.time()) + 86400, "fetch_failed")
             continue
         combined = None
         filed_global = pd.Series(dtype=object)
@@ -281,6 +287,8 @@ def sync_per_cik_fallback(
             rec["gross_margin"] = (gp / rev) if (rev and gp is not None and rev != 0) else None
             q.upsert_fundamental(conn, rec)
             stored += 1
+        # Set 7-day cooldown after successfully parsing and upserting the company facts.
+        governor.cooldown_set(conn, f"sec:{ticker}", int(time.time()) + 7 * 86400, "recently_synced")
     return stored
 
 
