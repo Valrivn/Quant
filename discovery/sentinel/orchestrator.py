@@ -176,10 +176,10 @@ def run_ig_harvest(conn, reddit_conn, cfg, limit: int = 30) -> Dict:
         from Qualitative.psychological.scrapers.instagram_primary import (
             InstagramChallengeDetected, InstagramConfig, fetch_instagram_mentions,
         )
-        cfg_ig = InstagramConfig(
-            max_pages_per_session=int(ig.get("max_pages_per_session", 10)),
-            session_cool_down_seconds=float(ig.get("session_cool_down_seconds", 300)),
-        )
+        cfg_ig = InstagramConfig({
+            "max_pages_per_session": int(ig.get("max_pages_per_session", 10)),
+            "session_cool_down_seconds": float(ig.get("session_cool_down_seconds", 300)),
+        })
         mentions = fetch_instagram_mentions(limit=limit, config=cfg_ig)
     except InstagramChallengeDetected:
         governor.record_failure(conn, "ig")
