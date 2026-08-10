@@ -14,7 +14,9 @@ Commands:
 
 import argparse
 import json
+import random
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -96,95 +98,118 @@ def cmd_github_sync(cfg):
 
 
 def cmd_run_all(cfg):
-    """Run the entire pipeline end-to-end: enqueuing, syncing SEC, syncing GitHub,
+    """Run the entire pipeline end-to-end continuously: enqueuing, syncing SEC,
 
-    harvesting IG, executing the funnel pass, and displaying final progress.
+    syncing GitHub, and entering a continuous Instagram scraping + Gating Pass loop.
     All API sync lanes are cached to make repeated local runs instant.
     """
     conn = _conn(cfg)
     tickers = [r["ticker"] for r in get_universe()]
 
-    print("Step 1/5: Enqueuing missing roster tickers...")
+    print("Step 1/4: Enqueuing missing roster tickers...")
     enqueued = 0
     for t in tickers:
         if q.enqueue(conn, t.upper(), "cli", f"cli:{t.upper()}"):
             enqueued += 1
     print(f"  Enqueued {enqueued} new tickers.")
 
-    print("\nStep 2/5: Resetting queue failed/processing items to pending...")
-    conn.execute(
-        "UPDATE sentinel_queue SET stage='pending', attempts=0 WHERE stage IN ('failed', 'processing')"
-    )
-    conn.commit()
-
-    print("\nStep 3/5: Running SEC CIK sync (7-day caching)...")
+    print("\nStep 2/4: Running SEC CIK sync (7-day caching)...")
     res_sec = run_sec_sync(conn, _scfg(cfg), tickers, get_cik, years_back=3)
     print(f"  SEC sync complete: {json.dumps(res_sec)}")
 
-    print("\nStep 4/5: Running GitHub snapshots (daily caching)...")
+    print("\nStep 3/4: Running GitHub snapshots (daily caching)...")
     res_gh = run_github_sync(conn, _scfg(cfg), tickers)
     print(f"  GitHub sync complete: {json.dumps(res_gh)}")
 
-    print("\nStep 5/5: Running Instagram harvest...")
+    print("\nStep 4/4: Starting continuous Instagram Scraper + Sentinel Funnel Pass Loop...")
+    print("[*] Press Ctrl+C at any time to stop the pipeline loop.")
+
+    loop_count = 0
     try:
-        rconn = _reddit_conn(cfg)
-        res_ig = run_ig_harvest(conn, rconn, _scfg(cfg), limit=15)
-        print(f"  Instagram harvest complete: {json.dumps(res_ig)}")
-        rconn.close()
-    except Exception as exc:
-        print(f"  Instagram harvest skipped or failed (unconfigured/challenge): {exc}")
+        while True:
+            loop_count += 1
+            print(f"\n{'='*20} Loop iteration #{loop_count} {'='*20}")
 
-    print("\nExecuting Sentinel Funnel Pass...")
-    rconn = _reddit_conn(cfg)
-    res_pass = run_pass(conn, rconn, _scfg(cfg), get_cik)
-    rconn.close()
+            print("Resetting queue failed/processing items to pending...")
+            conn.execute(
+                "UPDATE sentinel_queue SET stage='pending', attempts=0 WHERE stage IN ('failed', 'processing')"
+            )
+            conn.commit()
 
-    # Calculate Instagram Reels progress (target 100,000 reels)
-    ig_count = 0
-    try:
-        rconn = _reddit_conn(cfg)
-        row = rconn.execute("SELECT COUNT(*) FROM instagram_raw_mentions").fetchone()
-        if row:
-            ig_count = row[0]
-        rconn.close()
-    except Exception:
-        pass
+            print("Running Instagram harvest (100 reels target)...")
+            try:
+                rconn = _reddit_conn(cfg)
+                res_ig = run_ig_harvest(conn, rconn, _scfg(cfg), limit=100)
+                print(f"  Instagram harvest complete: {json.dumps(res_ig)}")
+                rconn.close()
+            except Exception as exc:
+                print(f"  Instagram harvest skipped or failed: {exc}")
 
-    ig_target = 100000
-    ig_pct = min(100.0, (ig_count / ig_target) * 100.0)
+            print("Executing Sentinel Funnel Pass...")
+            rconn = _reddit_conn(cfg)
+            res_pass = run_pass(conn, rconn, _scfg(cfg), get_cik)
+            rconn.close()
 
-    # Calculate Funnel Evaluation progress (completed roster tickers)
-    queue_status = q.queue_status(conn)
-    total_tickers = sum(queue_status.values())
-    passed_cnt = queue_status.get("passed", 0)
-    failed_cnt = queue_status.get("failed", 0)
-    completed_tickers = passed_cnt + failed_cnt
-    funnel_pct = (completed_tickers / total_tickers * 100) if total_tickers > 0 else 0
+            # Calculate Instagram Reels progress (target 100,000 reels)
+            ig_count = 0
+            try:
+                rconn = _reddit_conn(cfg)
+                row = rconn.execute("SELECT COUNT(*) FROM instagram_raw_mentions").fetchone()
+                if row:
+                    ig_count = row[0]
+                rconn.close()
+            except Exception:
+                pass
 
-    # Unified Overall Progress (50% IG Reels dataset target, 50% Funnel Evaluations)
-    overall_pct = (ig_pct * 0.5) + (funnel_pct * 0.5)
+            ig_target = 100000
+            ig_pct = min(100.0, (ig_count / ig_target) * 100.0)
 
-    print("\n" + "=" * 50)
-    print("Sentinel Pipeline Execution Summary:")
-    print(f"  Processed queue items: {res_pass.get('processed', 0)}")
-    print(f"  Passed this run: {res_pass.get('passed', 0)}")
-    print(f"  Failed this run: {res_pass.get('failed', 0)}")
-    print("-" * 50)
-    print("Pipeline Progress Targets:")
-    print(f"  1. Instagram Reels Data:  {ig_count:,} / {ig_target:,} reels ({ig_pct:.2f}% complete)")
-    print(f"  2. Ticker Funnel Gating: {completed_tickers} / {total_tickers} tickers ({funnel_pct:.2f}% complete)")
-    print("-" * 50)
-    print(f"  OVERALL GOAL PROGRESS: {overall_pct:.2f}%")
-    print("-" * 50)
+            # Calculate Funnel Evaluation progress (completed roster tickers)
+            queue_status = q.queue_status(conn)
+            total_tickers = sum(queue_status.values())
+            passed_cnt = queue_status.get("passed", 0)
+            failed_cnt = queue_status.get("failed", 0)
+            completed_tickers = passed_cnt + failed_cnt
+            funnel_pct = (completed_tickers / total_tickers * 100) if total_tickers > 0 else 0
 
-    passed_rows = conn.execute(
-        "SELECT ticker FROM sentinel_queue WHERE stage = 'passed'"
-    ).fetchall()
-    passed_tickers = [r["ticker"] for r in passed_rows]
-    print(f"  Current Passed Cohort: {sorted(passed_tickers)}")
-    print("=" * 50)
+            # Unified Overall Progress (50% IG Reels dataset target, 50% Funnel Evaluations)
+            overall_pct = (ig_pct * 0.5) + (funnel_pct * 0.5)
 
-    conn.close()
+            print("\n" + "-" * 50)
+            print("Sentinel Pipeline Execution Summary:")
+            print(f"  Processed queue items: {res_pass.get('processed', 0)}")
+            print(f"  Passed this run: {res_pass.get('passed', 0)}")
+            print(f"  Failed this run: {res_pass.get('failed', 0)}")
+            print("-" * 50)
+            print("Pipeline Progress Targets:")
+            print(f"  1. Instagram Reels Data:  {ig_count:,} / {ig_target:,} reels ({ig_pct:.2f}% complete)")
+            print(f"  2. Ticker Funnel Gating: {completed_tickers} / {total_tickers} tickers ({funnel_pct:.2f}% complete)")
+            print("-" * 50)
+            print(f"  OVERALL GOAL PROGRESS: {overall_pct:.2f}%")
+            print("-" * 50)
+
+            passed_rows = conn.execute(
+                "SELECT ticker FROM sentinel_queue WHERE stage = 'passed'"
+            ).fetchall()
+            passed_tickers = [r["ticker"] for r in passed_rows]
+            print(f"  Current Passed Cohort: {sorted(passed_tickers)}")
+            print("=" * 50)
+
+            # Human-like session break after the 100 reels batch
+            sleep_time = random.uniform(60, 120)
+            print(f"[*] Sleeping for {int(sleep_time)}s (1-2 min session break)...")
+            sleep_start = time.time()
+            while time.time() - sleep_start < sleep_time:
+                remaining = int(sleep_time - (time.time() - sleep_start))
+                sys.stdout.write(f"\rNext batch/pass in: {remaining}s...   ")
+                sys.stdout.flush()
+                time.sleep(1)
+            sys.stdout.write("\n")
+
+    except KeyboardInterrupt:
+        print("\n[!] Continuous pipeline loop interrupted by user. Exiting cleanly.")
+    finally:
+        conn.close()
 
 
 def cmd_status(cfg):
