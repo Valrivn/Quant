@@ -139,20 +139,43 @@ def cmd_run_all(cfg):
     res_pass = run_pass(conn, rconn, _scfg(cfg), get_cik)
     rconn.close()
 
+    # Calculate Instagram Reels progress (target 100,000 reels)
+    ig_count = 0
+    try:
+        rconn = _reddit_conn(cfg)
+        row = rconn.execute("SELECT COUNT(*) FROM instagram_raw_mentions").fetchone()
+        if row:
+            ig_count = row[0]
+        rconn.close()
+    except Exception:
+        pass
+
+    ig_target = 100000
+    ig_pct = min(100.0, (ig_count / ig_target) * 100.0)
+
+    # Calculate Funnel Evaluation progress (completed roster tickers)
+    queue_status = q.queue_status(conn)
+    total_tickers = sum(queue_status.values())
+    passed_cnt = queue_status.get("passed", 0)
+    failed_cnt = queue_status.get("failed", 0)
+    completed_tickers = passed_cnt + failed_cnt
+    funnel_pct = (completed_tickers / total_tickers * 100) if total_tickers > 0 else 0
+
+    # Unified Overall Progress (50% IG Reels dataset target, 50% Funnel Evaluations)
+    overall_pct = (ig_pct * 0.5) + (funnel_pct * 0.5)
+
     print("\n" + "=" * 50)
     print("Sentinel Pipeline Execution Summary:")
     print(f"  Processed queue items: {res_pass.get('processed', 0)}")
     print(f"  Passed this run: {res_pass.get('passed', 0)}")
     print(f"  Failed this run: {res_pass.get('failed', 0)}")
-
-    queue_status = q.queue_status(conn)
-    total = sum(queue_status.values())
-    passed_cnt = queue_status.get("passed", 0)
-    failed_cnt = queue_status.get("failed", 0)
-    completed = passed_cnt + failed_cnt
-    pct = (completed / total * 100) if total > 0 else 0
-
-    print(f"  Overall Funnel Completion: {pct:.1f}% ({completed}/{total} tickers evaluated)")
+    print("-" * 50)
+    print("Pipeline Progress Targets:")
+    print(f"  1. Instagram Reels Data:  {ig_count:,} / {ig_target:,} reels ({ig_pct:.2f}% complete)")
+    print(f"  2. Ticker Funnel Gating: {completed_tickers} / {total_tickers} tickers ({funnel_pct:.2f}% complete)")
+    print("-" * 50)
+    print(f"  OVERALL GOAL PROGRESS: {overall_pct:.2f}%")
+    print("-" * 50)
 
     passed_rows = conn.execute(
         "SELECT ticker FROM sentinel_queue WHERE stage = 'passed'"
