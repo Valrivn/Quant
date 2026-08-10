@@ -31,8 +31,8 @@ from psychological.scrapers.nodriver_scraper import (
 logger = logging.getLogger(__name__)
 
 _DEFAULT_HASHTAGS = [
-    "stocks", "trading", "investing", "stockmarket",
-    "wallstreetbets", "nvidia", "tesla", "amd",
+    "semiconductors", "datacenter", "photonics", "liquidcooling",
+    "advancedpackaging", "highnaeuv", "nvidia", "asml",
 ]
 
 _DEFAULT_BULLISH = {
@@ -88,6 +88,8 @@ class InstagramConfig:
     max_pages_per_session: int = 25
     session_cool_down_seconds: float = 180.0
     session_file: str = "config/instagram_cookies.json"
+    sessions_dir: str = "config/instagram_sessions"
+    proxies_file: str = "config/proxies.txt"
     app_id: str = "936619743392459"
     hashtags: List[str] = field(default_factory=lambda: list(_DEFAULT_HASHTAGS))
     finance_accounts: List[str] = field(default_factory=list)
@@ -103,6 +105,8 @@ class InstagramConfig:
         self.max_pages_per_session = int(cfg.get("max_pages_per_session", 25))
         self.session_cool_down_seconds = float(cfg.get("session_cool_down_seconds", 180.0))
         self.session_file = str(cfg.get("session_file", "config/instagram_cookies.json"))
+        self.sessions_dir = str(cfg.get("sessions_dir", "config/instagram_sessions"))
+        self.proxies_file = str(cfg.get("proxies_file", "config/proxies.txt"))
         self.app_id = str(cfg.get("app_id", "936619743392459"))
         self.hashtags = list(cfg.get("hashtags", _DEFAULT_HASHTAGS))
         self.finance_accounts = list(cfg.get("finance_accounts", []))
@@ -225,6 +229,7 @@ def _normalize_post(node: dict) -> dict:
             views = int(views)
         except (TypeError, ValueError):
             views = None
+    video_url = node.get("video_url") if node.get("is_video") else None
     return {
         "shortcode": str(node.get("shortcode") or ""),
         "caption": caption,
@@ -232,6 +237,7 @@ def _normalize_post(node: dict) -> dict:
         "likes": likes,
         "comments": comments,
         "views": views,
+        "video_url": video_url,
         "author_username": str(owner.get("username") or ""),
         "author_followers": (owner.get("edge_followed_by") or {}).get("count") or 0,
         "author_verified": bool(owner.get("is_verified") or False),
@@ -286,6 +292,14 @@ def _normalize_web_info_item(item: dict) -> dict:
         except (TypeError, ValueError):
             views = None
             
+    video_url = None
+    if item.get("is_video") or item.get("media_type") == 2:
+        video_versions = item.get("video_versions")
+        if isinstance(video_versions, list) and video_versions:
+            video_url = video_versions[0].get("url")
+        else:
+            video_url = item.get("video_url")
+            
     return {
         "shortcode": str(item.get("code") or ""),
         "caption": caption,
@@ -293,6 +307,7 @@ def _normalize_web_info_item(item: dict) -> dict:
         "likes": likes,
         "comments": comments,
         "views": views,
+        "video_url": video_url,
         "author_username": str(user_obj.get("username") or ""),
         "author_followers": 0,
         "author_verified": bool(user_obj.get("is_verified") or False),
@@ -404,12 +419,69 @@ def _real_ticker_universe() -> Optional[set]:
     return universe
 
 
-def extract_tickers(text: str) -> List[str]:
-    """Extract uppercase ticker candidates from ``text``.
+_TECH_KEYWORD_MAP = {
+    "co-packaged optics": ["FN", "CLS", "LITE", "COHR"],
+    "silicon photonics": ["FN", "CLS", "LITE", "COHR"],
+    "liquid cooling": ["VRT", "MOD", "VICR"],
+    "high-na euv": ["ASML", "LRCX", "AMAT", "KLAC"],
+    "hbm3e": ["MU", "AVGO"],
+    "advanced packaging": ["TSM", "ASX", "AMAT"],
+    "euv pellicle": ["ASML", "LRCX"],
+    "wafer testing": ["TER", "COHU", "ONTO", "NVMI"],
+}
 
-    Blacklist approach (verbatim copy of reddit_custom.py common_words) plus a
-    real-ticker whitelist when the local SEC CIK map is available, which drops
-    English ALL-CAPS words (BEAR, BUY, CHEAP...) that the blacklist misses.
+
+def llm_analyze_transcript_buzzwords(transcript: str) -> List[str]:
+    """Execute a semantic analysis of the transcript using the opencode CLI.
+    Identify ground-breaking scientific breakthroughs, AI tech, and map them to supplier tickers.
+    Falls back to static keyword extraction on failure.
+    """
+    if not transcript:
+        return []
+    import subprocess
+    import json
+    import re
+    
+    prompt = (
+        "Analyze the following transcript from a video. Identify if it discusses any "
+        "ground-breaking scientific discoveries, biotech breakthroughs, advanced AI developments, "
+        "semiconductor technologies, or deep tech. If it does, map the technologies mentioned "
+        "to the public stock tickers of the small-cap or mid-cap component/subsystem suppliers (e.g., Vertiv VRT, "
+        "Celestica CLS, Fabrinet FN, Micron MU, Broadcom AVGO, ASML, Lam Research LRCX). "
+        "Return ONLY a JSON list of stock tickers, like [\"VRT\", \"CLS\"]. Return [] if none fit.\n"
+        f"Transcript: {transcript}"
+    )
+    try:
+        result = subprocess.run(
+            ["opencode", "run", prompt],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=25,
+        )
+        if result.returncode == 0 and result.stdout:
+            match = re.search(r"\[\s*\"[A-Z0-9,\s\"]*\"\s*\]", result.stdout)
+            if match:
+                tickers = json.loads(match.group(0))
+                return [t.upper().strip() for t in tickers if isinstance(t, str)]
+    except Exception:
+        pass
+    
+    tickers = set()
+    lower_text = transcript.lower()
+    for kw, mapped in _TECH_KEYWORD_MAP.items():
+        if kw in lower_text:
+            for t in mapped:
+                tickers.add(t)
+    return list(tickers)
+
+
+def extract_tickers(text: str, llm_tickers: List[str] = None) -> List[str]:
+    """Extract uppercase ticker candidates from ``text``, including keyword-mapped suppliers.
+
+    Blacklist approach plus a real-ticker whitelist when the local SEC CIK map is
+    available. Also scans for technical keywords (e.g. "liquid cooling") and maps
+    them to their sub-system suppliers (VRT, CLS) to bypass megacap buyer bias.
     """
     if not text:
         return []
@@ -418,6 +490,19 @@ def extract_tickers(text: str) -> List[str]:
     blacklist = set(TICKER_BLACKLIST) | _COMMON_WORDS
     universe = _real_ticker_universe()
     tickers = set()
+    
+    if llm_tickers:
+        for t in llm_tickers:
+            tickers.add(t)
+            
+    # 1. Scan for technical keyword mapping
+    lower_text = text.lower()
+    for kw, mapped in _TECH_KEYWORD_MAP.items():
+        if kw in lower_text:
+            for t in mapped:
+                tickers.add(t)
+                
+    # 2. Traditional regex parser
     words = re.findall(r"\b[A-Z]{1,5}\b", text.upper())
     for word in words:
         if len(word) < 2 or word in blacklist:
@@ -456,6 +541,57 @@ def compute_sentiment(text: str) -> Optional[float]:
     return score if matched else None
 
 
+def transcribe_video_audio(video_url: str) -> str:
+    """Download video_url, extract audio via ffmpeg, transcribe via Whisper.
+    Falls back to "" on any error/missing dependencies (no-fail invariant).
+    """
+    if not video_url:
+        return ""
+    import tempfile
+    import subprocess
+    import urllib.request
+    
+    try:
+        import whisper
+    except ImportError:
+        logger.warning("Whisper library not installed; skipping audio transcription.")
+        return ""
+        
+    temp_dir = tempfile.gettempdir()
+    video_path = os.path.join(temp_dir, "temp_ig_video.mp4")
+    audio_path = os.path.join(temp_dir, "temp_ig_audio.wav")
+    
+    try:
+        # Download video
+        urllib.request.urlretrieve(video_url, video_path)
+        
+        # Extract audio using ffmpeg (mono, 16kHz WAV format)
+        cmd = [
+            "ffmpeg", "-y", "-i", video_path,
+            "-ar", "16000", "-ac", "1", "-f", "wav", audio_path
+        ]
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
+        if result.returncode != 0:
+            logger.warning("ffmpeg audio extraction failed.")
+            return ""
+            
+        # Transcribe using Whisper
+        model = whisper.load_model("base")
+        transcription = model.transcribe(audio_path)
+        text = transcription.get("text", "")
+        return text
+    except Exception as e:
+        logger.warning(f"Audio transcription failed: {e}")
+        return ""
+    finally:
+        for p in (video_path, audio_path):
+            if os.path.exists(p):
+                try:
+                    os.remove(p)
+                except Exception:
+                    pass
+
+
 def to_mention_row(post: dict, fetch_ts: int) -> List[dict]:
     """Map a post dict to discovery-compatible mention rows (one per ticker).
 
@@ -463,7 +599,15 @@ def to_mention_row(post: dict, fetch_ts: int) -> List[dict]:
     Returns [] for a post with no tickers.
     """
     caption = post.get("caption") or ""
-    tickers = extract_tickers(caption)
+    video_url = post.get("video_url")
+    llm_tickers = None
+    if video_url:
+        transcription = transcribe_video_audio(video_url)
+        if transcription:
+            caption = caption + " " + transcription
+            llm_tickers = llm_analyze_transcript_buzzwords(transcription)
+            
+    tickers = extract_tickers(caption, llm_tickers=llm_tickers)
     if not tickers:
         return []
     sentiment = compute_sentiment(caption)
@@ -730,12 +874,45 @@ async def _fetch_mentions_async(limit: int, config: InstagramConfig) -> List[dic
     return rows[:limit]
 
 
-def _read_cookie_header(path: str) -> str:
+def _get_random_proxy(proxies_file: str) -> Optional[str]:
+    """Load and return a random proxy from proxies_file, or None."""
+    if not os.path.exists(proxies_file):
+        return None
+    try:
+        with open(proxies_file, "r") as f:
+            proxies = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
+        return random.choice(proxies) if proxies else None
+    except Exception:
+        return None
+
+
+def _resolve_session_path(config: InstagramConfig) -> str:
+    """Resolve cookie file path from default or pick a random one from sessions_dir."""
+    if os.path.exists(config.session_file):
+        return config.session_file
+    if os.path.exists(config.sessions_dir):
+        import glob
+        files = glob.glob(os.path.join(config.sessions_dir, "*.json"))
+        if files:
+            return random.choice(files)
+    return config.session_file
+
+
+def _read_cookie_header(path: str, config: Optional[InstagramConfig] = None) -> str:
     """Build a Cookie header from the session cookie file, or ""."""
-    if not os.path.exists(path):
+    resolved_path = path
+    if config:
+        resolved_path = _resolve_session_path(config)
+    elif not os.path.exists(path) and os.path.exists("config/instagram_sessions"):
+        import glob
+        files = glob.glob("config/instagram_sessions/*.json")
+        if files:
+            resolved_path = random.choice(files)
+            
+    if not os.path.exists(resolved_path):
         return ""
     try:
-        with open(path, "r") as f:
+        with open(resolved_path, "r") as f:
             cookies = json.load(f)
         return "; ".join(
             "{}={}".format(c.get("name"), c.get("value"))
@@ -773,6 +950,13 @@ def _normalize_private_api_item(item: dict) -> dict:
     views = item.get("view_count")
     if views is None:
         views = item.get("video_view_count")
+    video_url = None
+    if item.get("media_type") == 2 or item.get("is_video"):
+        video_versions = item.get("video_versions")
+        if isinstance(video_versions, list) and video_versions:
+            video_url = video_versions[0].get("url")
+        else:
+            video_url = item.get("video_url")
     return {
         "shortcode": str(item.get("code") or ""),
         "caption": caption,
@@ -780,10 +964,91 @@ def _normalize_private_api_item(item: dict) -> dict:
         "likes": item.get("like_count") or 0,
         "comments": item.get("comment_count") or 0,
         "views": views,
+        "video_url": video_url,
         "author_username": str(user.get("username") or ""),
         "author_followers": 0,
         "author_verified": bool(user.get("is_verified") or False),
     }
+
+
+def _fetch_clips_home(limit: int, config: InstagramConfig) -> List[dict]:
+    """Scrape Instagram personalized Reels (clips/home) to gather randomized,
+    genre-specific videos using rotated profiles and IP proxies.
+
+    Bypasses standard hashtag search and pulls recommended content.
+    Uses irregular delay intervals and heavy stealth request headers.
+    """
+    try:
+        from curl_cffi.requests import Session
+    except ImportError:
+        return []
+    cookie_header = _read_cookie_header(config.session_file, config)
+    if not cookie_header:
+        return []
+
+    connection_types = ["WIFI", "CELLULAR", "EXCELLENT"]
+    locales = ["en_US", "en_GB", "es_ES", "fr_FR"]
+    headers = {
+        "User-Agent": _IG_MOBILE_UA,
+        "X-Requested-With": "XMLHttpRequest",
+        "X-IG-App-ID": config.app_id,
+        "X-IG-Capabilities": "36r/Fx8=",
+        "X-IG-Connection-Type": random.choice(connection_types),
+        "X-IG-App-Locale": random.choice(locales),
+        "Accept": "*/*",
+        "Cookie": cookie_header,
+    }
+
+    proxy = _get_random_proxy(config.proxies_file)
+    proxies_dict = {"http": proxy, "https": proxy} if proxy else None
+
+    rows: List[dict] = []
+    try:
+        with Session(impersonate="chrome", proxies=proxies_dict) as session:
+            max_id = ""
+            # Dynamically size the number of chunks to fetch so we can meet the requested limit
+            num_chunks = max(5, int(limit / 6) + 2)
+            chunks = [random.randint(4, 10) for _ in range(num_chunks)]
+            for count in chunks:
+                if len(rows) >= limit:
+                    break
+                try:
+                    # Optimized micro-delay with human-like jitter
+                    delay = random.uniform(2.0, 7.0)
+                    time.sleep(delay)
+
+                    resp = session.post(
+                        "https://i.instagram.com/api/v1/clips/home/",
+                        headers=headers,
+                        data={"max_id": max_id, "count": str(count)},
+                        timeout=20,
+                    )
+                except Exception:
+                    continue
+                if resp.status_code != 200:
+                    continue
+                try:
+                    payload = resp.json()
+                except Exception:
+                    continue
+
+                posts = []
+                for item in payload.get("items") or []:
+                    media = item.get("media") if isinstance(item, dict) else None
+                    if isinstance(media, dict):
+                        posts.append(_normalize_private_api_item(media))
+
+                for post in posts:
+                    rows.extend(to_mention_row(post, fetch_ts=int(time.time())))
+                    if len(rows) >= limit:
+                        break
+
+                max_id = payload.get("next_max_id") or ""
+                if not max_id:
+                    break
+        return rows[:limit]
+    except Exception:
+        return []
 
 
 def _fetch_private_api(limit: int, config: InstagramConfig) -> List[dict]:
@@ -797,7 +1062,7 @@ def _fetch_private_api(limit: int, config: InstagramConfig) -> List[dict]:
         from curl_cffi.requests import Session
     except ImportError:
         return []
-    cookie_header = _read_cookie_header(config.session_file)
+    cookie_header = _read_cookie_header(config.session_file, config)
     if not cookie_header:
         return []
     headers = {
@@ -807,9 +1072,11 @@ def _fetch_private_api(limit: int, config: InstagramConfig) -> List[dict]:
         "Accept": "*/*",
         "Cookie": cookie_header,
     }
+    proxy = _get_random_proxy(config.proxies_file)
+    proxies_dict = {"http": proxy, "https": proxy} if proxy else None
     rows: List[dict] = []
     try:
-        with Session(impersonate="chrome") as session:
+        with Session(impersonate="chrome", proxies=proxies_dict) as session:
             for tag in config.hashtags:
                 if len(rows) >= limit:
                     break
@@ -859,11 +1126,13 @@ def _curl_cffi_fallback(limit: int, config: InstagramConfig) -> List[dict]:
             "X-Requested-With": "XMLHttpRequest",
             "X-IG-App-ID": config.app_id,
         }
-        cookie_header = _read_cookie_header(config.session_file)
+        cookie_header = _read_cookie_header(config.session_file, config)
         if cookie_header:
             headers["Cookie"] = cookie_header
+        proxy = _get_random_proxy(config.proxies_file)
+        proxies_dict = {"http": proxy, "https": proxy} if proxy else None
         rows: List[dict] = []
-        with Session() as session:
+        with Session(proxies=proxies_dict) as session:
             for tag in config.hashtags:
                 if len(rows) >= limit:
                     break
@@ -903,6 +1172,9 @@ def fetch_instagram_mentions(limit: int = 100, config: InstagramConfig = None) -
             "Instagram session cookie missing; export from a logged-in browser "
             "to config/instagram_cookies.json (git-ignored)"
         )
+    clips_rows = _fetch_clips_home(limit, cfg)
+    if clips_rows:
+        return clips_rows
     api_rows = _fetch_private_api(limit, cfg)
     if api_rows:
         return api_rows
