@@ -134,18 +134,43 @@ def run_pass(conn, reddit_conn, cfg, cik_resolver, batch_limit: Optional[int] = 
     return {"processed": processed, "passed": passed, "failed": failed}
 
 
+def _derive_ig_record(row: Dict) -> tuple:
+    """Stable unique id + shortcode for an IG mention row (dedupe-safe).
+
+    ``to_mention_row`` emits ``id``/``shortcode`` directly, but this guard keeps
+    any other producer from writing NULL ids: SQLite treats NULL as distinct in
+    a PRIMARY KEY, so a NULL id silently defeats INSERT OR IGNORE and the same
+    reel gets re-inserted on every harvest pass.
+    """
+    ticker = (row.get("entity") or "").strip() or "UNKNOWN"
+    ext_id = row.get("external_id") or ""
+    parts = [p for p in ext_id.split("/") if p]
+    shortcode = parts[-1] if parts else (row.get("shortcode") or "")
+    if shortcode:
+        return "{}_".format(ticker) + str(shortcode), str(shortcode)
+    row_id = row.get("id")
+    if row_id:
+        return "{}_".format(ticker) + str(row_id), str(row_id)
+    import random as _random
+    import time as _time
+    return "{}_{}_{}".format(ticker, int(_time.time()), _random.randint(1000, 9999)), ""
+
+
 def _save_raw_mention(conn: sqlite3.Connection, row: Dict) -> None:
-    from datetime import datetime, timezone
+    record_id, shortcode = _derive_ig_record(row)
     conn.execute(
         """INSERT OR IGNORE INTO instagram_raw_mentions
-           (id, ticker, shortcode, caption, sentiment, views, comments, followers,
-            verified, fetch_ts, external_id)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           (id, ticker, shortcode, caption, sentiment,
+            finbert_label, finbert_sentiment, finbert_confidence,
+            views, comments, followers, verified, fetch_ts, external_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
-            row.get("id"), row.get("entity"), row.get("shortcode") or "",
-            row.get("caption"), row.get("sentiment"), row.get("views"),
-            row.get("comments"), row.get("followers"), row.get("verified"),
-            row.get("fetch_ts"), row.get("external_id"),
+            row.get("id") or record_id, row.get("entity"), shortcode,
+            row.get("caption"), row.get("sentiment"),
+            row.get("finbert_label"), row.get("finbert_sentiment"),
+            row.get("finbert_confidence"),
+            row.get("views"), row.get("comments"), row.get("followers"),
+            row.get("verified"), row.get("fetch_ts"), row.get("external_id"),
         ),
     )
     conn.commit()
@@ -196,7 +221,7 @@ def run_ig_harvest(conn, reddit_conn, cfg, limit: int = 30) -> Dict:
     governor.record_success(conn, "ig")
     enqueued = 0
     for row in mentions:
-        _save_raw_mention(conn, row)
+        _save_raw_mention(reddit_conn, row)
         ticker = row.get("entity")
         skey = row.get("external_id") or row.get("id") or ""
         if not ticker or not skey:
@@ -231,3 +256,117 @@ def run_github_sync(conn, cfg, tickers: List[str], token: Optional[str] = None) 
     except Exception as exc:
         q.end_run(conn, run_id, 0, 0, 0, "error", str(exc))
         raise
+
+
+def _load_edge_maps() -> Dict:
+    """Load pre-registered edge maps from config/frontier_edges.yaml (optional).
+
+    The file is optional: when absent or unreadable the frontier expands from
+    whatever edges are already persisted in ecosystem_graph_edges. Never
+    fabricates edges (honest empty graph > invented relationships).
+    """
+    import os
+    import yaml
+
+    path = os.path.join(os.path.dirname(__file__), "..", "..", "config", "frontier_edges.yaml")
+    if not os.path.exists(path):
+        return {"customer_to_suppliers": {}, "supplier_to_suppliers": {}}
+    with open(path, "r") as f:
+        data = yaml.safe_load(f) or {}
+    return {
+        "customer_to_suppliers": data.get("customer_to_suppliers") or {},
+        "supplier_to_suppliers": data.get("supplier_to_suppliers") or {},
+    }
+
+
+def run_frontier_expansion(conn, cfg, cik_resolver, edge_maps: Optional[Dict] = None) -> Dict:
+    """One overlap-graded frontier expansion (B-20260819-001).
+
+    Slow by design: the engine runs deterministically over the supplied edge
+    maps; newly discovered nodes are enqueued (source='frontier') so they flow
+    through the G1-G4 funnel under the existing governor. Nothing here invents
+    edges — ``edge_maps`` come from persisted graph rows + the optional
+    pre-registered config file, both CIK-filtered before enqueue.
+    """
+    from discovery.frontier import expand_frontier, normalize_tickers
+
+    fr = cfg["frontier"]
+    maps = dict(edge_maps or _load_edge_maps())
+    cust = maps.get("customer_to_suppliers") or {}
+    supp = maps.get("supplier_to_suppliers") or {}
+
+    # Merge any edges already persisted by prior runs.
+    try:
+        rows = conn.execute(
+            "SELECT source, target FROM ecosystem_graph_edges WHERE relation='customer'"
+        ).fetchall()
+        for r in rows:
+            cust.setdefault(r["source"], []).append(r["target"])
+    except Exception:  # noqa: BLE001 - graph table may not exist yet
+        pass
+
+    # ETF weights feed the grading denominator (cached, quarterly).
+    relevance: Dict[str, float] = {}
+    try:
+        from discovery.etf_weights import get_weights
+        weights = get_weights(conn, fr.get("etf_denominator", "QQQ"))
+        relevance = {t: float(w) for t, w in weights.items()}
+    except Exception:  # noqa: BLE001 - no weights -> equal-weight grading
+        pass
+
+    run_id = q.start_run(conn, "frontier_expansion")
+    try:
+        result = expand_frontier(
+            seed_tickers=fr["seed_tickers"],
+            competitor_set=fr["competitor_set"],
+            customer_to_suppliers=cust,
+            supplier_to_suppliers=supp,
+            major_set=fr.get("major_set"),
+            relevance=relevance or None,
+            max_depth=int(fr["max_depth"]),
+            max_nodes=int(fr["max_nodes_per_seed"]),
+            max_edges_per_node=int(fr["max_edges_per_node"]),
+        )
+    except Exception as exc:
+        q.end_run(conn, run_id, 0, 0, 0, "error", str(exc))
+        raise
+
+    now_ts = int(time.time())
+    node_count = edge_count = enqueued = 0
+    for n in result.nodes:
+        if n.depth < 1:  # seeds + competitors are the anchor, not discoveries
+            continue
+        cik = None
+        try:
+            cik = cik_resolver(n.ticker)
+        except Exception:  # noqa: BLE001 - no CIK -> node still recorded without cik
+            pass
+        if cik is None:
+            continue
+        conn.execute(
+            """INSERT OR REPLACE INTO ecosystem_graph_nodes
+               (ticker, cik, depth, grade, seed, first_seen, last_seen)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (n.ticker, cik, n.depth, n.grade, fr["seed_tickers"][0], now_ts, now_ts),
+        )
+        node_count += 1
+        if q.enqueue(conn, n.ticker, "frontier", f"frontier:{n.ticker}"):
+            enqueued += 1
+
+    for e in result.edges:
+        conn.execute(
+            """INSERT OR REPLACE INTO ecosystem_graph_edges
+               (source, target, relation, confidence, filed_date, provenance, discovered_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (e.source, e.target, e.relation, e.confidence, e.filed_date,
+             e.provenance, now_ts),
+        )
+        edge_count += 1
+    conn.commit()
+    q.end_run(conn, run_id, node_count, enqueued, 0, "done")
+    return {
+        "nodes": node_count,
+        "edges": edge_count,
+        "enqueued": enqueued,
+        "summary": result.summary,
+    }

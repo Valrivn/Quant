@@ -17,7 +17,13 @@ _CONFIG_PATH = os.path.join(
 _ALLOWED_TOP = {"sentinel"}
 _REQUIRED_TOP = {"sentinel"}
 _REQUIRED_SENTINEL = {
-    "enabled", "db_path", "queue", "gates", "lanes", "governor",
+    "enabled", "db_path", "queue", "gates", "lanes", "governor", "frontier",
+}
+
+_FRONTIER_REQUIRED = {
+    "seed_tickers", "competitor_set", "max_depth", "max_nodes_per_seed",
+    "max_edges_per_node", "block_size", "inter_block_gap_seconds",
+    "max_active_hours",
 }
 
 
@@ -68,6 +74,22 @@ def _validate_governor(gov: Dict) -> None:
     _check(gov["circuit_failure_threshold"] >= 1, "governor.circuit_failure_threshold must be >= 1")
 
 
+def _validate_frontier(fr: Dict) -> None:
+    _require(fr, _FRONTIER_REQUIRED, "frontier")
+    seeds = fr["seed_tickers"]
+    _check(isinstance(seeds, list) and len(seeds) >= 1, "frontier.seed_tickers must be a non-empty list")
+    _check(all(isinstance(t, str) for t in seeds), "frontier.seed_tickers must be strings")
+    comp = fr["competitor_set"]
+    _check(isinstance(comp, list) and len(comp) >= 1, "frontier.competitor_set must be a non-empty list")
+    for k in ("max_depth", "max_nodes_per_seed", "max_edges_per_node", "block_size"):
+        _check(isinstance(fr[k], int) and fr[k] >= 1, f"frontier.{k} must be an int >= 1")
+    _check(isinstance(fr["max_active_hours"], (int, float)) and fr["max_active_hours"] > 0,
+           "frontier.max_active_hours must be > 0")
+    gap = fr["inter_block_gap_seconds"]
+    _check(isinstance(gap, list) and len(gap) == 2 and gap[0] >= 0 and gap[1] >= gap[0],
+           "frontier.inter_block_gap_seconds must be [lo, hi] with 0 <= lo <= hi")
+
+
 def load_sentinel_config(path: str = None) -> Dict[str, Any]:
     """Load and strictly validate sentinel.yaml. Raises on any problem."""
     cfg_path = path or _CONFIG_PATH
@@ -87,6 +109,7 @@ def load_sentinel_config(path: str = None) -> Dict[str, Any]:
     _validate_gates(s["gates"])
     _validate_lanes(s["lanes"])
     _validate_governor(s["governor"])
+    _validate_frontier(s["frontier"])
     return cfg
 
 
