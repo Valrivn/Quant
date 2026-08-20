@@ -12,6 +12,9 @@ Tables (sandbox, research-only):
   discovery_integration_decisions final decisions (research-only)
   discovery_source_status         degraded registry (per-source status)
   discovery_concepts              research backlog (concept-vs-ticker separation)
+  ecosystem_graph_nodes           overlap-graded frontier nodes (B-20260819-001)
+  ecosystem_graph_edges           point-in-time interconnection edges
+  etf_holdings                    ETF weight cache (grading denominator)
 """
 
 import sqlite3
@@ -102,5 +105,49 @@ def create_discovery_tables(conn: sqlite3.Connection) -> None:
             status TEXT NOT NULL
         )
     """)
+
+    # Ecosystem interconnection graph (B-20260819-001 "Virus-Frontier").
+    # Nodes are CIK-validated tickers surfaced by the overlap-graded frontier;
+    # edges are point-in-time (filed_date) relationships with provenance.
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ecosystem_graph_nodes (
+            ticker TEXT PRIMARY KEY,
+            cik TEXT,
+            depth INTEGER NOT NULL,
+            grade REAL NOT NULL DEFAULT 0.0,
+            seed TEXT NOT NULL,
+            first_seen INTEGER NOT NULL,
+            last_seen INTEGER NOT NULL
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_eco_nodes_grade ON ecosystem_graph_nodes(grade)")
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ecosystem_graph_edges (
+            source TEXT NOT NULL,
+            target TEXT NOT NULL,
+            relation TEXT NOT NULL DEFAULT 'customer',
+            confidence REAL NOT NULL DEFAULT 1.0,
+            filed_date TEXT,
+            provenance TEXT NOT NULL,
+            discovered_at INTEGER NOT NULL,
+            PRIMARY KEY (source, target, relation, provenance)
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_eco_edges_target ON ecosystem_graph_edges(target)")
+
+    # ETF holdings cache (B-20260819-001): QQQ weights feed the grading
+    # denominator. Fetched once per rebalance (quarterly), never per-run.
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS etf_holdings (
+            etf TEXT NOT NULL,
+            ticker TEXT NOT NULL,
+            weight REAL NOT NULL,
+            as_of TEXT NOT NULL,
+            fetched_at INTEGER NOT NULL,
+            PRIMARY KEY (etf, ticker, as_of)
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_etf_holdings_etf ON etf_holdings(etf, as_of)")
 
     conn.commit()

@@ -8,15 +8,24 @@ Commands:
   sec-sync [--years N] bulk SEC quarterly sync for the roster
   ig-harvest [--limit] single-account IG harvest -> enqueue (fail-closed)
   github-sync           GitHub star snapshots for the roster (G3 source)
-  run-all              run the entire pipeline end-to-end (highly cached)
+  frontier-expand       overlap-graded frontier expansion (B-20260819-001)
+  run-all [--with-ig]  run the entire pipeline end-to-end (highly cached)
   status               queue + funnel summary
 """
+
+# Monkeypatch nodriver to use Brave browser path on Windows
+try:
+    import nodriver.core.config
+    nodriver.core.config.find_chrome_executable = lambda *args, **kwargs: r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
+except ImportError:
+    pass
 
 import argparse
 import json
 import random
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -25,7 +34,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "Qualitative"))
 from discovery.sentinel import governor, queue as q
 from discovery.sentinel.config import load_sentinel_config
 from discovery.sentinel.orchestrator import (
-    run_github_sync, run_ig_harvest, run_pass, run_sec_sync,
+    run_frontier_expansion, run_github_sync, run_ig_harvest, run_pass, run_sec_sync,
 )
 from valuation_alpha.universe.roster import get_cik, get_universe
 
@@ -97,11 +106,19 @@ def cmd_github_sync(cfg):
     conn.close()
 
 
-def cmd_run_all(cfg):
-    """Run the entire pipeline end-to-end continuously: enqueuing, syncing SEC,
+def cmd_frontier_expand(cfg):
+    conn = _conn(cfg)
+    res = run_frontier_expansion(conn, _scfg(cfg), get_cik)
+    print(json.dumps(res, indent=2))
+    conn.close()
 
-    syncing GitHub, and entering a continuous Instagram scraping + Gating Pass loop.
-    All API sync lanes are cached to make repeated local runs instant.
+
+def cmd_run_all(cfg, with_ig=False):
+    """Run the entire pipeline end-to-end continuously: enqueuing, syncing SEC,
+    syncing GitHub, running the overlap-graded frontier expansion, and entering
+    a continuous Funnel Pass loop. Instagram is DEMOTED: it only runs when
+    --with-ig is set AND we are outside market hours (hygiene fallback, never
+    a discovery driver).
     """
     conn = _conn(cfg)
     tickers = [r["ticker"] for r in get_universe()]
@@ -114,14 +131,21 @@ def cmd_run_all(cfg):
     print(f"  Enqueued {enqueued} new tickers.")
 
     print("\nStep 2/4: Running SEC CIK sync (7-day caching)...")
-    res_sec = run_sec_sync(conn, _scfg(cfg), tickers, get_cik, years_back=3)
+    res_sec = run_sec_sync(conn, _scfg(cfg), tickers, get_cik, years_back=10)
     print(f"  SEC sync complete: {json.dumps(res_sec)}")
 
     print("\nStep 3/4: Running GitHub snapshots (daily caching)...")
     res_gh = run_github_sync(conn, _scfg(cfg), tickers)
     print(f"  GitHub sync complete: {json.dumps(res_gh)}")
 
-    print("\nStep 4/4: Starting continuous Instagram Scraper + Sentinel Funnel Pass Loop...")
+    print("\nStep 3.5/4: Running overlap-graded frontier expansion...")
+    try:
+        res_fr = run_frontier_expansion(conn, _scfg(cfg), get_cik)
+        print(f"  Frontier expansion complete: {json.dumps(res_fr)}")
+    except Exception as exc:
+        print(f"  Frontier expansion skipped or failed: {exc}")
+
+    print("\nStep 4/4: Starting continuous Funnel Pass Loop...")
     print("[*] Press Ctrl+C at any time to stop the pipeline loop.")
 
     loop_count = 0
@@ -136,19 +160,27 @@ def cmd_run_all(cfg):
             )
             conn.commit()
 
-            print("Running Instagram harvest (100 reels target)...")
-            try:
-                rconn = _reddit_conn(cfg)
-                res_ig = run_ig_harvest(conn, rconn, _scfg(cfg), limit=100)
-                print(f"  Instagram harvest complete: {json.dumps(res_ig)}")
-                rconn.close()
-            except Exception as exc:
-                print(f"  Instagram harvest skipped or failed: {exc}")
-
             print("Executing Sentinel Funnel Pass...")
             rconn = _reddit_conn(cfg)
             res_pass = run_pass(conn, rconn, _scfg(cfg), get_cik)
             rconn.close()
+
+            # Instagram is DEMOTED: hygiene fallback only, fired last and only
+            # when explicitly enabled AND outside market hours (09:30-16:00 ET).
+            ig_utc_hour = datetime.now().hour
+            et_hour = (ig_utc_hour - 5) % 24
+            if with_ig and not (9 <= et_hour <= 16):
+                print("Running Instagram harvest (hygiene fallback, off-hours)...")
+                try:
+                    rconn = _reddit_conn(cfg)
+                    res_ig = run_ig_harvest(conn, rconn, _scfg(cfg), limit=30)
+                    print(f"  Instagram harvest complete: {json.dumps(res_ig)}")
+                    rconn.close()
+                except Exception as exc:
+                    print(f"  Instagram harvest skipped or failed: {exc}")
+            else:
+                ig_note = "disabled (--with-ig not set)" if not with_ig else "skipped (market hours)"
+                print(f"Instagram harvest {ig_note}.")
 
             # Calculate Instagram Reels progress (target 100,000 reels)
             ig_count = 0
@@ -238,7 +270,10 @@ def main():
     ph = sub.add_parser("ig-harvest")
     ph.add_argument("--limit", type=int, default=30)
     pg = sub.add_parser("github-sync")
-    sub.add_parser("run-all")
+    pf = sub.add_parser("frontier-expand")
+    pra = sub.add_parser("run-all")
+    pra.add_argument("--with-ig", action="store_true",
+                     help="enable Instagram harvest as hygiene fallback (off-hours only)")
     sub.add_parser("status")
 
     args = ap.parse_args()
@@ -256,8 +291,10 @@ def main():
         cmd_ig_harvest(cfg, args.limit)
     elif args.cmd == "github-sync":
         cmd_github_sync(cfg)
+    elif args.cmd == "frontier-expand":
+        cmd_frontier_expand(cfg)
     elif args.cmd == "run-all":
-        cmd_run_all(cfg)
+        cmd_run_all(cfg, with_ig=getattr(args, "with_ig", False))
     elif args.cmd == "status":
         cmd_status(cfg)
 

@@ -1,0 +1,42 @@
+# Pre-registered seed edges for the overlap-graded frontier (B-20260819-001).
+#
+# THIS FILE IS MANUALLY MAINTAINED SEED DATA — not scraped, not fabricated.
+# It encodes publicly known supply-chain relationships so the frontier engine
+# can begin expanding the NVDA ecosystem without a live SEC extraction pass.
+# Review and edit freely; the orchestrator merges these with whatever edges are
+# already persisted in ecosystem_graph_edges, then grades by overlap across the
+# major set. A missing/empty file is fine — the frontier just expands from
+# persisted edges only (honest empty graph).
+#
+# Only US-listed tickers are listed here: non-US/private names (TSMC's EUV
+# optics chain, SK Hynix, SUMCO, Tokyo Electron, ASML's laser suppliers) are
+# intentionally ABSENT because they have no CIK and would be dropped by the
+# orchestrator's CIK validation anyway. The frontier surfaces them via their
+# US-listed peers (ASML itself is US-listed; TSMC's fab suppliers AMAT/LRCX/
+# KLAC/ENTG/MKSI/UCTT/ICHR are the investable "spot before the shovel").
+#
+# Shape:
+#   customer_to_suppliers:  customer ticker -> [supplier tickers it buys from]
+#   supplier_to_suppliers:  supplier ticker -> [its own upstream suppliers]
+#
+# Relation direction: NVDA buys from TSM -> NVDA: [TSM].
+
+customer_to_suppliers:
+  NVDA: [TSM, MU, ASML, AMAT, LRCX, KLAC, SMCI, WDC, AVGO, MRVL]
+  AMD: [TSM, MU, ASML, AMAT, LRCX, AVGO]
+  INTC: [ASML, AMAT, LRCX, KLAC, ENTG]
+  AVGO: [TSM, ASML, AMAT, LRCX, KLAC]
+  MSFT: [TSM, AMD, AVGO, MRVL]
+  GOOGL: [TSM, MU, AVGO, MRVL]
+  META: [TSM, MU, AMD]
+  AMZN: [TSM, MU, AVGO, MRVL]
+  AAPL: [TSM, MU, AMAT]
+
+supplier_to_suppliers:
+  TSM: [ASML, AMAT, LRCX, KLAC, ENTG, MKSI, UCTT, ICHR]
+  MU: [AMAT, LRCX, KLAC, ENTG, MKSI, UCTT]
+  ASML: []
+  AMAT: [MKSI, UCTT, ICHR, ENTG]
+  LRCX: [UCTT, MKSI, ICHR]
+  SMCI: [NVDA, AMD, INTC, MU]
+  AVGO: [TSM, ASML, AMAT]
