@@ -36,10 +36,18 @@ def _sparql_query(query: str, timeout_s: int = 90) -> list[dict]:
 def fetch_companies(timeout_s: int = 90) -> list[dict]:
     """Fetch companies with tickers from Wikidata.
 
-    Returns a list of dicts: [{'qid', 'label', 'ticker'}], sorted by qid.
+    Tickers live almost exclusively as pq:P249 qualifiers on stock-exchange
+    (P414) statements; direct wdt:P249 is retained as a sparse fallback.
+    Returns a deduplicated list of dicts: [{'qid', 'label', 'ticker'}],
+    sorted by qid.
     """
-    query = """SELECT ?company ?ticker ?label WHERE {
-      ?company wdt:P249 ?ticker .
+    query = """SELECT DISTINCT ?company ?ticker ?label WHERE {
+      {
+        ?company wdt:P249 ?ticker .
+      } UNION {
+        ?company p:P414 ?exchange .
+        ?exchange pq:P249 ?ticker .
+      }
       OPTIONAL {
         ?company rdfs:label ?label .
         FILTER(LANG(?label) = "en")
@@ -47,11 +55,15 @@ def fetch_companies(timeout_s: int = 90) -> list[dict]:
     }"""
     raw = _sparql_query(query, timeout_s=timeout_s)
     results = []
+    seen = set()
     for row in raw:
         company_uri = row.get("company", "")
         qid = company_uri.rsplit("/", 1)[-1]
         ticker = row.get("ticker", "").strip().upper()
         label = row.get("label", "")
+        if not qid or not ticker or (qid, ticker) in seen:
+            continue
+        seen.add((qid, ticker))
         results.append({
             "qid": qid,
             "label": label,
