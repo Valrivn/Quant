@@ -1,0 +1,458 @@
+{
+  "checkpoints": [
+    "2026-11-20",
+    "2027-02-20",
+    "2027-05-20",
+    "2027-08-20"
+  ],
+  "freeze_id": "QUAL-T1-20260820",
+  "rule": "D-20260820-001 Track 1 extension \u2014 all qualitative lanes",
+  "sources": {
+    "data/sentinel.db": {
+      "sha256": "12f82bdd324d1465a12471d7796be2ef2f0b92deaf6f591a2b2bd93175c3ddc1",
+      "size_bytes": 3923968,
+      "tables": {
+        "discovery_candidates": {
+          "rows": 0
+        },
+        "discovery_concepts": {
+          "rows": 0
+        },
+        "discovery_gate_passes": {
+          "rows": 0
+        },
+        "discovery_integration_decisions": {
+          "rows": 0
+        },
+        "discovery_mentions": {
+          "rows": 0
+        },
+        "discovery_source_status": {
+          "rows": 0
+        },
+        "ecosystem_graph_edges": {
+          "rows": 0
+        },
+        "ecosystem_graph_nodes": {
+          "rows": 0
+        },
+        "etf_holdings": {
+          "rows": 0
+        },
+        "sentinel_circuits": {
+          "range": [
+            "None",
+            "None"
+          ],
+          "rows": 3,
+          "ts_column": "opened_utc"
+        },
+        "sentinel_cooldowns": {
+          "range": [
+            "1786747038",
+            "1787616094"
+          ],
+          "rows": 80,
+          "ts_column": "next_allowed_utc"
+        },
+        "sentinel_enrich": {
+          "distinct_tickers": 10,
+          "range": [
+            "1786660556",
+            "1787013923"
+          ],
+          "rows": 20,
+          "ts_column": "fetched_at"
+        },
+        "sentinel_fundamentals": {
+          "distinct_tickers": 71,
+          "range": [
+            "2009-05-07",
+            "2026-08-14"
+          ],
+          "rows": 4081,
+          "ts_column": "filed_date"
+        },
+        "sentinel_funnel_results": {
+          "distinct_tickers": 84,
+          "range": [
+            "1786660532",
+            "1787013923"
+          ],
+          "rows": 283,
+          "ts_column": "evaluated_utc"
+        },
+        "sentinel_github_snapshots": {
+          "distinct_tickers": 17,
+          "range": [
+            "1786321856",
+            "1786925831"
+          ],
+          "rows": 67,
+          "ts_column": "fetched_at"
+        },
+        "sentinel_queue": {
+          "distinct_tickers": 84,
+          "range": [
+            "1786315774",
+            "1786931406"
+          ],
+          "rows": 111,
+          "ts_column": "created_utc"
+        },
+        "sentinel_rate_limits": {
+          "rows": 3
+        },
+        "sentinel_telemetry": {
+          "range": [
+            "1786315854",
+            "1787104300"
+          ],
+          "rows": 204,
+          "ts_column": "started_at"
+        },
+        "wiki_edges": {
+          "range": [
+            "1787271482",
+            "1787273478"
+          ],
+          "rows": 11155,
+          "ts_column": "discovered_at"
+        },
+        "wiki_runs": {
+          "rows": 3
+        },
+        "wikidata_companies": {
+          "distinct_tickers": 14078,
+          "range": [
+            "1787273478",
+            "1787273478"
+          ],
+          "rows": 15591,
+          "ts_column": "fetched_at"
+        }
+      }
+    },
+    "reddit_quant.db": {
+      "sha256": "d243b336a124a297e30e10f7188baeefe0c4de569ff0ea0c62fc685a2f0753dd",
+      "size_bytes": 18767872,
+      "tables": {
+        "adzuna_job_snapshots": {
+          "distinct_tickers": 10,
+          "range": [
+            "2021-06-01",
+            "2026-05-06"
+          ],
+          "rows": 610,
+          "ts_column": "date"
+        },
+        "app_store_feeds": {
+          "distinct_tickers": 10,
+          "range": [
+            "2021-01-13",
+            "2026-05-31"
+          ],
+          "rows": 300,
+          "ts_column": "date"
+        },
+        "bayes_posteriors": {
+          "rows": 0
+        },
+        "comparably_snapshots": {
+          "distinct_tickers": 10,
+          "range": [
+            "2021-01-01",
+            "2026-06-19"
+          ],
+          "rows": 2379,
+          "ts_column": "date"
+        },
+        "composite_scores": {
+          "rows": 0
+        },
+        "consensus_company_rows": {
+          "distinct_tickers": 4,
+          "rows": 55
+        },
+        "consensus_flags": {
+          "distinct_tickers": 3,
+          "rows": 44
+        },
+        "consensus_review_evidence": {
+          "rows": 0
+        },
+        "daily_aggregations": {
+          "distinct_tickers": 26,
+          "range": [
+            "2021-01-01",
+            "2026-08-16"
+          ],
+          "rows": 34975,
+          "ts_column": "date"
+        },
+        "discovery_candidates": {
+          "rows": 0
+        },
+        "discovery_concepts": {
+          "rows": 0
+        },
+        "discovery_gate_passes": {
+          "rows": 0
+        },
+        "discovery_integration_decisions": {
+          "rows": 0
+        },
+        "discovery_mentions": {
+          "distinct_tickers": 7,
+          "range": [
+            "-2.0",
+            "1.0"
+          ],
+          "rows": 10,
+          "ts_column": "sentiment"
+        },
+        "discovery_source_status": {
+          "rows": 0
+        },
+        "fintech_messages": {
+          "distinct_tickers": 48,
+          "range": [
+            "-0.0951923076923077",
+            "1.0"
+          ],
+          "rows": 663,
+          "ts_column": "sentiment_score"
+        },
+        "four_lane_results": {
+          "distinct_tickers": 10,
+          "range": [
+            "2026-07-03",
+            "2026-07-03"
+          ],
+          "rows": 10,
+          "ts_column": "date"
+        },
+        "g2_capterra_reviews": {
+          "distinct_tickers": 10,
+          "range": [
+            "2021-01-03",
+            "2026-05-26"
+          ],
+          "rows": 300,
+          "ts_column": "date"
+        },
+        "github_org_metrics": {
+          "distinct_tickers": 10,
+          "range": [
+            "2023-09-01T20:10:34Z",
+            "2026-06-30T01:55:43Z"
+          ],
+          "rows": 550,
+          "ts_column": "updated_at_api"
+        },
+        "glassdoor_comparably_audit": {
+          "distinct_tickers": 8,
+          "range": [
+            "2021-01-01",
+            "2026-06-19"
+          ],
+          "rows": 2288,
+          "ts_column": "date"
+        },
+        "glassdoor_snapshots": {
+          "distinct_tickers": 11,
+          "range": [
+            "2021-01-01",
+            "2026-06-30"
+          ],
+          "rows": 2955,
+          "ts_column": "date"
+        },
+        "hiring_velocity_snapshots": {
+          "distinct_tickers": 10,
+          "range": [
+            "2021-01-01",
+            "2026-06-26"
+          ],
+          "rows": 2403,
+          "ts_column": "date"
+        },
+        "historical_5y_slice": {
+          "distinct_tickers": 10,
+          "range": [
+            "2021-06-30",
+            "2025-06-30"
+          ],
+          "rows": 50,
+          "ts_column": "date"
+        },
+        "hybrid_scrape_runs": {
+          "rows": 0
+        },
+        "ig_historical_telemetry": {
+          "distinct_tickers": 23,
+          "range": [
+            "2026-08-08",
+            "2026-08-20"
+          ],
+          "rows": 118,
+          "ts_column": "date"
+        },
+        "indeed_snapshots": {
+          "distinct_tickers": 10,
+          "range": [
+            "2021-06-01",
+            "2026-05-06"
+          ],
+          "rows": 610,
+          "ts_column": "date"
+        },
+        "instagram_qual_proxies": {
+          "distinct_tickers": 219,
+          "range": [
+            "0.0",
+            "0.0"
+          ],
+          "rows": 219,
+          "ts_column": "sentiment_score"
+        },
+        "instagram_raw_mentions": {
+          "distinct_tickers": 315,
+          "range": [
+            "-2.0",
+            "2.0"
+          ],
+          "rows": 1972,
+          "ts_column": "sentiment"
+        },
+        "jobspy_velocity": {
+          "distinct_tickers": 10,
+          "range": [
+            "2021-01-01",
+            "2026-06-19"
+          ],
+          "rows": 3173,
+          "ts_column": "date"
+        },
+        "product_intel_reviews": {
+          "distinct_tickers": 11,
+          "range": [
+            "2021-01-01",
+            "2026-06-19"
+          ],
+          "rows": 18496,
+          "ts_column": "date"
+        },
+        "psychological_regimes": {
+          "distinct_tickers": 10,
+          "range": [
+            "2021-01-01",
+            "2026-06-27"
+          ],
+          "rows": 8015,
+          "ts_column": "date"
+        },
+        "psychological_vectors": {
+          "distinct_tickers": 10,
+          "range": [
+            "1609567200",
+            "1782523279"
+          ],
+          "rows": 1001,
+          "ts_column": "timestamp"
+        },
+        "quantitative_dcf_floor": {
+          "distinct_tickers": 11,
+          "range": [
+            "2021-01-01",
+            "2026-07-03"
+          ],
+          "rows": 2744,
+          "ts_column": "date"
+        },
+        "regime_states": {
+          "rows": 0
+        },
+        "risk_signals": {
+          "rows": 0
+        },
+        "schema_migrations": {
+          "range": [
+            "1781561544",
+            "1787018929"
+          ],
+          "rows": 7,
+          "ts_column": "applied_at"
+        },
+        "scrape_state": {
+          "rows": 0
+        },
+        "sec_cik_map": {
+          "distinct_tickers": 10508,
+          "range": [
+            "1785693744",
+            "1786914386"
+          ],
+          "rows": 10508,
+          "ts_column": "updated_at"
+        },
+        "sec_xbrl_facts": {
+          "distinct_tickers": 10,
+          "range": [
+            "2018-04-24",
+            "2026-05-06"
+          ],
+          "rows": 698,
+          "ts_column": "filing_date"
+        },
+        "sentiment_runs": {
+          "range": [
+            "2026-06-11",
+            "2026-06-30"
+          ],
+          "rows": 3,
+          "ts_column": "date"
+        },
+        "signal_provenance": {
+          "rows": 0
+        },
+        "submissions": {
+          "rows": 0
+        },
+        "validation_gate_results": {
+          "distinct_tickers": 10,
+          "range": [
+            "2021-01-31",
+            "2026-05-05"
+          ],
+          "rows": 79,
+          "ts_column": "date"
+        },
+        "velocity_provenance": {
+          "rows": 0
+        },
+        "velocity_snapshots": {
+          "distinct_tickers": 10,
+          "rows": 2001
+        },
+        "watchlist": {
+          "distinct_tickers": 11,
+          "range": [
+            "1609434000",
+            "1782681262"
+          ],
+          "rows": 11,
+          "ts_column": "added_at"
+        },
+        "weight_versions": {
+          "range": [
+            "None",
+            "None"
+          ],
+          "rows": 3,
+          "ts_column": "promoted_at"
+        }
+      }
+    }
+  }
+}
