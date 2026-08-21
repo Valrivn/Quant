@@ -287,3 +287,60 @@ new additive top-level discovery/ module planned; existing config/weights*.yaml,
 diversification/, portfolio/, Quantitative/stochastic/, backtesting/ cores frozen
 with SHA-256 manifest + auditor bit-identical check; no integration until P1–P5 pass
 and a separate APPROVE ruling.
+
+## Ruling D-20260809-002 (T3) — HOUSE BACKTEST v2: CHI-SQUARE GATE + ARCHETYPE COUNCIL
+SUMMARY: CEO APPROVES the v2 backtest build (brief B-20260809-002). (1) New gate:
+`backtesting/chi_square.py` — regime×win/loss chi-square (chi2, fisher fallback on
+sparse cells) emits SYSTEMATIC vs CHANCE on the FULL window; `run_standard_backtest`
+validates methods against ENGINE_MAP (spy, macro, minvar, dividend, opportunistic,
+static-ml, adaptive, rm-final — existing fee_sim3 engines only) and appends rows
+with the full metric bundle (Sharpe, Sortino, Calmar, win-rate, FF5 alpha + 95% CI,
+excess vs SPY, info ratio, maxDD, fees $/% of gains, trades). (2) Fixed windows:
+FULL 2018-01-31..2026-07-31 and RECENT 2025-01-01..2026-07-31; regimes bull 2023-24,
+bear 2020 crash + 2022. (3) AUDIT-STATUS line: only `AUDITED CLEAN` may claim "100%
+fully audited"; DEGRADED-DATA blocks; env-degraded tags report but don't block.
+(4) `fee_sim3` engines gain a `vpath` return so gains are expressed as paths, not
+just end values. (5) New backtest-agent (Gemini 3.1 Pro via Antigravity, CEO
+mandate) executes `/backtest {method}` and `/backtest history`
+(.opencode/command/backtest.md), writing artifacts to
+.agents/project/org/backtests/ and append-only rows to backtest-registry.md (v2
+schema). (6) Archetype council created (sim-guardian, risk-automator,
+execution-strategist, alpha-integrator, devil-advocate, open-minded — advisory,
+read-only, voices must appear in T3 synthesis). (7) Skills installed: philosopher
+(via skills.sh), in-house debate-protocol + planning; pruning-policy.md governs
+strategy retirement (CHANCE verdict, OOS decay, overfit, maxDD breach, fee > alpha,
+strict-dominance successor). | BY: CEO | EFFECT: backtesting/ gains the gate +
+metric bundle; backtest claims become falsifiable and audit-tagged; registry rows
+are decisions, not dashboard entries; 9 new archetype agents in .opencode/agent/;
+v2 engine files stay untouched by discovery/finance lanes (frozen cores discipline
+applies).
+
+## Ruling D-20260815-001 (T3) — IG_LLM SENTINEL VALIDATION (APPROVE hybrid)
+SUMMARY: CEO APPROVES implementation of IG_LLM Sentinel Validation (brief B-20260815-001, synthesis S-20260815-001) under four constraints. (1) Combined Hallucination Controls: mandate both structured output schema and source-URL grounding + per-score audit trail for LLM-synthesized qualitative proxies. (2) Gate-Threshold Freeze: hard-prohibit edits to qualitative gate thresholds or exclusions in this PR. (3) Pre-Build Cost Estimate: analyze token usage before writing main code. (4) Ticker-Collision Validation: implement defensive ticker lookup to avoid overlaps. EFFECT: Unlocks RFF256 discovery candidate stream with programmatic proxy scoring (IG_LLM_ prefix) inside existing qualitative gate.
+
+## Ruling D-20260816-001 (T3) — ANTI-BIAS ALT-DATA CONSENSUS GATE (APPROVE rev3)
+SUMMARY: CEO APPROVES the anti-bias alt-data consensus gate (brief B-20260816-001, synthesis S-20260816-001, impl-plan rev 3) as a research-only build. (1) Hardcoded frozen weight sheet: quantifiable anchor 50% / expression-voice 30% / subjective ratings 20% cap; per-factor weights fixed pre-ingestion, only CEO-ruling mutable on a pre-registered sufficient-data condition. (2) Review usability ladder: <10 = INSUFFICIENT abstain (never neutral 0.5); 10-49 = directional; 50-99 = distributional; >=100 = usable evidence. (3) SET-ASIDE rule: <50 total reviews across platforms -> company left aside + marked, review block contributes 0 (still scores on Type-A/B). (4) Attack flags: BRIBE-ATTACK (>=5 same-star in-window burst + suspicious profiles), COMPANY-PUNISHING ATTACK (>3x weekly volume spike / coordinated 1-star barrage) — flagged evidence quarantined, cannot cross pass line. (5) POLARIZED / NO-CONVERGENCE flag: |skew|>1.5, bimodal clusters, or 2-of-3 convergence failure at usable threshold. (6) LinkedIn talent scout (Type-B, 10% weight): talked-about people joining the company across LinkedIn/JobSpy/IG/Reddit/TikTok hiring mentions = talent capture signal, directional-only. (7) Anti-bot layer for all collectors, NodeDriver strategy for Glassdoor/Cloudflare. (8) Backtest gate: P1 outputs sorted per-company rows -> pre-registered house backtest vs rm-final baseline (relative-vs-baseline bar per D-20260806-001) BEFORE implementation. Constraints held: D-20260815-001 gate-threshold freeze intact; frozen cores untouched; Provenance invariant (data-status ledger, no silent fallbacks); research-only until P1-P5 + separate APPROVE ruling. EFFECT: Blueprint gains the alt-data consensus-gate pillar (research-only, NOT wired); discovery/ gains consensus+collector modules; all flags machine-checkable and audit-trailed.
+
+## Ruling D-20260820-001 (T3) — Wiki×SEC DISCOVERY LANE (ADOPT hybrid + PIT amendment)
+SUMMARY: CEO ADOPTS the hybrid on brief B-20260820-001 (synthesis S-20260820-001).
+New research-only Wikidata discovery lane: SPARQL bulk pull of P249 tickers +
+P355/P127/P749 typed edges WITH P580/P582 validity qualifiers; grade-prioritized
+BFS over company→company edges; topic-triggered DFS descent GATED behind a
+pre-registered ≥10-descent falsification experiment vs IG's 315-junk noise
+floor; hard STRUCTURAL firewall wiki↔backtest-agent from day one; hub defenses
+(class filter, industry excluded, out-degree>50 zeroed, blocklist); parallel
+wiki×SEC diff harness (PASS = both buckets non-trivial). CEO PIT amendment:
+dated edges form reconstructable historical graph states; revision-history
+reconstruction prototype on NVDA/AMD at T−3y/T−5y; ≥50% seed-graph edge-dating
+bar unlocks walk-forward discovery replay (dated edges only), else lane stays
+live-screener. USPTO/USASpending catalogued as complementary future source.
+Flip condition: experiment false-positive rate ≥ IG baseline → abandon DFS,
+pivot USPTO primary.  |  BY: CEO  |  EFFECT: discovery/ gains wikidata.py +
+wiki_frontier.py + wiki_census.py + wiki_sec_diff.py (research-only, own
+tables wikidata_companies/wiki_edges/wiki_runs with valid_from/valid_to from
+day one); config/sentinel.yaml gains lanes.wikipedia block; frozen cores and
+ecosystem_graph_* untouched; separate APPROVE ruling required before any
+wiring into run-all.
+
+## Ruling D-20260819-001 (T3) — VIRUS-FRONTIER: OVERLAP-GRADED FRONTIER ENGINE (APPROVE hybrid, executed)
+SUMMARY: CEO APPROVES the index-anchored overlap frontier (brief B-20260819-001, synthesis S-20260819-001). Discovery feed now walks the SUPPLY-CHAIN web, not social noise: seed = NVDA + competitors (AMD/INTC/AVGO) + major set (MSFT/GOOGL/META/AMZN/AAPL); grade(S) = Σ relevance(customer) over shared customers across the MAJOR SET (overlap-graded, not seed-only); upstream inheritance ("the spot before the shovel") — tier-2 suppliers graded by the tier-1 customers they feed; max 3 hops, ≤200 nodes/seed, ≤50 edges/node, edges CIK-validated + point-in-time (filed_date) + ≥2 sources; QQQ ETF weights SUPPLIED as supplemental cache (quarterly) only — competitors-primary; AI-cons vector: 10 pre-registered cons ("companies solving AI's problems") by sector + quant gate, narrative never required, hidden-gem steal filter; IG DEMOTED to off-market-hours hygiene fallback behind --with-ig (noise floor: 315 "tickers" in 10 days); slow binge-block pacing (block 10, gaps 120-300s, max 3 active hours) for ban safety; quant gate is the SOLE value filter ("a steal doesn't need attention"). Co-mention/13F vectors SUPPRESSED at launch (fail ≥2-source gate). | BY: CEO | EFFECT: discovery/frontier.py + ai_cons.py + etf_weights.py; ecosystem_graph_nodes/edges + etf_holdings schema (point-in-time); frontier sentinel lane + frontier-expand CLI; run-all demotes IG; config/frontier_edges.yaml seed; 51 new tests; full suite 1236 passed/18 skipped/0 failed; commit 61147ea on feature/frontier-overlap-engine. Live SEC >10% customer extraction is Phase-2.

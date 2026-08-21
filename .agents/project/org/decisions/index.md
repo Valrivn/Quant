@@ -1,27 +1,110 @@
-# Executive Decision Ledger — Index
+﻿# Executive Decision Ledger — Index
 
 Every CEO ruling becomes a decision file in this folder. This index is the
-spine of the leadership record (and the college portfolio).
+spine of the leadership record (and the college portfolio). Organized by
+date, newest first.
 
-## Ledger
+## 8-20-2026
 
-| Decision-ID | Date | Tier | Task | Ruling | Models in loop | Cost row? | Status |
-|-------------|------|------|------|--------|----------------|-----------|--------|
-| D-20260801-001 | 2026-08-01 | T2 | Commit stabilization + org setup | APPROVE | big-pickle, gemini-planner | D-20260801-001 | DONE |
-| D-20260801-002 | 2026-08-01 | T3 | Run full agent-pipeline audit | APPROVE | big-pickle, gemini-planner, hermes-bridge | D-20260801-002 | DONE |
-| D-20260801-003 | 2026-08-01 | T3 | Stochastic risk dashboard tab implementation plan | APPROVE | big-pickle, gemini-planner, hermes-bridge | D-20260801-003 | DONE |
-| D-20260801-004 | 2026-08-01 | T3 | Relative-Alpha Value Evaluation Architecture | APPROVE | big-pickle, gemini-planner, hermes-bridge | D-20260801-004 | COMPLETE |
-| D-20260802 | 2026-08-02 | T3 | Backtest deep review: megacap-vs-not, alpha logic, data validity | APPROVE | big-pickle, gemini-planner, hermes-bridge, deepseek-worker | D-20260802 | APPROVED (FINAL) — CEO ruled APPROVE with hermes hybrid: regime-dependent exit band, Glassdoor continuous tilt, falsification-first sequencing. |
-| D-20260802-002 | 2026-08-02 | T3 | Pilot validation redirect: reinvestment-rate + moat discovery | MODIFY | CEO direct ruling + big-pickle (evidence); hermes not re-invoked | D-20260802-002 | MODIFY — reinvestment-rate + qualitative-moat discovery re-thesis; 3-5y horizon; moat-compromise-only exit; head-to-head test case (profitable vs high-reinvestment). |
-| D-20260802-002 | 2026-08-02 | T3 | Reinvestment-rate + moat thesis implementation | APPROVE | big-pickle (pilot+evidence) + CEO ruling | D-20260802-002 | APPROVE — reinvestment-rate + moat thesis with profit-agnostic tilt and qualitative moat discovery |
-| D-20260803-001 | 2026-08-03 | T3 | Selective-Small-Cap Thesis: Bounded Falsification-First Build | APPROVE (hybrid — falsification-first build) | big-pickle (Position A), big-pickle (Position B under degradation-ladder), hermes-bridge (synthesis) | D-20260803-001 | APPROVE — bounded falsification-first build; test OCF/reinvestment/margin-trend on 1002-name universe; fund insider-buying datastore + gross-margin PIT only if gates pass; watchlist is monitor not investment rule; modifies D-20260802-002's profit-agnostic stance to include profitability as selectivity gate |
-| D-20260803-002 | 2026-08-03 | T3 | two-sleeve portfolio + cost-aware dynamic allocation + $10k fee simulation | MODIFY | big-pickle, gemini-planner, big-pickle (map), hermes-bridge, logger | D-20260803-002 | MODIFY — hybrid two-sleeve portfolio with transaction-cost flooring and opportunistic liquidation; $10k implementation-today simulation required; college agent records adaptation data. |
-| D-20260803-003 | 2026-08-03 | T3 | multi-asset sleeves + macro-state rotation | APPROVE (hybrid phased) | big-pickle (A) + gemini-planner (B) + big-pickle (map) + hermes-bridge (synthesis) + logger | D-20260803-003 | APPROVE |
-| D-20260803-004 | 2026-08-03 | T3 | Phase 2: opportunistic + dividend engines | APPROVE (hybrid + floor) | big-pickle (A), gemini-planner (B), big-pickle (map), hermes-bridge (synthesis), logger | D-20260803-004 | APPROVE — Phase-2 greenlit; stable-dividend audit + minimum-candidates floor/bills fallback + opportunistic engine (reused swap + bear-regime gate) + DIVIDEND variant in fee_sim3; decision file + archived drafts exist |
-| D-20260803-005 | 2026-08-03 | T3 | risk-constrained ML allocator: static + adaptive | MODIFY | big-pickle (posA + map) + gemini-planner (posB) + hermes-bridge (synthesis) + CEO ruling | D-20260803-005 | MODIFY — three-strategy risk-constrained ML allocator: STATIC-40/20/20/20 + STATIC-after-ML + ADAPTIVE (Sharpe-max objective, risky-weight penalty, hard <=30% maxDD at every point); all params pre-registered in config/weights_diversification.yaml; hybrid base adopted |
-| D-20260804-001 | 2026-08-04 | DISCOVERY | Return-max discovery pivot | (pending CEO decision) | big-pickle (primary-session execution) | D-20260804-001 | DISCOVERY — return-max pivot shows directional improvement (+171% vs SPY +217%) with 60% lower DD, but fails all three success bars; modules built (markov_momentum.py, return_max.py, fee_sim3 run_sim_discovery, 23 tests); recommendation that any follow-up be a Tier-3 MODIFY brief |
-| D-20260804-002 | 2026-08-04 | T3 | 7-phase PIT data-layer rebuild (B-20260804-002) gated on <=1hr API probe; per-source DEGRADED fallback; Discovery re-run with % deltas; success S1-S6 pre-registered | APPROVE (hybrid) | big-pickle (Position A) + gemini-planner (Position B) + big-pickle (map) + hermes-bridge (synthesis) + logger | D-20260804-002 | APPROVE — 7-phase PIT data-layer rebuild gated on <=1hr API probe; per-source DEGRADED fallback; Discovery re-run with % deltas; success S1-S6 pre-registered |
-| D-20260806-001 | 2026-08-06 | T3 | Modify discovery pipeline with deterministic trend-ranked feed (SEC/Reddit/StockTwits immediate scope; IG/TikTok gated on sandbox evidence; no epsilon-greedy RNG; relative-vs-baseline no-regression bar) | MODIFY | big-pickle (Position A), gemini-planner (Position B), big-pickle (map), hermes-bridge (synthesis), logger | D-20260806-001 | MODIFY — deterministic trend-ranked discovery feed with SEC/Reddit/StockTwits immediate scope; IG/TikTok gated on sandbox evidence of ≥1 qualitative-gate pass; no epsilon-greedy RNG; pre-registered bar amended to relative-vs-baseline |
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260820-001 | T3 | Wiki×SEC discovery lane (Wikidata SPARQL BFS + gated DFS + PIT probe) | ADOPT hybrid + PIT amendment | BUILT — 1247 passed/0 failed on feature/b-20260820-001, awaiting commit + P1 live probe |
+
+## 8-19-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260819-001 | T3 | Virus-Frontier: overlap-graded supply-chain frontier engine + AI-cons vector | APPROVE (hybrid, CEO-modified) | APPROVED — built + tested (1236 passed/18 skipped/0 failed), commit 61147ea |
+
+## 8-18-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260818-001 | T2 | Enable supervised live consensus (G2/Glassdoor/Indeed) | APPROVE | APPROVED → live run S1 FAILED → F1 REJECT, kill-switch reverted; re-plan pending |
+
+## 8-16-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260816-002 | T3 | Scraping anti-bot strategy engine selection gate | APPROVE | APPROVED — fingerprint audit gate before engine selection |
+
+## 8-15-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260815-001 | T3 | IG_LLM Sentinel Validation (hybrid A+B) for qualitative gating bottleneck | APPROVE | APPROVED — structured schema, URL grounding, audit trail, threshold freeze |
+
+## 8-11-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260811-001 | DISCOVERY | Free data-source strategy: AI-era backtest window + IG discovery-alpha question | direction recorded | DISCOVERY — 58-source catalog narrowed; 10-yr AI window adopted; two-track plan |
+
+## 8-9-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260809-001 | T3 | Scale Instagram Reels scraper to 100k+ videos with anti-bot measures | APPROVE | APPROVED |
+| D-20260809-002 | T3 | House Backtest v2: chi-square gate, metric bundle, archetype council, /backtest | APPROVE | APPROVED — falsifiable registry rows; pruning policy |
+
+## 8-8-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260808-001 | T3 | Reverse-heatmap transition scraper + Whisper audio transcription | APPROVE | APPROVED |
+| D-20260808-002 | T3 | S-Curve + Kalman filter attention tracker | APPROVE | APPROVED |
+| D-20260808-003 | T3 | LLM semantic transcript analyzer integration | APPROVE | APPROVED |
+| D-20260808-004 | T3 | High-scale proxy & session rotation for IG Reels | APPROVE | APPROVED |
+| D-20260808-005 | T3 | Multi-asset portfolio optimization & backtest (2024–2026) | APPROVE | APPROVED — 40% stock floor, 185.37% return |
+| D-20260808-006 | T3 | Walk-forward backtest verification (no lookahead) | APPROVE | APPROVED — 186.67% return PIT |
+| D-20260808-007 | T3 | Calculus-based macro-regime sigmoid allocator | APPROVE | APPROVED — bear/bull split reporting |
+| D-20260808-008 | T3 | Grade 12 schedule integration + 70/30 IG/Reddit sleeve | APPROVE | APPROVED |
+
+## 8-7-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260807-001 | T3 | Instagram independent discovery experiment (alpha-gate test) | MODIFY | MODIFY — independent channel, standard screen, isolation contract holds |
+| D-20260807-002 | DISCOVERY | Instagram anti-bot scraper build (real IG feed) | APPROVE | APPROVED — cookie-import auth, nodriver CDP stealth; 42 tests pass |
+
+## 8-6-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260806-001 | T3 | Deterministic trend-ranked discovery feed (SEC/Reddit/StockTwits; IG gated) | MODIFY | MODIFY — no RNG; relative-vs-baseline bar; P1–P5 gates fail closed |
+
+## 8-4-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260804-001 | DISCOVERY | Return-max discovery pivot | pending CEO decision | DISCOVERY — directional improvement but fails all three success bars; follow-up = T3 MODIFY brief |
+| D-20260804-002 | T3 | 7-phase PIT data-layer rebuild, API-probe-gated | APPROVE (hybrid) | APPROVED — DEGRADED fallbacks; success S1–S6 pre-registered |
+
+## 8-3-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260803-001 | T3 | Selective-small-cap thesis: bounded falsification-first build | APPROVE (hybrid) | APPROVE — OCF/reinvestment/margin falsification gates datastore funding |
+| D-20260803-002 | T3 | Two-sleeve portfolio + cost-aware allocation + $10k fee sim | MODIFY | MODIFY — transaction-cost flooring; opportunistic liquidation only |
+| D-20260803-003 | T3 | Multi-asset sleeves + macro-state rotation (phased) | APPROVE (hybrid phased) | APPROVE — Phase 1 bonds/gold + risk minimizer |
+| D-20260803-004 | T3 | Phase 2: opportunistic + dividend engines | APPROVE (hybrid + floor) | APPROVE — stable-dividend audit + minimum-candidates floor |
+| D-20260803-005 | T3 | Risk-constrained ML allocator: static + adaptive | MODIFY | MODIFY — Sharpe-max objective, hard ≤30% maxDD bound |
+
+## 8-2-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260802 | T3 | Backtest deep review: alpha logic, data validity | APPROVE | APPROVED (FINAL) — regime-dependent exit band, Glassdoor tilt, falsification-first |
+| D-20260802-002 | T3 | Reinvestment-rate + moat discovery re-thesis | MODIFY / APPROVE | CLOSED — reinvestment-rate thesis; superseded in part by D-20260803-001 selectivity gate |
+
+## 8-1-2026
+
+| ID | Tier | Task | Ruling | Status |
+|----|------|------|--------|--------|
+| D-20260801-001 | T2 | Commit stabilization + org setup | APPROVE | DONE |
+| D-20260801-002 | T3 | Full agent-pipeline audit | APPROVE | DONE |
+| D-20260801-003 | T3 | Stochastic risk dashboard tab implementation plan | APPROVE | DONE |
+| D-20260801-004 | T3 | Relative-Alpha Value Evaluation Architecture | APPROVE | COMPLETE — three-layer sleeve architecture |
 
 ## Conventions
 

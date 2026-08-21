@@ -150,4 +150,38 @@ def create_discovery_tables(conn: sqlite3.Connection) -> None:
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_etf_holdings_etf ON etf_holdings(etf, as_of)")
 
+    # Wikidata tables (ruling D-20260820-001)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS wikidata_companies (
+            qid TEXT PRIMARY KEY,
+            label TEXT,
+            ticker TEXT NOT NULL,
+            fetched_at INTEGER NOT NULL
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS wiki_edges (
+            source_qid TEXT NOT NULL,
+            target_qid TEXT NOT NULL,
+            relation TEXT NOT NULL,
+            valid_from TEXT,
+            valid_to TEXT,
+            provenance TEXT NOT NULL,
+            discovered_at INTEGER NOT NULL,
+            PRIMARY KEY (source_qid, target_qid, relation, provenance)
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_wiki_edges_target ON wiki_edges(target_qid)")
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS wiki_runs (
+            run_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            kind TEXT NOT NULL,
+            started INTEGER NOT NULL,
+            finished INTEGER,
+            stats_json TEXT
+        )
+    """)
+
     conn.commit()
