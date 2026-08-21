@@ -8,7 +8,7 @@ date, newest first.
 
 | ID | Tier | Task | Ruling | Status |
 |----|------|------|--------|--------|
-| D-20260820-001 | T3 | Wiki×SEC discovery lane (Wikidata SPARQL BFS + gated DFS + PIT probe) | ADOPT hybrid + PIT amendment | BUILT — 1247 passed/0 failed on feature/b-20260820-001, awaiting commit + P1 live probe |
+| D-20260820-001 | T3 | Wiki×SEC discovery lane (Wikidata SPARQL BFS + gated DFS + PIT probe) | ADOPT hybrid + PIT amendment | BUILT + P1 PROBED — PIT replay DEAD (2.02% << 50% bar); no alpha in first cohort (40% stale); lane stays live-screener behind firewall; firewall audit PASS |
 
 ## 8-19-2026
 
