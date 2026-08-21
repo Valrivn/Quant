@@ -29,7 +29,7 @@ from discovery.wiki_census import pit_unlock_check
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "sentinel.db"
 SEED_TICKERS = [
     "NVDA", "AMD", "INTC", "AVGO", "MSFT",
-    "GOOGL", "META", "AMZN", "AAPL",
+    "GOOGL", "META", "AMZN", "AAPL", "TSM", "ASML",
 ]
 MAJOR_TICKERS = {
     "NVDA", "AMD", "INTC", "AVGO", "MSFT",
@@ -37,7 +37,7 @@ MAJOR_TICKERS = {
 }
 WAVE_BATCH = 48
 MAX_DEPTH = 3
-MAX_NODES = 1200
+MAX_NODES = 2500
 QUERY_GAP_S = 1.0
 
 _WAVE_QUERY = """SELECT ?src ?rel ?tgt ?from ?to WHERE {
