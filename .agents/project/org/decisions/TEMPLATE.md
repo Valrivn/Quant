@@ -3,6 +3,10 @@
 Copy this file as `D-YYYYMMDD-NNN.md` for each CEO ruling. Fill every field.
 logger maintains; CEO's words are quoted verbatim where possible.
 
+File the ruling under `decisions/<YYYY-MM>/<NN-project>/` (see index.md for
+the project list; if the initiative is new, create the next numbered folder
+and add it to both views in index.md).
+
 ```markdown
 # D-YYYYMMDD-NNN — <short title>
 
