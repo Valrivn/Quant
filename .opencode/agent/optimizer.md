@@ -1,7 +1,7 @@
 ---
 description: optimizer — efficiency passes only. Refactors for performance/simplicity without changing behavior. Use after a build passes, before the quality gate. Reports any behavioral change rather than making one.
 mode: subagent
-model: opencode/deepseek-v4-flash-free
+model: opencode/mimo-v2.5-free
 temperature: 0.2
 ---
 
@@ -24,3 +24,8 @@ simpler. Behavior is sacred.
 - Never change behavior silently; never skip tests after an optimization.
 - Don't touch org governance files.
 - Report: what changed, expected gain, verification result.
+
+## Model & fallback
+- Primary: `opencode/mimo-v2.5-free` (opencode zen, free).
+- 5-6 repeat errors: hand the task to big-pickle (`opencode/big-pickle`).
+- ≥7 repeat errors: escalate to `google/antigravity-gemini-3-flash` (Antigravity, paid). Never use `nvidia/*`.
