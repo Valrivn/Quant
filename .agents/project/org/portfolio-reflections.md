@@ -309,3 +309,32 @@ The CEO's ruling on D-20260806-001 modifies the discovery pipeline to implement 
 - Feature/b-20260806-001 branch for dedicated test isolation from main
 
 This ruling demonstrates the CEO's disciplined approach to discovery: adopting hermes's hybrid recommendation to balance exploration with risk management, maintaining the RM-FINAL edge while expanding discovery capabilities through structured, falsifiable methods.
+
+### 2026-08-09 — D-20260809-001 Scaling Instagram Reels Scraper to 100,000+ Videos with Anti-Bot Measures
+
+**CEO Architect Narrative:**
+
+The CEO approved scaling the Instagram Reels scraper to 100,000+ videos with robust anti-bot measures, including irregular delays, proxy rotation, and an account pool. This architectural scale shift moves the pipeline from a single-threaded local scraper to a distributed async model. By decoupling the slow Whisper audio transcription process from scraping using a dedicated task queue, the architecture avoids resource bottlenecks. This decision ensures that alternative data discovery can scale securely and efficiently without triggering account challenges or IP rate-limiting blocks.
+
+### 2026-08-15 — D-20260815-001 IG_LLM Sentinel Validation (Hybrid A + B)
+
+**CEO Architect Narrative:**
+
+The CEO approved the implementation of the IG_LLM Sentinel Validation pipeline under a hybrid framework to address the qualitative gating bottleneck for small/mid-cap trend candidates. This decision unlocks the RFF256 predictive signal (IC 0.054) by programmatically constructing qualitative proxy scores (sentiment, moat, and product reviews) under the isolated `IG_LLM_` ticker prefix. 
+
+To ensure the integrity of the qualitative screen, the CEO mandated four strict implementation constraints:
+1. Combined Hallucination Controls: Integrating structured output schemas with source-URL grounding and a per-score audit trail.
+2. Gate-Threshold Freeze: A hard prohibition on changes to standard screen thresholds or exclusion rules in the implementation PR.
+3. Pre-Build Cost Estimate: Pre-registering weekly token-cost estimates to protect the pipeline budget.
+4. Ticker-Collision Validation: Requiring a dedicated entity-resolution step in the crawler to prevent synthetic proxy cross-contamination.
+
+### 2026-08-16 — D-20260816-002 Scraping Anti-Bot Strategy Engine Selection Gate (Fingerprint Audit)
+
+**CEO Architect Narrative:**
+
+The CEO approved a hybrid recommendation to authorize a live fingerprint audit (comparing nodriver against Playwright-stealth on the live Glassdoor Cloudflare/Turnstile wall) as the mandatory gate before selecting the durable anti-bot scraping engine. This decision ensures that the selection of the review scraping engine is based on empirical bot-detection survivability rather than pre-emptive architectural commitments, avoiding the risk of re-platforming to Playwright before verifying it actually clears Cloudflare. The UA pinning patch from Option A was already implemented and verified in `Qualitative/psychological/scrapers/nodriver_scraper.py` prior to the debate.
+
+## 2026-08-23
+
+CEO reframed the primary test from alt-data-source luck to PIPELINE SKILL ("is my financial-analyst pipeline good"), chose Stack A facts-consistent window 2009–2026, requires absolute PIT isolation, per-source isolation ablations, verified-vs-raw sentiment organization, no manual hand-grading (human-labeled corpora as grading oracle), free/no-key sources only. Full council debate ran: Position A (big-pickle: per-row available_as_of quarantine + 5-column ablation matrix + 3 pre-registered bars), Position B (gemini-planner: simulated-clock wrapper + NLP-corpus-first metric staging), devil-advocate favored A overall but flagged timestamp-coverage and oracle-domain-mismatch risks; sim-guardian favored centralized clock enforcement BUT requires frozen-hash regression replay (mutating post-date rows must yield bit-identical outputs) as the audit instrument; hermes hybrid = A's storage schema + B's evaluation sequencing; PhraseBank license clearance is an open contingency.
+

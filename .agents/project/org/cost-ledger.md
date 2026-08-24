@@ -1,4 +1,4 @@
-# Cost Ledger — Token Spend per Decision
+﻿# Cost Ledger — Token Spend per Decision
 
 **Maintained by:** logger. One row per model invocation within a decision.
 This file answers the CEO's standing question: "is the debate paying for
@@ -13,6 +13,7 @@ Format (from token-budget.md):
 ## Ledger
 
 | date | decision-id | tier | models | in-tok | out-tok | est-cost | ruling | notes |
+| 2026-08-18 | D-20260818-001 | T2 | deepseek-v4-flash (primary session audit+build) | 12.8k | 2.1k | $0 (zen) | APPROVE → S1 FAIL → F1 REJECT | audit+impl-plan+flag+build+supervised live run; consensus.enabled reverted false |
 |------|-------------|------|--------|--------|---------|----------|--------|-------|
 | 2026-08-01 | D-20260801-001 | T2 | big-pickle, gemini-planner | 35k | 15k | $0.50 | APPROVE | T2 execution approval |
 | 2026-08-01 | D-20260801-002 | T3 | big-pickle, gemini-planner, hermes-bridge | 60k | 20k | $1.50 | APPROVE | T3 demo/audit |
@@ -37,9 +38,21 @@ Format (from token-budget.md):
 | 2026-08-04 | D-20260804-002 | T3 | big-pickle (Position A) + gemini-planner (Position B) + big-pickle (map) + hermes-bridge (synthesis) + logger | 75k | 22k | $2.00 | APPROVE (hybrid) | 7-phase PIT data-layer rebuild (B-20260804-002) gated on <=1hr API probe; per-source DEGRADED fallback; Discovery re-run with % deltas; success S1-S6 pre-registered |
 | 2026-08-06 | D-20260806-001 | T3 | big-pickle (Position A), gemini-planner (Position B), big-pickle (map), hermes-bridge (synthesis), logger | 75k | 22k | $2.00 | MODIFY | Deterministic trend-ranked discovery feed with SEC/Reddit/StockTwits immediate scope; IG/TikTok gated on sandbox evidence of ≥1 qualitative-gate pass; no epsilon-greedy RNG; pre-registered bar amended to relative-vs-baseline |
 | 2026-08-05 | B-20260805-002 | T3 | opencode/big-pickle | 12k | 4k | $0.50 | BRIEF CREATION | Brief B-20260805-002 created: trailing 12m/24m backtest of return-max allocator vs SP500; pre-register "beats SP500" bar; design plan-only reward metric (min transactions + alpha), Bayesian-updating confidence, Monte Carlo forward sim, Markov Peter-Lynch-state prediction; implementation plan before any build |
+| 2026-08-07 | D-20260807-001 | T3 | big-pickle (Position A) + gemini-planner (Position B) + big-pickle (map) + hermes-bridge (synthesis) + logger | 75k | 22k | $2.00 | MODIFY | Instagram/TikTok as INDEPENDENT experimental discovery channel; standard stock screen; isolation contract holds; decision file D-20260807-001.md |
+| 2026-08-07 | D-20260807-002 | DISCOVERY | big-pickle (plan) + deepseek-worker (build) + logger | 25k | 14k | $0.90 | APPROVE | IG anti-bot scraper build: instagram_primary.py (cookie-session nodriver), InstagramSource wiring, additive instagram ranker weight, 42 tests pass; logger task cancelled at launch (big-pickle completed artifacts) |
+| 2026-08-08 | D-20260808-007 | T3 | big-pickle (implementation) + logger | 12k | 4k | $0.50 | APPROVE | Calculus-based macro-regime sigmoid transition and Bear (2022) / Bull (2024-2026) split reporting |
+| 2026-08-08 | D-20260808-008 | T3 | big-pickle (implementation) + logger | 12k | 4k | $0.50 | APPROVE | Grade 12 calendar schedule execution and 70% IG / 30% Reddit weight allocation |
+| 2026-08-09 | D-20260809-001 | T3 | big-pickle (A) + gemini-planner (B) + big-pickle (map) + hermes-bridge (synthesis) + logger | 75k | 22k | $2.00 | APPROVE | Scale Instagram Reels scraper to 100k+ videos with anti-bot measures |
+| 2026-08-09 | D-20260809-002 | T3 | big-pickle (implementation) + logger | 12k | 4k | $0.50 | APPROVE (executed) | v2 backtest build: chi_square.py + metrics_extra.py + fee_sim3 vpaths + 19 tests; 9 archetype agents; /backtest command; skills (philosopher via skills.sh, in-house debate-protocol + planning); pruning policy; registry v2 schema; AGENTS.md update |
+| 2026-08-11 | D-20260811-001 | DISCOVERY | big-pickle (primary session) + discovery-altdata (3 research passes) | 60k est | 20k est | $0.00 (free lane) | direction recorded | Free data-source research (58 sources); free+tech-trend narrowing; AI-era 10y backtest window; Instagram discovery-alpha hypothesis logged |
+| 2026-08-15 | D-20260815-001 | T3 | big-pickle (A) + gemini-planner (B) + big-pickle (map) + hermes-bridge (synthesis) + logger | 75k | 22k | $2.00 | APPROVE | Implement IG_LLM Sentinel Validation (Hybrid A + B) to solve the Discovery qualitative gating bottleneck |
+| 2026-08-16 | D-20260816-002 | T3 | big-pickle (A) + gemini-planner (B) + hermes-bridge (synthesis) + logger | 75k | 22k | $2.00 | APPROVE | Scraping anti-bot strategy engine selection gate; authorize fingerprint audit (nodriver vs Playwright-stealth) |
+| 2026-08-19 | D-20260819-001 | T3 | big-pickle (A) + gemini-planner (B) + big-pickle (map) + hermes-bridge (synthesis) + deepseek-worker (build) + conductor + logger | 118k | 35k | $1.50 | APPROVE (hybrid, CEO-modified) | Virus-Frontier overlap-graded frontier engine + AI-cons vector + ETF weight cache + IG demotion; council hearing (devil-advocate, open-minded, sim-guardian, risk-automator, execution-strategist, alpha-integrator voices in synthesis S-20260819-001); 51 new tests; full suite 1236 passed/18 skipped/0 failed; commit 61147ea on feature/frontier-overlap-engine |
+| 2026-08-23 | D-20260823-001 | T3 | big-pickle (brief+A+map) + gemini-planner (B) + devil-advocate + sim-guardian + hermes-bridge (synthesis) + logger | ~55k (est) | - | - | APPROVED (conditional, verified) | hybrid adopted; phase 0 executed on feature/b-20260823-001 |
+
 
 ## Monthly roll-up (data-scientist writes)
 
 | Month | Decisions | Total in-tok | Total out-tok | Est cost (paid) | Avg/decision |
 |-------|-----------|--------------|---------------|-----------------|--------------|
-| 2026-08 | 18 | 1172k | 427k | $34.75 | $1.93 |
+| 2026-08 | 21 | 1382k | 491k | $38.75 | $1.85 |

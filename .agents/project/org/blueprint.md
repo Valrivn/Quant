@@ -523,5 +523,24 @@ day one); config/sentinel.yaml gains lanes.wikipedia block; frozen cores and
 ecosystem_graph_* untouched; separate APPROVE ruling required before any
 wiring into run-all.
 
+## Ruling D-20260823-001 (T3) — STACK A PIT SANDBOX: PIPELINE SKILL FALSIFICATION (APPROVE hybrid, condition met, Phase 0 executed)
+SUMMARY: CEO conditional APPROVE of hybrid synthesis S-20260823-001 (brief B-20260823-001): Position A's per-row
+`available_as_of` storage schema + quarantine partitions as the enforcement layer, Position B's staged metric
+sequencing (NLP corpus skill proven on verified human-labeled corpora BEFORE any return linkage), sim-guardian's
+frozen-hash regression replay as the mandatory audit instrument, centralized clock-stepped read layer over the views
+(sim-guardian fix of B's static-clock hole). Condition "sources must be sortable by real dates" VERIFIED: transcripts
+dataset carries populated `date` field (2005–2025) + MIT license; XBRL/FSDS filed-dated; Damodaran year-labeled;
+Chen-Zimmermann vintaged; GDELT event-dated; PhraseBank/SemEval undated → atemporal oracle use only. Council
+counter-tests implemented as executable gates: DA-1 timestamp coverage ≥80%/source; DA-2/B-2 oracle transfer
+(>15pp F1 drop on held-out REAL inputs = miscalibrated); B-1 instrument provenance (rule-based or training cutoff ≤
+2009-01-01); SG-1 frozen-hash replay bit-identity incl. negative control. Pre-registered bars frozen in
+config/weights_sentinel_bars.yaml BEFORE any data run. Tuning locked until all stage verdicts recorded.  |  BY: CEO
+ |  EFFECT: db/schema_pit.py + db/pit_reader.py (pit_transcripts/pit_scores/pit_market_labels + _excluded
+quarantine twins + pit_audit_log; pit_query read-only via v_* temp views, raw-table access blocked);
+scripts/pit_phase0_audit.py; tests/test_pit_sandbox.py (9 gates); config/weights_sentinel_bars.yaml. Frozen cores,
+existing config/weights*.yaml untouched. Next phases gated: ingest idleengine corpus w/ coverage audit → Stage-1
+corpus scoring → Stage-2 transfer check → Stage-3 Strux return linkage → Stage-4 ablation matrix → verdicts → then
+tuning. Separate APPROVE required before any wiring into run-all.
+
 ## Ruling D-20260819-001 (T3) — VIRUS-FRONTIER: OVERLAP-GRADED FRONTIER ENGINE (APPROVE hybrid, executed)
 SUMMARY: CEO APPROVES the index-anchored overlap frontier (brief B-20260819-001, synthesis S-20260819-001). Discovery feed now walks the SUPPLY-CHAIN web, not social noise: seed = NVDA + competitors (AMD/INTC/AVGO) + major set (MSFT/GOOGL/META/AMZN/AAPL); grade(S) = Σ relevance(customer) over shared customers across the MAJOR SET (overlap-graded, not seed-only); upstream inheritance ("the spot before the shovel") — tier-2 suppliers graded by the tier-1 customers they feed; max 3 hops, ≤200 nodes/seed, ≤50 edges/node, edges CIK-validated + point-in-time (filed_date) + ≥2 sources; QQQ ETF weights SUPPLIED as supplemental cache (quarterly) only — competitors-primary; AI-cons vector: 10 pre-registered cons ("companies solving AI's problems") by sector + quant gate, narrative never required, hidden-gem steal filter; IG DEMOTED to off-market-hours hygiene fallback behind --with-ig (noise floor: 315 "tickers" in 10 days); slow binge-block pacing (block 10, gaps 120-300s, max 3 active hours) for ban safety; quant gate is the SOLE value filter ("a steal doesn't need attention"). Co-mention/13F vectors SUPPRESSED at launch (fail ≥2-source gate). | BY: CEO | EFFECT: discovery/frontier.py + ai_cons.py + etf_weights.py; ecosystem_graph_nodes/edges + etf_holdings schema (point-in-time); frontier sentinel lane + frontier-expand CLI; run-all demotes IG; config/frontier_edges.yaml seed; 51 new tests; full suite 1236 passed/18 skipped/0 failed; commit 61147ea on feature/frontier-overlap-engine. Live SEC >10% customer extraction is Phase-2.

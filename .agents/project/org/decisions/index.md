@@ -25,7 +25,7 @@ decisions/
 
 | Project | Scope | Decisions | Span |
 |---------|-------|-----------|------|
-| [01-org-platform](2026-08/01-org-platform/) | Org setup, pipeline audits, risk dashboard tooling, House Backtest v2 (`/backtest`) | 4 | Aug 1 → Aug 9 |
+| [01-org-platform](2026-08/01-org-platform/) | Org setup, pipeline audits, risk dashboard tooling, House Backtest v2 (`/backtest`) | 5 | Aug 1 → Aug 23 |
 | [02-value-alpha](2026-08/02-value-alpha/) | Relative-Alpha architecture, backtest deep review, reinvestment/moat thesis, selective small-cap gate | 4 | Aug 1 → Aug 3 |
 | [03-portfolio-allocation](2026-08/03-portfolio-allocation/) | Sleeves, dividend/opportunistic engines, ML allocator, multi-asset optimization, walk-forward verification, macro-regime allocator | 8 | Aug 3 → Aug 9 |
 | [04-discovery-feed](2026-08/04-discovery-feed/) | Discovery-feed design: return-max pivot, deterministic trend-ranked feed | 2 | Aug 4 → Aug 6 |
@@ -40,6 +40,12 @@ decisions/
 
 Times = file creation (local). Overnight sessions spill past midnight; where a
 ruling's ID-date and creation date differ, both are shown.
+
+### Sun Aug 23
+
+| Time | ID | Project | Tier | Task | Ruling / Status |
+|------|----|---------|------|------|-----------------|
+| 5:30 PM | [D-20260823-001](2026-08/01-org-platform/D-20260823-001.md) | org-platform | T3 | Stack A PIT sandbox: pipeline sentiment skill validation | APPROVE (conditional, verified) — hybrid adopted; phase 0 executed on feature/b-20260823-001 |
 
 ### Fri Aug 21 – Thu Aug 20
 
