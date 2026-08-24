@@ -1,0 +1,45 @@
+# Pre-registered success bars — D-20260823-001 (Stack A PIT sandbox).
+# FROZEN BEFORE ANY RUN per blueprint invariant 5 / falsification-first doctrine.
+# Changing any bar after a verdict is recorded requires a new T3 decision.
+
+decision: D-20260823-001
+window:
+  start: "2009-01-01"
+  end: "2026-12-31"
+
+# --- Phase 0 gates (devil-advocate counter-tests) -------------------------
+phase0:
+  timestamp_coverage_min_pct: 80.0   # DA-1: below this, source is quarantined, mechanism = theater
+  license_cleared_required: true     # PhraseBank (CC BY-NC-SA) + transcripts (MIT) must be recorded
+  provenance_rule: "instrument training cutoff <= 2009-01-01 OR rule-based (non-trained)"  # B-1
+
+# --- Stage 1: NLP skill on VERIFIED human-labeled corpora (atemporal) -----
+stage1_corpus:
+  oracle_f1_min: 0.62                # pipeline vs human labels (macro-F1)
+  lm_dict_baseline_f1_min: 0.55      # LM dictionary must clear this too, else bars are miscalibrated
+
+# --- Stage 2: oracle transfer check (DA-2 / B-2) ---------------------------
+stage2_transfer:
+  max_f1_drop_pp: 15.0               # benchmark-vs-real-input divergence beyond this = oracle miscalibrated
+  min_real_inputs_sample: 200        # held-out REAL pipeline transcripts to score
+
+# --- Stage 3: return linkage (Strux forward returns, dated 2017-2024) ------
+stage3_market:
+  spearman_min: 0.15                 # score vs forward return, PIT-clean labels only
+
+# --- Stage 4: source-isolation ablation matrix ----------------------------
+stage4_ablation:
+  columns:                           # each run in lock-step, identical universe/dates
+    - verified_only                  # human-verified sentiment sources alone
+    - raw_only                       # raw pipeline output, no verification layer
+    - lm_dict_only                   # Loughran-McDonald baseline alone
+    - chen_zimmermann_controls       # factor controls alone (must NOT beat pipeline on skill)
+    - full_pipeline
+  min_lift_over_best_baseline_pp: 5.0  # full_pipeline must beat best single baseline by >= 5pp
+
+# --- Stage 5 --------------------------------------------------------------
+tuning_unlocked_only_after_verdicts_recorded: true
+
+# --- Sim-guardian audit instrument ---------------------------------------
+hash_replay:
+  required: true                     # mutate/delete post-date rows -> outputs MUST be bit-identical
