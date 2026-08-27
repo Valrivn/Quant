@@ -49,6 +49,7 @@ Format (from token-budget.md):
 | 2026-08-16 | D-20260816-002 | T3 | big-pickle (A) + gemini-planner (B) + hermes-bridge (synthesis) + logger | 75k | 22k | $2.00 | APPROVE | Scraping anti-bot strategy engine selection gate; authorize fingerprint audit (nodriver vs Playwright-stealth) |
 | 2026-08-19 | D-20260819-001 | T3 | big-pickle (A) + gemini-planner (B) + big-pickle (map) + hermes-bridge (synthesis) + deepseek-worker (build) + conductor + logger | 118k | 35k | $1.50 | APPROVE (hybrid, CEO-modified) | Virus-Frontier overlap-graded frontier engine + AI-cons vector + ETF weight cache + IG demotion; council hearing (devil-advocate, open-minded, sim-guardian, risk-automator, execution-strategist, alpha-integrator voices in synthesis S-20260819-001); 51 new tests; full suite 1236 passed/18 skipped/0 failed; commit 61147ea on feature/frontier-overlap-engine |
 | 2026-08-23 | D-20260823-001 | T3 | big-pickle (brief+A+map) + gemini-planner (B) + devil-advocate + sim-guardian + hermes-bridge (synthesis) + logger | ~55k (est) | - | - | APPROVED (conditional, verified) | hybrid adopted; phase 0 executed on feature/b-20260823-001 |
+| 2026-08-26 | D-20260826-001 | T2 | big-pickle (review+plan) + 3 parallel workers (data/model/dataset-audit) | ~40k (est) | - | - | APPROVED | FinBERT dual-head v1 approved; PhraseBank transfer analysis added; parallel build on feature/sentiment-model-v1 |
 
 
 ## Monthly roll-up (data-scientist writes)

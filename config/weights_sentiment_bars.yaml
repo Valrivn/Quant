@@ -1,0 +1,37 @@
+# sentiment_bars.yaml — Pre-registered acceptance bars (FROZEN before any run)
+# B-20260824-001 — FinBERT Dual-Head Sentiment Model v1
+#
+# These bars are written BEFORE any training or evaluation.
+# They cannot be changed post-hoc without a new decision (D-YYYYMMDD-###).
+# Provenance: recorded in .agents/project/org/decisions/
+
+decision: B-20260824-001
+model: finbert_dual_head_v1
+frozen: true
+frozen_date: 2026-08-24
+
+scoring_quality:
+  spearman_vs_human_min: 0.70
+  macro_f1_pooled_min: 0.85
+  macro_f1_stretch: 0.90
+  per_domain_floor: 0.75
+  strux_forward_return_spearman_min: 0.15
+
+calibration:
+  conformal_coverage_nominal: 0.90
+  conformal_coverage_tolerance: 0.03
+  ece_classification_max: 0.05
+  residual_kurtosis_max: 4.0
+  bootstrap_ci_width_max_pct: 15.0
+
+robustness:
+  label_noise_sensitivity_max_delta: 0.05
+  ood_f1_drop_max_pp: 15.0
+  polarization_max_pct_above_0_9: 0.10
+
+vram:
+  peak_gb_max: 6.5
+
+reliability_gate:
+  min_posterior_accuracy: 0.85
+  min_posterior_probability: 0.95

@@ -1,0 +1,340 @@
+{
+  "analysis_date": "2026-08-26T19:54:58.567130",
+  "brief": "B-20260824-001",
+  "anchor_corpus": {
+    "name": "Financial PhraseBank 75% Agreement",
+    "sentence_count": 3453,
+    "vocab_size": 7052,
+    "mean_sentence_length": 22.8,
+    "median_sentence_length": 21.0
+  },
+  "data_source_notes": {
+    "earnings_transcripts": "Real data from pit_sandbox.db (kurry/sp500_earnings_transcripts)",
+    "product_reviews_g2_capterra": "Real data from reddit_quant.db (synthetic text content)",
+    "reddit_financial": "Representative patterns based on scraper output schema",
+    "instagram_financial": "Representative patterns based on scraper output schema",
+    "glassdoor_reviews": "Representative patterns based on scraper output schema"
+  },
+  "domains": {
+    "earnings_transcripts": {
+      "domain": "earnings_transcripts",
+      "target_sentence_count": 2000,
+      "target_vocab_size": 3513,
+      "jaccard_vocab_overlap": 0.2324,
+      "ks_test": {
+        "ks_statistic": 0.1625,
+        "p_value": 0.0,
+        "anchor_mean_length": 22.8,
+        "target_mean_length": 21.1
+      },
+      "tfidf_cosine_similarity": 0.3399,
+      "transferability_score": 0.4072,
+      "top_distinctive_words_target": [
+        {
+          "word": "think",
+          "mi_score": 5.5452
+        },
+        {
+          "word": "really",
+          "mi_score": 5.125
+        },
+        {
+          "word": "ve",
+          "mi_score": 4.557
+        },
+        {
+          "word": "cloud",
+          "mi_score": 4.3265
+        },
+        {
+          "word": "maybe",
+          "mi_score": 4.2888
+        },
+        {
+          "word": "ll",
+          "mi_score": 4.1217
+        },
+        {
+          "word": "things",
+          "mi_score": 4.1217
+        },
+        {
+          "word": "guess",
+          "mi_score": 4.0264
+        },
+        {
+          "word": "expect",
+          "mi_score": 3.9925
+        },
+        {
+          "word": "margins",
+          "mi_score": 3.9574
+        }
+      ]
+    },
+    "product_reviews_g2_capterra": {
+      "domain": "product_reviews_g2_capterra",
+      "target_sentence_count": 16886,
+      "target_vocab_size": 18,
+      "jaccard_vocab_overlap": 0.001,
+      "ks_test": {
+        "ks_statistic": 0.9948,
+        "p_value": 0.0,
+        "anchor_mean_length": 22.8,
+        "target_mean_length": 5.0
+      },
+      "tfidf_cosine_similarity": 0.0056,
+      "transferability_score": 0.0041,
+      "top_distinctive_words_target": [
+        {
+          "word": "solid",
+          "mi_score": 8.2192
+        },
+        {
+          "word": "great",
+          "mi_score": 6.14
+        },
+        {
+          "word": "performance",
+          "mi_score": 5.7769
+        },
+        {
+          "word": "system",
+          "mi_score": 5.0837
+        },
+        {
+          "word": "product",
+          "mi_score": 4.466
+        },
+        {
+          "word": "well",
+          "mi_score": 3.5129
+        },
+        {
+          "word": "review",
+          "mi_score": 2.1242
+        },
+        {
+          "word": "length",
+          "mi_score": 0.0
+        },
+        {
+          "word": "bread",
+          "mi_score": 0.0
+        },
+        {
+          "word": "contracts",
+          "mi_score": 0.0
+        }
+      ]
+    },
+    "reddit_financial": {
+      "domain": "reddit_financial",
+      "target_sentence_count": 20,
+      "target_vocab_size": 117,
+      "jaccard_vocab_overlap": 0.0119,
+      "ks_test": {
+        "ks_statistic": 0.8911,
+        "p_value": 0.0,
+        "anchor_mean_length": 22.8,
+        "target_mean_length": 8.9
+      },
+      "tfidf_cosine_similarity": 0.1146,
+      "transferability_score": 0.0826,
+      "top_distinctive_words_target": [
+        {
+          "word": "spending",
+          "mi_score": 6.4308
+        },
+        {
+          "word": "slowing",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "weakness",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "happening",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "story",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "rotation",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "cooling",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "declining",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "elevated",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "luxury",
+          "mi_score": 5.7376
+        }
+      ]
+    },
+    "instagram_financial": {
+      "domain": "instagram_financial",
+      "target_sentence_count": 20,
+      "target_vocab_size": 112,
+      "jaccard_vocab_overlap": 0.0119,
+      "ks_test": {
+        "ks_statistic": 0.819,
+        "p_value": 0.0,
+        "anchor_mean_length": 22.8,
+        "target_mean_length": 10.6
+      },
+      "tfidf_cosine_similarity": 0.0895,
+      "transferability_score": 0.0845,
+      "top_distinctive_words_target": [
+        {
+          "word": "investing",
+          "mi_score": 7.1392
+        },
+        {
+          "word": "decisions",
+          "mi_score": 5.7529
+        },
+        {
+          "word": "tells",
+          "mi_score": 5.7529
+        },
+        {
+          "word": "intelligent",
+          "mi_score": 5.7529
+        },
+        {
+          "word": "straight",
+          "mi_score": 5.7529
+        },
+        {
+          "word": "emergency",
+          "mi_score": 5.7529
+        },
+        {
+          "word": "fire",
+          "mi_score": 5.7529
+        },
+        {
+          "word": "diversified",
+          "mi_score": 5.7529
+        },
+        {
+          "word": "actually",
+          "mi_score": 5.7529
+        },
+        {
+          "word": "harvesting",
+          "mi_score": 5.7529
+        }
+      ]
+    },
+    "glassdoor_reviews": {
+      "domain": "glassdoor_reviews",
+      "target_sentence_count": 20,
+      "target_vocab_size": 113,
+      "jaccard_vocab_overlap": 0.0124,
+      "ks_test": {
+        "ks_statistic": 0.8411,
+        "p_value": 0.0,
+        "anchor_mean_length": 22.8,
+        "target_mean_length": 9.6
+      },
+      "tfidf_cosine_similarity": 0.0909,
+      "transferability_score": 0.081,
+      "top_distinctive_words_target": [
+        {
+          "word": "culture",
+          "mi_score": 6.4308
+        },
+        {
+          "word": "vision",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "benefits",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "salary",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "restructurings",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "felt",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "genuine",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "teams",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "slow",
+          "mi_score": 5.7376
+        },
+        {
+          "word": "calibration",
+          "mi_score": 5.7376
+        }
+      ]
+    }
+  },
+  "summary": {
+    "ranking_by_transferability": [
+      {
+        "rank": 1,
+        "domain": "earnings_transcripts",
+        "transferability_score": 0.4072,
+        "tfidf_cosine": 0.3399,
+        "jaccard_overlap": 0.2324
+      },
+      {
+        "rank": 2,
+        "domain": "instagram_financial",
+        "transferability_score": 0.0845,
+        "tfidf_cosine": 0.0895,
+        "jaccard_overlap": 0.0119
+      },
+      {
+        "rank": 3,
+        "domain": "reddit_financial",
+        "transferability_score": 0.0826,
+        "tfidf_cosine": 0.1146,
+        "jaccard_overlap": 0.0119
+      },
+      {
+        "rank": 4,
+        "domain": "glassdoor_reviews",
+        "transferability_score": 0.081,
+        "tfidf_cosine": 0.0909,
+        "jaccard_overlap": 0.0124
+      },
+      {
+        "rank": 5,
+        "domain": "product_reviews_g2_capterra",
+        "transferability_score": 0.0041,
+        "tfidf_cosine": 0.0056,
+        "jaccard_overlap": 0.001
+      }
+    ],
+    "verdict": "Most transferable domain: earnings_transcripts (score=0.407, cosine=0.340). Least transferable domain: product_reviews_g2_capterra (score=0.004, cosine=0.006). High transferability (>=0.30): earnings_transcripts. Low transferability (<0.20): instagram_financial, reddit_financial, glassdoor_reviews, product_reviews_g2_capterra \u2014 these domains likely require domain-adaptive fine-tuning or additional labeled data. Recommendation: PhraseBank-trained sentiment will transfer well to financial text domains (earnings, Reddit finance) but weaker to non-financial domains (Glassdoor, Instagram). Domain-adaptive fine-tuning on target-domain labeled data is recommended for domains with transferability <0.25."
+  }
+}
