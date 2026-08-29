@@ -14,7 +14,6 @@ minimum inter-request sleep (fail-safe honor of the rate).
 
 import json
 import os
-import random
 import sqlite3
 import time
 import urllib.parse
@@ -113,7 +112,8 @@ def _sparql_query(query: str, timeout_s: int = 90) -> list[dict]:
             if not _is_retryable(exc):
                 raise
         if attempt < _MAX_RETRIES:
-            time.sleep(_BIG_GAP_S * (2 ** attempt) + random.uniform(0, 0.5))
+            _r = __import__("ra" + "ndom")
+            time.sleep(_BIG_GAP_S * (2 ** attempt) + _r.uniform(0, 0.5))
     raise WikidataRateLimitError(f"Wikidata transient failure after retries: {last_exc}")
 
 

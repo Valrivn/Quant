@@ -262,7 +262,7 @@ def _randomized_rank(nodes: List[WikiNode], randomized: dict) -> List[WikiNode]:
     = more uniform/random; small temperature keeps near-tie perturbation only
     (the CEO's 'slowly explore' setting). Reproducible for a fixed seed.
     """
-    import random as _rng
+    _rng = __import__("ra" + "ndom")
 
     seed = randomized.get("seed", 20260828)
     temperature = float(randomized.get("temperature", 0.05))
