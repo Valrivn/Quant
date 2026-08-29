@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import json
+import os
 import random
 import time
 from typing import Dict, List, Optional, Any
@@ -227,7 +228,15 @@ class BrowserlessClient:
                 )
             
             return result
-            
+
+        except (aiohttp.ClientConnectorError, ConnectionRefusedError, OSError) as conn_err:
+            logger.warning("Browserless endpoint unreachable (%s); using free local nodriver fallback", conn_err)
+            html = await self._local_fetch_html(url, timeout or self.timeout)
+            if html:
+                logger.info("local nodriver fallback succeeded for %s (%d bytes)", url, len(html))
+                return BrowserlessResult(success=True, html=html, status_code=200)
+            return BrowserlessResult(success=False, error=str(conn_err))
+
         except Exception as e:
             circuit_state = "open" if isinstance(e, CircuitBreakerOpenError) else "closed"
             
@@ -259,6 +268,48 @@ class BrowserlessClient:
                     )
             
             return BrowserlessResult(success=False, error=str(e))
+
+    async def _local_fetch_html(self, url: str, timeout: Optional[int] = None) -> Optional[str]:
+        """Free fallback: fetch page HTML by attaching to the local debuggable
+        browser (127.0.0.1:9222) when the Browserless endpoint is unreachable.
+
+        Returns the same HTML a ``/content`` call would, at zero paid credits.
+        Best-effort: `script`/`wait_for` options are not honored.
+        """
+        try:
+            import nodriver as uc
+        except Exception:
+            return None
+        browser_executable = os.getenv("CHROME_BINARY_PATH")
+        try:
+            from config import load_hybrid_config
+            psych = load_hybrid_config().get("psychological", {})
+            browser_executable = psych.get("browser_binary_path") or browser_executable
+        except Exception:
+            pass
+
+        browser = None
+        try:
+            browser = await uc.start(
+                headless=False,
+                browser_executable_path=browser_executable,
+                sandbox=False,
+                host="127.0.0.1",
+                port=9222,
+            )
+            tab = await browser.get(url)
+            await asyncio.sleep(random.uniform(5, 9))
+            html = await tab.get_content()
+            return html if html else None
+        except Exception as exc:
+            logger.warning("local nodriver fallback failed for %s: %s", url, exc)
+            return None
+        finally:
+            if browser is not None:
+                try:
+                    await browser.stop()
+                except Exception:
+                    pass
 
     async def scrape_pdf(self, url: str) -> BrowserlessResult:
         if not self._session:

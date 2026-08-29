@@ -201,7 +201,7 @@ CLOUDFLARE_SIGNALS = [
     "access to this page has been denied", "confirm you are a human",
     "press & hold", "verify you are human", "checking if the site connection is secure",
     "we've detected unusual traffic", "cloudflare ray id",
-    "turnstile", "cf-turnstile", "challenge-form",
+    "challenge-form",
 ]
 
 

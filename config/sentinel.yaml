@@ -86,6 +86,19 @@ sentinel:
       hub_out_degree_zero_grade: 50
       blocklist: []
 
+    thread_b:  # Thread-B category discovery lane (D-20260828-001)
+      beta_band: 0.15
+      prefer_different_sub_area: true
+      max_parallel_workers: 2
+      randomized:
+        enabled: false        # minimal Gumbel exploration; OFF = bit-identical deterministic
+        temperature: 0.05
+        seed: 20260828
+      escalate_to_screen:
+        enabled: true         # Thread-B NOVEL candidates route through discovery screen
+        max_workers: 2
+        min_screen_floor: 0.0 # screen pass threshold (0.0 = pass any per existing gate)
+
   frontier:
     seed_tickers: ["NVDA"]
     competitor_set: ["NVDA", "AMD", "INTC", "AVGO"]

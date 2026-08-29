@@ -22,7 +22,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from db.schema_discovery import create_discovery_tables
 from discovery.wikidata import _sparql_query, fetch_companies, temporal_coverage_probe
+from discovery.gate_data import apply_reverse_heatmap_filter
 from discovery.wiki_frontier import expand_wiki_frontier
+from discovery.wiki_thread_b_workers import (
+    run_threads_parallel,
+    screen_novel_parallel,
+)
+from discovery.industry_beta import load_industry_beta
 from discovery.wiki_sec_diff import diff_wiki_sec
 from discovery.wiki_census import pit_unlock_check
 
@@ -39,6 +45,17 @@ WAVE_BATCH = 48
 MAX_DEPTH = 3
 MAX_NODES = 2500
 QUERY_GAP_S = 1.0
+
+
+def _load_thread_b_cfg() -> dict:
+    """Load thread_b lane config from sentinel.yaml (fail-closed defaults)."""
+    try:
+        from discovery.sentinel.config import load_sentinel_config
+        cfg = load_sentinel_config()
+        return dict(cfg["sentinel"]["lanes"].get("thread_b", {}))
+    except Exception:  # noqa: BLE001 - config load failure must not kill the probe
+        return {"beta_band": 0.15, "prefer_different_sub_area": True,
+                "randomized": None, "escalate_to_screen": {"enabled": False}}
 
 _WAVE_QUERY = """SELECT ?src ?rel ?tgt ?from ?to WHERE {
   VALUES ?seed { %SEEDS% }
@@ -179,13 +196,87 @@ def main() -> None:
     }
     stats["pit_unlock"] = pit_unlock_check(stats["coverage_local"]["pct_dated"])
 
-    print("[4/5] expanding wiki frontier...", flush=True)
-    result = expand_wiki_frontier(
-        seed_qids=seed_qids,
-        companies=companies,
-        edges=edges,
-        major_tickers=MAJOR_TICKERS,
-    )
+    print("[4/5] expanding wiki frontier (Thread A || Thread B)...", flush=True)
+    # Parallel worker lane: Thread A (frontier expansion) and Thread B's
+    # seed-industry fetch (network) run concurrently on a bounded executor.
+    try:
+        from discovery.wikidata import fetch_company_industries, fetch_industry_members
+        industry_cfg = load_industry_beta()
+        thread_b_cfg = _load_thread_b_cfg()
+    except Exception as exc:  # noqa: BLE001 - optional Thread-B lane never gates the probe
+        thread_b_cfg, industry_cfg = None, None
+        print(f"      [thread_b disabled: {str(exc)[:100]}]", flush=True)
+
+    if thread_b_cfg is not None:
+        thread_b_status = []
+        def _thread_a():
+            return expand_wiki_frontier(
+                seed_qids=seed_qids,
+                companies=companies,
+                edges=edges,
+                major_tickers=MAJOR_TICKERS,
+            )
+
+        def _seed_industries(qids):
+            try:
+                return fetch_company_industries(qids, timeout_s=150)
+            except Exception as exc:  # noqa: BLE001
+                thread_b_status.append({"seed_fetch": "DEGRADED",
+                                        "reason": str(exc)[:150]})
+                return {"company_industry": {}, "industry_members": {}}
+
+        def _peer_members(labels):
+            try:
+                return fetch_industry_members(timeout_s=150, industry_labels=labels)
+            except Exception as exc:  # noqa: BLE001
+                thread_b_status.append({"peer_fetch": "DEGRADED",
+                                        "reason": str(exc)[:150]})
+                return {"company_industry": {}, "industry_members": {}}
+
+        tb = run_threads_parallel(
+            frontier_callable=_thread_a,
+            seed_industries_callable=_seed_industries,
+            companies=companies,
+            ticker_industry=None,
+            industry_members_raw=None,
+            industry_beta_cfg=industry_cfg,
+            thread_b_cfg=thread_b_cfg,
+            seed_qids=seed_qids,
+            company_cap=200 * len(seed_qids),
+            peer_members_callable=_peer_members,
+            max_workers=int(thread_b_cfg.get("max_parallel_workers", 2)),
+        )
+        result = tb["result_a"]
+        stats["thread_b"] = {
+            "intersections": tb["b_intersections"],
+            "candidates": {q: v["ticker"] for q, v in tb["thread_b_candidates"].items()},
+            "status": thread_b_status,
+        }
+        escal = thread_b_cfg.get("escalate_to_screen") or {}
+        if escal.get("enabled", True) and tb["thread_b_candidates"]:
+            try:
+                screen_results = screen_novel_parallel(
+                    tb["thread_b_candidates"],
+                    tb["thread_a_nodes"],
+                    apply_reverse_heatmap_filter,
+                    max_workers=int(escal.get("max_workers", 2)),
+                )
+                passed = [t for t, i in screen_results.items() if i["passed"]]
+                stats["thread_b"]["screen"] = {
+                    "screened": list(screen_results.keys()),
+                    "passed": passed,
+                    "passed_count": len(passed),
+                }
+            except Exception as exc:  # noqa: BLE001 - screen failure never gates probe
+                stats["thread_b"]["screen"] = {"status": "DEGRADED",
+                                               "reason": str(exc)[:120]}
+    else:
+        result = expand_wiki_frontier(
+            seed_qids=seed_qids,
+            companies=companies,
+            edges=edges,
+            major_tickers=MAJOR_TICKERS,
+        )
     stats["frontier_summary"] = result.summary
     wiki_names = sorted({
         companies[n.qid] for n in result.nodes if n.kind == "company"

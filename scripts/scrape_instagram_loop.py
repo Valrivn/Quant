@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """
-Continuous Instagram scraping loop with irregular delay intervals,
-data persistence, progress tracking, and dynamic time estimation.
+Human-paced Instagram scraping loop (D-20260809-003 pattern, hardened).
+
+Runs binge blocks through the pacing supervisor in
+``instagram_primary.scrape_instagram_long``: each block is one real-session
+browser pass, blocks are separated by inter-block gaps, and the run HARD
+STOPS after ``--max-hours`` (default: config ``max_active_hours`` ≈ 5-6h) of
+ACTIVE scraping. Challenges / login walls / attach failures FAIL HARD: the
+loop stops and reports instead of blind-retrying.
 """
 
 import argparse
@@ -15,8 +21,15 @@ from pathlib import Path
 
 # Add project root to path for imports
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "Qualitative"))
 
-from Qualitative.psychological.scrapers.instagram_primary import fetch_instagram_mentions, InstagramConfig
+from Qualitative.psychological.scrapers.instagram_primary import (
+    fetch_instagram_mentions,
+    InstagramConfig,
+    scrape_instagram_long,
+    InstagramChallengeDetected,
+    InstagramSessionUnavailable,
+)
 from db.connection import get_connection
 
 def setup_db(conn: sqlite3.Connection):
@@ -29,6 +42,9 @@ def setup_db(conn: sqlite3.Connection):
             shortcode TEXT,
             caption TEXT,
             sentiment REAL,
+            finbert_label TEXT,
+            finbert_sentiment REAL,
+            finbert_confidence REAL,
             views INTEGER,
             comments INTEGER,
             followers INTEGER,
@@ -58,14 +74,19 @@ def save_mentions(conn: sqlite3.Connection, mentions: list) -> int:
         # We use INSERT OR IGNORE to prevent duplicate records
         cursor.execute("""
             INSERT OR IGNORE INTO instagram_raw_mentions (
-                id, ticker, shortcode, caption, sentiment, views, comments, followers, verified, fetch_ts, external_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                id, ticker, shortcode, caption, sentiment,
+                finbert_label, finbert_sentiment, finbert_confidence,
+                views, comments, followers, verified, fetch_ts, external_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             record_id,
             ticker,
             shortcode,
             m.get("caption"),
             m.get("sentiment"),
+            m.get("finbert_label"),
+            m.get("finbert_sentiment"),
+            m.get("finbert_confidence"),
             m.get("views") or m.get("volume_or_rank", 0),
             m.get("comments"),
             m.get("followers"),
@@ -105,87 +126,55 @@ def get_total_count(conn: sqlite3.Connection) -> int:
     return cursor.fetchone()[0]
 
 def main():
-    parser = argparse.ArgumentParser(description="Instagram Scrape Loop")
-    parser.add_argument("--target", type=int, default=100000, help="Target total scraped records")
-    parser.add_argument("--batch-size", type=int, default=100, help="Number of records to scrape per batch")
-    parser.add_argument("--min-delay", type=int, default=60, help="Minimum delay between batches in seconds")
-    parser.add_argument("--max-delay", type=int, default=120, help="Maximum delay between batches in seconds")
+    parser = argparse.ArgumentParser(description="Human-paced Instagram scrape loop (hard stop after N active hours)")
+    parser.add_argument("--max-hours", type=float, default=None,
+                        help="Hard stop after N hours of ACTIVE scraping (default: config max_active_hours)")
+    parser.add_argument("--target", type=int, default=0,
+                        help="Optional total-record target; stop early once reached")
+    parser.add_argument("--batch-size", type=int, default=100,
+                        help="Number of records to scrape per binge block")
     args = parser.parse_args()
 
     os.environ["DISCOVERY_LIVE"] = "1"
-    
+
+    cfg = InstagramConfig()
+    if args.max_hours:
+        cfg.max_active_hours = args.max_hours
+
     conn = get_connection()
     setup_db(conn)
-    
+
     initial_count = get_total_count(conn)
     print(f"[*] Database initialized. Currently stored instagram mentions: {initial_count}")
-    print(f"[*] Scraping target: {args.target} records.")
-    
-    if initial_count >= args.target:
-        print("[!] Target already reached or exceeded!")
-        return
+    print(f"[*] Hard stop after {cfg.max_active_hours}h of ACTIVE scraping "
+          f"(binge blocks, inter-block gaps {int(cfg.inter_block_gap_seconds[0])}-{int(cfg.inter_block_gap_seconds[1])}s).")
 
-    scraped_this_run = 0
     start_time = time.time()
-    
+    total_new = 0
+
+    def persist(rows, block_active):
+        nonlocal total_new
+        new_inserted = save_mentions(conn, rows)
+        total_new += new_inserted
+        current_total = get_total_count(conn)
+        elapsed = time.time() - start_time
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] Block: +{new_inserted} new "
+              f"(total {current_total}) in {format_duration(block_active)} | "
+              f"run +{total_new} new in {format_duration(elapsed)}")
+
     try:
-        while True:
-            current_total = get_total_count(conn)
-            if current_total >= args.target:
-                print(f"\n[+] Success! Target of {args.target} reached. Total stored: {current_total}")
-                break
-                
-            batch_start = time.time()
-            print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Starting next batch of {args.batch_size}...")
-            
-            try:
-                cfg = InstagramConfig()
-                mentions = fetch_instagram_mentions(limit=args.batch_size, config=cfg)
-                new_inserted = save_mentions(conn, mentions)
-                scraped_this_run += new_inserted
-                current_total += new_inserted
-            except Exception as e:
-                print(f"[!] Error fetching/saving batch: {e}. Sleeping before retry.")
-                # If hit a rate limit/challenge, do a longer cooldown
-                cooldown = random.randint(600, 1200)
-                print(f"[*] Cooling down for {format_duration(cooldown)}...")
-                time.sleep(cooldown)
-                continue
-                
-            # Progress calculation
-            progress_pct = (current_total / args.target) * 100
-            remaining_records = args.target - current_total
-            
-            # Dynamic time estimation based on records scraped during this run
-            elapsed_run_time = time.time() - start_time
-            if scraped_this_run > 0:
-                avg_time_per_record = elapsed_run_time / scraped_this_run
-                est_remaining_seconds = remaining_records * avg_time_per_record
-                est_time_str = format_duration(est_remaining_seconds)
-            else:
-                est_time_str = "Calculating..."
-                
-            print(f"Status: {progress_pct:.3f}% | Total Scraped: {current_total}/{args.target} (+{new_inserted} new)")
-            print(f"Run Stats: Scraped {scraped_this_run} items in {format_duration(elapsed_run_time)}")
-            print(f"Estimated Remaining Time to Target: {est_time_str}")
-            
-            if current_total >= args.target:
-                print(f"\n[+] Target reached!")
-                break
-                
-            # Sleep with irregular interval
-            sleep_time = random.uniform(args.min_delay, args.max_delay)
-            print(f"[*] Sleeping for {format_duration(sleep_time)}...")
-            
-            # Countdown print
-            sleep_start = time.time()
-            while time.time() - sleep_start < sleep_time:
-                remaining = int(sleep_time - (time.time() - sleep_start))
-                sys.stdout.write(f"\rNext batch in: {remaining}s...   ")
-                sys.stdout.flush()
-                time.sleep(1)
-            sys.stdout.write("\n")
-            
+        summary = scrape_instagram_long(limit=args.batch_size, config=cfg, on_block=persist)
+        current_total = get_total_count(conn)
+        print(f"\n[+] Run complete. New rows this run: {total_new} | DB total: {current_total}")
+        print(f"    Blocks: {summary['blocks']} | Active scraping: {format_duration(summary['active_seconds'])}")
+        if args.target and current_total >= args.target:
+            print(f"    Target of {args.target} reached.")
+    except InstagramChallengeDetected as e:
+        print(f"\n[!] FAIL-HARD: Instagram challenge detected: {e}")
+        print("    Pipeline stopped. Do NOT auto-resume. Report to CEO and wait for explicit go.")
+    except InstagramSessionUnavailable as e:
+        print(f"\n[!] FAIL-HARD: Instagram session unavailable: {e}")
+        print("    Pipeline stopped. Do NOT auto-resume. Report to CEO and wait for explicit go.")
     except KeyboardInterrupt:
         print("\n[!] Scraping loop interrupted by user. Saving and exiting.")
     finally:

@@ -26,7 +26,7 @@ def _score(text: str) -> float:
 
 
 def fetch_via_jina(url: str, jina_base: str, max_chars: int,
-                   timeout: int = 60) -> Tuple[Optional[str], int]:
+                   timeout: int = 2) -> Tuple[Optional[str], int]:
     target = f"{jina_base}/{url}"
     try:
         resp = requests.get(

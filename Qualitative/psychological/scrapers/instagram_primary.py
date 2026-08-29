@@ -20,7 +20,7 @@ import random
 import re
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Tuple
 
 from config import load_hybrid_config
 from psychological.scrapers.nodriver_scraper import (
@@ -94,6 +94,9 @@ class InstagramConfig:
     hashtags: List[str] = field(default_factory=lambda: list(_DEFAULT_HASHTAGS))
     finance_accounts: List[str] = field(default_factory=list)
     browser_executable_path: Optional[str] = None
+    max_active_hours: float = 5.5
+    inter_block_gap_seconds: Tuple[float, float] = (1200.0, 2400.0)
+    max_empty_blocks: int = 3
 
     def __init__(self, config_dict: dict = None):
         cfg = config_dict
@@ -111,6 +114,13 @@ class InstagramConfig:
         self.hashtags = list(cfg.get("hashtags", _DEFAULT_HASHTAGS))
         self.finance_accounts = list(cfg.get("finance_accounts", []))
         self.browser_executable_path = cfg.get("browser_executable_path")
+        self.max_active_hours = float(cfg.get("max_active_hours", 5.5))
+        gap = cfg.get("inter_block_gap_seconds", [1200.0, 2400.0])
+        try:
+            self.inter_block_gap_seconds = (float(gap[0]), float(gap[1]))
+        except (TypeError, ValueError, IndexError):
+            self.inter_block_gap_seconds = (1200.0, 2400.0)
+        self.max_empty_blocks = int(cfg.get("max_empty_blocks", 3))
 
 
 _CHALLENGE_SIGNALS = [
@@ -389,6 +399,16 @@ _COMMON_WORDS = {
     "THE", "AND", "FOR", "ARE", "BUT", "NOT", "YOU", "ALL", "CAN", "HAS", "HAD", "WAS", "ONE", "TWO", "NEW", "OLD", "SEE", "GET", "GOT", "LET", "PUT", "CALL", "LONG", "SHORT", "MOON", "CRASH", "PUMP", "DUMP", "RIP", "YTD", "CEO", "CFO", "CTO", "IPO", "ETF", "SEC", "FDA", "FOMC", "CPI", "PPI", "GDP", "EPS", "PE", "ROE", "ROA", "EBITDA", "FCF", "DCF", "AI", "ML", "GPU", "CPU", "API", "SDK", "UI", "UX", "DB", "SQL", "AWS", "GCP", "K8S", "CI", "CD", "PR", "QA", "DEV", "OPS", "SRE", "PM", "PO", "CTO", "VP", "DIR", "MGR", "ENG", "TECH", "SALES", "HR", "IT", "FIN", "OPS", "MKT", "BD", "R&D", "Q1", "Q2", "Q3", "Q4", "FY", "TTM", "YOY", "QOQ", "MOM", "WOW", "DOD", "AH", "PM", "AM", "EST", "PST", "CST", "MST", "UTC", "GMT", "EDT", "PDT", "CDT", "MDT",
     "WHAT", "MOVES", "YOUR", "JUNE", "THIS", "THAT", "WITH", "FROM", "HAVE", "BEEN", "WERE", "THEY", "THEIR", "THERE", "THEN", "THAN", "WHEN", "WHERE", "WHICH", "WHO", "WHOM", "WHOSE", "WHY", "HOW", "ITS", "OUR", "OUT", "OVER", "OWN", "SAME", "SUCH", "VERY", "WELL", "WILL", "WOULD", "ABOUT", "AFTER", "AGAIN", "BELOW", "COULD", "EVERY", "FIRST", "FOUND", "GREAT", "GROUP", "HAND", "HIGH", "HOME", "LARGE", "LAST", "LEFT", "LIFE", "LIGHT", "LIKE", "LINE", "LITTLE", "LONG", "LOOK", "MADE", "MAKE", "MAN", "MANY", "MAY", "MIGHT", "MOST", "MUST", "NEVER", "NEXT", "NIGHT", "ONLY", "OPEN", "ORDER", "OTHER", "PART", "PLACE", "POINT", "POWER", "PUBLIC", "RIGHT", "SAID", "SAME", "SAW", "SAY", "SEE", "SEEM", "SEEN", "SHALL", "SHOULD", "SHOW", "SIDE", "SINCE", "SMALL", "SOUND", "STILL", "STUDY", "SYSTEM", "TAKE", "TELL", "THOSE", "THOUGH", "THOUGHT", "THROUGH", "THUS", "TOGETHER", "TOO", "TOOK", "TURN", "UNDER", "UNTIL", "UPON", "USED", "USES", "USING", "USUALLY", "VARIOUS", "WANT", "WAY", "WAYS", "WEEK", "WEEKS", "WENT", "WHERE", "WHILE", "WHITE", "WHOLE", "WITHIN", "WITHOUT", "WORK", "WORLD", "YEAR", "YEARS", "YOUNG", "ZUCK", "KOSPI", "SPCX", "TOP", "BRACE", "DUDE", "HOPE", "WELL", "DOING", "RETIREMENT", "ACCOUNT", "GROUND", "ONLY", "THESE", "WERE", "PUTS", "IF", "ALL", "IN", "ON", "USD", "ZUCK", "BRACE", "KOSPI", "SPCX", "TOP", "RIP",
     "TO", "IS", "IT", "AS", "AT", "BE", "BY", "DO", "GO", "HE", "HI", "IF", "IN", "IT", "ME", "MY", "NO", "OF", "ON", "OR", "SO", "UP", "US", "WE", "AM", "AN", "AS", "AT", "BE", "BY", "DO", "GO", "HE", "HI", "IF", "IN", "IS", "IT", "ME", "MY", "NO", "OF", "ON", "OR", "SO", "TO", "UP", "US", "WE", "HIS", "HER", "HIM", "SHE", "THEM", "THEN", "THAN", "THAT", "THIS", "THOSE", "THESE", "THERE", "WHERE", "WHEN", "WHY", "HOW", "WHO", "WHOM", "WHOSE", "WHICH", "WHAT", "WHICH", "WHILE", "WITH", "WITHIN", "WITHOUT", "YOUR", "YOU", "YOURS", "OUR", "OURS", "MY", "MINE", "HIS", "HERS", "ITS", "THEIR", "THEIRS",
+    # Common English words that collide with real SEC tickers (verified via the
+    # local CIK map). In lowercase prose captions these are almost never stock
+    # mentions (e.g. "main character energy" -> MAIN, "link in bio" -> LINK).
+    # Kept as a safety net: even if text gets uppercased upstream, these still
+    # filter out. Real registered companies: MAIN=Main Street Capital,
+    # NOW=ServiceNow, LINK=Interlink Electronics, BIO=Bio-Rad, etc.
+    "ANY", "BACK", "BAND", "BEAT", "BILL", "BIO", "BOLD", "BR", "COST", "DE",
+    "DOW", "ES", "ET", "FIVE", "FOUR", "GAP", "HELP", "HIT", "HOUR", "KEY",
+    "LINK", "LOW", "MAIN", "MED", "MOVE", "NET", "NOW", "PLUS", "POST", "RACE",
+    "REAL", "RUN", "SITS", "WWW",
 }
 
 
@@ -502,9 +522,20 @@ def extract_tickers(text: str, llm_tickers: List[str] = None) -> List[str]:
             for t in mapped:
                 tickers.add(t)
                 
-    # 2. Traditional regex parser
-    words = re.findall(r"\b[A-Z]{1,5}\b", text.upper())
-    for word in words:
+    # 2. Cashtags are explicit ticker signals regardless of case: $TSLA or $tsla.
+    for word in re.findall(r"\$([A-Za-z]{1,5})\b", text):
+        word = word.upper()
+        if len(word) < 2 or word in blacklist:
+            continue
+        if universe is not None and word not in universe:
+            continue
+        tickers.add(word)
+
+    # 3. Uppercase ticker candidates: only words already UPPERCASE in the
+    #    original caption. Never via text.upper() — Instagram captions are
+    #    lowercase prose, and uppercasing them turns "main"/"link"/"now" into
+    #    false ticker candidates. Tickers are naturally written uppercase.
+    for word in re.findall(r"\b[A-Z]{1,5}\b", text):
         if len(word) < 2 or word in blacklist:
             continue
         if universe is not None and word not in universe:
@@ -541,10 +572,14 @@ def compute_sentiment(text: str) -> Optional[float]:
     return score if matched else None
 
 
+_WHISPER_MODEL_CACHE = None
+
+
 def transcribe_video_audio(video_url: str) -> str:
     """Download video_url, extract audio via ffmpeg, transcribe via Whisper.
     Falls back to "" on any error/missing dependencies (no-fail invariant).
     """
+    global _WHISPER_MODEL_CACHE
     if not video_url:
         return ""
     import tempfile
@@ -576,8 +611,9 @@ def transcribe_video_audio(video_url: str) -> str:
             return ""
             
         # Transcribe using Whisper
-        model = whisper.load_model("base")
-        transcription = model.transcribe(audio_path)
+        if _WHISPER_MODEL_CACHE is None:
+            _WHISPER_MODEL_CACHE = whisper.load_model("base")
+        transcription = _WHISPER_MODEL_CACHE.transcribe(audio_path)
         text = transcription.get("text", "")
         return text
     except Exception as e:
@@ -611,6 +647,13 @@ def to_mention_row(post: dict, fetch_ts: int) -> List[dict]:
     if not tickers:
         return []
     sentiment = compute_sentiment(caption)
+    finbert = None
+    if caption:
+        try:
+            from psychological.scrapers.finbert_sentiment import grade_text
+            finbert = grade_text(caption)
+        except Exception:  # noqa: BLE001 - never let grading break a row
+            finbert = None
     rows = []
     for ticker in tickers:
         rows.append({
@@ -620,6 +663,11 @@ def to_mention_row(post: dict, fetch_ts: int) -> List[dict]:
             "source_confidence": 0.6,
             "volume_or_rank": post.get("views") if post.get("views") else post.get("likes", 0),
             "sentiment": sentiment,
+            "finbert_label": finbert["label"] if finbert else None,
+            "finbert_sentiment": finbert["score"] if finbert else None,
+            "finbert_confidence": finbert["confidence"] if finbert else None,
+            "shortcode": post.get("shortcode") or "",
+            "id": "{}_{}".format(ticker, post.get("shortcode") or "") if post.get("shortcode") else None,
             "external_id": "https://www.instagram.com/p/{}/".format(post.get("shortcode") or ""),
             "caption": caption,
             "hashtags": post.get("hashtags", []),
@@ -653,7 +701,12 @@ class InstagramSession:
             min_delay=self.config.min_delay,
             max_delay=self.config.max_delay,
         ))
-        await self._session.initialize()
+        try:
+            await self._session.initialize()
+        except RuntimeError as e:
+            raise InstagramSessionUnavailable(
+                "could not attach to debuggable browser: {}".format(e)
+            ) from e
         await self._session.apply_cdp_stealth()
         await self.load_cookies()
         await self._session.get("https://www.instagram.com/")
@@ -705,7 +758,12 @@ class InstagramSession:
 
     async def save_cookies(self) -> None:
         """Persist current browser cookies to ``config.session_file``. Never
-        raises; logs and continues on any failure."""
+        raises; logs and continues on any failure.
+
+        Fail-closed guard: a guest jar (no ``sessionid``/``ds_user_id``) is
+        NEVER written back over the authenticated cookie file. Otherwise a
+        blocked port -> fresh headless browser -> logged-out jar would poison
+        the file that the next run loads from."""
         try:
             tab = self._session.get_tab() if self._session else None
             jar = getattr(tab, "cookies", None) if tab is not None else None
@@ -716,6 +774,14 @@ class InstagramSession:
                 logger.warning("nodriver cookie API unavailable; skipping cookie save")
                 return
             cookies = await jar.get_all()
+            names = {str(getattr(c, "name", "")) for c in cookies}
+            if not (names & {"sessionid", "ds_user_id"}):
+                logger.warning(
+                    "Refusing to save guest cookie jar (no sessionid/ds_user_id). "
+                    "Keeping %s intact.",
+                    self.config.session_file,
+                )
+                return
             out = []
             for c in cookies:
                 out.append({
@@ -872,6 +938,97 @@ async def _fetch_mentions_async(limit: int, config: InstagramConfig) -> List[dic
                 if len(rows) >= limit:
                     break
     return rows[:limit]
+
+
+async def _run_scrape_session(
+    limit: int,
+    config: InstagramConfig,
+    on_block: Optional[Callable[[List[dict], float], None]] = None,
+) -> dict:
+    """Human-paced scrape supervisor: binge blocks with inter-block gaps.
+
+    One binge block == one ``_fetch_mentions_async`` pass (browser attach,
+    scroll, close). Between blocks the browser is closed and we sleep an
+    inter-block gap — mirroring a real user putting the phone down — until
+    ``max_active_hours`` of ACTIVE scraping is reached, then HARD STOP.
+
+    Fail-closed: a challenge or login wall propagates (no blind retry); a
+    page-budget cool-down pauses and continues; ``max_empty_blocks``
+    consecutive empty passes stop the run as degraded. Returns a run summary.
+    """
+    max_active = float(config.max_active_hours) * 3600.0
+    active = 0.0
+    total_rows = 0
+    blocks = 0
+    empty_streak = 0
+    while True:
+        if active >= max_active:
+            logger.info("Hard stop: %.0fs active >= max %.0fs", active, max_active)
+            break
+        block_start = time.monotonic()
+        rows: List[dict] = []
+        try:
+            rows = await _fetch_mentions_async(limit, config)
+            block_active = time.monotonic() - block_start
+            active += block_active
+            blocks += 1
+            total_rows += len(rows)
+            empty_streak = empty_streak + 1 if not rows else 0
+            logger.info(
+                "Binge block %d: %d rows in %.0fs (active total %.0fs)",
+                blocks, len(rows), block_active, active,
+            )
+            if on_block is not None:
+                on_block(rows, block_active)
+        except InstagramCoolDown:
+            block_active = time.monotonic() - block_start
+            active += block_active
+            blocks += 1
+            empty_streak += 1
+            logger.info(
+                "Binge block %d: page budget exhausted in %.0fs; cooling down %.0fs",
+                blocks, block_active, config.session_cool_down_seconds,
+            )
+            await asyncio.sleep(config.session_cool_down_seconds)
+        except (InstagramChallengeDetected, InstagramSessionUnavailable):
+            logger.warning("Session degraded during block %d; stopping run.", blocks)
+            raise
+        if empty_streak >= config.max_empty_blocks:
+            logger.warning(
+                "Degraded: %d consecutive empty blocks; hard-stopping.",
+                empty_streak,
+            )
+            break
+        if active >= max_active:
+            logger.info("Hard stop: %.0fs active >= max %.0fs", active, max_active)
+            break
+        gap_lo, gap_hi = config.inter_block_gap_seconds
+        gap = random.uniform(gap_lo, gap_hi)
+        logger.info("Inter-block gap: %.0fs", gap)
+        await asyncio.sleep(gap)
+    return {"rows": total_rows, "blocks": blocks, "active_seconds": active}
+
+
+def scrape_instagram_long(
+    limit: int = 100,
+    config: InstagramConfig = None,
+    on_block: Optional[Callable[[List[dict], float], None]] = None,
+) -> dict:
+    """SYNC long-run entrypoint for the pacing supervisor.
+
+    Fail-closed cookie gate identical to ``fetch_instagram_mentions``. Uses the
+    browser path directly (real-session CDP attach) with human-like binge
+    blocks and a HARD STOP after ``max_active_hours`` of active scraping.
+    Challenge / login wall / attach failure propagate so callers can halt and
+    report instead of blind-retrying. Returns a run summary dict.
+    """
+    cfg = config or InstagramConfig()
+    if not os.path.exists(cfg.session_file):
+        raise InstagramCookieMissing(
+            "Instagram session cookie missing; export from a logged-in browser "
+            "to config/instagram_cookies.json (git-ignored)"
+        )
+    return asyncio.run(_run_scrape_session(limit, cfg, on_block=on_block))
 
 
 def _get_random_proxy(proxies_file: str) -> Optional[str]:
@@ -1178,12 +1335,12 @@ def fetch_instagram_mentions(limit: int = 100, config: InstagramConfig = None) -
             "Instagram session cookie missing; export from a logged-in browser "
             "to config/instagram_cookies.json (git-ignored)"
         )
-    clips_rows = _fetch_clips_home(limit, cfg)
-    if clips_rows:
-        return clips_rows
     api_rows = _fetch_private_api(limit, cfg)
     if api_rows:
         return api_rows
+    clips_rows = _fetch_clips_home(limit, cfg)
+    if clips_rows:
+        return clips_rows
     try:
         return asyncio.run(_fetch_mentions_async(limit, cfg))
     except (InstagramChallengeDetected, InstagramCoolDown, InstagramSessionUnavailable):

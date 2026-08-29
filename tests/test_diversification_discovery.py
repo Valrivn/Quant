@@ -202,3 +202,73 @@ class TestStaticReturnFit:
         assert w is not None
         assert abs(sum(w.values()) - 1.0) < 1e-6
         assert set(w.keys()) == set(RM_ORDER)
+
+
+class TestIgLlmGateFirst:
+    """D-20260815-001: IG_LLM candidates feed INTO the qualitative gate; only
+    buy-class passers are injected into the sim. Never a bypass."""
+
+    def test_ig_llm_passed_candidates_only_buy_class(self, monkeypatch):
+        from diversification import fee_sim3
+        import sqlite3
+        import sys
+
+        class FakeOut:
+            def __init__(self, rec):
+                self.recommendation = rec
+                self.blended_qualitative_score = 0.9
+
+        class FakeCursor:
+            def __init__(self):
+                self.rows = [("AAA",), ("BBB",), ("CCC",)]
+
+            def execute(self, sql, *a, **k):
+                return self
+
+            def fetchall(self):
+                return self.rows
+
+        class FakeConn:
+            def execute(self, sql, *a, **k):
+                return FakeCursor()
+
+            def cursor(self):
+                return FakeCursor()
+
+            def close(self):
+                pass
+
+        recs = {"AAA": "strong_buy", "BBB": "hold", "CCC": "buy"}
+
+        class FakePipeline:
+            def run(self, **kw):
+                return FakeOut(recs[kw["ticker"]])
+
+        monkeypatch.setattr(sqlite3, "connect", lambda *a, **k: FakeConn())
+        monkeypatch.setattr(
+            "discovery.gate_data.qualitative_signals",
+            lambda t: ({k: 0.8 for k in [
+                "product_breadth", "developer_momentum", "employee_sentiment",
+                "revenue_concentration", "network_effect_proxy", "regulatory_barrier",
+            ]}, {}),
+        )
+        import Qualitative.psychological.qualitative_scoring as qs
+        monkeypatch.setattr(
+            qs, "create_alternative_strategy_pipeline", lambda: FakePipeline()
+        )
+        if "Qualitative" not in sys.path:
+            sys.path.insert(0, "Qualitative")
+
+        passed = fee_sim3._ig_llm_passed_candidates()
+        assert passed == ["AAA", "CCC"]
+        assert "BBB" not in passed
+
+    def test_ig_llm_passed_candidates_empty_on_db_error(self, monkeypatch):
+        from diversification import fee_sim3
+        import sqlite3
+
+        def boom(*a, **k):
+            raise RuntimeError("db down")
+
+        monkeypatch.setattr(sqlite3, "connect", boom)
+        assert fee_sim3._ig_llm_passed_candidates() == []

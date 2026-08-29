@@ -22,9 +22,13 @@ class NodriverConfig:
     headless: bool = True
     browser_executable_path: Optional[str] = None
     browser_args: Optional[List[str]] = None
-    min_delay: float = 12.0
-    max_delay: float = 25.0
+    min_delay: float = 20.0
+    max_delay: float = 40.0
     page_load_timeout: int = 30
+    user_data_dir: Optional[str] = None
+    cdp_host: Optional[str] = None
+    cdp_port: Optional[int] = None
+    allow_fresh_fallback: bool = False
 
 
 class NodriverSession:
@@ -44,12 +48,20 @@ class NodriverSession:
         logger.info("Initializing Nodriver session...")
 
         browser_executable = self.config.browser_executable_path or os.getenv("CHROME_BINARY_PATH")
-        if not browser_executable:
-            try:
-                hybrid_config = load_hybrid_config()
-                browser_executable = hybrid_config.get("psychological", {}).get("browser_binary_path")
-            except Exception:
-                pass
+        cdp_host = self.config.cdp_host
+        cdp_port = self.config.cdp_port
+        
+        try:
+            hybrid_config = load_hybrid_config()
+            psych = hybrid_config.get("psychological", {})
+            if not browser_executable:
+                browser_executable = psych.get("browser_binary_path")
+            if not cdp_host:
+                cdp_host = psych.get("cdp_host")
+            if not cdp_port:
+                cdp_port = psych.get("cdp_port")
+        except Exception:
+            pass
 
         if not browser_executable:
             browser_executable = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
@@ -75,26 +87,56 @@ class NodriverSession:
             "--disable-sync",
         ]
         
-        self._browser = await uc.start(
-            headless=self.config.headless,
-            browser_executable_path=browser_executable,
-            browser_args=browser_args,
-            sandbox=not is_root,
-        )
+        try:
+            self._browser = await uc.start(
+                headless=self.config.headless,
+                browser_executable_path=browser_executable,
+                browser_args=browser_args,
+                sandbox=False,
+                user_data_dir=self.config.user_data_dir,
+                host=cdp_host,
+                port=cdp_port,
+            )
+        except Exception as e:
+            attach_intended = bool(cdp_host and cdp_port)
+            if attach_intended and not self.config.allow_fresh_fallback:
+                raise RuntimeError(
+                    f"CDP attach to {cdp_host}:{cdp_port} failed ({e}); "
+                    "fresh-browser fallback disabled (allow_fresh_fallback=False). "
+                    "Start the debuggable browser (python -m psychological.scrapers.login_cdp "
+                    "--launch <profile-dir>) and retry."
+                ) from e
+            logger.warning(f"Could not connect to browser on port {cdp_port}, retrying with dynamic port: {e}")
+            self._browser = await uc.start(
+                headless=True,
+                browser_executable_path=browser_executable,
+                browser_args=browser_args,
+                sandbox=False,
+                user_data_dir=None,
+            )
 
         self._tab = await self._browser.get("about:blank")
         self._viewport = random.choice([
             (1920, 1080), (1440, 900), (1366, 768), (1536, 864), (1280, 800),
         ])
-        self._user_agent = random.choice([
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
-        ])
+        self._user_agent = self._load_user_agent()
         self._initialized = True
-        logger.info("Nodriver session initialized")
+        logger.info("Nodriver session initialized (UA pinned: %s)", self._user_agent)
+
+    @staticmethod
+    def _load_user_agent() -> str:
+        pinned = os.getenv("DISCOVERY_USER_AGENT")
+        if pinned:
+            return pinned
+        try:
+            hybrid_config = load_hybrid_config()
+            pinned = hybrid_config.get("psychological", {}).get("user_agent")
+        except Exception:
+            pass
+        if pinned:
+            return pinned
+        return ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
 
     async def apply_cdp_stealth(self) -> None:
         if not self._browser or not self._tab:
@@ -118,7 +160,9 @@ class NodriverSession:
         if self._browser and self._initialized:
             logger.info("Closing Nodriver session...")
             try:
-                await self._browser.stop()
+                stop = self._browser.stop()
+                if stop is not None:
+                    await stop
             except Exception as e:
                 logger.error(f"Error closing Nodriver session: {e}")
             self._browser = None
@@ -152,7 +196,18 @@ class NodriverSession:
             if not self._initialized:
                 await self.initialize()
 
-            self._tab = await self._browser.get(url)
+            old_tab = self._tab
+            page_timeout = timeout or self.config.page_load_timeout
+            try:
+                self._tab = await asyncio.wait_for(self._browser.get(url, new_tab=True), timeout=page_timeout)
+            except asyncio.TimeoutError:
+                logger.warning("Navigation to %s timed out after %ss; continuing", url, page_timeout)
+                return False
+            if old_tab is not None:
+                try:
+                    await old_tab.close()
+                except Exception:  # noqa: BLE001 - never let tab cleanup break a scrape
+                    pass
 
             if apply_stealth:
                 await self.apply_cdp_stealth()
@@ -174,7 +229,10 @@ class NodriverSession:
     async def get_content(self) -> str:
         if not self._tab:
             return ""
-        return await self._tab.get_content()
+        try:
+            return await asyncio.wait_for(self._tab.get_content(), timeout=30)
+        except Exception:  # noqa: BLE001 - never let content read hang
+            return ""
 
     async def find_element(self, selector: str, timeout: int = 10):
         if not self._tab:

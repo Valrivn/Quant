@@ -121,8 +121,8 @@ def _get_nodriver_pool():
             max_sessions=1,
             config=NodriverConfig(
                 headless=True,
-                min_delay=12.0,
-                max_delay=25.0,
+                min_delay=20.0,
+                max_delay=40.0,
                 page_load_timeout=30,
             ),
         )

@@ -15,8 +15,8 @@ from scraper.health_monitor import CircuitBreaker, CircuitOpenError
 
 logger = logging.getLogger(__name__)
 
-CONFIG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "config", "reddit_weights.yaml"))
-CREDENTIALS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "config", "reddit_credentials.yaml"))
+CONFIG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "config", "reddit_weights.yaml"))
+CREDENTIALS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "config", "reddit_credentials.yaml"))
 
 def load_weights_config() -> Dict[str, Any]:
     with open(CONFIG_PATH, 'r') as f:

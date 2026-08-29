@@ -91,6 +91,14 @@ class CorpAnonymousScraper:
             "TSLA": "Tesla",
             "AAPL": "Apple",
             "AMZN": "Amazon",
+            "QCOM": "Qualcomm",
+            "MU": "Micron Technology",
+            "TSM": "TSMC",
+            "CRM": "Salesforce",
+            "ADBE": "Adobe",
+            "DELL": "Dell Technologies",
+            "SMCI": "Super Micro Computer",
+            "IBM": "IBM",
         }
         
     def _get_indeed_slugs(self) -> Dict[str, str]:
@@ -105,6 +113,14 @@ class CorpAnonymousScraper:
             "TSLA": "Tesla",
             "AAPL": "Apple",
             "AMZN": "Amazon",
+            "QCOM": "Qualcomm",
+            "MU": "Micron Technology",
+            "TSM": "TSMC",
+            "CRM": "Salesforce",
+            "ADBE": "Adobe",
+            "DELL": "Dell Technologies",
+            "SMCI": "Supermicro",
+            "IBM": "IBM",
         }
 
     def _get_cache_key(self, ticker: str) -> str:

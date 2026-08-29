@@ -248,6 +248,116 @@ class TestClaimBatch:
 
 
 # --------------------------------------------------------------------------- #
+# Queue: dedup guard — one row per ticker (B-20260820-001)
+# --------------------------------------------------------------------------- #
+
+class TestDedupGuard:
+    def _conn(self):
+        return q.connect(":memory:")
+
+    def test_enqueue_blocks_same_ticker_different_source(self):
+        """A second enqueue for the same ticker (different source+key) must be
+        ignored and must NOT count as a new row."""
+        conn = self._conn()
+        assert q.enqueue(conn, "X", "cli", "cli:X") is True
+        assert q.enqueue(conn, "X", "ig", "ig:X") is False
+        assert q.enqueue(conn, "X", "frontier", "frontier:X") is False
+        assert conn.execute("SELECT COUNT(*) FROM sentinel_queue").fetchone()[0] == 1
+        conn.close()
+
+    def test_enqueue_allows_different_tickers(self):
+        conn = self._conn()
+        assert q.enqueue(conn, "A", "cli", "cli:A") is True
+        assert q.enqueue(conn, "B", "cli", "cli:B") is True
+        assert conn.execute("SELECT COUNT(*) FROM sentinel_queue").fetchone()[0] == 2
+        conn.close()
+
+    def test_dedup_queue_removes_later_duplicates(self):
+        """dedup_queue keeps the earliest row per ticker and removes the rest.
+
+        Simulates legacy databases that had UNIQUE(source, source_key) instead
+        of UNIQUE(ticker). We temporarily drop the ticker-level constraint,
+        insert duplicates, then run dedup_queue.
+        """
+        conn = self._conn()
+        now = int(time.time())
+        # Drop the ticker-level unique constraint to simulate legacy schema
+        conn.execute("DROP INDEX IF EXISTS idx_sentinel_queue_ticker")
+        # Also need to handle the inline UNIQUE(ticker) — rebuild without it
+        conn.execute("CREATE TABLE sentinel_queue_bak AS SELECT * FROM sentinel_queue")
+        conn.execute("DROP TABLE sentinel_queue")
+        conn.execute(
+            "CREATE TABLE sentinel_queue ("
+            "    id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "    ticker TEXT NOT NULL, source TEXT NOT NULL, source_key TEXT NOT NULL,"
+            "    stage TEXT NOT NULL DEFAULT 'pending', attempts INTEGER NOT NULL DEFAULT 0,"
+            "    last_error TEXT, raw_json TEXT,"
+            "    created_utc INTEGER NOT NULL, updated_utc INTEGER NOT NULL,"
+            "    UNIQUE(source, source_key)"
+            ")"
+        )
+        conn.execute("INSERT INTO sentinel_queue SELECT * FROM sentinel_queue_bak")
+        conn.execute("DROP TABLE sentinel_queue_bak")
+        conn.commit()
+
+        # Now force-insert duplicates (simulates legacy data)
+        conn.execute(
+            "INSERT INTO sentinel_queue (ticker, source, source_key, stage, attempts, created_utc, updated_utc) "
+            "VALUES ('DUP', 'cli', 'cli:DUP', 'pending', 0, ?, ?)",
+            (now - 100, now - 100),
+        )
+        conn.execute(
+            "INSERT INTO sentinel_queue (ticker, source, source_key, stage, attempts, created_utc, updated_utc) "
+            "VALUES ('DUP', 'ig', 'ig:DUP', 'pending', 0, ?, ?)",
+            (now, now),
+        )
+        conn.commit()
+        assert conn.execute("SELECT COUNT(*) FROM sentinel_queue WHERE ticker='DUP'").fetchone()[0] == 2
+
+        removed = q.dedup_queue(conn)
+        assert removed == 1
+        row = conn.execute("SELECT id, source_key FROM sentinel_queue WHERE ticker='DUP'").fetchone()
+        assert row["source_key"] == "cli:DUP"  # earliest kept
+        assert conn.execute("SELECT COUNT(*) FROM sentinel_queue WHERE ticker='DUP'").fetchone()[0] == 1
+        conn.close()
+
+    def test_duplicate_enqueue_does_not_increment_queue_status(self):
+        """queue_status counts must not grow when a duplicate ticker is enqueued."""
+        conn = self._conn()
+        q.enqueue(conn, "Q", "cli", "cli:Q")
+        before = q.queue_status(conn)
+        q.enqueue(conn, "Q", "ig", "ig:Q")  # duplicate — should be ignored
+        after = q.queue_status(conn)
+        assert before == after
+        conn.close()
+
+    def test_dedup_queue_returns_zero_when_no_duplicates(self):
+        conn = self._conn()
+        q.enqueue(conn, "A", "s1", "k1")
+        q.enqueue(conn, "B", "s1", "k2")
+        assert q.dedup_queue(conn) == 0
+        conn.close()
+
+    def test_connect_creates_ticker_unique_index(self):
+        """Fresh in-memory DB must enforce UNIQUE(ticker) on sentinel_queue."""
+        conn = self._conn()
+        # The constraint can appear as a named index or as an inline UNIQUE in DDL.
+        named_idx = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='index' "
+            "AND name='idx_sentinel_queue_ticker'"
+        ).fetchone()
+        table_sql = conn.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' "
+            "AND name='sentinel_queue'"
+        ).fetchone()
+        has_constraint = (named_idx is not None) or (
+            table_sql and "UNIQUE(ticker)" in (table_sql[0] or "")
+        )
+        assert has_constraint, "sentinel_queue must enforce UNIQUE(ticker)"
+        conn.close()
+
+
+# --------------------------------------------------------------------------- #
 # per-CIK fallback: tag coalescing across fiscal ends
 # --------------------------------------------------------------------------- #
 

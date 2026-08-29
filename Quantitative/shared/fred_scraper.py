@@ -136,8 +136,13 @@ class FREDScraper:
         """Get the cache file path for a FRED series."""
         return self._cache_dir / f"{series_id}.json"
 
-    def _read_cache(self, series_id: str) -> Optional[FREDSeriesResult]:
-        """Read cached data if it exists and is fresh."""
+    def _read_cache(self, series_id: str, allow_stale: bool = False) -> Optional[FREDSeriesResult]:
+        """Read cached data if it exists and is fresh.
+
+        ``allow_stale=True`` skips the freshness check so a down FRED can still
+        serve the last-good snapshot (tagged DEGRADED by the caller — stale
+        macro is never presented as live).
+        """
         cache_path = self._get_cache_path(series_id)
         if not cache_path.exists():
             return None
@@ -147,7 +152,7 @@ class FREDScraper:
             cached_at = datetime.fromisoformat(data.get("cached_at", ""))
             age_hours = (datetime.now(timezone.utc) - cached_at).total_seconds() / 3600
 
-            if age_hours > self.CACHE_TTL_HOURS:
+            if not allow_stale and age_hours > self.CACHE_TTL_HOURS:
                 logger.debug(f"Cache expired for {series_id} (age: {age_hours:.1f}h)")
                 return None
 
@@ -363,10 +368,11 @@ class FREDScraper:
                 error=str(e), retrieval_method="pandas_datareader",
             )
 
-    def fetch_series(self, series_id: str, force_refresh: bool = False) -> FREDSeriesResult:
+    def fetch_series(self, series_id: str, force_refresh: bool = False,
+                     allow_stale: bool = False) -> FREDSeriesResult:
         """
         Fetch a FRED series using the 3-tier fallback chain:
-        1. Local cache (24h TTL)
+        1. Local cache (24h TTL; any age when ``allow_stale``)
         2. FRED CSV download endpoint (primary scrape)
         3. FRED HTML page parse (secondary scrape)
         4. pandas_datareader (last resort)
@@ -374,6 +380,9 @@ class FREDScraper:
         Args:
             series_id: FRED series identifier (e.g., "GOLDPMGBD228NLBM")
             force_refresh: If True, skip cache and scrape fresh data
+            allow_stale: If True, serve the disk cache even when past its TTL
+                (caller must tag the result DEGRADED — stale macro is never
+                presented as live).
 
         Returns:
             FREDSeriesResult with observations and metadata
@@ -383,7 +392,7 @@ class FREDScraper:
 
         # Tier 1: Cache
         if not force_refresh:
-            cached = self._read_cache(series_id)
+            cached = self._read_cache(series_id, allow_stale=allow_stale)
             if cached:
                 return cached
 

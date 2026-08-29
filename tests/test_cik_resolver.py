@@ -1,6 +1,7 @@
 """Tests for the B-20260803 P1 CIK resolver (valuation_alpha/universe/cik_resolver.py)."""
 
 import pytest
+import requests
 
 from valuation_alpha.universe.cik_resolver import (
     fetch_cik_map,
@@ -47,6 +48,30 @@ class TestFetchCikMap:
 
         monkeypatch.setattr("requests.get", Boom.get)
         assert fetch_cik_map() == {}
+
+    def test_retries_until_success(self, monkeypatch):
+        calls = {"n": 0}
+
+        class FakeResp:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return FAKE_TICKERS_JSON
+
+        class FlakyRequests:
+            @staticmethod
+            def get(*args, **kwargs):
+                calls["n"] += 1
+                if calls["n"] <= 2:
+                    raise requests.exceptions.ConnectionError("net down")
+                return FakeResp()
+
+        monkeypatch.setattr("requests.get", FlakyRequests.get)
+        mapping = fetch_cik_map()
+        assert calls["n"] == 3
+        assert mapping["NVDA"]["cik"] == "0001045810"
+        assert mapping["AAPL"]["cik"] == "0000320193"
 
 
 class TestResolveCik:

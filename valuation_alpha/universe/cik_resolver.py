@@ -13,7 +13,7 @@ import requests
 from db.connection import get_connection
 
 _TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
-_USER_AGENT = "quant-research contact@example.com"
+_USER_AGENT = "Quant-research backtest/1.0 (data integrity work; contact hayden@quant.local)"
 _MAX_AGE_SECONDS = 7 * 24 * 3600  # refresh weekly
 
 
@@ -41,20 +41,26 @@ def _ensure_table() -> None:
     conn.commit()
 
 
-def fetch_cik_map(user_agent: str = _USER_AGENT) -> dict:
+def fetch_cik_map(user_agent: str = _USER_AGENT, max_attempts: int = 3) -> dict:
     """Fetch the full SEC ticker->CIK map.
 
     Returns {ticker: {"cik": 10-digit CIK, "title": company name}}. Empty dict
-    on any failure.
+    only after all attempts fail. Retries up to ``max_attempts`` times with
+    exponential backoff (``time.sleep(2 ** attempt)`` between attempts) to
+    tolerate SEC rate limiting / intermittent unreachability.
     """
-    try:
-        resp = requests.get(
-            _TICKERS_URL, headers={"User-Agent": user_agent}, timeout=30
-        )
-        resp.raise_for_status()
-        data = resp.json()
-    except Exception:
-        return {}
+    for attempt in range(max_attempts):
+        try:
+            resp = requests.get(
+                _TICKERS_URL, headers={"User-Agent": user_agent}, timeout=30
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            break
+        except Exception:
+            if attempt == max_attempts - 1:
+                return {}
+            time.sleep(2 ** attempt)
     out = {}
     for row in data.values():
         ticker = str(row.get("ticker", "")).upper()

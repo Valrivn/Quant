@@ -1,0 +1,81 @@
+# Pre-registered Anti-Bias Alt-Data Consensus Gate configuration (D-20260816-001, P1).
+# Pre-registration date: 2026-08-16. RULING: D-20260816-001 (APPROVE rev3).
+#
+# EVERY value here is fixed BEFORE any run (frozen weight sheet). Nothing is fit
+# to reported outcomes. All thresholds (usability ladder, attack flags, outlier
+# marking) are hardcoded here and pre-registered. The gate is research-only:
+# kill-switch consensus.enabled defaults to false until a separate APPROVE
+# ruling after P1-P5 + the pre-registered backtest vs rm-final baseline.
+#
+# The loader (discovery/consensus/config.py) validates this file at load:
+# unknown keys, NaN, non-normalized positive weights, or a missing required key
+# => load error (fail closed, never silently defaulted).
+
+consensus:
+  enabled: false          # D-20260818-001: live run S1 FAILED (zero evidence) -> F1 REJECT, kill-switch off. Re-plan pending.
+
+# --- Frozen composite weight sheet (CEO-approved 50/30/20) -------------------
+# Block weights must sum to 1.0. Within-block factor weights must sum to 1.0.
+weights:
+  blocks:
+    quantifiable: 0.50    # Type-A: transactions, SEC attrition, hiring velocity
+    expression: 0.30      # review volume, skewness, sentiment breadth, talent
+    subjective: 0.20      # Type-C ratings — HARD CAP, never exceeds this
+
+  # Within-block factor weights (sum to 1.0 per block).
+  factors:
+    quantifiable:
+      transaction_volume: 0.20    # what people actually buy (Type-A)
+      sec_attrition_velocity: 0.30  # attr 10: voluntary churn (Type-A)
+      hiring_velocity: 0.30       # attr 4/8: job-post + senior hires (Type-B)
+      review_volume: 0.20         # expression breadth, harder to fake than level
+    expression:
+      talent_capture: 0.33        # CEO signal: talked-about people joining (Type-B)
+      review_skewness: 0.33       # attr 9: IQR/bimodality health
+      sentiment_breadth: 0.34     # corpus-wide sentiment distribution
+    subjective:
+      exec_approval: 0.30         # attr 1: CEO & executive approval
+      culture_values: 0.25        # attr 2: culture & values sub-score
+      comp_equity: 0.25           # attr 5: compensation & equity satisfaction
+      work_life: 0.20             # attr 6: work-life balance & burnout
+
+# --- Review usability ladder (CEO-confirmed, hardcoded) ----------------------
+usability:
+  insufficient_threshold: 10      # <10 reviews: INSUFFICIENT -> abstain
+  directional_threshold: 50       # 10-49: DIRECTIONAL (moves weights, no pass)
+  distributional_threshold: 100   # 50-99: DISTRIBUTIONAL (skew/IQR usable)
+  usable_threshold: 100           # >=100: USABLE (enters two-extreme norm + 2-of-3)
+  set_aside_threshold: 50         # <50 TOTAL across platforms: SET-ASIDE + marked
+
+# --- Attack / polarization flags (CEO-confirmed thresholds) -------------------
+flags:
+  bribe_attack:
+    min_same_star_burst: 5        # >=5 same-star reviews
+    burst_window_hours: 72        # within this window
+    # Suspicious profile ratio: fraction of burst profiles that are new/low-rep.
+    suspicious_profile_ratio: 0.5
+  punishing_attack:
+    weekly_volume_spike_ratio: 3.0  # >3x normal weekly volume
+    novice_profile_ratio: 0.6       # dense 1-star cluster from novice profiles
+    coordinated_language: true      # near-duplicate negative text detection
+  polarized:
+    skewness_abs_floor: 1.5       # |skew| > 1.5
+    bimodal_star_gap: 1.5         # two clusters >=1.5 stars apart
+    bimodal_min_cluster: 20       # each cluster n >= threshold
+    # 2-of-3 convergence failure at usable threshold -> NO-CONVERGENCE.
+    min_converging_sources: 2
+
+# --- Type-B modeled-source floor ----------------------------------------------
+modeled:
+  min_monthly_visits: 50000       # below this, ignore modeled traffic entirely
+
+# --- Sector normalization -----------------------------------------------------
+sector:
+  min_companies_for_two_extreme: 3  # <3 companies: two-extreme DISABLED -> directional fallback
+
+# --- Talent scout -------------------------------------------------------------
+talent:
+  enabled: true
+  # Cross-platform employer-mention surfaces for the talent-capture signal.
+  surfaces: ["linkedin", "jobspy", "instagram", "reddit", "tiktok"]
+  min_senior_mentions: 3          # senior-profile join mentions needed to fire

@@ -108,6 +108,48 @@ def migration_005_add_bayes_tracking(conn: sqlite3.Connection) -> None:
     print("Applied migration 005: Added Bayesian posterior tracking")
 
 
+def migration_006_add_ig_llm_proxies(conn: sqlite3.Connection) -> None:
+    """Add Instagram qualitative LLM proxy table."""
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS instagram_qual_proxies (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticker TEXT NOT NULL,
+            product_adoption REAL,
+            competitive_disruption INTEGER,
+            sentiment_score REAL,
+            source_url TEXT,
+            audit_trail TEXT,
+            created_at INTEGER NOT NULL,
+            UNIQUE(ticker)
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_ig_qual_ticker ON instagram_qual_proxies(ticker)")
+    print("Applied migration 006: Added instagram_qual_proxies table")
+
+
+def migration_007_add_ig_finbert_columns(conn: sqlite3.Connection) -> None:
+    """Add FinBERT sentiment grading columns to instagram_raw_mentions.
+
+    FinBERT (ProsusAI/finbert, fine-tuned on the PhD-annotated Financial
+    PhraseBank) grades captions during live scraping; the lexicon sentiment
+    column stays untouched so old rows remain comparable.
+    """
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(instagram_raw_mentions)")
+    existing = {row[1] for row in cursor.fetchall()}
+    additions = {
+        "finbert_label": "TEXT",
+        "finbert_sentiment": "REAL",
+        "finbert_confidence": "REAL",
+    }
+    for col, col_type in additions.items():
+        if col not in existing:
+            cursor.execute(f"ALTER TABLE instagram_raw_mentions ADD COLUMN {col} {col_type}")
+    conn.commit()
+    print("Applied migration 007: Added FinBERT sentiment columns")
+
+
 # Register migrations in order
 MIGRATIONS = [
     (1, "initial_schema", migration_001_initial_schema),
@@ -115,6 +157,8 @@ MIGRATIONS = [
     (3, "risk_signal_details", migration_003_add_risk_signal_details),
     (4, "regime_tracking", migration_004_add_regime_tracking),
     (5, "bayes_tracking", migration_005_add_bayes_tracking),
+    (6, "ig_llm_proxies", migration_006_add_ig_llm_proxies),
+    (7, "ig_finbert_columns", migration_007_add_ig_finbert_columns),
 ]
 
 
@@ -170,11 +214,11 @@ def run_migration(conn: sqlite3.Connection, version: int, name: str, func) -> bo
             (version, name, int(time.time()))
         )
         conn.commit()
-        print(f"  ✓ Migration {version} completed")
+        print(f"  [PASS] Migration {version} completed")
         return True
     except Exception as e:
         conn.rollback()
-        print(f"  ✗ Migration {version} failed: {e}")
+        print(f"  [FAIL] Migration {version} failed: {e}")
         return False
 
 
@@ -200,7 +244,7 @@ def show_status(conn: sqlite3.Connection) -> None:
         for v, name, _ in pending:
             print(f"  v{v:03d} - {name}")
     else:
-        print("\n✓ All migrations applied")
+        print("\n[OK] All migrations applied")
 
 
 def main():
@@ -242,7 +286,7 @@ def main():
                 print(f"Migration failed at version {version}. Stopping.")
                 return 1
         
-        print(f"\n✓ All migrations completed. Current version: {get_current_version(conn)}")
+        print(f"\n[OK] All migrations completed. Current version: {get_current_version(conn)}")
         return 0
         
     finally:

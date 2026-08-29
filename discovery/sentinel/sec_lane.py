@@ -302,7 +302,7 @@ def sync_lane(conn, tickers: List[str], cik_resolver, cfg: Dict,
     into reliable per-company totals.
     """
     sec = cfg["lanes"]["sec"]
-    start = start_year or sec.get("default_start_year", 2024)
+    start = start_year or (2026 - years_back + 1)
 
     counts = {"bulk": 0, "fallback": 0, "quarters": 0}
     if sec.get("use_bulk_datasets", True):

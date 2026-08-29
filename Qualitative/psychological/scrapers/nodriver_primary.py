@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import random
 import re
 from typing import Dict, List, Optional, Tuple
@@ -59,11 +60,26 @@ class GlassdoorNodriverScraper:
             "AMZN": "Amazon",
             "AVGO": "Broadcom",
             "INTC": "Intel Corporation",
+            "QCOM": "Qualcomm",
+            "MU": "Micron Technology",
+            "TSM": "TSMC",
+            "CRM": "Salesforce",
+            "ADBE": "Adobe",
+            "DELL": "Dell Technologies",
+            "SMCI": "Super Micro Computer",
+            "IBM": "IBM",
         }
+        _profile = self.glassdoor_config.get("profile_dir")
         self.nodriver_config = NodriverConfig(
-            headless=self.config.get("nodriver", {}).get("headless", True),
-            min_delay=12.0,
-            max_delay=25.0,
+            headless=self.glassdoor_config.get("headless", False),
+            min_delay=25.0,
+            max_delay=45.0,
+            user_data_dir=os.path.abspath(_profile) if _profile else None,
+            browser_args=[
+                "--no-first-run",
+                "--no-default-browser-check",
+                "--disable-blink-features=AutomationControlled",
+            ],
         )
 
     def _parse_score(self, text: str) -> Optional[float]:
@@ -105,7 +121,10 @@ class GlassdoorNodriverScraper:
         recommend_to_friend = None
 
         try:
-            url = f"{self.BASE_URL}/Reviews/{slug}-Reviews-SRCH_KE0,{len(slug)}.htm"
+            if "-Reviews-E" in slug:
+                url = f"{self.BASE_URL}/Reviews/{slug}.htm"
+            else:
+                url = f"{self.BASE_URL}/Reviews/{slug}-Reviews-SRCH_KE0,{len(slug)}.htm"
             
             async def extract(session: NodriverSession):
                 nonlocal raw_score, review_count, ceo_approval, recommend_to_friend
@@ -113,7 +132,11 @@ class GlassdoorNodriverScraper:
                 await asyncio.sleep(random.uniform(3, 5))
                 
                 # Wait for ratings to load
-                await session._tab.wait_for("div[data-test='overallRating'], span[data-test='overall-rating'], .ratingNumber", timeout=10)
+                await session._tab.wait_for(
+                    "div[data-test='overallRating'], span[data-test='overall-rating'], .ratingNumber, "
+                    "[class*='RatingHeadline_rating'], [class*='ReviewOverview_overallRating']",
+                    timeout=10,
+                )
                 await asyncio.sleep(2)
                 
                 # Try multiple selectors for overall rating
@@ -122,10 +145,12 @@ class GlassdoorNodriverScraper:
                                      await session.find_element(".ratingNumber") or \
                                      await session.find_element("[class*='rating'] [class*='number']") or \
                                      await session.find_element(".bigRating strong") or \
-                                     await session.find_element(".ratingNum")
+                                     await session.find_element(".ratingNum") or \
+                                     await session.find_element("[class*='RatingHeadline_rating']") or \
+                                     await session.find_element("[class*='ReviewOverview_overallRating']")
                 
                 if overall_rating_elem:
-                    text = await overall_rating_elem.text_all
+                    text = overall_rating_elem.text_all
                     score = self._parse_score(text)
                     if score:
                         raw_score = score
@@ -133,13 +158,22 @@ class GlassdoorNodriverScraper:
                 
                 # Get page content for regex parsing
                 html = await session.get_content()
+                body_text = await session.evaluate("document.body ? document.body.innerText : ''")
                 
                 if raw_score is None:
                     score_match = re.search(r'(\d+\.?\d*)\s*(?:out of|/)\s*5', html, re.IGNORECASE)
                     if score_match:
                         raw_score = float(score_match.group(1))
+                    else:
+                        # New Glassdoor layout: bare decimal inside RatingHeadline block
+                        rating_block = re.search(
+                            r'RatingHeadline_rating[^>]*>(\d+\.\d)', html, re.IGNORECASE
+                        )
+                        if rating_block:
+                            raw_score = float(rating_block.group(1))
                 
-                review_match = re.search(r'([\d,]+)\s*(?:review|Reviews)', html, re.IGNORECASE)
+                # Extract review count from body text to avoid HTML/URL false positives
+                review_match = re.search(r'\b([\d,]+)\s+reviews?\b', body_text, re.IGNORECASE)
                 if review_match:
                     review_count = int(review_match.group(1).replace(",", ""))
                 
@@ -153,8 +187,15 @@ class GlassdoorNodriverScraper:
                 
                 return True
 
-            await scrape_with_nodriver(url, wait_for="div[data-test='overallRating'], span[data-test='overall-rating'], .ratingNumber", 
-                                     config=self.nodriver_config, extract_fn=extract)
+            await scrape_with_nodriver(
+                url,
+                wait_for=(
+                    "div[data-test='overallRating'], span[data-test='overall-rating'], .ratingNumber, "
+                    "[class*='RatingHeadline_rating'], [class*='ReviewOverview_overallRating']"
+                ),
+                config=self.nodriver_config,
+                extract_fn=extract,
+            )
             
             if raw_score:
                 logger.info("Nodriver Glassdoor scrape success for %s: score=%s", ticker, raw_score)

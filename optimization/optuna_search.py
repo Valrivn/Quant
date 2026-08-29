@@ -74,3 +74,47 @@ def run_bayesian_optimization(
         "subreddit_weights": candidate["subreddit_weights"],
         "metrics": metrics,
     }
+
+
+def save_optimized_weights_as_challenger(opt_results: dict):
+    """
+    Saves optimized weights to the weight_versions table as a Challenger (is_active = 0).
+    """
+    import json
+    import time
+    import yaml
+    from db.connection import get_connection
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Save parameters as YAML
+    config_yaml = yaml.dump({
+        "category_weights": opt_results["category_weights"],
+        "subreddit_weights": opt_results["subreddit_weights"]
+    })
+    
+    try:
+        cursor.execute("""
+            INSERT INTO weight_versions (
+                config_yaml, category_weights, subreddit_weights, ic_score, sharpe_ratio, 
+                hit_rate, lookback_days, optimization_method, promoted_at, is_active, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            config_yaml, 
+            json.dumps(opt_results["category_weights"]), 
+            json.dumps(opt_results["subreddit_weights"]),
+            opt_results.get("metrics", {}).get("ic", 0.0),
+            opt_results.get("metrics", {}).get("sharpe", 0.0),
+            opt_results.get("metrics", {}).get("hit_rate", 0.0),
+            180, # Lookback days default
+            "bayesian_optimization",
+            None, # Not promoted yet
+            0, # is_active = False (Challenger status)
+            int(time.time())
+        ))
+        conn.commit()
+    except Exception as e:
+        print(f"Error saving challenger config: {e}")
+    finally:
+        conn.close()
+    print("Optimized weights saved as Challenger configuration.")

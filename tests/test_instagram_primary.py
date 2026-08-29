@@ -5,11 +5,18 @@ fail-closed gate, and the discovery-compatible row mapping. The session
 cookie check is validated to raise BEFORE any browser launch.
 """
 
+import asyncio
+import os
+
 import pytest
 
 from psychological.scrapers.instagram_primary import (
     InstagramConfig,
     InstagramCookieMissing,
+    InstagramSession,
+    InstagramCoolDown,
+    InstagramChallengeDetected,
+    InstagramSessionUnavailable,
     detect_instagram_challenge,
     detect_instagram_login_wall,
     parse_shared_data,
@@ -19,6 +26,8 @@ from psychological.scrapers.instagram_primary import (
     fetch_instagram_mentions,
     parse_embedded_media_json,
     _unwrap_nodriver,
+    _run_scrape_session,
+    scrape_instagram_long,
 )
 
 TAG_HTML = """
@@ -129,6 +138,39 @@ class TestExtractTickers:
         result = extract_tickers("ALGO is the future, BTC to 100k")
         assert "ALGO" not in result
 
+    def test_lowercase_collision_words_do_not_match(self):
+        # Regression: lowercase prose words that collide with real SEC tickers
+        # must NOT be extracted (previously text.upper() turned them into
+        # false candidates).
+        for phrase, word in [
+            ("Small accessory. Big main character energy.", "MAIN"),
+            ("One bracelet, four different vibes!", "FOUR"),
+            ("Join us at the link in bio", "LINK"),
+            ("Buy NOW before it moons", "NOW"),
+            ("Stay bold with your picks", "BOLD"),
+            ("Anything else you want?", "ANY"),
+            ("He gave five reasons today", "FIVE"),
+            ("We saw real growth in revenue", "REAL"),
+        ]:
+            result = extract_tickers(phrase)
+            assert word not in result, f"{word} leaked from: {phrase!r} -> {result}"
+
+    def test_uppercase_ticker_still_extracted_in_mixed_case(self):
+        # Uppercase tickers in otherwise-lowercase prose are still found.
+        result = extract_tickers("I am a bold investor buying TSLA today")
+        assert "TSLA" in result
+        assert "BOLD" not in result
+
+    def test_collision_words_blacklisted_even_when_uppercased(self):
+        # Safety net: even if text is fully uppercased upstream, collision
+        # words are filtered by the augmented _COMMON_WORDS blacklist.
+        from psychological.scrapers.instagram_primary import _COMMON_WORDS
+
+        for w in ["MAIN", "FOUR", "LINK", "NOW", "BOLD", "ANY", "FIVE"]:
+            assert w in _COMMON_WORDS, f"{w} missing from _COMMON_WORDS"
+        result = extract_tickers("MAIN FOUR LINK NOW BOLD ANY FIVE")
+        assert result == []
+
 
 class TestComputeSentiment:
     def test_bullish_positive(self):
@@ -168,11 +210,21 @@ class TestToMentionRow:
         assert "ABC123" in row["external_id"]
         for key in ("caption", "hashtags", "comments", "views", "followers", "verified", "brand_account"):
             assert key in row
+        # FinBERT fields ride along fail-closed (None offline / live-gated).
+        assert row["finbert_label"] is None
+        assert row["finbert_sentiment"] is None
+        assert row["finbert_confidence"] is None
 
     def test_no_tickers_returns_empty(self):
         # Every word here is in the verbatim common-words blacklist, so the
         # extractor must yield no tickers and no mention rows.
         assert to_mention_row({"caption": "the and for but all with can has old"}, fetch_ts=1) == []
+
+    def test_transcribe_video_audio_graceful_fail(self):
+        # Since Whisper/ffmpeg might be absent or network call fails, it should fail closed/gracefully.
+        from psychological.scrapers.instagram_primary import transcribe_video_audio
+        res = transcribe_video_audio("https://example.com/nonexistent_video.mp4")
+        assert res == ""
 
 
 class TestFetchMentionsCookieGate:
@@ -326,3 +378,183 @@ class TestPrivateApi:
         assert post["comments"] == 0
         assert post["author_username"] == ""
         assert post["author_verified"] is False
+
+
+class TestPacingConfig:
+    def test_defaults_via_dict(self):
+        cfg = InstagramConfig({
+            "max_active_hours": 6.0,
+            "inter_block_gap_seconds": [60, 120],
+            "max_empty_blocks": 5,
+        })
+        assert cfg.max_active_hours == 6.0
+        assert cfg.inter_block_gap_seconds == (60.0, 120.0)
+        assert cfg.max_empty_blocks == 5
+
+    def test_bad_gap_values_fall_back(self):
+        cfg = InstagramConfig({"inter_block_gap_seconds": "bogus"})
+        assert cfg.inter_block_gap_seconds == (1200.0, 2400.0)
+
+
+class TestPacingSupervisor:
+    def _cfg(self, **overrides):
+        base = {
+            "session_file": "config/instagram_cookies.json",
+            "max_active_hours": 1.0,
+            "inter_block_gap_seconds": [0.0001, 0.0001],
+            "session_cool_down_seconds": 0.001,
+        }
+        base.update(overrides)
+        return InstagramConfig(base)
+
+    def test_hard_stop_after_max_active(self, monkeypatch):
+        rows = [{"entity": "TSLA", "external_id": "https://www.instagram.com/p/ABC/"}]
+
+        async def fake_fetch(limit, config):
+            await asyncio.sleep(0.05)
+            return rows
+
+        monkeypatch.setattr(
+            "psychological.scrapers.instagram_primary._fetch_mentions_async",
+            fake_fetch,
+        )
+        # 0.00005h == 0.18s active cap; each block takes ~0.05s so the loop
+        # must terminate after a handful of blocks (proves hard stop, no hang).
+        summary = asyncio.run(_run_scrape_session(10, self._cfg(max_active_hours=0.00005)))
+        assert summary["blocks"] >= 1
+        assert summary["rows"] == summary["blocks"] * len(rows)
+
+    def test_stops_after_max_empty_blocks(self, monkeypatch):
+        async def fake_fetch(limit, config):
+            return []
+
+        monkeypatch.setattr(
+            "psychological.scrapers.instagram_primary._fetch_mentions_async",
+            fake_fetch,
+        )
+        summary = asyncio.run(_run_scrape_session(10, self._cfg(max_empty_blocks=3)))
+        assert summary["blocks"] == 3
+        assert summary["rows"] == 0
+
+    def test_challenge_fails_hard(self, monkeypatch):
+        async def fake_fetch(limit, config):
+            raise InstagramChallengeDetected("challenge")
+
+        monkeypatch.setattr(
+            "psychological.scrapers.instagram_primary._fetch_mentions_async",
+            fake_fetch,
+        )
+        with pytest.raises(InstagramChallengeDetected):
+            asyncio.run(_run_scrape_session(10, self._cfg()))
+
+    def test_login_wall_fails_hard(self, monkeypatch):
+        async def fake_fetch(limit, config):
+            raise InstagramSessionUnavailable("login wall")
+
+        monkeypatch.setattr(
+            "psychological.scrapers.instagram_primary._fetch_mentions_async",
+            fake_fetch,
+        )
+        with pytest.raises(InstagramSessionUnavailable):
+            asyncio.run(_run_scrape_session(10, self._cfg()))
+
+    def test_cool_down_then_continue(self, monkeypatch):
+        calls = {"n": 0}
+        rows = [{"entity": "NVDA", "external_id": "https://www.instagram.com/p/DEF/"}]
+
+        async def fake_fetch(limit, config):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise InstagramCoolDown("page budget exhausted")
+            if calls["n"] == 2:
+                return rows
+            return []  # after recovery, empty passes drive the empty-streak stop
+
+        monkeypatch.setattr(
+            "psychological.scrapers.instagram_primary._fetch_mentions_async",
+            fake_fetch,
+        )
+        summary = asyncio.run(_run_scrape_session(10, self._cfg()))
+        # cool-down did NOT fail-hard (block 2 ran and yielded rows) and the
+        # run still terminated via the empty-streak rule.
+        assert summary["blocks"] >= 3
+        assert summary["rows"] == len(rows)
+
+    def test_long_entrypoint_cookie_gate(self, tmp_path):
+        cfg = InstagramConfig({"session_file": str(tmp_path / "nope.json")})
+        with pytest.raises(InstagramCookieMissing):
+            scrape_instagram_long(limit=5, config=cfg)
+
+
+class _FakeCookie:
+    def __init__(self, name):
+        self.name = name
+        self.value = "v"
+        self.domain = ".instagram.com"
+        self.path = "/"
+        self.secure = True
+        self.expires = None
+
+
+class _FakeJar:
+    def __init__(self, names):
+        self._cookies = [_FakeCookie(n) for n in names]
+
+    async def get_all(self):
+        return self._cookies
+
+
+class _FakeTab:
+    def __init__(self, names):
+        self.cookies = _FakeJar(names)
+
+
+class _FakeSession:
+    def __init__(self, names):
+        self._tab = _FakeTab(names)
+
+    def get_tab(self):
+        return self._tab
+
+
+class TestSaveCookiesGuestGuard:
+    def test_guest_jar_never_overwrites(self, tmp_path):
+        target = str(tmp_path / "cookies.json")
+        with open(target, "w") as f:
+            f.write("{}")
+        session = InstagramSession(InstagramConfig({"session_file": target}))
+        session._session = _FakeSession(["mid", "ig_did"])  # no sessionid/ds_user_id
+        asyncio.run(session.save_cookies())
+        assert open(target).read() == "{}"
+
+    def test_authenticated_jar_is_saved(self, tmp_path):
+        target = str(tmp_path / "cookies.json")
+        session = InstagramSession(InstagramConfig({"session_file": target}))
+        session._session = _FakeSession(["sessionid", "ig_did"])
+        asyncio.run(session.save_cookies())
+        assert os.path.exists(target)
+        assert "sessionid" in open(target).read()
+
+
+class TestFinBertGrading:
+    """FinBERT is live-gated (DISCOVERY_LIVE=1) and fail-closed offline.
+
+    Offline the grader must never attempt a model load: grading returns None
+    and the mention-row mapping keeps its fail-closed FinBERT fields.
+    """
+
+    def test_grade_text_returns_none_offline(self, monkeypatch):
+        monkeypatch.delenv("DISCOVERY_LIVE", raising=False)
+        from psychological.scrapers.finbert_sentiment import grade_text
+        assert grade_text("Apple reported record earnings.") is None
+
+    def test_grade_batch_returns_none_list_offline(self, monkeypatch):
+        monkeypatch.delenv("DISCOVERY_LIVE", raising=False)
+        from psychological.scrapers.finbert_sentiment import grade_batch
+        assert grade_batch(["buy", "sell", ""]) == [None, None, None]
+
+    def test_grade_text_empty_is_none(self, monkeypatch):
+        monkeypatch.setenv("DISCOVERY_LIVE", "1")
+        from psychological.scrapers.finbert_sentiment import grade_text
+        assert grade_text("") is None
+        assert grade_text("   ") is None
