@@ -142,6 +142,7 @@ class TestCorpAnonymousScraper:
         scraper._fetch_adzuna = AsyncMock(return_value=None)
         scraper._fetch_adzuna_web_ui_fallback = AsyncMock(return_value=None)
         scraper._fetch_jobspy_fallback = AsyncMock(return_value=None)
+        scraper._fetch_nodriver_fallback = AsyncMock(return_value=None)
         scraper._fetch_career_index_fallback = AsyncMock(return_value=500)
         
         count = await scraper.get_job_count("AAPL")

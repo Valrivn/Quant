@@ -55,7 +55,11 @@ def quant_baseline_flags(names: pd.DataFrame) -> pd.DataFrame:
 
     out["quant_reason"] = out.apply(_row_reason, axis=1)
 
-    alpha = pd.to_numeric(out.get("alpha_3y_ann"), errors="coerce")
+    alpha_col = out["alpha_3y_ann"] if "alpha_3y_ann" in out.columns else None
+    if alpha_col is None:
+        alpha = pd.Series(np.nan, index=out.index)
+    else:
+        alpha = pd.to_numeric(alpha_col, errors="coerce")
     az = (alpha - alpha.mean()) / (alpha.std(ddof=1) + 1e-12) if alpha.notna().sum() > 1 else pd.Series(np.nan, index=out.index)
     if az.isna().all():
         out["pass_quant"] = False

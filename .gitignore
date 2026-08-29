@@ -25,9 +25,15 @@ logs/
 .env.local
 config/instagram_cookies.json
 
+# Account registration progress (may contain email addresses)
+data/registration_progress.json
+
 # Raw browser cookie exports (contain session cookies for many sites)
 cookiesinstagram.txt
 *cookies*.txt
+
+# Authenticated browser profiles (contain session cookies + fingerprints)
+config/browser_profiles/
 
 # IDE
 .vscode/
@@ -36,3 +42,45 @@ cookiesinstagram.txt
 # OS
 .DS_Store
 Thumbs.db
+
+# Org machinery — LOCAL ONLY, never pushed
+.agents/
+.opencode/
+opencode.json
+
+# Personal / credentials — LOCAL ONLY
+scripts/_launch_glassdoor_login.ps1
+Qualitative/psychological/scrapers/glassdoor_*.py
+Qualitative/psychological/scrapers/login_*.py
+
+# Session transcripts & scratch — local only
+sentimizer9.md
+session2b.md
+Session10.md
+Strategy Summary GAINZ
+results.md
+rm_final_result.json
+8/
+Untitled-1.txt
+scripts/tmp_*.py
+run_bt.py
+run_backtest_write.py
+run_ig_llm.py
+write_results.py
+
+# Runtime / harvest state
+.scrape_cooldowns.json
+skills-lock.json
+
+# Data artifacts (regenerated; keep local)
+reddit_quant.db
+data/*.db
+data/*.csv
+data/*.json
+data/*.log
+data/*.err
+data/*.txt
+data/reddit_batches/
+data/test_batches/
+data/sentiment_training_cache/
+data/phrasebank_cache/

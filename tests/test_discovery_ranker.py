@@ -54,11 +54,15 @@ class TestFormula:
         assert topic_relevance("Unknown", prio) == 0.0
 
     def test_score_uses_source_weights(self):
+        # Expected derived from config (D-20260807-002 re-normalized weights:
+        # reddit 0.14, stocktwits 0.09, instagram 0.05 added).
         r = DeterministicRanker()
+        w = r.config["ranker"]["source_weights"]
+        expected = w["reddit"] * 1.0 + w["stocktwits"] * 0.5
         inp = _input("NVDA", ranks={"reddit": 1, "stocktwits": 2})
         out = r.trend_score(inp)
-        # source term = 0.15*1.0 + 0.10*0.5 = 0.20
-        assert out.components["source_term"] == pytest.approx(0.20)
+        assert out.components["source_term"] == pytest.approx(expected)
+        assert expected == pytest.approx(0.185)  # spot-check current config
 
     def test_agreement_count(self):
         r = DeterministicRanker()

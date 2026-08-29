@@ -148,6 +148,19 @@ def run_ig_experiment(
 
     if qual_passing_tickers:
         try:
+            from .gate_data import apply_reverse_heatmap_filter
+            filtered_tickers = apply_reverse_heatmap_filter(qual_passing_tickers)
+            for c in qual_passers:
+                if c.ticker not in filtered_tickers:
+                    c.qual_pass = False
+                    c.qual_reason = "qual:low_attention_not_met"
+            qual_passers = [c for c in qual_passers if c.ticker in filtered_tickers]
+            qual_passing_tickers = [c.ticker for c in qual_passers]
+        except Exception as e:
+            pass
+
+    if qual_passing_tickers:
+        try:
             qfails = _quant_baseline_gate(qual_passing_tickers)
             for c in qual_passers:
                 if c.ticker in qfails:

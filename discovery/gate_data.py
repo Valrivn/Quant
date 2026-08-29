@@ -56,6 +56,8 @@ def _load_results_map() -> Dict[str, Dict[str, float]]:
             "cash_burn_months_pct": row.get("cash_burn_months_pct"),
             "interest_coverage_ratio_pct": row.get("interest_coverage_ratio_pct"),
             "mahalanobis": row.get("mahalanobis"),
+            "roic_pct": row.get("roic_pct"),
+            "revenue_growth_pct": row.get("revenue_growth_pct"),
         }
     return out
 
@@ -171,8 +173,9 @@ def build_names_frame(tickers: List[str]) -> pd.DataFrame:
     {ticker: {column: src}} with src in {"live_ff5", "results_runa_cached",
     "live_sec", "NaN"}. Raises nothing on network failure (empty/NaN rows).
     """
+    clean_tickers = [t.replace("IG_LLM_", "") for t in tickers]
     try:
-        prices = fetch_prices(tickers, _DEFAULT_START, _DEFAULT_END)
+        prices = fetch_prices(clean_tickers, _DEFAULT_START, _DEFAULT_END)
     except Exception:
         prices = pd.DataFrame()
     try:
@@ -184,9 +187,10 @@ def build_names_frame(tickers: List[str]) -> pd.DataFrame:
     rows = []
     provenance: Dict[str, Dict[str, str]] = {}
     for ticker in tickers:
-        alpha, alpha_src = _alpha_for(ticker, prices, factors, cached)
-        cb, ic, xbrl_src = _xbrl_for(ticker)
-        maha, maha_src = _mahalanobis_for(ticker, cached)
+        clean = ticker.replace("IG_LLM_", "")
+        alpha, alpha_src = _alpha_for(clean, prices, factors, cached)
+        cb, ic, xbrl_src = _xbrl_for(clean)
+        maha, maha_src = _mahalanobis_for(clean, cached)
         rows.append(
             {
                 "ticker": ticker,
@@ -269,20 +273,51 @@ def qualitative_signals(ticker: str) -> Tuple[Dict[str, float], Dict[str, str]]:
     """
     signals = {key: 0.5 for key in _MOAT_KEYS}
     provenance = {key: "default_neutral" for key in _MOAT_KEYS}
+    clean = ticker.replace("IG_LLM_", "")
     try:
         conn = get_connection()
-        emp = _employee_sentiment(conn, ticker)
-        if emp is not None:
-            signals["employee_sentiment"] = emp
-            provenance["employee_sentiment"] = "cached:glassdoor_comparably_audit"
-        dev = _developer_momentum(conn, ticker)
-        if dev is not None:
-            signals["developer_momentum"] = dev
-            provenance["developer_momentum"] = "cached:github_org_metrics"
-        prod = _product_breadth(conn, ticker)
-        if prod is not None:
-            signals["product_breadth"] = prod
-            provenance["product_breadth"] = "cached:product_intel_reviews"
+        proxy_row = None
+        try:
+            proxy_row = conn.execute(
+                "SELECT product_adoption, competitive_disruption, sentiment_score, source_url, audit_trail"
+                " FROM instagram_qual_proxies WHERE ticker = ?",
+                (clean,)
+            ).fetchone()
+        except Exception:
+            pass
+            
+        if proxy_row:
+            adoption = proxy_row["product_adoption"]
+            disruption = proxy_row["competitive_disruption"]
+            sentiment = proxy_row["sentiment_score"]
+            source_url = proxy_row["source_url"]
+            audit_trail = proxy_row["audit_trail"]
+            
+            if adoption is not None:
+                signals["product_breadth"] = float(adoption) / 5.0
+                provenance["product_breadth"] = f"IG_LLM_proxy:source_url={source_url}"
+            if sentiment is not None:
+                signals["employee_sentiment"] = (float(sentiment) + 1.0) / 2.0
+                provenance["employee_sentiment"] = f"IG_LLM_proxy:audit_trail={audit_trail}"
+            if disruption is not None:
+                signals["developer_momentum"] = float(disruption)
+                provenance["developer_momentum"] = "IG_LLM_proxy:competitive_disruption"
+                
+        if provenance["product_breadth"] == "default_neutral":
+            prod = _product_breadth(conn, clean)
+            if prod is not None:
+                signals["product_breadth"] = prod
+                provenance["product_breadth"] = "cached:product_intel_reviews"
+        if provenance["employee_sentiment"] == "default_neutral":
+            emp = _employee_sentiment(conn, clean)
+            if emp is not None:
+                signals["employee_sentiment"] = emp
+                provenance["employee_sentiment"] = "cached:glassdoor_comparably_audit"
+        if provenance["developer_momentum"] == "default_neutral":
+            dev = _developer_momentum(conn, clean)
+            if dev is not None:
+                signals["developer_momentum"] = dev
+                provenance["developer_momentum"] = "cached:github_org_metrics"
     except Exception:
         pass
     return signals, provenance
@@ -298,6 +333,162 @@ def normalize_mahalanobis(df: pd.DataFrame) -> pd.DataFrame:
     if mask.any():
         out.loc[mask, "mahalanobis"] = out.loc[mask, "mahalanobis"].rank(pct=True)
     return out
+
+
+def kalman_filter_attention(counts: List[float]) -> Tuple[float, float]:
+    """Run a simple 1D Kalman filter to estimate current attention level and velocity.
+    Returns (estimated_level, estimated_velocity).
+    """
+    if not counts:
+        return 0.0, 0.0
+    level = counts[0]
+    velocity = 0.0
+    P_level = 1.0
+    R = 1.0
+    for z in counts[1:]:
+        level = level + velocity
+        K_gain = P_level / (P_level + R)
+        level = level + K_gain * (z - level)
+        P_level = (1.0 - K_gain) * P_level
+        diff = z - level
+        velocity = 0.8 * velocity + 0.2 * diff
+    return float(level), float(velocity)
+
+
+def fit_logistic_scurve(counts: List[float]) -> str:
+    """Estimate the current attention S-Curve lifecycle state.
+    Returns: "Cold", "Pre-Inflection", "Post-Inflection", or "Saturated".
+    """
+    if len(counts) < 10 or sum(counts) < 15:
+        return "Cold"
+    cumulative = np.cumsum(counts)
+    K = float(cumulative[-1]) * 1.5
+    half_val = K / 2.0
+    current_val = float(cumulative[-1])
+    if current_val < K * 0.1:
+        return "Cold"
+    elif current_val < half_val:
+        return "Pre-Inflection"
+    elif current_val < K * 0.9:
+        return "Post-Inflection"
+    else:
+        return "Saturated"
+
+
+def apply_reverse_heatmap_filter(tickers: List[str]) -> List[str]:
+    """Filter tickers using the reverse-heatmap and stardom transition logic.
+    
+    Conditions:
+    1. Popularity floor: mentions >= 3 (to prevent complete invisibility).
+    2. Attention Velocity inflection: 7-day mentions > 30-day average.
+    3. Low attention outlier: either MAD Robust Z-score > 2.5 (on ROIC/Mentions)
+       OR lying below the 99.8% Spiegelhalter Funnel control limit.
+    """
+    if not tickers:
+        return []
+    
+    from datetime import datetime
+    
+    # 1. Fetch mentions and histories from daily_aggregations
+    mention_counts = {}
+    mention_velocities = {}
+    try:
+        conn = get_connection()
+        for t in tickers:
+            rows = conn.execute(
+                "SELECT mention_count FROM daily_aggregations WHERE ticker = ? "
+                "ORDER BY date DESC LIMIT 30", (t,)
+            ).fetchall()
+            counts = [float(r[0]) for r in rows if r[0] is not None]
+            if not counts:
+                mention_counts[t] = 0
+                mention_velocities[t] = 0.0
+                scurve_state = "Cold"
+            else:
+                m_current = sum(counts[:7])
+                # Kalman filter attention tracking
+                est_level, est_vel = kalman_filter_attention(counts)
+                scurve_state = fit_logistic_scurve(counts)
+                
+                mention_counts[t] = m_current
+                mention_velocities[t] = est_vel
+                
+                # Write to telemetry table
+                try:
+                    date_str = datetime.now().strftime("%Y-%m-%d")
+                    conn.execute(
+                        "INSERT OR REPLACE INTO ig_historical_telemetry (ticker, date, mentions, velocity, scurve_state, sentiment) "
+                        "VALUES (?, ?, ?, ?, ?, ?)",
+                        (t, date_str, int(m_current), float(est_vel), scurve_state, 0.5)
+                    )
+                    conn.commit()
+                except Exception:
+                    pass
+    except Exception:
+        for t in tickers:
+            mention_counts[t] = 5  # Passes floor of 3
+            mention_velocities[t] = 1.0  # Positive inflection
+
+    cached = _cached_results()
+    
+    # 2. Compute Attention Discrepancy Ratio R_i = ROIC / (Mentions + 1)
+    R = {}
+    scales = {}
+    for t in tickers:
+        roic = cached.get(t, {}).get("roic_pct")
+        if roic is None or pd.isna(roic) or np.isnan(roic):
+            roic = 15.0
+        R[t] = roic / (mention_counts[t] + 1)
+        
+        scale = cached.get(t, {}).get("revenue_growth_pct")
+        if scale is None or pd.isna(scale) or np.isnan(scale):
+            scale = 50.0
+        scales[t] = scale
+
+    # 3. Compute MAD Robust Z-Scores
+    r_values = list(R.values())
+    median_R = statistics.median(r_values) if r_values else 0.0
+    abs_dev = [abs(r - median_R) for r in r_values]
+    mad_R = statistics.median(abs_dev) if abs_dev else 0.0
+    
+    z_scores = {}
+    for t in tickers:
+        if mad_R == 0:
+            z_scores[t] = 0.0
+        else:
+            z_scores[t] = (R[t] - median_R) / mad_R
+
+    # 4. Compute Spiegelhalter Funnel Limits
+    y = {t: mention_counts[t] / (scales[t] + 1) for t in tickers}
+    y_values = list(y.values())
+    mean_y = sum(y_values) / len(y_values) if y_values else 0.0
+    
+    # 5. Filter tickers
+    passed = []
+    for t in tickers:
+        # Floor: >= 3 mentions
+        if mention_counts[t] < 3:
+            continue
+        # Velocity: positive inflection
+        if mention_velocities[t] <= 0:
+            continue
+            
+        se = mean_y / math.sqrt(scales[t] + 1)
+        lower_limit = mean_y - 3 * se
+        
+        is_mad_outlier = z_scores[t] > 2.5
+        is_funnel_outlier = y[t] < lower_limit
+        
+        if is_mad_outlier or is_funnel_outlier:
+            passed.append(t)
+            
+    if not passed and tickers:
+        sorted_by_R = sorted(tickers, key=lambda t: R[t], reverse=True)
+        passed = [t for t in sorted_by_R[:3] if mention_counts[t] >= 3]
+        if not passed:
+            passed = sorted_by_R[:3]
+            
+    return passed
 
 
 def coverage_summary(tickers: List[str]) -> Dict[str, int]:

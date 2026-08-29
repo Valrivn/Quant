@@ -68,5 +68,14 @@ async def main():
         print(f"✗ antigravity daemon scan failed: {e}")
 
 if __name__ == "__main__":
-    sys.path.insert(0, '/Users/hayden/Desktop/quant-py')
+    import os
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sys.path.insert(0, project_root)
+    sys.path.insert(0, os.path.join(project_root, "Qualitative"))
+    # Force UTF-8 stdout if needed, or use ASCII equivalents
+    import sys
+    import codecs
+    if sys.platform.startswith('win'):
+        # Avoid UnicodeEncodeError on Windows console by using ASCII characters
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
     asyncio.run(main())

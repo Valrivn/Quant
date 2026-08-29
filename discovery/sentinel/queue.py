@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS sentinel_queue (
     raw_json TEXT,
     created_utc INTEGER NOT NULL,
     updated_utc INTEGER NOT NULL,
-    UNIQUE(source, source_key)
+    UNIQUE(ticker)
 );
 CREATE INDEX IF NOT EXISTS idx_sentinel_queue_stage ON sentinel_queue(stage, created_utc);
 
@@ -115,6 +115,51 @@ def _now() -> int:
     return int(datetime.now(tz=timezone.utc).timestamp())
 
 
+def dedup_queue(conn: sqlite3.Connection) -> int:
+    """Remove duplicate rows from sentinel_queue, keeping the earliest (lowest id) per ticker.
+
+    Returns the number of rows removed.
+    """
+    dups = conn.execute(
+        """SELECT ticker, MIN(id) AS keep_id
+           FROM sentinel_queue
+           GROUP BY ticker
+           HAVING COUNT(*) > 1"""
+    ).fetchall()
+    removed = 0
+    for row in dups:
+        cur = conn.execute(
+            "DELETE FROM sentinel_queue WHERE ticker = ? AND id != ?",
+            (row["ticker"], row["keep_id"]),
+        )
+        removed += cur.rowcount
+    if removed:
+        conn.commit()
+    return removed
+
+
+def _ensure_unique_ticker(conn: sqlite3.Connection) -> None:
+    """Migration: ensure UNIQUE(ticker) index exists on sentinel_queue.
+
+    Older databases may have UNIQUE(source, source_key) only.  This deduplicates
+    first, then adds the ticker-level unique index so that duplicate tickers
+    cannot re-enter the queue via ``INSERT OR IGNORE``.
+    """
+    # Check whether the table was created with UNIQUE(ticker) in the DDL.
+    create_sql = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type='table' AND name='sentinel_queue'"
+    ).fetchone()
+    if create_sql and "UNIQUE(ticker)" in (create_sql[0] or ""):
+        return  # DDL already has the correct constraint
+    # Older schema — deduplicate, then add a unique index.
+    dedup_queue(conn)
+    conn.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_sentinel_queue_ticker"
+        " ON sentinel_queue(ticker)"
+    )
+    conn.commit()
+
+
 def connect(db_path: str = "data/sentinel.db") -> sqlite3.Connection:
     parent = os.path.dirname(db_path)
     if parent:
@@ -125,6 +170,7 @@ def connect(db_path: str = "data/sentinel.db") -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys=ON;")
     conn.row_factory = sqlite3.Row
     conn.executescript(_DDL)
+    _ensure_unique_ticker(conn)
     conn.commit()
     return conn
 
@@ -133,7 +179,7 @@ def enqueue(
     conn: sqlite3.Connection, ticker: str, source: str, source_key: str,
     raw_json: Optional[Dict] = None,
 ) -> bool:
-    """Insert a queue item idempotently (unique by source+key). Returns True if new."""
+    """Insert a queue item idempotently (unique by ticker). Returns True if new."""
     now = _now()
     cur = conn.execute(
         """INSERT OR IGNORE INTO sentinel_queue

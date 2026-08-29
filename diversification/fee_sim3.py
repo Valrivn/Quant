@@ -38,6 +38,7 @@ nothing is fitted or hardcoded to outcomes.
 import numpy as np
 import pandas as pd
 import requests
+import sys
 
 from diversification import allocator
 from diversification.allocator import (
@@ -85,6 +86,7 @@ from diversification.sleeves import (
 )
 
 START = "2015-01-01"
+DIV_HIST_START = "2010-01-01"
 END = "2026-07-31"
 REBAL_START = "2018-01-31"
 INITIAL = 10000.0
@@ -116,6 +118,12 @@ def _fred_reachable():
         return False
 
 
+def _fred_source(baa10y):
+    if baa10y is not None and not baa10y.empty:
+        return baa10y.attrs.get("source", "FRED")
+    return "PRICE FALLBACK"
+
+
 def fetch_all():
     prices = fetch_sleeve_prices(P3_TICKERS + MACRO_TICKERS, START, END)
     if prices.empty:
@@ -127,7 +135,11 @@ def fetch_all():
         dgs10 = fetch_fred_series("DGS10", START, END)
         gold_fix = fetch_fred_series("GOLDPMGBD228NLBM", START, END)
     else:
-        baa10y = dgs10 = gold_fix = pd.Series(dtype=float)
+        baa10y = fetch_fred_series("BAA10Y", START, END, allow_stale=True)
+        dgs10 = fetch_fred_series("DGS10", START, END, allow_stale=True)
+        gold_fix = fetch_fred_series("GOLDPMGBD228NLBM", START, END, allow_stale=True)
+    if not fred_ok and not baa10y.empty and "source" not in baa10y.attrs:
+        baa10y.attrs["source"] = "FRED_CACHE_STALE"
     credit_ratio = prices["HYG"] / prices["LQD"]
     return prices, baa10y, dgs10, gold_fix, credit_ratio
 
@@ -136,7 +148,7 @@ def _fetch_div_hist(traded):
     """Dividend histories for every traded ticker (candidates + ETFs), so the
     sim accrues REAL ex-date events instead of the static DIVIDEND_YIELDS map."""
     syms = list(dict.fromkeys(list(DIVIDEND_CANDIDATES) + list(traded)))
-    return fetch_dividend_history(syms, START, END)
+    return fetch_dividend_history(syms, DIV_HIST_START, END)
 
 
 def sleeve_target(date, rets, spread_series, credit_ratio, within_fx):
@@ -390,7 +402,7 @@ def run_sim():
     start_idx = prices.index[prices.index > pd.Timestamp(REBAL_START)][0]
     traded = [c for c in prices.columns if c in ALL_TICKERS or c in DIVIDEND_CANDIDATES]
 
-    div_hist = _fetch_div_hist(traded)
+    div_hist = _fetch_div_hist(P3_TICKERS)
 
     pf = Portfolio(prices[traded], div_hist=div_hist)
 
@@ -480,19 +492,20 @@ def run_sim():
         return target, {"state": "minvar"}
 
     results = []
-    div_info = None
+    infos = {}
+    vpaths = {}
     for label, fn in [("BASELINE SPY", target_baseline),
                       ("MACRO (state+risk, opportunistic)", target_macro),
                       ("MINVAR (theoretically-better)", target_minvar),
                       ("DIVIDEND (stable-div + opportunistic)", target_dividend)]:
         vpath, info = pf.run(rebal, fn)
-        if label.startswith("DIVIDEND"):
-            div_info = info
+        infos[label] = info
+        vpaths[label] = vpath
         results.append(summarize(label, vpath, info, start_idx, prices.index[-1], rets, baa10y))
 
-    meta = {"fred_source": "FRED" if not baa10y.empty else "PRICE FALLBACK"}
+    meta = {"fred_source": _fred_source(baa10y)}
     return (pd.DataFrame([r for r in results if r]), prices, rets, gold_fix, baa10y,
-            div_hist, div_info, meta)
+            div_hist, infos, vpaths, meta)
 
 
 # ---------------------------------------------------------------------------
@@ -666,6 +679,7 @@ def run_sim_phase3():
 
     results = []
     infos = {}
+    vpaths = {}
     for label, fn in [
         ("BASELINE SPY", target_baseline),
         ("STATIC-40/20/20/20 (CEO)", target_static),
@@ -675,6 +689,7 @@ def run_sim_phase3():
     ]:
         vpath, info = pf.run(rebal, fn)
         infos[label] = info
+        vpaths[label] = vpath
         results.append(summarize(label, vpath, info, start_idx, prices.index[-1], rets, baa10y))
         if label == "STATIC-after-ML":
             oos_row = summarize(f"{label} [OOS {cfg['optimizer']['oos_start']}+]",
@@ -683,11 +698,11 @@ def run_sim_phase3():
                 oos_row["strategy"] = f"{label} OOS segment"
                 results.append(oos_row)
 
-    meta = {"fred_source": "FRED" if not baa10y.empty else "PRICE FALLBACK",
+    meta = {"fred_source": _fred_source(baa10y),
             "ml_weights": ml_weights, "train_end": cfg["optimizer"]["train_end"],
             "oos_start": cfg["optimizer"]["oos_start"]}
     return (pd.DataFrame([r for r in results if r]), prices, rets, gold_fix, baa10y,
-            div_hist, infos, meta)
+            div_hist, infos, vpaths, meta)
 
 
 NASDAQ_CROSSCHECK = ["SPY", "VCSH", "VCIT", "BIL", "SHY", "SGOV", "GLD", "IAU"]
@@ -745,15 +760,63 @@ def _raw_level_recon(sym, nasdaq_series):
         return "  (raw recon failed)"
 
 
+def validate_prices(prices, rets, gold_fix, baa10y, div_hist=None):
+    """Shared multi-source price integrity gate (S2): gold vs FRED gold fix
+    plus the Nasdaq second-vendor cross-check. Runs on every report path."""
+    print("\n--- Multi-source price checks (S2) ---")
+    print(f"  macro state input: {_fred_source(baa10y)}"
+          f"   (FRED BAA10Y obs: {len(baa10y)})")
+    gld = rets.get("GLD", pd.Series(dtype=float))
+    if not gold_fix.empty:
+        gf = gold_fix.pct_change(fill_method=None)
+        joined = pd.concat([gld.rename("gld"), gf.rename("fix")], axis=1).dropna()
+        if len(joined) > 30:
+            corr = float(joined["gld"].corr(joined["fix"]))
+            print(f"  GLD vs FRED gold-fix daily return corr: {corr:.3f} "
+                  f"(n={len(joined)}) — gold sleeve cross-validated on a second source")
+    else:
+        print("  gold cross-check (FRED GOLDPMGBD228NLBM): SKIPPED (series unavailable "
+              "via FRED this run — gold-fix was discontinued upstream)")
+    print("  --- Nasdaq (second vendor) price integrity ---")
+    _nasdaq_crosscheck(prices, rets)
+
+
+def xbrl_crosscheck_report(div_hist):
+    """SEC XBRL stable-dividend cross-check (second dividend source, S3).
+    Wrapped in try/except: all-NA resolution is a documented degradation."""
+    print("\n  --- SEC XBRL stable-dividend cross-check (second dividend source) ---")
+    try:
+        from valuation_alpha.datastore import xbrl_financials
+        from valuation_alpha.universe import cik_resolver
+
+        rows = xbrl_crosscheck_all(
+            DIVIDEND_CANDIDATES, div_hist, pd.Timestamp(END),
+            resolve_cik=cik_resolver.resolve_cik,
+            fetch_companyfacts=xbrl_financials.fetch_companyfacts,
+            extract=xbrl_financials.extract_quarterly_financials,
+        )
+        n_na = sum(1 for _, s, _ in rows if s == "NA")
+        if rows and n_na == len(rows):
+            print("  SEC EDGAR / CIK resolution unavailable this run - XBRL"
+                  " cross-check SKIPPED (documented degradation)")
+            return
+        print("  ticker | status | detail")
+        for name, status, detail in rows:
+            print(f"  {name:6s} | {status:4s} | {detail}")
+    except Exception as e:
+        print(f"  XBRL cross-check failed: {type(e).__name__}: {e} (DEGRADED)")
+
+
 def main():
-    out, prices, rets, gold_fix, baa10y, div_hist, div_info, meta = run_sim()
+    out, prices, rets, gold_fix, baa10y, div_hist, infos, vpaths, _ = run_sim()
+    div_info = infos.get("DIVIDEND (stable-div + opportunistic)")
     pd.set_option("display.width", 220)
     print("=== Phase-1/2 (D-20260803-003/004) ===")
     print(out.to_string(float_format=lambda x: f"{x:,.2f}"))
     out.to_csv(f"{OUT}\\fee_sim3_results.csv", index=False)
 
     print("\n=== Phase-3 (D-20260803-005): risk-constrained ML allocator ===")
-    out3, prices3, rets3, gold_fix3, baa10y3, div_hist3, infos3, meta3 = run_sim_phase3()
+    out3, prices3, rets3, gold_fix3, baa10y3, div_hist3, infos3, vpaths3, meta3 = run_sim_phase3()
     print(out3.to_string(float_format=lambda x: f"{x:,.2f}"))
     out3.to_csv(f"{OUT}\\fee_sim3_phase3_results.csv", index=False)
 
@@ -790,40 +853,8 @@ def main():
         print(f"  macro states across decisions: bear {n_bear} / "
               f"{n - n_bear} non-bear")
 
-    print("\n--- Multi-source check (non-yfinance) ---")
-    print(f"  macro state input: {meta['fred_source']}"
-          f"   (FRED BAA10Y obs: {len(baa10y)})")
-    gld = rets.get("GLD", pd.Series(dtype=float))
-    if not gold_fix.empty:
-        gf = gold_fix.pct_change(fill_method=None)
-        joined = pd.concat([gld.rename("gld"), gf.rename("fix")], axis=1).dropna()
-        if len(joined) > 30:
-            corr = float(joined["gld"].corr(joined["fix"]))
-            print(f"  GLD vs FRED gold-fix daily return corr: {corr:.3f} "
-                  f"(n={len(joined)}) — gold sleeve cross-validated on a second source")
-    else:
-        print("  gold cross-check (FRED GOLDPMGBD228NLBM): SKIPPED (FRED unreachable this run)")
-    print("  --- Nasdaq (second vendor) price integrity ---")
-    _nasdaq_crosscheck(prices, rets)
-    print("\n  --- SEC XBRL stable-dividend cross-check (second dividend source) ---")
-    from valuation_alpha.datastore import xbrl_financials
-    from valuation_alpha.universe import cik_resolver
-
-    rows = xbrl_crosscheck_all(
-        DIVIDEND_CANDIDATES, div_hist, pd.Timestamp(END),
-        resolve_cik=cik_resolver.resolve_cik,
-        fetch_companyfacts=xbrl_financials.fetch_companyfacts,
-        extract=xbrl_financials.extract_quarterly_financials,
-    )
-    n_na = sum(1 for _, s, _ in rows if s == "NA")
-    if rows and n_na == len(rows):
-        print("  SEC EDGAR / CIK resolution unavailable this run - XBRL"
-              " cross-check SKIPPED (documented degradation, same pattern as"
-              " the FRED fallback)")
-        return
-    print("  ticker | status | detail")
-    for name, status, detail in rows:
-        print(f"  {name:6s} | {status:4s} | {detail}")
+    validate_prices(prices, rets, gold_fix, baa10y, div_hist)
+    xbrl_crosscheck_report(div_hist)
 
 
 def rebal_dates(infos):
@@ -839,7 +870,7 @@ def rebal_dates(infos):
 # config/weights_diversification.yaml return_max block; nothing fit to outcomes).
 # ---------------------------------------------------------------------------
 
-def run_sim_discovery():
+def run_sim_discovery(extra_small_mid: list = None):
     """Discovery comparison: return-max rules + ML variants vs SPY and Phase-3.
 
     Strategies (all params pre-registered):
@@ -848,8 +879,15 @@ def run_sim_discovery():
       RM-ML-ADAPTIVE-HIGH / LOW (trailing re-fit, diversified vs equity-heavy
       bounds), RM-GUARD (adaptive-high + crisis de-risk engine; Test-2 bar),
       RM-FINAL (guard + event-driven fee discipline; Final bar).
+
+    ``extra_small_mid`` optionally extends the small/mid sleeve tickers (used by
+    the IG_LLM engine to add gate-passing IG_LLM_<T> candidates).
     """
     cfg = load_config()
+    if extra_small_mid:
+        cfg["sleeves"]["small_mid"] = sorted(
+            set(cfg["sleeves"]["small_mid"]) | set(extra_small_mid)
+        )
     rm = cfg["return_max"]
     prices, baa10y, dgs10, gold_fix, credit_ratio = fetch_all()
     rets = prices.pct_change(fill_method=None)
@@ -1005,9 +1043,11 @@ def run_sim_discovery():
 
     results = []
     infos = {}
+    vpaths = {}
     for label, fn, report_oos, gate in strategies:
         vpath, info = pf.run(rebal, fn, gate=gate)
         infos[label] = info
+        vpaths[label] = vpath
         results.append(summarize(label, vpath, info, start_idx, prices.index[-1], rets, baa10y))
         if report_oos:
             oos_row = summarize(f"{label} [OOS {rm['oos_start']}+]", vpath, info,
@@ -1016,17 +1056,96 @@ def run_sim_discovery():
                 oos_row["strategy"] = f"{label} OOS segment"
                 results.append(oos_row)
 
-    meta = {"fred_source": "FRED" if not baa10y.empty else "PRICE FALLBACK",
+    meta = {"fred_source": _fred_source(baa10y),
             "rm_static": rm_static, "train_end": rm["train_end"],
             "oos_start": rm["oos_start"], "p3_ml": p3_ml}
     return (pd.DataFrame([r for r in results if r]), prices, rets, gold_fix, baa10y,
-            div_hist, infos, meta)
+            div_hist, infos, vpaths, meta)
+
+
+def _ig_llm_passed_candidates() -> list:
+    """IG_LLM candidates whose qualitative proxies pass the buy-class gate.
+
+    Only candidates whose LLM-derived proxy signals lift the qualitative
+    pipeline to a buy-class recommendation (D-20260815-001: proxies feed INTO
+    the existing gate; never a bypass). Returns the clean ticker list.
+    """
+    import sqlite3
+    try:
+        conn = sqlite3.connect("reddit_quant.db")
+        rows = conn.execute(
+            "SELECT DISTINCT ticker FROM instagram_qual_proxies"
+        ).fetchall()
+        conn.close()
+    except Exception:
+        return []
+    tickers = [r[0] for r in rows]
+    if not tickers:
+        return []
+    try:
+        from pathlib import Path
+        qual = Path(__file__).resolve().parent.parent / "Qualitative"
+        if str(qual) not in sys.path:
+            sys.path.insert(0, str(qual))
+        from discovery import gate_data
+        from Qualitative.psychological.qualitative_scoring import (
+            create_alternative_strategy_pipeline,
+        )
+        pipeline = create_alternative_strategy_pipeline()
+        passed = []
+        for t in tickers:
+            try:
+                sigs, _ = gate_data.qualitative_signals(t)
+                out = pipeline.run(
+                    ticker=t, moat_signals=sigs,
+                    financial_inputs=None, z_score=None,
+                )
+                if out.recommendation in ("strong_buy", "buy"):
+                    passed.append(t)
+            except Exception:
+                continue
+        return passed
+    except Exception:
+        return []
+
+
+def run_sim_discovery_ig_llm():
+    """Discovery comparison running with IG_LLM Sentinel Validation proxies.
+
+    Only IG_LLM candidates whose proxies PASS the qualitative gate are injected
+    into the tradeable small/mid sleeve (prefixed IG_LLM_<T>); all others are
+    excluded (D-20260815-001: gate-first, no bypass).
+    """
+    passed = _ig_llm_passed_candidates()
+    ig_tickers = [f"IG_LLM_{t}" for t in passed]
+
+    global P3_TICKERS
+    old_p3 = list(P3_TICKERS)
+    P3_TICKERS = sorted(set(P3_TICKERS) | set(ig_tickers))
+
+    old_small_mid = None
+    try:
+        df, prices, rets, gold_fix, baa10y, div_hist, infos, vpaths, meta = run_sim_discovery(extra_small_mid=ig_tickers)
+
+        # Map RM-FINAL to RM-IG-LLM
+        if "RM-FINAL (Final bar)" in vpaths:
+            vpaths["RM-IG-LLM (IG LLM Sentinel)"] = vpaths.pop("RM-FINAL (Final bar)")
+        if "RM-FINAL (Final bar)" in infos:
+            infos["RM-IG-LLM (IG LLM Sentinel)"] = infos.pop("RM-FINAL (Final bar)")
+
+        df["strategy"] = df["strategy"].replace({
+            "RM-FINAL (Final bar)": "RM-IG-LLM (IG LLM Sentinel)",
+            "RM-FINAL (Final bar) OOS segment": "RM-IG-LLM (IG LLM Sentinel) OOS segment"
+        })
+        return df, prices, rets, gold_fix, baa10y, div_hist, infos, vpaths, meta
+    finally:
+        P3_TICKERS = old_p3
 
 
 def main_discovery():
     """Discovery report: return-max variants vs SPY, the three success bars,
     head-to-head vs STATIC-after-ML, and decision counts."""
-    out, prices, rets, gold_fix, baa10y, div_hist, infos, meta = run_sim_discovery()
+    out, prices, rets, gold_fix, baa10y, div_hist, infos, vpaths, meta = run_sim_discovery()
     pd.set_option("display.width", 240)
     print("=== Discovery B-20260804-001: return-max pivot ===")
     print(out.to_string(float_format=lambda x: f"{x:,.2f}"))
@@ -1076,6 +1195,10 @@ def main_discovery():
         tilted = sum(1 for _, m in st if m.get("tilted"))
         print(f"  {label:24s} n {n:3d} | bull {bull:3d} bear {bear:3d} | "
               f"armed {armed:3d} | tilted {tilted:3d} | holds {holds:3d}")
+
+    data_status(prices, rets, gold_fix, baa10y, div_hist, meta)
+    validate_prices(prices, rets, gold_fix, baa10y, div_hist)
+    xbrl_crosscheck_report(div_hist)
 
     return out, infos, meta
 
@@ -1157,46 +1280,20 @@ def pool_all_results():
     report first, then one pooled table. Writes the pooled CSV to OUT."""
     pd.set_option("display.width", 240)
 
-    out, prices, rets, gold_fix, baa10y, div_hist, div_info, meta = run_sim()
+    out, prices, rets, gold_fix, baa10y, div_hist, infos, vpaths, meta = run_sim()
     data_status(prices, rets, gold_fix, baa10y, div_hist, meta)
 
-    print("\n--- Multi-source price checks (S2) ---")
-    _nasdaq_crosscheck(prices, rets)
-    if not gold_fix.empty:
-        gld = rets.get("GLD", pd.Series(dtype=float))
-        gf = gold_fix.pct_change(fill_method=None)
-        joined = pd.concat([gld.rename("gld"), gf.rename("fix")], axis=1).dropna()
-        if len(joined) > 30:
-            print(f"  GLD vs FRED gold-fix return corr: "
-                  f"{float(joined['gld'].corr(joined['fix'])):.3f} "
-                  f"(n={len(joined)})")
+    validate_prices(prices, rets, gold_fix, baa10y, div_hist)
 
-    out3, prices3, rets3, gold_fix3, baa10y3, div_hist3, infos3, meta3 = run_sim_phase3()
-    outd, pricesd, retsd, gold_fixd, baa10yd, div_histd, infosd, metad = run_sim_discovery()
+    out3, prices3, rets3, gold_fix3, baa10y3, div_hist3, infos3, vpaths3, meta3 = run_sim_phase3()
+    outd, pricesd, retsd, gold_fixd, baa10yd, div_histd, infosd, vpathsd, metad = run_sim_discovery()
 
-    print("\n--- SEC XBRL stable-dividend cross-check (live) ---")
-    try:
-        from valuation_alpha.datastore import xbrl_financials
-        from valuation_alpha.universe import cik_resolver
-        rows = xbrl_crosscheck_all(
-            DIVIDEND_CANDIDATES, div_hist, pd.Timestamp(END),
-            resolve_cik=cik_resolver.resolve_cik,
-            fetch_companyfacts=xbrl_financials.fetch_companyfacts,
-            extract=xbrl_financials.extract_quarterly_financials,
-        )
-        n_na = sum(1 for _, s, _ in rows if s == "NA")
-        if rows and n_na == len(rows):
-            print("  EDGAR CIK resolution unavailable - XBRL cross-check SKIPPED (DEGRADED)")
-        else:
-            print("  ticker | status | detail")
-            for name, status, detail in rows:
-                print(f"  {name:6s} | {status:4s} | {detail}")
-    except Exception as e:
-        print(f"  XBRL cross-check failed: {type(e).__name__}: {e} (DEGRADED)")
+    xbrl_crosscheck_report(div_hist)
 
     pool = pd.concat([out, out3, outd], ignore_index=True, sort=False)
     pool["phase"] = (["P1/P2"] * len(out)) + (["P3"] * len(out3)) + (["DISCOVERY"] * len(outd))
-    pool["div_src"] = "real-events+static-fallback"
+    static = [c for c in prices.columns if c not in div_hist and DIVIDEND_YIELDS.get(c, 0.0) > 0]
+    pool["div_src"] = "real-events" if not static else "real-events+static-fallback"
 
     d_ref = DEGRADED_BASELINE_DISCOVERY
     pool["degraded_end_value"] = pool["strategy"].map(d_ref)

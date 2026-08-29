@@ -97,10 +97,24 @@ def fetch_sleeve_prices(tickers: list, start: str, end: str) -> pd.DataFrame:
     """
     if not tickers:
         return pd.DataFrame()
-    try:
-        data = yf.download(tickers, start=start, end=end, progress=False, auto_adjust=True)
-    except Exception:
-        return pd.DataFrame()
+        
+    clean_map = {}
+    for t in tickers:
+        clean = t.replace("IG_LLM_", "")
+        clean_map[clean] = t
+        
+    download_tickers = list(clean_map.keys())
+    
+    data = None
+    for attempt in range(3):
+        try:
+            data = yf.download(download_tickers, start=start, end=end, progress=False, auto_adjust=True)
+            if data is not None and not data.empty:
+                break
+        except Exception:
+            pass
+        if attempt < 2:
+            time.sleep(2 * (attempt + 1))
     if data is None or data.empty:
         return pd.DataFrame()
     if isinstance(data.columns, pd.MultiIndex):
@@ -108,7 +122,10 @@ def fetch_sleeve_prices(tickers: list, start: str, end: str) -> pd.DataFrame:
     else:
         close = data["Close"] if "Close" in data.columns else data
     if close.ndim == 1:
-        close = close.to_frame(tickers[0])
+        close = close.to_frame(download_tickers[0])
+        
+    # Rename columns back to prefixed names
+    close = close.rename(columns=clean_map)
     return close
 
 
@@ -124,7 +141,8 @@ def fetch_dividend_history(tickers: list, start: str, end: str, cache_dir: Path 
     (cache_root / "dividends").mkdir(parents=True, exist_ok=True)
     out = {}
     for sym in tickers:
-        cache = cache_root / "dividends" / f"{sym}.csv"
+        clean = sym.replace("IG_LLM_", "")
+        cache = cache_root / "dividends" / f"{clean}.csv"
         if cache.exists():
             try:
                 s = pd.read_csv(cache, index_col=0, parse_dates=True).iloc[:, 0]
@@ -135,8 +153,18 @@ def fetch_dividend_history(tickers: list, start: str, end: str, cache_dir: Path 
             except Exception:
                 pass
         try:
-            s = yf.Ticker(sym).dividends
+            s = None
+            for attempt in range(3):
+                try:
+                    s = yf.Ticker(clean).dividends
+                    if s is not None and not s.empty:
+                        break
+                except Exception:
+                    pass
+                if attempt < 2:
+                    time.sleep(2 * (attempt + 1))
             if s is None or s.empty:
+                time.sleep(0.6)
                 continue
             s.index = pd.to_datetime(s.index)
             if getattr(s.index, "tz", None) is not None:
@@ -144,7 +172,7 @@ def fetch_dividend_history(tickers: list, start: str, end: str, cache_dir: Path 
             s = s[(s.index >= pd.Timestamp(start)) & (s.index <= pd.Timestamp(end))]
             if not s.empty:
                 out[sym] = s
-                pd.DataFrame({sym: s}).to_csv(cache)
+                pd.DataFrame({clean: s}).to_csv(cache)
             time.sleep(0.6)
         except Exception:
             time.sleep(0.6)
@@ -152,24 +180,130 @@ def fetch_dividend_history(tickers: list, start: str, end: str, cache_dir: Path 
     return out
 
 
-def fetch_fred_series(series_id: str, start: str, end: str, api_key: str = None) -> pd.Series:
-    """Fetch a FRED series between start and end.
-
-    Uses the FREDScraper pattern. Returns an empty Series on any failure; never raises.
-    """
+def get_fred_api_key() -> str:
+    """Load FRED API key from environment or .env file."""
+    import os
+    key = os.environ.get("FRED_API_KEY")
+    if key:
+        return key
     try:
-        scraper = FREDScraper()
-        result = scraper.fetch_series(series_id)
-        observations = result.observations
+        import dotenv
+        env_path = Path(__file__).resolve().parents[1] / ".env"
+        if env_path.exists():
+            dotenv.load_dotenv(dotenv_path=env_path)
+            return os.environ.get("FRED_API_KEY")
+    except Exception:
+        pass
+    return None
+
+
+def _fetch_fred_api(series_id: str, start: str, end: str, api_key: str) -> pd.Series:
+    """Fetch FRED observations using the API."""
+    url = "https://api.stlouisfed.org/fred/series/observations"
+    params = {
+        "series_id": series_id,
+        "api_key": api_key,
+        "file_type": "json",
+        "sort_order": "asc",
+        "observation_start": start,
+        "observation_end": end,
+    }
+    try:
+        resp = requests.get(url, params=params, timeout=30)
+        if resp.status_code == 400:
+            # FRED says the series does not exist (e.g. discontinued gold-fix):
+            # skip the slow scrape fallback for a series that is gone upstream.
+            s = pd.Series(dtype=float)
+            s.attrs["_fred_api_missing"] = True
+            return s
+        if resp.status_code != 200:
+            return pd.Series(dtype=float)
+        data = resp.json()
+        observations = data.get("observations", [])
         if not observations:
             return pd.Series(dtype=float)
-        series = pd.Series(
-            [obs.value for obs in observations],
-            index=pd.to_datetime([obs.date for obs in observations]),
-        )
+        
+        dates = []
+        values = []
+        for obs in observations:
+            d = obs.get("date")
+            v = obs.get("value")
+            if d is None or v is None:
+                continue
+            v_str = str(v).strip()
+            if v_str == "." or not v_str:
+                continue
+            try:
+                val = float(v_str)
+                dates.append(pd.to_datetime(d))
+                values.append(val)
+            except ValueError:
+                continue
+        
+        if not dates:
+            return pd.Series(dtype=float)
+            
+        series = pd.Series(values, index=dates)
         series = series.sort_index()
         series = series[(series.index >= pd.Timestamp(start)) & (series.index <= pd.Timestamp(end))]
+        series = series[~series.index.duplicated(keep='first')]
         return series
+    except Exception:
+        return pd.Series(dtype=float)
+
+
+def fetch_fred_series(series_id: str, start: str, end: str, api_key: str = None, allow_stale: bool = False) -> pd.Series:
+    """Fetch a FRED series between start and end.
+
+    Uses the FRED API if a key is available, falling back to FREDScraper.
+    Returns an empty Series on any failure; never raises.
+    """
+    try:
+        resolved_key = api_key or get_fred_api_key()
+        is_real_scraper = getattr(FREDScraper, "__module__", "").startswith("Quantitative.shared")
+        if resolved_key and is_real_scraper:
+            series = _fetch_fred_api(series_id, start, end, resolved_key)
+            if series.attrs.get("_fred_api_missing"):
+                return pd.Series(dtype=float)
+            if not series.empty:
+                series.attrs["source"] = "FRED_API"
+                return series
+            
+            scraper = FREDScraper()
+            result = scraper.fetch_series(series_id, allow_stale=allow_stale)
+            observations = result.observations
+            if observations:
+                series = pd.Series(
+                    [obs.value for obs in observations],
+                    index=pd.to_datetime([obs.date for obs in observations]),
+                )
+                series = series.sort_index()
+                series = series[(series.index >= pd.Timestamp(start)) & (series.index <= pd.Timestamp(end))]
+                series = series[~series.index.duplicated(keep='first')]
+                if not series.empty:
+                    series.attrs["source"] = "FRED_SCRAPE"
+                    return series
+            return pd.Series(dtype=float)
+        else:
+            scraper = FREDScraper()
+            result = scraper.fetch_series(series_id, allow_stale=allow_stale)
+            observations = result.observations
+            if not observations:
+                return pd.Series(dtype=float)
+            series = pd.Series(
+                [obs.value for obs in observations],
+                index=pd.to_datetime([obs.date for obs in observations]),
+            )
+            series = series.sort_index()
+            series = series[(series.index >= pd.Timestamp(start)) & (series.index <= pd.Timestamp(end))]
+            series = series[~series.index.duplicated(keep='first')]
+            if not series.empty:
+                if allow_stale and result.retrieval_method == "cache":
+                    series.attrs["source"] = "FRED_CACHE_STALE"
+                else:
+                    series.attrs["source"] = "FRED_SCRAPE"
+                return series
+            return pd.Series(dtype=float)
     except Exception:
         return pd.Series(dtype=float)
 

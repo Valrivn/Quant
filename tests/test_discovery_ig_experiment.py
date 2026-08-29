@@ -11,6 +11,7 @@ sufficient), and the cohort loader falls back to [] when the DB is absent.
 import pandas as pd
 import pytest
 
+from discovery import gate_data as gd
 from discovery.ig_experiment import (
     run_ig_experiment,
     current_scraper_cohort,
@@ -42,8 +43,6 @@ def _bull_signals(_ticker):
 
 
 def _patch_gates(monkeypatch, build_df=None):
-    import discovery.gate_data as gd
-
     monkeypatch.setattr(gd, "qualitative_signals", _neutral_signals)
     if build_df is not None:
         monkeypatch.setattr(gd, "build_names_frame", lambda tickers: build_df)
@@ -109,8 +108,6 @@ def test_current_scraper_cohort_loads_or_closes():
 
 def test_batch_quant_gate_on_multiple_names(monkeypatch):
     """Batch quant gate on >=2 real names produces non-no_alpha_data reason when data is patched."""
-    import discovery.gate_data as gd
-
     df = pd.DataFrame(
         {
             "ticker": ["AAPL", "MSFT"],
@@ -131,8 +128,6 @@ def test_batch_quant_gate_on_multiple_names(monkeypatch):
 
 def test_qualitative_gate_default_neutral(monkeypatch):
     """Qualitative gate with all-default-neutral signals yields recommendation 'hold' (not 'avoid')."""
-    import discovery.gate_data as gd
-
     monkeypatch.setattr(gd, "qualitative_signals", _neutral_signals)
     result = run_ig_experiment(["AAPL"])
     candidate = result["candidates"][0]
@@ -143,8 +138,6 @@ def test_qualitative_gate_default_neutral(monkeypatch):
 
 def test_qualitative_gate_bull_passes_to_quant(monkeypatch):
     """Strong moat signals pass the qual gate so the candidate reaches the quant leg."""
-    import discovery.gate_data as gd
-
     monkeypatch.setattr(gd, "qualitative_signals", _bull_signals)
     monkeypatch.setattr(gd, "build_names_frame", lambda tickers: _plain_frame(tickers))
     monkeypatch.setattr(gd, "normalize_mahalanobis", lambda df: df)
@@ -156,8 +149,6 @@ def test_qualitative_gate_bull_passes_to_quant(monkeypatch):
 
 def test_run_ig_experiment_provenance(monkeypatch):
     """run_ig_experiment output includes provenance counts when live=True."""
-    import discovery.gate_data as gd
-
     df = _plain_frame(["AAPL", "MSFT"])
     df.attrs["provenance"] = {
         "AAPL": {

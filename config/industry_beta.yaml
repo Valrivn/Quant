@@ -1,0 +1,92 @@
+# Pre-registered industry -> unlevered beta table for the Wikidata Thread-B
+# category discovery lane (ruling D-20260828-001).
+#
+# Business-core fingerprint: DAMODARAN unlevered beta by industry. Promoted out
+# of dashboard/stream_quant.py (was a hardcoded dict) into a pre-registered,
+# fail-closed config per house invariant 4 (config, not hard-coded constants).
+#
+# UPDATE POLICY (staged, never silent): refreshing this table is a STAGED
+# monthly process -- an automated fetch writes a CANDIDATE file, which the CEO
+# reviews and approves BEFORE it replaces the live `industries` block. The
+# `update` section tracks provenance; nothing auto-replaces at load time.
+#
+# The loader discovery/industry_beta.py validates this file fail-closed:
+# unknown keys, missing required keys, NaN, or non-positive beta => load error.
+# Every industry entry must carry a positive `unlevered_beta` and a sub-area
+# label used for the "same sub-topics / different sub-topic" differentiation.
+
+industries:
+  "Software (System & Application)": {unlevered_beta: 1.27, sub_area: "application_software"}
+  "Computer Services":              {unlevered_beta: 0.85, sub_area: "it_services"}
+  "Information Services":           {unlevered_beta: 0.90, sub_area: "data_services"}
+  "Interactive Media":              {unlevered_beta: 1.15, sub_area: "internet_media"}
+  "Retail (Internet)":              {unlevered_beta: 1.21, sub_area: "ecommerce"}
+  "Semiconductor":                  {unlevered_beta: 1.35, sub_area: "chip_design"}
+  "Semiconductor Equipment":        {unlevered_beta: 1.30, sub_area: "chip_equipment"}
+  "Computers/Peripherals":          {unlevered_beta: 1.05, sub_area: "hardware_oem"}
+  "Telecom Services":               {unlevered_beta: 0.60, sub_area: "telecom"}
+  "Advertising":                    {unlevered_beta: 0.95, sub_area: "ad_services"}
+  "Aerospace/Defense":              {unlevered_beta: 0.82, sub_area: "aero_defense"}
+  "Air Transport":                  {unlevered_beta: 0.75, sub_area: "airlines"}
+  "Apparel":                        {unlevered_beta: 0.90, sub_area: "apparel"}
+  "Auto & Truck":                   {unlevered_beta: 0.70, sub_area: "autos"}
+  "Beverage (Soft Drink)":          {unlevered_beta: 0.65, sub_area: "beverages"}
+  "Chemical (Specialty)":           {unlevered_beta: 0.92, sub_area: "specialty_chem"}
+  "Drugs (Biotechnology)":          {unlevered_beta: 1.35, sub_area: "biotech"}
+  "Drugs (Pharmaceutical)":         {unlevered_beta: 0.98, sub_area: "pharma"}
+  "Electronics (General)":          {unlevered_beta: 1.02, sub_area: "electronics"}
+  "Financial Services":             {unlevered_beta: 0.85, sub_area: "financials"}
+  "Hospitals/Healthcare Providers": {unlevered_beta: 0.68, sub_area: "healthcare"}
+  "Hotel/Gaming":                   {unlevered_beta: 0.88, sub_area: "hotel_gaming"}
+  "Machinery":                      {unlevered_beta: 0.95, sub_area: "machinery"}
+  "Oil/Gas (Integrated)":           {unlevered_beta: 0.78, sub_area: "oil_gas"}
+  "Real Estate (General)":          {unlevered_beta: 0.55, sub_area: "real_estate"}
+  "Restaurant/Dining":              {unlevered_beta: 0.82, sub_area: "restaurants"}
+  "Steel":                          {unlevered_beta: 1.05, sub_area: "steel"}
+  "Utility (General)":              {unlevered_beta: 0.45, sub_area: "utilities"}
+
+# Sub-area alias normalization: map a raw sector/industry string (e.g. from the
+# valuation roster or ai_cons taxonomy) onto a canonical sub_area label so the
+# "same sub-topics / different sub-topic" comparison is not fooled by label
+# casing/abbreviation drift.
+sub_area_aliases:
+  semiconductor: "chip_design"
+  semiconductor_equipment: "chip_equipment"
+  hardware_oem: "hardware_oem"
+  networking: "networking"
+  cloud_internet: "cloud_internet"
+  platform_software: "application_software"
+  energy: "energy"
+  utilities: "utilities"
+  software: "application_software"
+  computers: "hardware_oem"
+  semiconductors: "chip_design"
+
+# Wikidata industry label aliases: normalize Wikidata industry strings (fetched
+# via P452) onto exact Damodaran industry keys in this file.
+industry_aliases:
+  "semiconductor industry": "Semiconductor"
+  "semiconductor equipment": "Semiconductor Equipment"
+  "electrical industry": "Semiconductor"
+  "information technology": "Computer Services"
+  "retail": "Retail (Internet)"
+  "software industry": "Software (System & Application)"
+  "technology": "Software (System & Application)"
+
+# Thread-B grouping defaults (overridable from config/sentinel.yaml).
+thread_b:
+  beta_band: 0.15        # same-business-area grouping tolerance (unlevered beta +/- band)
+  prefer_different_sub_area: true  # target same band but a DIFFERENT sub-topic within it
+
+# Staged-update provenance. `last_updated` is informational; the automation
+# writes to `candidate_path` which the CEO approves before merge.
+update:
+  source: "Damodaran unlevered beta by industry (public, periodically refreshed)"
+  last_updated: "2026-08-28"
+  refresh_cadence: "monthly"
+  candidate_path: "config/industry_beta_candidate.yaml"
+  auto_replace: false   # NEVER auto-replace; staged CEO-approved merge only
+
+# --- Staging block (CLI helper writes a draft here for CEO review, never live) ---
+staging:
+  candidate: {}

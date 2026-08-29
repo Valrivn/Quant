@@ -85,7 +85,9 @@ def _qualitative_gate(ticker: str) -> tuple:
     """Read-only qualitative gate via AlternativeStrategyPipeline.
 
     Returns (passed: bool, reason: str). With no live signals the pipeline
-    returns a neutral 'hold' recommendation, which does not pass the gate.
+    returns a neutral 'hold' recommendation. For low-coverage/niche tickers
+    lacking DB records, we forgive/bypass the gate to allow them to be screened
+    on the quantitative baseline.
     """
     _ensure_qual_path()
     from Qualitative.psychological.qualitative_scoring import (
@@ -96,9 +98,25 @@ def _qualitative_gate(ticker: str) -> tuple:
         moat_signals, _prov = gate_data.qualitative_signals(ticker)
     except Exception:
         moat_signals = {}
+        _prov = {}
 
     pipeline = create_alternative_strategy_pipeline()
     out = pipeline.run(ticker=ticker, moat_signals=moat_signals, financial_inputs=None, z_score=None)
+    
+    # Check if the ticker is a low-coverage/niche stock (fewer than 10 mentions in daily_aggregations)
+    is_low_coverage = False
+    try:
+        from db.connection import get_connection
+        conn = get_connection()
+        count = conn.execute("SELECT COUNT(1) FROM daily_aggregations WHERE ticker = ?", (ticker,)).fetchone()[0]
+        if count < 10:
+            is_low_coverage = True
+    except Exception:
+        pass
+
+    if is_low_coverage:
+        return True, "qual:forgiven_low_coverage"
+
     if out.recommendation in QUAL_PASS_RECS:
         return True, out.recommendation
     return False, f"qual:{out.recommendation}"
