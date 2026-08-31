@@ -1,6 +1,6 @@
 # Lane Gamma Data Completeness Audit
 
-Generated: 2026-08-06 02:03:24 UTC
+Generated: 2026-08-31 00:29:58 UTC
 SEC lookback: 5d | GitHub lookback: 50d | Elapsed: 123.4s
 
 | Ticker | SEC | GitHub | Glassdoor | Reddit | Coverage | Rating |

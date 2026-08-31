@@ -1,6 +1,6 @@
 """Phase-1/Phase-2 $10k multi-asset simulation (D-20260803-003 / D-20260803-004).
 
-Compares strategies over 2018-01-31 -> 2026-07-31 (monthly rebalances) on a
+Compares strategies over 2000-01-31 -> today (monthly rebalances) on a
 $10,000 account, with real share accounting, turnover-proportional fees, and
 dividend accrual:
 
@@ -85,10 +85,10 @@ from diversification.sleeves import (
     SLEEVES,
 )
 
-START = "2015-01-01"
-DIV_HIST_START = "2010-01-01"
-END = "2026-07-31"
-REBAL_START = "2018-01-31"
+START = "2000-01-01"
+DIV_HIST_START = "2000-01-01"
+END = pd.Timestamp.today().strftime("%Y-%m-%d")
+REBAL_START = "2000-01-31"
 INITIAL = 10000.0
 FEE_RATE = 0.005
 MIN_TURNOVER = 0.05
@@ -309,24 +309,24 @@ class Portfolio:
                         skipped += 1
                 pending = None
 
-            # dividend accrual (real ex-date events from dividend history when
-            # available; static DIVIDEND_YIELDS fallback otherwise)
+            # Dividend income is REPORTED but not added to cash: sleeve prices
+            # are downloaded with auto_adjust=True (adjusted/total-return close),
+            # so dividends are already reinvested into the mark-to-market price.
+            # Separately accruing them as cash double-counted the dividend and
+            # left an idle unreinvested cash buffer that biased sub-window
+            # excess/alpha (P1-5 RC, CEO ruling 2026-08-30 -> total-return basis).
             for c in assets:
                 if shares[c] <= 0:
                     continue
                 ev = self._div_events.get(c)
                 if ev is not None and d in ev.index:
-                    inc = shares[c] * float(np.sum(np.atleast_1d(ev.loc[d])))
-                    cash += inc
-                    dividends += inc
+                    dividends += shares[c] * float(np.sum(np.atleast_1d(ev.loc[d])))
                     continue
                 p = self._price(c, d)
                 if p > 0:
                     y = DIVIDEND_YIELDS.get(c, 0.0)
                     if y > 0:
-                        inc = shares[c] * p * y / ANNUALIZE
-                        cash += inc
-                        dividends += inc
+                        dividends += shares[c] * p * y / ANNUALIZE
             vpath.append(self._value(d, shares, cash))
         return pd.Series(vpath, index=self.idx), {"fees": fees, "trades": trades,
                                                   "dividends": dividends,
@@ -1070,6 +1070,18 @@ def _ig_llm_passed_candidates() -> list:
     pipeline to a buy-class recommendation (D-20260815-001: proxies feed INTO
     the existing gate; never a bypass). Returns the clean ticker list.
     """
+    # LOCKED (2026-08-30, big-pickle): the Instagram lane is fully RETIRED.
+    # instagram_raw_mentions / instagram_qual_proxies were archived out of the
+    # live DB (data/archive/instagram/instagram_retired.db, read-only) and
+    # dropped. Refuse loudly instead of returning []; no backtest may inject
+    # Instagram candidates ever again. Re-enable only by a deliberate rebuild
+    # (LLM synthesis, PIT proxies, ticker validation) AND removal of this guard.
+    raise RuntimeError(
+        "Instagram lane is RETIRED and LOCKED (2026-08-30). "
+        "_ig_llm_passed_candidates is disabled; Instagram proxies are archived "
+        "to data/archive/instagram/instagram_retired.db (read-only). No "
+        "backtest may ingest Instagram candidates."
+    )
     import sqlite3
     try:
         conn = sqlite3.connect("reddit_quant.db")
@@ -1116,6 +1128,17 @@ def run_sim_discovery_ig_llm():
     into the tradeable small/mid sleeve (prefixed IG_LLM_<T>); all others are
     excluded (D-20260815-001: gate-first, no bypass).
     """
+    # DISABLED (2026-08-30, big-pickle): the IG-LLM lane is parked. It was
+    # returning a relabeled RM-FINAL baseline (zero traded IG candidates)
+    # because the LLM synthesis fell back to placeholders on 218/219 rows.
+    # Raise instead of silently producing a fake "IG-LLM" result. Re-enable by
+    # removing this guard after rebuilding the synthesis/PIT/ticker pipeline.
+    raise RuntimeError(
+        "IG-LLM backtest lane is DISABLED (retired 2026-08-30). "
+        "`ig-llm` is no longer in ENGINE_MAP. The qualitative->quantitative "
+        "IM->backtest path must be rebuilt (LLM synthesis, PIT proxies, ticker "
+        "validation) before re-enabling. See errors.md P0-1..P0-4."
+    )
     passed = _ig_llm_passed_candidates()
     ig_tickers = [f"IG_LLM_{t}" for t in passed]
 

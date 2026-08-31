@@ -1,6 +1,8 @@
 """Data layer for the diversification sleeve: price and FRED series fetching."""
 
 import json
+import logging
+import os
 import time
 from pathlib import Path
 
@@ -10,6 +12,8 @@ import yfinance as yf
 
 from Quantitative.shared.fred_scraper import FREDScraper
 
+logger = logging.getLogger(__name__)
+
 SLEEVES = {
     "corporate_bonds": ["VCSH", "VCIT"],
     "short_bills": ["BIL", "SHY"],
@@ -17,7 +21,29 @@ SLEEVES = {
     "equity_income": ["VTI", "VB", "BND"],
 }
 
-CACHE_DIR = Path(__file__).resolve().parents[1] / "data"
+# Runtime download cache lives OUTSIDE the repo so repeated yfinance/FRED/Nasdaq
+# pulls can't pollute the working tree (P1-2). Falls back inside-repo only when
+# no OS cache dir is available/writable.
+def _default_cache_dir() -> Path:
+    base = None
+    local = os.environ.get("LOCALAPPDATA")
+    if local:
+        base = Path(local)
+    if base is None:
+        home = os.environ.get("USERPROFILE") or os.environ.get("HOME")
+        if home:
+            base = Path(home) / "AppData" / "Local"
+    if base is not None:
+        try:
+            d = base / "HouseOfQuant" / "cache"
+            d.mkdir(parents=True, exist_ok=True)
+            return d
+        except Exception:
+            pass
+    return Path(__file__).resolve().parents[1] / "data"
+
+
+CACHE_DIR = _default_cache_dir()
 NASDAQ_BASE = "https://api.nasdaq.com/api/quote/{sym}/chart"
 NASDAQ_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -93,29 +119,51 @@ def fetch_nasdaq(symbols: list, start: str, end: str, cache_dir: Path = None) ->
 def fetch_sleeve_prices(tickers: list, start: str, end: str) -> pd.DataFrame:
     """Fetch daily close prices for tickers between start and end.
 
-    Returns a DataFrame indexed by date with one column per ticker; empty on failure.
+    Returns a DataFrame indexed by date with one column per ticker; empty on
+    failure. Backoff mirrors yfinance's rate-limit recovery: repeated batches
+    are throttled (2-5s+ per request, longer on shared IPs), so on a total
+    batch failure we re-pull with escalating waits up to a ~2-3 minute
+    cool-down before the final attempt — never give up after only ~6s. Every
+    wait/retry and any per-symbol drop is logged via the module logger rather
+    than silently swallowed.
     """
     if not tickers:
         return pd.DataFrame()
-        
+
     clean_map = {}
     for t in tickers:
         clean = t.replace("IG_LLM_", "")
         clean_map[clean] = t
-        
+
     download_tickers = list(clean_map.keys())
-    
+
+    # yfinance-mirroring backoff schedule (seconds to sleep BEFORE each retry).
+    # First two retries are short (rate-limit blips recover fast); the last
+    # attempt waits the full recovery window so a congested shared IP can drain.
+    backoff = [5, 20, 90, 150]
+
     data = None
-    for attempt in range(3):
+    last_err = None
+    for attempt in range(len(backoff) + 1):
         try:
             data = yf.download(download_tickers, start=start, end=end, progress=False, auto_adjust=True)
             if data is not None and not data.empty:
                 break
-        except Exception:
-            pass
-        if attempt < 2:
-            time.sleep(2 * (attempt + 1))
+        except Exception as e:  # yfinance raises on rate-limit / transient errors
+            last_err = e
+            data = None
+        if attempt < len(backoff):
+            wait = backoff[attempt]
+            logger.warning(
+                "yfinance price batch failed (attempt %d) - retrying in %ss. "
+                "tickers=%d err=%s", attempt + 1, wait, len(download_tickers), last_err
+            )
+            time.sleep(wait)
     if data is None or data.empty:
+        logger.error(
+            "yfinance sleeve price download FAILED after %d attempts: %s",
+            len(backoff) + 1, last_err or "empty frame",
+        )
         return pd.DataFrame()
     if isinstance(data.columns, pd.MultiIndex):
         close = data["Close"] if "Close" in data.columns.get_level_values(0) else data
@@ -123,7 +171,17 @@ def fetch_sleeve_prices(tickers: list, start: str, end: str) -> pd.DataFrame:
         close = data["Close"] if "Close" in data.columns else data
     if close.ndim == 1:
         close = close.to_frame(download_tickers[0])
-        
+
+    # Report any symbol that silently dropped out of the batch (esp. SPY),
+    # so a partial frame is never quietly trusted.
+    got = set(close.columns)
+    missing = [c for c in download_tickers if c not in got]
+    if missing:
+        logger.warning(
+            "yfinance returned PARTIAL price data; %d symbol(s) dropped from batch: %s",
+            len(missing), sorted(missing),
+        )
+
     # Rename columns back to prefixed names
     close = close.rename(columns=clean_map)
     return close

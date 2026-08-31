@@ -23,6 +23,17 @@ def load_hybrid_config() -> Dict[str, Any]:
         raise FileNotFoundError(f"Config file not found: {HYBRID_CONFIG_PATH}")
     with open(HYBRID_CONFIG_PATH, 'r') as f:
         config = yaml.safe_load(f)
+    
+    # Also load weights_diversification.yaml to load qualitative scoring config
+    div_path = os.path.join(os.path.dirname(__file__), "weights_diversification.yaml")
+    if os.path.exists(div_path):
+        try:
+            with open(div_path, 'r', encoding='utf-8') as f_div:
+                div_cfg = yaml.safe_load(f_div)
+                if div_cfg and "qualitative_moat_scoring" in div_cfg:
+                    config["qualitative_moat_scoring"] = div_cfg["qualitative_moat_scoring"]
+        except Exception:
+            pass
     return config
 
 

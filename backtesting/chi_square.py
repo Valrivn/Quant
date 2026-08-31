@@ -12,6 +12,8 @@ confirms the pipeline is fully audited with no leaked data -- or lists every
 degradation that blocks "AUDITED CLEAN".
 """
 
+import logging
+
 import numpy as np
 import pandas as pd
 from scipy import stats as _stats
@@ -19,6 +21,8 @@ from scipy import stats as _stats
 from backtesting.metrics_extra import calmar, monthly_returns, period_return, sortino, win_rate
 
 from valuation_alpha.alpha import excess_vs_sp500, ff5_residual_alpha
+
+logger = logging.getLogger(__name__)
 
 ANNUALIZE = 252.0
 INITIAL = 10000.0
@@ -29,9 +33,10 @@ DEFAULT_REGIMES = {
     "bear": [("2020-02-19", "2020-03-23"), ("2022-01-03", "2022-12-30")],
 }
 
-# Fixed windows (CEO ruling): Window 1 = most data guaranteed, Window 2 = recent.
-FULL_WINDOW = ("2018-01-31", "2026-07-31")
-RECENT_WINDOW = ("2025-01-01", "2026-07-31")
+# Fixed windows (CEO ruling): Window 1 = most data guaranteed (2000->today),
+# Window 2 = recent 19 months to today.
+FULL_WINDOW = ("2000-01-31", pd.Timestamp.today().strftime("%Y-%m-%d"))
+RECENT_WINDOW = (pd.Timestamp.today() - pd.DateOffset(months=19)).strftime("%Y-%m-%d"), pd.Timestamp.today().strftime("%Y-%m-%d")
 
 # Existing fee_sim3 engines only (CEO ruling). Strategy labels must match the
 # labels the engines emit for their vpath dicts.
@@ -44,7 +49,11 @@ ENGINE_MAP = {
     "static-ml": ("run_sim_phase3", "STATIC-after-ML"),
     "adaptive": ("run_sim_phase3", "ADAPTIVE (risk-constrained)"),
     "rm-final": ("run_sim_discovery", "RM-FINAL (Final bar)"),
-    "ig-llm": ("run_sim_discovery_ig_llm", "RM-IG-LLM (IG LLM Sentinel)"),
+    # IG-LLM lane DISABLED (2026-08-30, big-pickle): qualitative proxies are
+    # LLM-fallback placeholders (218/219 rows "LLM timeout/error") read as real
+    # signals, so `ig-llm` returned a relabeled RM-FINAL baseline with zero
+    # traded IG candidates. Lane parked; code kept intact for re-enable.
+    # "ig-llm": ("run_sim_discovery_ig_llm", "RM-IG-LLM (IG LLM Sentinel)"),
 }
 
 
@@ -167,7 +176,10 @@ def metric_bundle(label, vpath, info, spy, start, end, initial=INITIAL, factors=
 
     alpha = None
     if factors is not None and not factors.empty:
-        alpha_res = ff5_residual_alpha(r, factors)
+        # horizon_days=len(r): make the FF5 regression cover the SAME window
+        # as this row (the previous default of 252 made FULL-window alpha a
+        # trailing-1-year artifact — P1-5). n_obs is surfaced for transparency.
+        alpha_res = ff5_residual_alpha(r, factors, horizon_days=len(r))
         if alpha_res is not None:
             alpha = {
                 "annualized": alpha_res["alpha_annualized"],
@@ -195,6 +207,7 @@ def metric_bundle(label, vpath, info, spy, start, end, initial=INITIAL, factors=
         "alpha_annualized": alpha["annualized"] if alpha else None,
         "alpha_ci_lower": alpha["ci_lower"] if alpha else None,
         "alpha_ci_upper": alpha["ci_upper"] if alpha else None,
+        "alpha_n_obs": alpha["n"] if alpha else None,
         "fees": fees,
         "fees_pct_of_gain": (fees / gain * 100.0 if gain else np.nan),
         "trades": trades,
@@ -222,6 +235,8 @@ def audit_status(meta, factors_ok, hard_fail=False):
         env.append("FRED unreachable -> HYG/LQD price-proxy macro (DEGRADED tag)")
     if meta.get("div_partial"):
         data.append("static DIVIDEND_YIELDS fallback on some tickers (S4/S6 PARTIAL)")
+    if meta.get("spy_partial"):
+        env.append(str(meta.get("spy_partial_detail", "SPY benchmark partial coverage")))
     if meta.get("placeholder_data"):
         data.append("placeholder/seed data in signal source (blocking)")
     if data:
@@ -236,12 +251,17 @@ def audit_status(meta, factors_ok, hard_fail=False):
 
 
 def load_factors():
-    """Ken French FF5 daily factors, empty DataFrame when the feed is down."""
+    """Ken French FF5 daily factors, empty DataFrame when the feed is down.
+
+    P2-1: a fetch failure is logged (not silent) and still surfaced by
+    ``audit_status`` as "FF5 factors unavailable -> alpha_ff5 n/a".
+    """
     try:
         from valuation_alpha.datastore.factors import fetch_ff5_factors
 
         return fetch_ff5_factors()
-    except Exception:
+    except Exception as _load_err:
+        logger.warning("load_factors could not fetch FF5 factors: %s", _load_err)
         return pd.DataFrame()
 
 
@@ -254,6 +274,36 @@ def _div_partial(prices, div_hist):
         if c not in (div_hist or {}) and DIVIDEND_YIELDS.get(c, 0.0) > 0
     ]
     return bool(static)
+
+
+def _benchmark_coverage(spy, start, end) -> float:
+    """Detect a truncated/partial SPY download (P1-1 failure mode).
+
+    SPY's own index is the NYSE trading calendar, so comparing against
+    ``pd.bdate_range`` would wrongly count midweek market holidays (Christmas,
+    July 4th, etc.) as missing days. Instead this detects *truncation* directly:
+    a cut-off tail (no SPY data near the window end), a cut-off head (none near
+    the window start), or an implausibly large interior gap (longer than a
+    holiday cluster). Returns a fraction in [0,1]: count of the three checks
+    that pass, or 0.0 when the series is empty.
+    """
+    if spy is None or len(spy) == 0:
+        return 0.0
+    s = pd.Timestamp(start)
+    e = pd.Timestamp(end)
+    inn = spy[(spy.index >= s) & (spy.index <= e)]
+    if len(inn) == 0:
+        return 0.0
+    checks = 0.0
+    head_tol = pd.Timedelta(days=15)
+    if (inn.index[0] - s) <= head_tol:
+        checks += 1.0
+    if (e - inn.index[-1]) <= head_tol:
+        checks += 1.0
+    gaps = inn.index.to_series().diff()
+    if gaps.max() is pd.NaT or gaps.max() <= pd.Timedelta(days=20):
+        checks += 1.0
+    return checks / 3.0
 
 
 def run_standard_backtest(
@@ -288,12 +338,23 @@ def run_standard_backtest(
     spy = prices["SPY"]
     meta["div_partial"] = _div_partial(prices, div_hist)
     meta["placeholder_data"] = False
+    # P1-5: benchmark must cover every backtest window. A partial SPY download
+    # silently truncates the excess/alpha comparison; tag it so it can't pass
+    # as "AUDITED CLEAN".
+    windows = windows or [("FULL", FULL_WINDOW), ("RECENT", RECENT_WINDOW)]
+    weak_cov = []
+    for wname, (ws, we) in windows:
+        cov = _benchmark_coverage(spy, ws, we)
+        if cov < 0.98:
+            weak_cov.append(f"SPY {wname} benchmark coverage {cov:.1%}")
+    if weak_cov:
+        meta["spy_partial"] = True
+        meta["spy_partial_detail"] = "; ".join(weak_cov)
 
     factors_ok = factors is not None and not factors.empty
     status = audit_status(meta, factors_ok, hard_fail=hard_fail)
 
     regimes = regimes or DEFAULT_REGIMES
-    windows = windows or [("FULL", FULL_WINDOW), ("RECENT", RECENT_WINDOW)]
 
     rows = []
     for wname, (ws, we) in windows:

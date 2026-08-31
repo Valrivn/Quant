@@ -204,71 +204,25 @@ class TestStaticReturnFit:
         assert set(w.keys()) == set(RM_ORDER)
 
 
-class TestIgLlmGateFirst:
-    """D-20260815-001: IG_LLM candidates feed INTO the qualitative gate; only
-    buy-class passers are injected into the sim. Never a bypass."""
+class TestIgLlmRetired:
+    """D-20260815-001 gate-first path is RETIRED and LOCKED (2026-08-30).
 
-    def test_ig_llm_passed_candidates_only_buy_class(self, monkeypatch):
+    Instagram (instagram_raw_mentions / instagram_qual_proxies) was archived
+    out of the live DB and the code path is fail-closed: the IG-LLM gate and
+    the qualitative proxy reader must REFUSE loudly, never silently degrade or
+    inject Instagram candidates into a backtest."""
+
+    def test_ig_llm_passed_candidates_is_locked(self):
         from diversification import fee_sim3
-        import sqlite3
-        import sys
+        with pytest.raises(RuntimeError, match="RETIRED and LOCKED"):
+            fee_sim3._ig_llm_passed_candidates()
 
-        class FakeOut:
-            def __init__(self, rec):
-                self.recommendation = rec
-                self.blended_qualitative_score = 0.9
-
-        class FakeCursor:
-            def __init__(self):
-                self.rows = [("AAA",), ("BBB",), ("CCC",)]
-
-            def execute(self, sql, *a, **k):
-                return self
-
-            def fetchall(self):
-                return self.rows
-
-        class FakeConn:
-            def execute(self, sql, *a, **k):
-                return FakeCursor()
-
-            def cursor(self):
-                return FakeCursor()
-
-            def close(self):
-                pass
-
-        recs = {"AAA": "strong_buy", "BBB": "hold", "CCC": "buy"}
-
-        class FakePipeline:
-            def run(self, **kw):
-                return FakeOut(recs[kw["ticker"]])
-
-        monkeypatch.setattr(sqlite3, "connect", lambda *a, **k: FakeConn())
-        monkeypatch.setattr(
-            "discovery.gate_data.qualitative_signals",
-            lambda t: ({k: 0.8 for k in [
-                "product_breadth", "developer_momentum", "employee_sentiment",
-                "revenue_concentration", "network_effect_proxy", "regulatory_barrier",
-            ]}, {}),
-        )
-        import Qualitative.psychological.qualitative_scoring as qs
-        monkeypatch.setattr(
-            qs, "create_alternative_strategy_pipeline", lambda: FakePipeline()
-        )
-        if "Qualitative" not in sys.path:
-            sys.path.insert(0, "Qualitative")
-
-        passed = fee_sim3._ig_llm_passed_candidates()
-        assert passed == ["AAA", "CCC"]
-        assert "BBB" not in passed
-
-    def test_ig_llm_passed_candidates_empty_on_db_error(self, monkeypatch):
+    def test_ig_llm_backtest_engine_is_locked(self):
         from diversification import fee_sim3
-        import sqlite3
+        with pytest.raises(RuntimeError, match="DISABLED"):
+            fee_sim3.run_sim_discovery_ig_llm()
 
-        def boom(*a, **k):
-            raise RuntimeError("db down")
-
-        monkeypatch.setattr(sqlite3, "connect", boom)
-        assert fee_sim3._ig_llm_passed_candidates() == []
+    def test_qualitative_signals_refuses_ig_llm_ticker(self):
+        from discovery import gate_data
+        with pytest.raises(RuntimeError, match="RETIRED and LOCKED"):
+            gate_data.qualitative_signals("IG_LLM_AAA")

@@ -695,7 +695,12 @@ class FourLanePipeline:
                 if hasattr(l1.dcf_output, "_cache"):
                     hardcoding_guard_passed = False
 
-            spearman_ic = 0.27
+            # P2-3: no real Spearman IC is computed in this Lane-4 path, so we
+            # must NOT emit a fake constant. Previously this hardcoded 0.27 was a
+            # fabricated validation quantity (house invariant 4). It is not
+            # consumed downstream (persisted columns are only the pass flags), so
+            # an honest None is emitted instead of a made-up number.
+            spearman_ic = None
 
             terminal_stability_passed = True
             if l1.dcf_output is not None:

@@ -71,6 +71,9 @@ class TestDatastore:
             raise RuntimeError("network down")
 
         monkeypatch.setattr("diversification.datastore.yf.download", fake_download)
+        monkeypatch.setattr(
+            "diversification.datastore.time.sleep", lambda s: None
+        )
         df = fetch_sleeve_prices(["VCSH"], "2023-01-01", "2023-01-10")
         assert df.empty
 
