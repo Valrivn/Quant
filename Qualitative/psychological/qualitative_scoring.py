@@ -1,5 +1,6 @@
 import logging
 import math
+from functools import lru_cache
 import numpy as np
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
@@ -286,6 +287,20 @@ class DoubleStandardizer:
 # MoatComposite — 60d EMA aggregation of qualitative moat signals
 # ---------------------------------------------------------------------------
 
+@lru_cache(maxsize=1)
+def _moat_scoring_config() -> Dict[str, Any]:
+    """Return the ``qualitative_moat_scoring`` block (ruling D-20260830-001).
+
+    Cached once so repeated per-signal reads on the backtest hot path do not
+    re-parse YAML. Returns {} on any config error (callers fall back).
+    """
+    try:
+        cfg = load_hybrid_config()
+        return cfg.get("qualitative_moat_scoring", {}) or {}
+    except Exception:
+        return {}
+
+
 @dataclass
 class MoatComposite:
     ticker: str
@@ -321,19 +336,85 @@ class MoatComposite:
         if key not in self.MOAT_SIGNAL_KEYS:
             logger.warning("Unknown moat signal key '%s', ignoring", key)
             return
+        
+        moat_cfg = _moat_scoring_config()
+
+        # Check applicability from config (ruling D-20260830-001)
+        try:
+            applicability = moat_cfg.get("applicability", {})
+            excluded_tickers = applicability.get(key, {}).get("excluded_tickers", [])
+            if self.ticker in excluded_tickers:
+                return  # Exclude from composite
+        except Exception as e:
+            logger.warning("Failed to check applicability config for %s: %s", key, e)
+
         self.scores[key] = max(0.0, min(1.0, value))
         if weight is not None:
             self.weights[key] = weight
         elif key not in self.weights:
-            self.weights[key] = self.MOAT_DEFAULT_WEIGHTS.get(key, 0.1)
+            try:
+                config_weights = moat_cfg.get("weights", {})
+                if key in config_weights:
+                    self.weights[key] = config_weights[key]
+                else:
+                    self.weights[key] = self.MOAT_DEFAULT_WEIGHTS.get(key, 0.1)
+            except Exception:
+                self.weights[key] = self.MOAT_DEFAULT_WEIGHTS.get(key, 0.1)
 
     def compute_raw_composite(self) -> float:
         if not self.scores:
             return 0.0
+            
+        base_weights = {}
+        for key in self.scores:
+            base_weights[key] = self.weights.get(key, self.MOAT_DEFAULT_WEIGHTS.get(key, 0.1))
+            
+        # Enforce 40% single factor cap of the total contributing weight (ruling D-20260830-001)
+        adjusted = {}
+        if base_weights:
+            total = sum(base_weights.values())
+            if total > 0:
+                props = {k: v / total for k, v in base_weights.items()}
+                cap = 0.40
+                effective_cap = cap
+                if len(props) <= 2:
+                    effective_cap = 1.0 / len(props)
+                
+                # Redistribute excess
+                while True:
+                    excess = 0.0
+                    capped_keys = set()
+                    for k, p in props.items():
+                        if p > effective_cap:
+                            excess += p - effective_cap
+                            props[k] = effective_cap
+                            capped_keys.add(k)
+                    if excess <= 1e-9:
+                        break
+                    non_capped_keys = [k for k in props if k not in capped_keys]
+                    if not non_capped_keys:
+                        break
+                    non_capped_total = sum(props[k] for k in non_capped_keys)
+                    if non_capped_total <= 0:
+                        for k in non_capped_keys:
+                            props[k] += excess / len(non_capped_keys)
+                    else:
+                        for k in non_capped_keys:
+                            props[k] += excess * (props[k] / non_capped_total)
+                adjusted = {k: p * total for k, p in props.items()}
+            else:
+                adjusted = {k: 0.1 for k in base_weights}
+        else:
+            adjusted = {}
+
+        # Save the adjusted weights back to self.weights for visibility/verifiability
+        for k, v in adjusted.items():
+            self.weights[k] = v
+
         total_weight = 0.0
         weighted_sum = 0.0
         for key, val in self.scores.items():
-            w = self.weights.get(key, self.MOAT_DEFAULT_WEIGHTS.get(key, 0.1))
+            w = adjusted.get(key, 0.1)
             weighted_sum += val * w
             total_weight += w
         self.raw_composite = weighted_sum / total_weight if total_weight > 0 else 0.0

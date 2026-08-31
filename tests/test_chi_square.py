@@ -42,10 +42,10 @@ def test_chi2_rejects_empty_table():
 
 
 def test_engine_map_covers_approved_methods():
+    # ig-llm REMOVED from ENGINE_MAP 2026-08-30 (lane retired; see chi_square.py).
     expected = {
         "spy", "macro", "minvar", "dividend",
         "opportunistic", "static-ml", "adaptive", "rm-final",
-        "ig-llm",
     }
     assert set(ENGINE_MAP) == expected
 

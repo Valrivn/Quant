@@ -6,10 +6,35 @@ cached fallback, per-row provenance, honest NaN when a value is unknown.
 """
 
 import json
+import logging
 import math
 import os
 import statistics
 from typing import Dict, List, Optional, Tuple
+
+logger = logging.getLogger(__name__)
+
+from functools import lru_cache
+
+
+@lru_cache(maxsize=1)
+def _moat_excluded_tickers() -> List[str]:
+    """Cached list of tickers for which ``developer_momentum`` is not applicable.
+
+    Ruling D-20260830-001: GitHub signal applies only to real public OSS
+    footprints. Read once (config parse cached) for the backtest hot path.
+    """
+    try:
+        from config import load_hybrid_config
+        cfg = load_hybrid_config()
+        return (
+            cfg.get("qualitative_moat_scoring", {})
+            .get("applicability", {})
+            .get("developer_momentum", {})
+            .get("excluded_tickers", [])
+        ) or []
+    except Exception:
+        return ["TSM", "MU", "AVGO", "DELL", "SMCI"]
 
 import numpy as np
 import pandas as pd
@@ -273,36 +298,27 @@ def qualitative_signals(ticker: str) -> Tuple[Dict[str, float], Dict[str, str]]:
     """
     signals = {key: 0.5 for key in _MOAT_KEYS}
     provenance = {key: "default_neutral" for key in _MOAT_KEYS}
+    # --- Instagram lane RETIRED and LOCKED (2026-08-30) ---
+    # instagram_raw_mentions / instagram_qual_proxies were archived out of the
+    # live DB (data/archive/instagram/instagram_retired.db, read-only). This
+    # guard sits OUTSIDE the try/except below so it can never be swallowed:
+    # qualitative_signals must never process an IG_LLM_* ticker again. Refuse
+    # loudly so no future re-wiring can inject Instagram noise into a backtest.
+    if ticker.startswith("IG_LLM_"):
+        raise RuntimeError(
+            "Instagram lane is RETIRED and LOCKED (2026-08-30). "
+            "qualitative_signals refuses IG_LLM_* tickers; IG proxies are "
+            "archived to data/archive/instagram/instagram_retired.db (read-only). "
+            "Do not re-wire Instagram into the backtest path."
+        )
     clean = ticker.replace("IG_LLM_", "")
+    
+    # Check if developer_momentum is excluded via config (ruling D-20260830-001)
+    if clean in _moat_excluded_tickers():
+        provenance["developer_momentum"] = "not_applicable"
+
     try:
         conn = get_connection()
-        proxy_row = None
-        try:
-            proxy_row = conn.execute(
-                "SELECT product_adoption, competitive_disruption, sentiment_score, source_url, audit_trail"
-                " FROM instagram_qual_proxies WHERE ticker = ?",
-                (clean,)
-            ).fetchone()
-        except Exception:
-            pass
-            
-        if proxy_row:
-            adoption = proxy_row["product_adoption"]
-            disruption = proxy_row["competitive_disruption"]
-            sentiment = proxy_row["sentiment_score"]
-            source_url = proxy_row["source_url"]
-            audit_trail = proxy_row["audit_trail"]
-            
-            if adoption is not None:
-                signals["product_breadth"] = float(adoption) / 5.0
-                provenance["product_breadth"] = f"IG_LLM_proxy:source_url={source_url}"
-            if sentiment is not None:
-                signals["employee_sentiment"] = (float(sentiment) + 1.0) / 2.0
-                provenance["employee_sentiment"] = f"IG_LLM_proxy:audit_trail={audit_trail}"
-            if disruption is not None:
-                signals["developer_momentum"] = float(disruption)
-                provenance["developer_momentum"] = "IG_LLM_proxy:competitive_disruption"
-                
         if provenance["product_breadth"] == "default_neutral":
             prod = _product_breadth(conn, clean)
             if prod is not None:
@@ -318,8 +334,11 @@ def qualitative_signals(ticker: str) -> Tuple[Dict[str, float], Dict[str, str]]:
             if dev is not None:
                 signals["developer_momentum"] = dev
                 provenance["developer_momentum"] = "cached:github_org_metrics"
-    except Exception:
-        pass
+    except Exception as _sig_err:
+        # P2-1: log any failure while reading moat signals so a transient
+        # data-source error is observable rather than silently degrading all
+        # three signals to default_neutral. Fallback to neutral is retained.
+        logger.warning("qualitative_signals failed for %s: %s", ticker, _sig_err)
     return signals, provenance
 
 

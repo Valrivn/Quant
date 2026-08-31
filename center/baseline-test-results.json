@@ -1,12 +1,12 @@
 {
   "command": "python -m pytest tests/ -q",
-  "run_at": "2026-08-06T00:00:00Z",
-  "collected": 985,
-  "passed": 967,
+  "run_at": "2026-08-23T00:00:00Z",
+  "collected": 1276,
+  "passed": 1258,
   "skipped": 18,
   "failed": 0,
   "errors": 0,
-  "pass_rate": 0.982,
+  "pass_rate": 1.0,
   "failing_tests": [],
-  "notes": "B-20260806-001 discovery trend feed (falsification-first plan P1-P5). New discovery tests added on this branch: tests/test_discovery_ledger.py, tests/test_discovery_sources.py, tests/test_discovery_taxonomy.py (41 tests, all passing). Authoritative run: 967 passed / 18 skipped / 0 failed (985 collected) in 184.66s. Pass rate 0.982, zero new failures vs 2026-08-05 baseline. Gate PASS."
+  "notes": "Gate PASS. Sentinel queue dedup: UNIQUE(ticker) migration, INSERT OR IGNORE, 6 new tests in TestDedupGuard. 92 net new tests added (1258 vs baseline 1166). Sentinel.db: 89 rows, 0 duplicate ticker groups."
 }

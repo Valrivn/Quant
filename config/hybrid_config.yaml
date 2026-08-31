@@ -89,16 +89,14 @@ github_mappings:
   GOOGL: "google/jax"
   META: "facebookresearch/llama"
   TSLA: "teslamotors/linux"
-  AVGO: "broadcom/broadcom-mcu"  # Broadcom for AVGO
   INTC: "intel/intel-graphics-compiler"  # Intel for INTC
-  QCOM: "qualcomm/open-source"
-  MU: "micron/micron-ddr"
-  TSM: "tsmc/open-source"
-  CRM: "salesforce/salesforce-sdk"
-  ADBE: "adobe/open-source"
-  DELL: "dell/open-source"
-  SMCI: "supermicro/open-source"
-  IBM: "ibm/open-source"
+  QCOM: "qualcomm/GenieX"  # real top-starred repo (P2-4 verified live)
+  CRM: "salesforce/LAVIS"  # real top-starred repo (P2-4 verified live)
+  ADBE: "adobe/brackets"  # real top-starred repo (P2-4 verified live)
+  IBM: "IBM/sarama"  # real top-starred repo (P2-4 verified live)
+  # AVGO/QCOM-adjacent, MU, TSM, DELL, SMCI removed: no real public OSS
+  # footprint; developer_momentum is not_applicable for them per ruling
+  # D-20260830-001 (ticker-aware applicability).
 
 adzuna:
   app_id: "${ADZUNA_APP_ID}"

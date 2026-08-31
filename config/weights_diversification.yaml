@@ -147,3 +147,16 @@ return_max:
     trade_on: ["state-transition", "crisis-arm-disarm", "quarter-boundary"]
     max_trades_per_year: 4
     target_fee_budget: 200
+
+# Qualitative moat scoring configuration (ruling D-20260830-001)
+qualitative_moat_scoring:
+  weights:
+    product_breadth: 0.30
+    developer_momentum: 0.20
+    employee_sentiment: 0.25
+    network_effect_proxy: 0.15
+    revenue_concentration: 0.05
+    regulatory_barrier: 0.05
+  applicability:
+    developer_momentum:
+      excluded_tickers: ["TSM", "MU", "AVGO", "DELL", "SMCI"]

@@ -92,14 +92,14 @@ COMPANY_PRODUCTS = {
 # ---------------------------------------------------------------------------
 
 SOURCES: Dict[str, dict] = {
-    "instagram": {
-        "db": DB_PATH,
-        "table": "instagram_raw_mentions",
-        "target": 100_000,
-        "cooldown_sec": 600,
-        "batch_size": 200,
-        "priority": 1,
-    },
+    # "instagram": {          # DISABLED 2026-08-30 (lane retired; see SCRAPERS)
+    #     "db": DB_PATH,
+    #     "table": "instagram_raw_mentions",
+    #     "target": 100_000,
+    #     "cooldown_sec": 600,
+    #     "batch_size": 200,
+    #     "priority": 1,
+    # },
     "reddit": {
         "db": DB_PATH,
         "table": "submissions",
@@ -625,7 +625,10 @@ def scrape_psychological_regimes_batch(batch_size: int) -> int:
 # ---------------------------------------------------------------------------
 
 SCRAPERS = {
-    "instagram": scrape_instagram_batch,
+    # Instagram scraper DISABLED 2026-08-30 (lane retired; LLM-fallback
+    # placeholders read as real signals — see errors.md P0-1). Kept defined
+    # below but not wired so the run-all pass skips it. Re-enable by un-commenting.
+    # "instagram": scrape_instagram_batch,
     "reddit": scrape_reddit_batch,
     "product_intel": scrape_product_intel_batch,
     "g2_capterra": scrape_g2_capterra_batch,

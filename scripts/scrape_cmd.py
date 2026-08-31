@@ -174,6 +174,12 @@ def run_consensus_scrape(consensus_limit=1):
         print(f"[!] Consensus scrape failed: {e}")
 
 def run_active_scrape(limit=10, live_consensus=False, consensus_limit=1):
+    # Instagram lane DISABLED 2026-08-30 (retired). Do not run live IG scrapes;
+    # keep instagram_raw_mentions frozen. Re-enable only after the IG pipeline
+    # is rebuilt and re-audited (see errors.md P0-1). The rest of scrape_cmd
+    # (status/validation/consensus) still works.
+    print("[!] Active Instagram scrape is DISABLED (lane retired 2026-08-30). Skipping IG batch; running status/validation only.")
+    return
     print(f"[*] Starting active Instagram scrape batch (limit: {limit})...")
     os.environ["DISCOVERY_LIVE"] = "1"
     try:

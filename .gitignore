@@ -16,6 +16,12 @@ Takeout/
 data/etf_cache/
 data/fred_cache/
 data/pipeline_cache/
+data/dividends/
+data/nasdaq/
+data/edgar_cache/
+data/phrasebank_cache/
+data/sentiment_training_cache/
+data/sec_datasets/
 
 # Logs
 logs/

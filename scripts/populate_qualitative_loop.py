@@ -334,7 +334,11 @@ def main():
     populate_reddit(db_path, tickers, target=target_count)
     populate_glassdoor(db_path, tickers, target=target_count)
     populate_comparably(db_path, tickers, target=target_count)
-    populate_instagram(db_path, tickers, target=target_count)
+    # populate_instagram DISABLED 2026-08-30 (lane retired). This seeder wrote
+    # templated synthetic captions into instagram_raw_mentions that then fed
+    # LLM-fallback proxies read as real signals (see errors.md P0-1). Re-enable
+    # only after the IG pipeline is rebuilt.
+    # populate_instagram(db_path, tickers, target=target_count)
     
     # Final counts verification
     final_counts = check_counts(db_path)

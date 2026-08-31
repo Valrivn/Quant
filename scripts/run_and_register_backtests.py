@@ -130,7 +130,10 @@ def run_method(method):
     print(f"[+] Appended backtest results for {method} to registry.")
 
 def main():
-    methods = ["ig-llm"]
+    # IG-LLM lane DISABLED (2026-08-30): was `["ig-llm"]`, which auto-registered
+    # a relabeled RM-FINAL baseline as an IG-LLM backtest. Lane parked; re-add
+    # the method only after rebuilding the IG-LLM pipeline (see errors.md P0-1).
+    methods = []
     for m in methods:
         try:
             run_method(m)
