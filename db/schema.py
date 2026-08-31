@@ -578,3 +578,56 @@ def create_calibration_tables(conn: sqlite3.Connection) -> None:
     )
 
     conn.commit()
+
+
+def create_pit_rating_tables(conn: sqlite3.Connection) -> None:
+    """Point-in-time alternative-data rating tables (Wayback-sourced).
+
+    ``pit_rating_snapshots`` stores the AS-OF rating a source displayed on
+    ``valid_date`` (the snapshot capture date). A rating recorded on a past
+    date is usable in a backtest only for returns from that date forward, so
+    consumers join on ``valid_date`` without look-ahead. ``pit_harvest_runs``
+    is the harvest run ledger.
+    """
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS pit_rating_snapshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticker TEXT NOT NULL,
+            source TEXT NOT NULL,
+            valid_date TEXT NOT NULL,
+            rating REAL,
+            review_count INTEGER,
+            detail_json TEXT,
+            original_url TEXT,
+            snapshot_ts TEXT,
+            parse_pattern TEXT,
+            created_at INTEGER NOT NULL,
+            UNIQUE(ticker, source, valid_date)
+        )
+    """)
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_pit_rating_src_date ON pit_rating_snapshots(source, valid_date)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_pit_rating_ticker_date ON pit_rating_snapshots(ticker, valid_date)"
+    )
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS pit_harvest_runs (
+            run_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source TEXT NOT NULL,
+            started_at INTEGER NOT NULL,
+            completed_at INTEGER,
+            tickers TEXT,
+            attempted INTEGER DEFAULT 0,
+            succeeded INTEGER DEFAULT 0,
+            failed INTEGER DEFAULT 0,
+            skipped INTEGER DEFAULT 0,
+            status TEXT,
+            error_message TEXT
+        )
+    """)
+
+    conn.commit()
