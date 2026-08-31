@@ -60,6 +60,7 @@ Qualitative/psychological/scrapers/glassdoor_*.py
 Qualitative/psychological/scrapers/login_*.py
 
 # Session transcripts & scratch — local only
+Warning2.md
 sentimizer9.md
 session2b.md
 Session10.md
@@ -86,6 +87,7 @@ data/*.json
 data/*.log
 data/*.err
 data/*.txt
+data/archive/
 data/reddit_batches/
 data/test_batches/
 data/sentiment_training_cache/
