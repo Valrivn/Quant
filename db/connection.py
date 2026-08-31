@@ -59,7 +59,7 @@ def close_connection() -> None:
 
 def init_db() -> None:
     """Initialize database with all tables and indexes."""
-    from .schema import create_tables, create_indexes, migrate_psychological_schema, migrate_existing_schema, create_lane_gamma_tables
+    from .schema import create_tables, create_indexes, migrate_psychological_schema, migrate_existing_schema, create_lane_gamma_tables, create_pit_rating_tables
     from .schema_discovery import create_discovery_tables
     from .schema_consensus import create_consensus_tables
     with connection_context() as conn:
@@ -70,6 +70,7 @@ def init_db() -> None:
         create_lane_gamma_tables(conn)
         create_discovery_tables(conn)
         create_consensus_tables(conn)
+        create_pit_rating_tables(conn)
 
 # Alias for backward compatibility
 get_db_connection = get_connection
