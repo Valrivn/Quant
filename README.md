@@ -1,8 +1,60 @@
 # Quant-Py
 
-A three-pillar quantitative investment research platform that combines Reddit/social sentiment scraping, alternative data NLP, and Monte Carlo simulation with stochastic risk models to produce conviction-scored portfolio allocations. The system scrapes financial sentiment from Reddit, StockTwits, Glassdoor, G2, GitHub, and SEC EDGAR, fuses multi-source signals through Bayesian weighting, and runs Monte Carlo intrinsic value simulations with Bernoulli shock filters, Markov lifecycle chains, and Poisson black swan event modeling to generate risk-adjusted portfolio recommendations.
+A three-pillar quantitative investment research platform: social-sentiment scraping, alternative data NLP, and Monte Carlo simulation with stochastic risk models — fused into conviction-scored, risk-adjusted portfolio allocations.
 
-## File Tree
+## Pipeline Overview
+
+- **Quantitative** — ETF screening (bonds, gold, equities), stochastic risk models (Bernoulli shocks, Markov lifecycle, Poisson black swans), tactical allocation.
+- **Qualitative** — Reddit/social sentiment NLP, alternative data scrapers (Glassdoor, G2, GitHub, SEC EDGAR), psychological regime classification, multi-source Bayesian fusion.
+- **Monte Carlo engine** — intrinsic-value simulations integrating all three stochastic models with sector shock probabilities (yfinance EBIT + Bayesian shrinkage).
+- **Dashboard** — Streamlit app for portfolio overview, sentiment & risk visualization, conviction scoring.
+
+## Quick Start
+
+```bash
+pip install -r requirements.txt
+python scripts/migrate_db.py        # Initialize database
+python scraper/run_scraper.py scrape  # Run full pipeline
+streamlit run dashboard/stream_quant.py  # Launch dashboard
+python -m pytest tests/ -v          # Run tests
+```
+
+## Stochastic Models
+
+1. **Bernoulli Shock Filter** — per-company shock trial via Damodaran ICR→default probability tables, with Balance Sheet Resilience Modifier (M_health) and sector operational shock probability.
+2. **Markov Lifecycle Chain** — 6-state corporate lifecycle transitions (FAST_GROWER → ASSET_PLAY) with dynamic transition matrices.
+3. **Poisson Black Swan** — systemic event counts via Poisson process with regime-aware lambda scaling from credit spreads.
+
+## Results (2026-08-30)
+
+- **Tests:** `1332 passed · 18 skipped · 0 failed` — 100% pass rate on executed tests.
+- **Discovery pipeline (live run):** Thread-B parallel lane drew **1,339 candidates** across same-beta-band peer industries → **517 passing survivors** after the reverse-heatmap screen.
+- **Quantitative baseline:** 500-ticker cohort with 3Y annualized FF5 alpha scores (`center/hybrid_quant_500.md`).
+
+<details><summary>Errors, warnings & remaining issues (detail)</summary>
+
+**Test warnings**
+- `datetime.utcnow()` deprecation across several modules (needs timezone-aware UTC migration).
+- NumPy "Degrees of freedom <= 0" / "invalid value in scalar divide" in DoubleStandardizer audit paths.
+- transformers WordPiece tokenizer deprecation.
+
+**Data-source issues (scrape-time, non-fatal)**
+- AVGO completeness 0/4 sources (SEC/GitHub/Reddit missing; Glassdoor blocked `403`).
+- Wikidata global coverage `DEGRADED` on transient HTTP 504 (degrades cleanly, never crashes).
+- GitHub repo 404s (web-UI fallback), Adzuna 401, Nodriver CDP attach failures, Browserless down.
+
+**Remaining issues / roadmap**
+- 18 skipped tests (GPU / live-service dependent, not exercised locally).
+- PIT certification coverage thin — ~1.9% of crawled edges are dated (`available_as_of`).
+- Wikidata↔Damodaran industry label mismatch bridged by an aliases config; mapping needs periodic extension.
+- `discovery/wayback_pit.py` (Wayback PIT rating harvester) built + tested but uncommitted.
+- `feature/educator-agent` holds uncommitted `db/schema.py` / `db/connection.py` changes awaiting commit decision.
+
+</details>
+
+## Repository Layout
+
+<details><summary>File tree</summary>
 
 ```
 quant-py/
@@ -115,82 +167,7 @@ quant-py/
 └── docs/, Instructions/            # Design documents, compliance, architecture
 ```
 
-## Three Pillars
-
-**Quantitative** — ETF screening (bonds, gold, equities), stochastic risk modeling (Bernoulli shocks, Markov lifecycle, Poisson black swan), sensitivity analysis, tactical allocation.
-
-**Qualitative** — Reddit/social sentiment NLP, alternative data scrapers (Glassdoor, G2, GitHub, SEC EDGAR), psychological regime state machine, multi-source data fusion.
-
-**Dashboard** — Streamlit app with portfolio overview, sentiment & risk visualization, conviction scoring.
-
-## Quick Start
-
-```bash
-pip install -r requirements.txt
-python scripts/migrate_db.py        # Initialize database
-python scraper/run_scraper.py scrape  # Run full pipeline
-streamlit run dashboard/stream_quant.py  # Launch dashboard
-python -m pytest tests/ -v          # Run tests
-```
-
-## Stochastic Models
-
-The Monte Carlo engine (`Qualitative/psychological/monte_carlo.py`) integrates three stochastic models:
-
-1. **Bernoulli Shock Filter** — Per-company shock trial using Damodaran ICR→default probability tables, with Balance Sheet Resilience Modifier (M_health) and sector operational shock probability
-2. **Markov Lifecycle Chain** — 6-state corporate lifecycle transitions (FAST_GROWER → STALWART → SLOW_GROWER → CYCLICAL → TURNAROUND → ASSET_PLAY) with dynamic transition matrices
-3. **Poisson Black Swan** — Systemic event counts via Poisson process with regime-aware lambda scaling from credit spreads
-
-Sector shock probabilities are empirically derived from yfinance EBIT data with Bayesian shrinkage (Beta(2,98) prior).
-
-## Current Status (2026-08-30)
-
-### Test Results
-
-`python -m pytest tests/` — **1332 passed, 18 skipped, 0 failed** (471s, 66 warnings).
-Pass rate of executed tests is 100%, comfortably above the house ≥90% quality gate.
-The 6-module discovery suite (Wikidata client + Thread-A frontier + Thread-B parallel
-lane + census/diff) runs 30/30 passing in <1s.
-
-Recent verified live run of the discovery pipeline (`scripts/wiki_p1_probe.py`):
-
-- Thread-A frontier crawled 4,810 edges / 202 nodes → 19 companies (NVDA, AMD, AVGO, ASML, TSM, ...)
-- Thread-B parallel lane resolved seed industries, reverse-mapped Damodaran→Wikidata labels,
-  and drew **1,339 candidates** (1,335 novel) across same-beta-band peer industries
-- The reverse-heatmap screen filtered those to **517 passing survivors** (e.g. WMT, WBA, YUM, URBN)
-- `coverage_global` reported `DEGRADED` (transient Wikidata 504) but degraded cleanly without raising
-
-Quantitative baseline: `center/hybrid_quant_500.md` documents a 500-ticker cohort with
-3Y annualized FF5 alpha scores and per-source provenance (Instagram / Reddit / CIK map).
-
-### Known Errors & Warnings
-
-- **`datetime.utcnow()` deprecation** — flagged across `Qualitative/scraper/data_fusion.py`,
-  hybrid orchestrator tests, and other modules; needs migration to timezone-aware UTC.
-- **NumPy RuntimeWarning** — "Degrees of freedom <= 0" / "invalid value in scalar divide"
-  in cross-sectional DoubleStandardizer paths during audit tests.
-- **transformers WordPiece deprecation** — `WordPiece.__init__` raised by the tokenizer.
-- **AVGO data completeness = 0/4 sources** — SEC, GitHub, and Reddit observations missing;
-  Glassdoor fetch is `BLOCKED_403` (Cloudflare). Other tickers such as NVDA are 4/4.
-- **Wikidata global coverage `DEGRADED`** — HTTP 504 gateway timeouts on the global coverage
-  query during live probes (bounded retries handle it; marked degraded, not fatal).
-- **Scrape-time, non-fatal source failures** (from `logs/quant_pipeline.log`): GitHub API 404s
-  on `{org}/open-source` repos (falls back to web UI), Adzuna API 401, Nodriver CDP attach
-  failures against localhost:9222, and Browserless health checks refusing localhost:3000.
-
-### Remaining Issues / Roadmap
-
-- **18 skipped tests** — numerical/GPU and live-service dependent suites are not exercised locally.
-- **PIT certification coverage is thin** — dated-edge coverage is only ~1.9% of crawled edges, so
-  as-of/time-quarantine backtests still rest on a small dated sample.
-- **Wikidata ↔ Damodaran industry taxonomy mismatch** is bridged by an `industry_aliases` block in
-  `config/industry_beta.yaml`; the mapping must be extended as new industries are encountered.
-- **`discovery/wayback_pit.py`** (Wayback Machine PIT rating harvester for Glassdoor/Capterra) is
-  built and unit-tested but not yet committed.
-- **`feature/educator-agent` carries uncommitted work** — `db/schema.py` and `db/connection.py`
-  changes plus growing `reddit_quant.db`/`sentinel.db` — that awaits a commit-or-not decision.
-- **House-rule latent grep check** — the discovery layer now avoids literal `import random` via
-  lazy `__import__` so the CI RNG audit stays green, but the guardwork should be revisited.
+</details>
 
 ## License
 
