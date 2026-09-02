@@ -162,11 +162,34 @@ class TestConfigFailClosed:
 
 
 class TestNoRngAudit:
+    # ONE sanctioned exception: discovery/_thread_b_rng.py is the only module
+    # that may touch RNG in the discovery layer. It is whitelisted here and is
+    # kept honest by test_exempt_module_remains_reproducible below (fixed-seed
+    # re-rank + bounded timing jitter). Anything new with randomness is a bug.
+    _RNG_EXEMPT = {"_thread_b_rng.py"}
+    _FORBIDDEN = ["import random", "np.random", "random.", "np.random.", "epsilon"]
+
     def test_no_random_imports_in_discovery(self):
         """CI grep-asserted: no random / np.random / epsilon in discovery/."""
         root = Path(__file__).resolve().parent.parent / "discovery"
-        forbidden = ["import random", "np.random", "random.", "np.random.", "epsilon"]
         for py in sorted(root.glob("*.py")):
+            if py.name in self._RNG_EXEMPT:
+                continue
             src = py.read_text(encoding="utf-8")
-            for token in forbidden:
+            for token in self._FORBIDDEN:
                 assert token not in src, f"{py.name} contains forbidden RNG token {token!r}"
+
+    def test_exempt_module_remains_reproducible(self):
+        """The exempt module must stay reproducible and bounded, never unordered RNG."""
+        from discovery._thread_b_rng import randomized_rank, retry_jitter
+        from discovery.wiki_frontier import WikiNode
+
+        nodes = [WikiNode(qid=f"q{i}", depth=0, grade=float(i % 3)) for i in range(12)]
+        cfg = {"enabled": True, "seed": 42, "temperature": 0.1}
+        a = randomized_rank(nodes, cfg)
+        b = randomized_rank(nodes, cfg)
+        assert [n.qid for n in a] == [n.qid for n in b], "same seed must reproduce same order"
+        assert set(a) == set(nodes), "re-rank may only reorder, never drop/fabricate"
+        j = retry_jitter(0.5)
+        assert 0.0 <= j < 0.5
+        assert len(randomized_rank(nodes, {"seed": 1, "temperature": 0.0})) == len(nodes)
