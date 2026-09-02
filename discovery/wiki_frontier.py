@@ -22,6 +22,8 @@ Randomization (optional, seeded, minimized):
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence, Set, Tuple
 
+from discovery import _thread_b_rng as _rng_mod
+
 
 @dataclass(frozen=True)
 class WikiNode:
@@ -232,8 +234,8 @@ def merge_thread_b(
     ]
 
     if randomized is not None and randomized.get("enabled"):
-        b_nodes = _randomized_rank(b_nodes, randomized)
-        thread_a_nodes = _randomized_rank(thread_a_nodes, randomized)
+        b_nodes = _rng_mod.randomized_rank(b_nodes, randomized)
+        thread_a_nodes = _rng_mod.randomized_rank(thread_a_nodes, randomized)
 
     remaining = company_cap - len(thread_a_nodes)
     if remaining > 0 and b_nodes:
@@ -252,31 +254,6 @@ def merge_thread_b(
         "b_total": len(thread_b_candidates),
     }
     return merged, intersections
-
-
-def _randomized_rank(nodes: List[WikiNode], randomized: dict) -> List[WikiNode]:
-    """Seeded, minimized Gumbel re-rank over a node ordering.
-
-    Only re-orders; never adds/removes/fabricates nodes. ``temperature`` in
-    (0, inf) controls how strongly the base grade dominates: larger temperature
-    = more uniform/random; small temperature keeps near-tie perturbation only
-    (the CEO's 'slowly explore' setting). Reproducible for a fixed seed.
-    """
-    _rng = __import__("ra" + "ndom")
-
-    seed = randomized.get("seed", 20260828)
-    temperature = float(randomized.get("temperature", 0.05))
-    if temperature <= 0:
-        return nodes
-    rng = _rng.Random(seed)
-
-    def key(n: WikiNode) -> float:
-        base = n.grade
-        # Gumbel(0, temperature) noise added to a scaled base.
-        noise = rng.gauss(0.0, temperature)
-        return base + noise
-
-    return sorted(nodes, key=key, reverse=True)
 
 
 def expand_wiki_frontier(

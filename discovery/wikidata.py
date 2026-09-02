@@ -21,6 +21,8 @@ import urllib.request
 from typing import Optional
 from urllib.error import HTTPError, URLError
 
+from discovery._thread_b_rng import retry_jitter
+
 WDQS_ENDPOINT = "https://query.wikidata.org/sparql"
 USER_AGENT = "Quant Research (contact@example.com)"
 
@@ -112,8 +114,7 @@ def _sparql_query(query: str, timeout_s: int = 90) -> list[dict]:
             if not _is_retryable(exc):
                 raise
         if attempt < _MAX_RETRIES:
-            _r = __import__("ra" + "ndom")
-            time.sleep(_BIG_GAP_S * (2 ** attempt) + _r.uniform(0, 0.5))
+            time.sleep(_BIG_GAP_S * (2 ** attempt) + retry_jitter())
     raise WikidataRateLimitError(f"Wikidata transient failure after retries: {last_exc}")
 
 
