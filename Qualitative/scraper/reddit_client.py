@@ -54,7 +54,7 @@ class RedditUniversalScraper:
     def _scrape_fallback_sync(self, tickers: List[str] = None) -> 'ScrapeResult':
         """Synchronous fallback scrape with reduced scope."""
         from scraper.hybrid_orchestrator import ScrapeResult
-        start = datetime.utcnow()
+        start = datetime.now(timezone.utc)
         try:
             priority_subs = ["wallstreetbets", "stocks", "options", "SecurityAnalysis"]
             # Run limited scrape for fallback
@@ -62,7 +62,7 @@ class RedditUniversalScraper:
             
             # Count new messages from today
             from db.connection import get_db_connection
-            today = datetime.utcnow().strftime("%Y-%m-%d")
+            today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute("SELECT COUNT(*) FROM daily_aggregations WHERE date=? AND source='reddit'", (today,))
@@ -71,12 +71,12 @@ class RedditUniversalScraper:
             
             return ScrapeResult(
                 source="reddit", messages_count=count, tickers_found=tickers or [],
-                duration_ms=int((datetime.utcnow() - start).total_seconds() * 1000), errors=[]
+                duration_ms=int((datetime.now(timezone.utc) - start).total_seconds() * 1000), errors=[]
             )
         except Exception as e:
             logger.error(f"Reddit fallback failed: {e}")
             return ScrapeResult(source="reddit", messages_count=0, tickers_found=[],
-                              duration_ms=int((datetime.utcnow() - start).total_seconds() * 1000), errors=[str(e)])
+                              duration_ms=int((datetime.now(timezone.utc) - start).total_seconds() * 1000), errors=[str(e)])
 
     def _scrape_priority_subreddits(self, priority_subs: List[str]):
         """Scrape only priority subreddits for fallback."""

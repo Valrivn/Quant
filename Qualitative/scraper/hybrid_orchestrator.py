@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from typing import List, Dict, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from dataclasses import dataclass
 
 from scraper.fintech_clients.factory import FintechClientFactory
@@ -107,7 +107,7 @@ class HybridOrchestrator:
     ) -> Dict[str, ScrapeResult]:
         """Scrape all healthy fintech sources in parallel for supplementary validation."""
         async def scrape_source(source: str) -> ScrapeResult:
-            start = datetime.utcnow()
+            start = datetime.now(timezone.utc)
             client = self.factory.get_client(source)
             try:
                 async with client:
@@ -120,7 +120,7 @@ class HybridOrchestrator:
                 persisted = await self._persist_fintech_messages(all_msgs, source)
 
                 tickers_found = list(set(m.ticker for m in all_msgs))
-                duration = int((datetime.utcnow() - start).total_seconds() * 1000)
+                duration = int((datetime.now(timezone.utc) - start).total_seconds() * 1000)
 
                 return ScrapeResult(
                     source=source, messages_count=persisted,
@@ -129,7 +129,7 @@ class HybridOrchestrator:
             except Exception as e:
                 logger.error(f"Error scraping {source}: {e}")
                 return ScrapeResult(source=source, messages_count=0, tickers_found=[],
-                                  duration_ms=int((datetime.utcnow() - start).total_seconds() * 1000), errors=[str(e)])
+                                  duration_ms=int((datetime.now(timezone.utc) - start).total_seconds() * 1000), errors=[str(e)])
 
         tasks = [scrape_source(s) for s in healthy_sources]
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -167,7 +167,7 @@ class HybridOrchestrator:
                     msg.sentiment_score,
                     msg.author,
                     int(msg.created_at.timestamp()),
-                    int(datetime.utcnow().timestamp()),
+                    int(datetime.now(timezone.utc).timestamp()),
                     msg.engagement.get("likes", msg.engagement.get("upvotes", 0)),
                     msg.engagement.get("comments", 0),
                     msg.engagement.get("shares", 0),
@@ -205,7 +205,7 @@ class HybridOrchestrator:
                     signal["total_weight"],
                     signal["message_count"],
                     signal["composite_sentiment"],
-                    int(datetime.utcnow().timestamp())
+                    int(datetime.now(timezone.utc).timestamp())
                 ))
             except Exception as e:
                 logger.error(f"Error inserting signal: {e}")

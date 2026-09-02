@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 from dataclasses import dataclass
 
@@ -81,7 +81,7 @@ class TestDataFusionEngine:
 
     @pytest.fixture
     def sample_messages(self):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         return [
             FintechMessage(
                 source="stocktwits",
@@ -136,7 +136,7 @@ class TestDataFusionEngine:
         assert signals == []
 
     def test_fuse_multiple_tickers(self, fusion_engine):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         messages = [
             FintechMessage(source="stocktwits", source_id="1", ticker="AAPL", text="Test",
                           sentiment_score=0.5, author="a", created_at=now, engagement={}, url="", metadata={}),
@@ -163,9 +163,9 @@ class TestHybridOrchestrator:
     def mock_factory(self):
         factory = Mock(spec=FintechClientFactory)
         factory.health_check_all = AsyncMock(return_value={
-            "stocktwits": FintechHealth(source="stocktwits", is_healthy=True, last_success=datetime.utcnow(),
+            "stocktwits": FintechHealth(source="stocktwits", is_healthy=True, last_success=datetime.now(timezone.utc),
                                        consecutive_failures=0, rate_limit_remaining=100, rate_limit_reset=None, error_message=None),
-            "apewisdom": FintechHealth(source="apewisdom", is_healthy=True, last_success=datetime.utcnow(),
+            "apewisdom": FintechHealth(source="apewisdom", is_healthy=True, last_success=datetime.now(timezone.utc),
                                       consecutive_failures=0, rate_limit_remaining=100, rate_limit_reset=None, error_message=None)
         })
         factory.get_healthy_sources = Mock(return_value=["stocktwits", "apewisdom"])
@@ -262,7 +262,7 @@ class TestHybridOrchestrator:
 
 class TestFintechMessage:
     def test_fintech_message_creation(self):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         msg = FintechMessage(
             source="stocktwits",
             source_id="123",

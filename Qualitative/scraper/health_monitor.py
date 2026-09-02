@@ -1,6 +1,6 @@
 import logging
 from typing import Dict, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass, field
 from collections import defaultdict
 from scraper.fintech_clients.base import FintechHealth
@@ -65,7 +65,7 @@ class CircuitState:
     def record_success(self):
         self.success_count += 1
         self.failure_count = 0
-        self.last_success = datetime.utcnow()
+        self.last_success = datetime.now(timezone.utc)
         if self.state == "HALF_OPEN" and self.success_count >= self.success_threshold:
             self.state = "CLOSED"
             logger.info(f"Circuit {self.source} CLOSED after recovery")
@@ -73,21 +73,21 @@ class CircuitState:
     def record_failure(self):
         self.failure_count += 1
         self.success_count = 0
-        self.last_failure = datetime.utcnow()
+        self.last_failure = datetime.now(timezone.utc)
         if self.state == "CLOSED" and self.failure_count >= self.failure_threshold:
             self.state = "OPEN"
-            self.next_attempt = datetime.utcnow() + timedelta(seconds=self.timeout_seconds)
+            self.next_attempt = datetime.now(timezone.utc) + timedelta(seconds=self.timeout_seconds)
             logger.warning(f"Circuit {self.source} OPENED after {self.failure_count} failures")
         elif self.state == "HALF_OPEN":
             self.state = "OPEN"
-            self.next_attempt = datetime.utcnow() + timedelta(seconds=self.timeout_seconds)
+            self.next_attempt = datetime.now(timezone.utc) + timedelta(seconds=self.timeout_seconds)
             logger.warning(f"Circuit {self.source} RE-OPENED after half-open failure")
 
     def can_execute(self) -> bool:
         if self.state == "CLOSED":
             return True
         if self.state == "OPEN":
-            if self.next_attempt and datetime.utcnow() >= self.next_attempt:
+            if self.next_attempt and datetime.now(timezone.utc) >= self.next_attempt:
                 self.state = "HALF_OPEN"
                 self.success_count = 0
                 logger.info(f"Circuit {self.source} entering HALF_OPEN")
@@ -167,7 +167,7 @@ class HealthMonitor:
         """Manually open a circuit."""
         circuit = self.get_circuit(source)
         circuit.state = "OPEN"
-        circuit.next_attempt = datetime.utcnow() + timedelta(seconds=circuit.timeout_seconds)
+        circuit.next_attempt = datetime.now(timezone.utc) + timedelta(seconds=circuit.timeout_seconds)
 
     def force_close(self, source: str):
         """Manually close a circuit."""

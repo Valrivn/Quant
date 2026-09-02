@@ -32,10 +32,47 @@ def _members(*items):
 # --- industry_beta.yaml loader -----------------------------------------------
 
 def test_loader_loads_expected_fingerprints():
-    assert CFG["industries"]["Semiconductor"]["unlevered_beta"] == 1.35
+    assert CFG["industries"]["Semiconductor"]["unlevered_beta"] == 1.4893
     assert CFG["industries"]["Semiconductor"]["sub_area"] == "chip_design"
+    assert CFG["industries"]["Semiconductor Equip"]["unlevered_beta"] == 1.3481
     assert CFG["update"]["auto_replace"] is False
     assert CFG["thread_b"]["beta_band"] == 0.15
+    eco = CFG["thread_b"]["ecosystem"]
+    assert eco["enabled"] is True
+    assert eco["max_hop_depth"] >= 1
+    assert eco["max_industries_per_hop"] >= 1
+    declared = {v.get("sub_area") for v in CFG["industries"].values()}
+    for src, targets in eco["sub_area_chain"].items():
+        assert src in declared
+        for tgt in targets:
+            assert tgt in declared
+
+
+def test_loader_fails_closed_on_bad_chain_target(tmp_path):
+    import copy
+
+    bad = tmp_path / "chain.yaml"
+    bad.write_text(
+        "industries:\n"
+        "  X: {unlevered_beta: 1.0, sub_area: a}\n"
+        "  Y: {unlevered_beta: 1.0, sub_area: b}\n"
+        "sub_area_aliases: {}\n"
+        "update:\n  auto_replace: false\n"
+        "thread_b:\n"
+        "  beta_band: 0.15\n"
+        "  prefer_different_sub_area: true\n"
+        "  ecosystem:\n"
+        "    enabled: true\n"
+        "    max_hop_depth: 2\n"
+        "    max_industries_per_hop: 12\n"
+        "    sub_area_chain:\n"
+        "      a: [b, bogus]\n"
+    )
+    try:
+        load_industry_beta(str(bad))
+        assert False, "should have raised"
+    except IndustryBetaConfigError:
+        pass
 
 
 def test_loader_fails_closed_on_bad_file(tmp_path):
@@ -61,16 +98,16 @@ def test_loader_fails_closed_on_missing_beta(tmp_path):
 # --- deterministic Thread-B candidate draw -----------------------------------
 
 def test_same_band_different_sub_area_surfaces_novel():
-    # Anchor: NVDA is reached, in Semiconductor (beta 1.35, sub_area chip_design).
-    # Same band: Semiconductor Equipment (1.30), different sub_area (chip_equipment).
-    # Opposite band: Utility (0.45) is NOT within band 0.15 of 1.35.
+    # Anchor: NVDA is reached, in Semiconductor (beta 1.4893, sub_area chip_design).
+    # Same band: Semiconductor Equip (1.3481), different sub_area (chip_equipment).
+    # Opposite band: Utility (General, ~0.41) is NOT within band 0.15 of 1.4893.
     companies = _companies(("QN", "NVDA"), ("QE", "ASML"), ("QU", "UTIL"))
-    ticker_industry = {"NVDA": "Semiconductor", "ASML": "Semiconductor Equipment",
+    ticker_industry = {"NVDA": "Semiconductor", "ASML": "Semiconductor Equip",
                        "UTIL": "Utility (General)"}
     reached = {"QN", "QE"}
     industry_members = _members(
         ("Semiconductor", [("QS1", "AMD"), ("QS2", "INTC")]),
-        ("Semiconductor Equipment", [("QE1", "KLAC"), ("QE2", "LRCX")]),
+        ("Semiconductor Equip", [("QE1", "KLAC"), ("QE2", "LRCX")]),
         ("Utility (General)", [("QU1", "DUK"), ("QU2", "SO")]),
     )
     cands = build_thread_b_candidates(
@@ -93,7 +130,7 @@ def test_deterministic_order_is_stable():
     reached = {"QN"}
     industry_members = _members(
         ("Semiconductor", [("QS1", "AMD")]),
-        ("Semiconductor Equipment", [("QE1", "KLAC"), ("QE2", "LRCX")]),
+        ("Semiconductor Equip", [("QE1", "KLAC"), ("QE2", "LRCX")]),
     )
     a = build_thread_b_candidates(reached, companies, ticker_industry,
                                   industry_members, CFG, beta_band=0.15)

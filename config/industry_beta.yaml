@@ -1,92 +1,443 @@
 # Pre-registered industry -> unlevered beta table for the Wikidata Thread-B
-# category discovery lane (ruling D-20260828-001).
+# category discovery lane (ruling D-20260828-001, extended D-20260901-001).
+# Generated from the LIVE Damodaran source, not hand-maintained:
+#   betas.xls "Industry Averages" (unlevered beta, authoritative names) and
+#   indname.xls "By industry" roster (company membership + SIC, ~48k firms).
+# Refresh: python scripts/refresh_damodaran.py  (writes a CANDIDATE yaml; the
+# CEO reviews an APPROVES before this live block is replaced -- auto_replace
+# is always false).
 #
-# Business-core fingerprint: DAMODARAN unlevered beta by industry. Promoted out
-# of dashboard/stream_quant.py (was a hardcoded dict) into a pre-registered,
-# fail-closed config per house invariant 4 (config, not hard-coded constants).
-#
-# UPDATE POLICY (staged, never silent): refreshing this table is a STAGED
-# monthly process -- an automated fetch writes a CANDIDATE file, which the CEO
-# reviews and approves BEFORE it replaces the live `industries` block. The
-# `update` section tracks provenance; nothing auto-replaces at load time.
-#
-# The loader discovery/industry_beta.py validates this file fail-closed:
-# unknown keys, missing required keys, NaN, or non-positive beta => load error.
-# Every industry entry must carry a positive `unlevered_beta` and a sub-area
-# label used for the "same sub-topics / different sub-topic" differentiation.
-
+# Each industry carries an unlevered_beta and a curated sub_area label used for
+# (a) "different sub-topic within the same band" grouping and (b) the ecosystem
+# "continue the path that is different" traversal in thread_b.ecosystem
+# (software -> hardware -> chips/materials -> customers, up AND down the stack).
+# Loader discovery/industry_beta.py validates this file fail-closed; the
+# ecosystem sub_area_chain keys/values must reference declared sub_areas.
 industries:
-  "Software (System & Application)": {unlevered_beta: 1.27, sub_area: "application_software"}
-  "Computer Services":              {unlevered_beta: 0.85, sub_area: "it_services"}
-  "Information Services":           {unlevered_beta: 0.90, sub_area: "data_services"}
-  "Interactive Media":              {unlevered_beta: 1.15, sub_area: "internet_media"}
-  "Retail (Internet)":              {unlevered_beta: 1.21, sub_area: "ecommerce"}
-  "Semiconductor":                  {unlevered_beta: 1.35, sub_area: "chip_design"}
-  "Semiconductor Equipment":        {unlevered_beta: 1.30, sub_area: "chip_equipment"}
-  "Computers/Peripherals":          {unlevered_beta: 1.05, sub_area: "hardware_oem"}
-  "Telecom Services":               {unlevered_beta: 0.60, sub_area: "telecom"}
-  "Advertising":                    {unlevered_beta: 0.95, sub_area: "ad_services"}
-  "Aerospace/Defense":              {unlevered_beta: 0.82, sub_area: "aero_defense"}
-  "Air Transport":                  {unlevered_beta: 0.75, sub_area: "airlines"}
-  "Apparel":                        {unlevered_beta: 0.90, sub_area: "apparel"}
-  "Auto & Truck":                   {unlevered_beta: 0.70, sub_area: "autos"}
-  "Beverage (Soft Drink)":          {unlevered_beta: 0.65, sub_area: "beverages"}
-  "Chemical (Specialty)":           {unlevered_beta: 0.92, sub_area: "specialty_chem"}
-  "Drugs (Biotechnology)":          {unlevered_beta: 1.35, sub_area: "biotech"}
-  "Drugs (Pharmaceutical)":         {unlevered_beta: 0.98, sub_area: "pharma"}
-  "Electronics (General)":          {unlevered_beta: 1.02, sub_area: "electronics"}
-  "Financial Services":             {unlevered_beta: 0.85, sub_area: "financials"}
-  "Hospitals/Healthcare Providers": {unlevered_beta: 0.68, sub_area: "healthcare"}
-  "Hotel/Gaming":                   {unlevered_beta: 0.88, sub_area: "hotel_gaming"}
-  "Machinery":                      {unlevered_beta: 0.95, sub_area: "machinery"}
-  "Oil/Gas (Integrated)":           {unlevered_beta: 0.78, sub_area: "oil_gas"}
-  "Real Estate (General)":          {unlevered_beta: 0.55, sub_area: "real_estate"}
-  "Restaurant/Dining":              {unlevered_beta: 0.82, sub_area: "restaurants"}
-  "Steel":                          {unlevered_beta: 1.05, sub_area: "steel"}
-  "Utility (General)":              {unlevered_beta: 0.45, sub_area: "utilities"}
-
-# Sub-area alias normalization: map a raw sector/industry string (e.g. from the
-# valuation roster or ai_cons taxonomy) onto a canonical sub_area label so the
-# "same sub-topics / different sub-topic" comparison is not fooled by label
-# casing/abbreviation drift.
+  Advertising:
+    unlevered_beta: 0.9301
+    sub_area: ad_services
+  Aerospace/Defense:
+    unlevered_beta: 0.8467
+    sub_area: aero_defense
+  Air Transport:
+    unlevered_beta: 0.7041
+    sub_area: transport
+  Apparel:
+    unlevered_beta: 0.758
+    sub_area: retail
+  Auto & Truck:
+    unlevered_beta: 1.269
+    sub_area: autos
+  Auto Parts:
+    unlevered_beta: 1.0217
+    sub_area: autos
+  Bank (Money Center):
+    unlevered_beta: 0.3411
+    sub_area: financials
+  Banks (Regional):
+    unlevered_beta: 0.2865
+    sub_area: financials
+  Beverage (Alcoholic):
+    unlevered_beta: 0.6132
+    sub_area: food_beverage
+  Beverage (Soft):
+    unlevered_beta: 0.5557
+    sub_area: food_beverage
+  Broadcasting:
+    unlevered_beta: 0.2864
+    sub_area: media_content
+  Brokerage & Investment Banking:
+    unlevered_beta: 0.5808
+    sub_area: financials
+  Building Materials:
+    unlevered_beta: 0.9302
+    sub_area: construction
+  Business & Consumer Services:
+    unlevered_beta: 0.7736
+    sub_area: it_services
+  Cable TV:
+    unlevered_beta: 0.3524
+    sub_area: telecom
+  Chemical (Basic):
+    unlevered_beta: 0.58
+    sub_area: materials
+  Chemical (Diversified):
+    unlevered_beta: 0.3666
+    sub_area: materials
+  Chemical (Specialty):
+    unlevered_beta: 0.7922
+    sub_area: materials
+  Coal & Related Energy:
+    unlevered_beta: 1.0165
+    sub_area: energy
+  Computer Services:
+    unlevered_beta: 0.9155
+    sub_area: it_services
+  Computers/Peripherals:
+    unlevered_beta: 1.3051
+    sub_area: hardware_oem
+  Construction Supplies:
+    unlevered_beta: 1.0161
+    sub_area: construction
+  Diversified:
+    unlevered_beta: 0.7889
+    sub_area: diversified
+  Drugs (Biotechnology):
+    unlevered_beta: 1.0341
+    sub_area: biotech
+  Drugs (Pharmaceutical):
+    unlevered_beta: 0.8862
+    sub_area: pharma
+  Education:
+    unlevered_beta: 0.6602
+    sub_area: it_services
+  Electrical Equipment:
+    unlevered_beta: 1.1478
+    sub_area: machinery_equipment
+  Electronics (Consumer & Office):
+    unlevered_beta: 0.8299
+    sub_area: hardware_oem
+  Electronics (General):
+    unlevered_beta: 0.8974
+    sub_area: hardware_oem
+  Engineering/Construction:
+    unlevered_beta: 1.0949
+    sub_area: machinery_equipment
+  Entertainment:
+    unlevered_beta: 0.7372
+    sub_area: media_content
+  Environmental & Waste Services:
+    unlevered_beta: 0.8145
+    sub_area: environment
+  Farming/Agriculture:
+    unlevered_beta: 0.813
+    sub_area: agri
+  Financial Svcs. (Non-bank & Insurance):
+    unlevered_beta: 0.3189
+    sub_area: financials
+  Food Processing:
+    unlevered_beta: 0.4574
+    sub_area: food_beverage
+  Food Wholesalers:
+    unlevered_beta: 0.6409
+    sub_area: food_beverage
+  Furn/Home Furnishings:
+    unlevered_beta: 0.6248
+    sub_area: retail
+  Green & Renewable Energy:
+    unlevered_beta: 0.4633
+    sub_area: energy
+  Healthcare Products:
+    unlevered_beta: 0.8291
+    sub_area: healthcare
+  Healthcare Support Services:
+    unlevered_beta: 0.6889
+    sub_area: healthcare
+  Heathcare Information and Technology:
+    unlevered_beta: 0.9913
+    sub_area: application_software
+  Homebuilding:
+    unlevered_beta: 0.785
+    sub_area: construction
+  Hospitals/Healthcare Facilities:
+    unlevered_beta: 0.5517
+    sub_area: healthcare
+  Hotel/Gaming:
+    unlevered_beta: 0.8323
+    sub_area: hospitality
+  Household Products:
+    unlevered_beta: 0.7178
+    sub_area: retail
+  Information Services:
+    unlevered_beta: 0.7372
+    sub_area: data_services
+  Insurance (General):
+    unlevered_beta: 0.5636
+    sub_area: insurance
+  Insurance (Life):
+    unlevered_beta: 0.4272
+    sub_area: insurance
+  Insurance (Prop/Cas.):
+    unlevered_beta: 0.4357
+    sub_area: insurance
+  Investments & Asset Management:
+    unlevered_beta: 0.5297
+    sub_area: financials
+  Machinery:
+    unlevered_beta: 0.868
+    sub_area: machinery_equipment
+  Metals & Mining:
+    unlevered_beta: 0.9636
+    sub_area: materials
+  Office Equipment & Services:
+    unlevered_beta: 0.9806
+    sub_area: it_services
+  Oil/Gas (Integrated):
+    unlevered_beta: 0.2712
+    sub_area: energy
+  Oil/Gas (Production and Exploration):
+    unlevered_beta: 0.5628
+    sub_area: energy
+  Oil/Gas Distribution:
+    unlevered_beta: 0.4651
+    sub_area: energy
+  Oilfield Svcs/Equip.:
+    unlevered_beta: 0.743
+    sub_area: machinery_equipment
+  Packaging & Container:
+    unlevered_beta: 0.7231
+    sub_area: materials
+  Paper/Forest Products:
+    unlevered_beta: 0.7216
+    sub_area: materials
+  Power:
+    unlevered_beta: 0.31
+    sub_area: utilities
+  Precious Metals:
+    unlevered_beta: 0.7932
+    sub_area: materials
+  Publishing & Newspapers:
+    unlevered_beta: 0.4773
+    sub_area: media_content
+  R.E.I.T.:
+    unlevered_beta: 0.3929
+    sub_area: real_estate
+  Real Estate (Development):
+    unlevered_beta: 0.4783
+    sub_area: real_estate
+  Real Estate (General/Diversified):
+    unlevered_beta: 0.5779
+    sub_area: real_estate
+  Real Estate (Operations & Services):
+    unlevered_beta: 0.8149
+    sub_area: real_estate
+  Recreation:
+    unlevered_beta: 0.6951
+    sub_area: hospitality
+  Reinsurance:
+    unlevered_beta: 0.4384
+    sub_area: insurance
+  Restaurant/Dining:
+    unlevered_beta: 0.7674
+    sub_area: food_beverage
+  Retail (Automotive):
+    unlevered_beta: 0.6984
+    sub_area: retail
+  Retail (Building Supply):
+    unlevered_beta: 1.307
+    sub_area: retail
+  Retail (Distributors):
+    unlevered_beta: 0.7827
+    sub_area: retail
+  Retail (General):
+    unlevered_beta: 0.76
+    sub_area: retail
+  Retail (Grocery and Food):
+    unlevered_beta: 0.8048
+    sub_area: retail
+  Retail (REITs):
+    unlevered_beta: 0.4362
+    sub_area: real_estate
+  Retail (Special Lines):
+    unlevered_beta: 0.9488
+    sub_area: retail
+  Rubber& Tires:
+    unlevered_beta: 0.1435
+    sub_area: materials
+  Semiconductor:
+    unlevered_beta: 1.4893
+    sub_area: chip_design
+  Semiconductor Equip:
+    unlevered_beta: 1.3481
+    sub_area: chip_equipment
+  Shipbuilding & Marine:
+    unlevered_beta: 0.644
+    sub_area: transport
+  Shoe:
+    unlevered_beta: 0.9337
+    sub_area: retail
+  Software (Entertainment):
+    unlevered_beta: 1.0128
+    sub_area: application_software
+  Software (Internet):
+    unlevered_beta: 1.5461
+    sub_area: application_software
+  Software (System & Application):
+    unlevered_beta: 1.2254
+    sub_area: application_software
+  Steel:
+    unlevered_beta: 0.9035
+    sub_area: materials
+  Telecom (Wireless):
+    unlevered_beta: 0.3873
+    sub_area: telecom
+  Telecom. Equipment:
+    unlevered_beta: 0.8635
+    sub_area: hardware_oem
+  Telecom. Services:
+    unlevered_beta: 0.3654
+    sub_area: telecom
+  Tobacco:
+    unlevered_beta: 0.6776
+    sub_area: retail
+  Transportation:
+    unlevered_beta: 0.6753
+    sub_area: transport
+  Transportation (Railroads):
+    unlevered_beta: 0.8069
+    sub_area: transport
+  Trucking:
+    unlevered_beta: 0.8504
+    sub_area: transport
+  Utility (General):
+    unlevered_beta: 0.1486
+    sub_area: utilities
+  Utility (Water):
+    unlevered_beta: 0.2812
+    sub_area: utilities
 sub_area_aliases:
-  semiconductor: "chip_design"
-  semiconductor_equipment: "chip_equipment"
-  hardware_oem: "hardware_oem"
-  networking: "networking"
-  cloud_internet: "cloud_internet"
-  platform_software: "application_software"
-  energy: "energy"
-  utilities: "utilities"
-  software: "application_software"
-  computers: "hardware_oem"
-  semiconductors: "chip_design"
-
-# Wikidata industry label aliases: normalize Wikidata industry strings (fetched
-# via P452) onto exact Damodaran industry keys in this file.
+  semiconductor: chip_design
+  semiconductor_equipment: chip_equipment
+  hardware_oem: hardware_oem
+  networking: telecom
+  cloud_internet: data_services
+  platform_software: application_software
+  energy: energy
+  utilities: utilities
+  software: application_software
+  computers: hardware_oem
+  semiconductors: chip_design
+  internet_media: media_content
+  ecommerce: retail
+  it_services: it_services
+  data_services: data_services
+  retail: retail
+  chips: chip_design
+  chip_equipment: chip_equipment
 industry_aliases:
-  "semiconductor industry": "Semiconductor"
-  "semiconductor equipment": "Semiconductor Equipment"
-  "electrical industry": "Semiconductor"
-  "information technology": "Computer Services"
-  "retail": "Retail (Internet)"
-  "software industry": "Software (System & Application)"
-  "technology": "Software (System & Application)"
-
-# Thread-B grouping defaults (overridable from config/sentinel.yaml).
+  semiconductor industry: Semiconductor
+  semiconductor equipment: Semiconductor Equip
+  electrical industry: Electrical Equipment
+  information technology: Computer Services
+  retail: Retail (General)
+  software industry: Software (System & Application)
 thread_b:
-  beta_band: 0.15        # same-business-area grouping tolerance (unlevered beta +/- band)
-  prefer_different_sub_area: true  # target same band but a DIFFERENT sub-topic within it
-
-# Staged-update provenance. `last_updated` is informational; the automation
-# writes to `candidate_path` which the CEO approves before merge.
+  beta_band: 0.15
+  prefer_different_sub_area: true
+  ecosystem:
+    enabled: true
+    max_hop_depth: 2
+    max_industries_per_hop: 12
+    sub_area_chain:
+      ad_services:
+      - media_content
+      - retail
+      aero_defense:
+      - machinery_equipment
+      - transport
+      - chip_design
+      agri:
+      - food_beverage
+      - materials
+      application_software:
+      - hardware_oem
+      - it_services
+      autos:
+      - transport
+      - materials
+      - hardware_oem
+      biotech:
+      - pharma
+      - healthcare
+      - materials
+      chip_design:
+      - chip_equipment
+      - hardware_oem
+      chip_equipment:
+      - chip_design
+      - materials
+      - machinery_equipment
+      construction:
+      - materials
+      - machinery_equipment
+      - real_estate
+      data_services:
+      - application_software
+      - media_content
+      - telecom
+      diversified:
+      - financials
+      - retail
+      energy:
+      - utilities
+      - materials
+      environment:
+      - utilities
+      - materials
+      financials:
+      - insurance
+      - real_estate
+      food_beverage:
+      - agri
+      - hospitality
+      - retail
+      hardware_oem:
+      - chip_design
+      - chip_equipment
+      - telecom
+      healthcare:
+      - biotech
+      - pharma
+      hospitality:
+      - food_beverage
+      - retail
+      insurance:
+      - financials
+      - real_estate
+      it_services:
+      - application_software
+      - data_services
+      machinery_equipment:
+      - chip_equipment
+      - materials
+      - construction
+      materials:
+      - machinery_equipment
+      - energy
+      - construction
+      media_content:
+      - ad_services
+      - telecom
+      - retail
+      pharma:
+      - biotech
+      - healthcare
+      real_estate:
+      - construction
+      - financials
+      - retail
+      retail:
+      - food_beverage
+      - hospitality
+      - media_content
+      telecom:
+      - hardware_oem
+      - data_services
+      - media_content
+      transport:
+      - autos
+      - hospitality
+      - materials
+      utilities:
+      - energy
+      - telecom
 update:
-  source: "Damodaran unlevered beta by industry (public, periodically refreshed)"
-  last_updated: "2026-08-28"
-  refresh_cadence: "monthly"
-  candidate_path: "config/industry_beta_candidate.yaml"
-  auto_replace: false   # NEVER auto-replace; staged CEO-approved merge only
-
-# --- Staging block (CLI helper writes a draft here for CEO review, never live) ---
+  source: Damodaran unlevered beta by industry - live Betas.html (pages.stern.nyu.edu)
+    + indname.xls roster
+  last_updated: '2026-09-01'
+  refresh_cadence: monthly
+  candidate_path: config/industry_beta_candidate.yaml
+  auto_replace: false
 staging:
   candidate: {}

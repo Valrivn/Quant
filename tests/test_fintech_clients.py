@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch
 
 from scraper.fintech_clients.base import FintechMessage, FintechHealth
@@ -136,7 +136,7 @@ class TestFintechNormalizer:
             text="Test",
             sentiment_score=0.5,
             author="user",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
             engagement={"likes": 100},
             url="",
             metadata={}
@@ -152,7 +152,7 @@ class TestFintechNormalizer:
             text="Test",
             sentiment_score=0.5,
             author="user",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
             engagement={"likes": 5},
             url="",
             metadata={}
@@ -162,13 +162,13 @@ class TestFintechNormalizer:
 
     def test_deduplicate(self, normalizer):
         msg1 = FintechMessage(source="stocktwits", source_id="1", ticker="AAPL", text="Test1",
-                             sentiment_score=0.5, author="user", created_at=datetime.utcnow(),
+                             sentiment_score=0.5, author="user", created_at=datetime.now(timezone.utc),
                              engagement={}, url="", metadata={})
         msg2 = FintechMessage(source="stocktwits", source_id="1", ticker="AAPL", text="Test2",
-                             sentiment_score=0.5, author="user", created_at=datetime.utcnow(),
+                             sentiment_score=0.5, author="user", created_at=datetime.now(timezone.utc),
                              engagement={}, url="", metadata={})
         msg3 = FintechMessage(source="apewisdom", source_id="1", ticker="AAPL", text="Test3",
-                             sentiment_score=0.5, author="user", created_at=datetime.utcnow(),
+                             sentiment_score=0.5, author="user", created_at=datetime.now(timezone.utc),
                              engagement={}, url="", metadata={})
         
         unique = normalizer.deduplicate([msg1, msg2, msg3])
@@ -206,7 +206,7 @@ class TestFintechClientFactory:
         factory = FintechClientFactory()
         
         health = {
-            "stocktwits": FintechHealth(source="stocktwits", is_healthy=True, last_success=datetime.utcnow(),
+            "stocktwits": FintechHealth(source="stocktwits", is_healthy=True, last_success=datetime.now(timezone.utc),
                                        consecutive_failures=0, rate_limit_remaining=100, rate_limit_reset=None, error_message=None),
             "apewisdom": FintechHealth(source="apewisdom", is_healthy=False, last_success=None,
                                       consecutive_failures=1, rate_limit_remaining=0, rate_limit_reset=None, error_message="Error")

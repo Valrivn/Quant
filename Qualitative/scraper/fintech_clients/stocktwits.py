@@ -1,7 +1,7 @@
 import aiohttp
 import asyncio
 from typing import List, Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from .base import BaseFintechClient, FintechMessage, FintechHealth
 
 
@@ -56,7 +56,7 @@ class StockTwitsClient(BaseFintechClient):
         try:
             await self._rate_limited_request(self._get, f"{self.BASE_URL}/trending/symbols.json")
             return FintechHealth(
-                source="stocktwits", is_healthy=True, last_success=datetime.utcnow(),
+                source="stocktwits", is_healthy=True, last_success=datetime.now(timezone.utc),
                 consecutive_failures=0, rate_limit_remaining=200, rate_limit_reset=None, error_message=None
             )
         except Exception as e:

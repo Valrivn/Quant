@@ -194,3 +194,119 @@ def test_dry_run_does_not_write(db_path):
 def test_list_tickers_filter():
     tickers = wp.list_tickers(include=["NVDA", "ZZZ", "AMD"])
     assert tickers == ["NVDA", "AMD"]
+
+
+def test_list_tickers_glassdoor_count():
+    tickers = wp.list_tickers()
+    assert len(tickers) == 28
+    assert "NVDA" in tickers
+    assert "ORCL" in tickers
+    assert "ABNB" in tickers
+
+
+def test_list_tickers_capterra_empty():
+    assert wp.list_tickers(source=wp.SOURCE_CAPTERRA) == []
+
+
+def test_list_tickers_capterra_with_include():
+    assert wp.list_tickers(include=["NVDA"], source=wp.SOURCE_CAPTERRA) == []
+
+
+def test_eid_for_known_entry():
+    assert wp.eid_for("NVDA") == 7633
+    assert wp.eid_for("AMD") == 15
+    assert wp.eid_for("IBM") == 354
+
+
+def test_eid_for_missing_returns_none():
+    assert wp.eid_for("ZZZZZ") is None
+
+
+def test_eid_for_sentinel_zero_returns_none():
+    assert wp.eid_for("ORCL") is None
+    assert wp.eid_for("ABNB") is None
+
+
+def test_eid_for_custom_registry():
+    reg = {"FOO": 42, "BAR": 0}
+    assert wp.eid_for("FOO", registry=reg) == 42
+    assert wp.eid_for("BAR", registry=reg) is None
+    assert wp.eid_for("BAZ", registry=reg) is None
+
+
+@pytest.mark.parametrize(
+    "html,expected_rating,expected_pattern",
+    [
+        # JSON-LD variant
+        (
+            '<script type="application/ld+json">'
+            '{"@type":"Product","aggregateRating":{"@type":"AggregateRating",'
+            '"ratingValue":"4.2","reviewCount":150}}</script>',
+            4.2,
+            "jsonld_ratingValue",
+        ),
+        # Legacy div average-rating variant
+        (
+            '<div class="average-rating">3.7</div><span>1,234 reviews</span>',
+            3.7,
+            "average_rating",
+        ),
+        # Embedded JSON variant
+        (
+            '<script>var data = {"rating": 4.5, "name": "Acme"}</script>',
+            4.5,
+            "embedded_rating_json",
+        ),
+        # Junk returns None
+        ("totally random html without any rating", None, None),
+        ("", None, None),
+    ],
+)
+def test_parse_capterra_rating(html, expected_rating, expected_pattern):
+    parsed = wp.parse_capterra_rating(html)
+    if expected_rating is None:
+        assert parsed is None
+    else:
+        assert parsed["rating"] == expected_rating
+        assert parsed["pattern"] == expected_pattern
+
+
+def test_parse_capterra_review_count():
+    html = (
+        '<script type="application/ld+json">'
+        '{"aggregateRating":{"ratingValue":"4.0","reviewCount":87}}'
+        '</script>'
+    )
+    parsed = wp.parse_capterra_rating(html)
+    assert parsed["rating"] == 4.0
+    assert parsed["review_count"] == 87
+
+
+def test_parse_capterra_review_count_text():
+    html = '<div class="average-rating">3.5</div><p>2,345 ratings</p>'
+    parsed = wp.parse_capterra_rating(html)
+    assert parsed["rating"] == 3.5
+    assert parsed["review_count"] == 2345
+
+
+def test_parse_capterra_out_of_range_rejected():
+    html = '{"ratingValue": "7.0"}'
+    assert wp.parse_capterra_rating(html) is None
+
+
+def test_month_snapshots_sentinel_eid_skips_canonical(monkeypatch):
+    """Ticker with eid=0 sentinel goes straight to family scan."""
+    calls = []
+
+    def fake_cdx(params):
+        calls.append(params["url"])
+        return [
+            [f"2008{m:02d}05000000", "http://www.glassdoor.com/Reviews/Oracle-Reviews.htm"]
+            for m in range(1, 7)
+        ]
+
+    monkeypatch.setattr(wp, "cdx_rows", fake_cdx)
+    months = wp.month_snapshots("ORCL", since="200801", until="200806")
+    # eid_for("ORCL") -> None, so canonical page was never queried.
+    assert not any("Reviews-E" in u for u in calls)
+    assert len(months) == 6

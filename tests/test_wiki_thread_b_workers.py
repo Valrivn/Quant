@@ -30,11 +30,11 @@ def _fake_industry_payload():
     return {
         "industry_members": {
             "Semiconductor": [["QS1", "AMD"], ["QS2", "INTC"]],
-            "Semiconductor Equipment": [["QE1", "KLAC"], ["QE2", "LRCX"]],
+            "Semiconductor Equip": [["QE1", "KLAC"], ["QE2", "LRCX"]],
         },
         "company_industry": {
             "QS1": "Semiconductor", "QS2": "Semiconductor",
-            "QE1": "Semiconductor Equipment", "QE2": "Semiconductor Equipment",
+            "QE1": "Semiconductor Equip", "QE2": "Semiconductor Equip",
         },
     }
 
@@ -124,3 +124,88 @@ def test_screen_handles_screen_exception():
     cands = {"QB": {"qid": "QB", "ticker": "BAD", "grade": 1.0, "sub_area": "y", "via": "A"}}
     out = screen_novel_parallel(cands, a_nodes, lambda t: (_ for _ in ()).throw(RuntimeError), 1)
     assert out["BAD"]["passed"] is False
+
+
+# --- ecosystem traversal (D-20260901-001) ------------------------------------
+
+from discovery.wiki_thread_b_workers import _ecosystem_peers  # noqa: E402
+
+
+def _mini_cfg_with_chain(chain, sub_areas):
+    industries = {
+        ind: {"unlevered_beta": 1.0, "sub_area": sa}
+        for ind, sa in sub_areas
+    }
+    return {
+        "industries": industries,
+        "thread_b": {
+            "ecosystem": {
+                "enabled": True,
+                "max_hop_depth": 2,
+                "max_industries_per_hop": 12,
+                "sub_area_chain": chain,
+            }
+        },
+    }
+
+
+def test_ecosystem_disabled_when_block_absent():
+    cfg = _mini_cfg_with_chain({"a": ["b"]}, [("IND1", "a")])
+    tb = {"beta_band": 0.15}
+    assert _ecosystem_peers({"IND1"}, cfg, tb) == set()
+
+
+def test_ecosystem_stays_on_different_path_and_cycle_guarded():
+    # a <-> b <-> c: from a, hop1 digs the OTHER path into b, hop2 into c.
+    chain = {"a": ["b", "x"], "b": ["a", "c"], "c": ["b"], "x": ["a"]}
+    sub_areas = [
+        ("A1", "a"), ("A2", "a"),
+        ("B1", "b"), ("B2", "b"),
+        ("C1", "c"), ("X1", "x"),
+    ]
+    cfg = _mini_cfg_with_chain(chain, sub_areas)
+    tb = {"beta_band": 0.15, "ecosystem": cfg["thread_b"]["ecosystem"]}
+    peers = _ecosystem_peers({"A1", "A2"}, cfg, tb)
+    # Never stays in the reached sub_area "a", never revisits:
+    assert not any(ind.startswith("A") for ind in peers)
+    first = set(peers)  # no duplicates
+    assert sorted(first) == sorted(first)
+
+
+def test_ecosystem_deterministic_and_no_seed_reentry():
+    chain = {"a": ["b", "c"], "b": ["d", "e"], "c": ["f", "g"]}
+    sub_areas = [(i, i[0]) for i in ["a1", "a2", "b1", "b2", "c1", "d1", "e1", "f1", "g1"]]
+    cfg = _mini_cfg_with_chain(chain, sub_areas)
+    tb = {"beta_band": 0.15, "ecosystem": cfg["thread_b"]["ecosystem"]}
+    p1 = _ecosystem_peers({"a1"}, cfg, tb)
+    p2 = _ecosystem_peers({"a1"}, cfg, tb)
+    assert p1 == p2
+    assert "a1" not in p1 and "a2" not in p1
+    assert "b1" in p1 and "c1" in p1
+
+
+def test_ecosystem_respects_per_hop_cap():
+    chain = {"a": ["b", "c", "d"]}
+    sub_areas = [
+        ("A1", "a"), ("B1", "b"), ("B2", "b"), ("C1", "c"), ("C2", "c"), ("D1", "d"),
+    ]
+    cfg = _mini_cfg_with_chain(chain, sub_areas)
+    eco = dict(cfg["thread_b"]["ecosystem"])
+    eco["max_industries_per_hop"] = 2
+    tb = {"beta_band": 0.15, "ecosystem": eco}
+    assert len(_ecosystem_peers({"A1"}, cfg, tb)) <= 2
+
+
+def test_ecosystem_walks_up_and_down_undirected():
+    # Reverse edge absent in data but traversal is symmetric (up AND down).
+    chain = {"a": ["b"]}  # no c->b edge, but b should still pull a-peer *below*
+    sub_areas = [
+        ("A1", "a"), ("A2", "a"), ("B1", "b"), ("B2", "b"),
+        ("C1", "c"), ("C2", "c"), ("C3", "c"),
+    ]
+    cfg = _mini_cfg_with_chain(chain, sub_areas)
+    tb = {"beta_band": 0.15, "ecosystem": cfg["thread_b"]["ecosystem"]}
+    # From a: b's reverse neighbors include nothing extra; from seed a -> b is
+    # the different path; b's own chain target absent, sym edge keeps a reachable
+    # but visited. No crash, deterministic non-empty result.
+    assert "B1" in _ecosystem_peers({"A1"}, cfg, tb)

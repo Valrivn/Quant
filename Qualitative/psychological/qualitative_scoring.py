@@ -226,6 +226,8 @@ class DoubleStandardizer:
 
     def _robust_z(self, value: float, history_or_peers: List[float]) -> float:
         arr = np.array(history_or_peers)
+        if len(arr) <= self.ddof:
+            return 0.0
         med = float(np.median(arr))
         abs_dev = np.abs(arr - med)
         mad = float(np.median(abs_dev))
@@ -233,7 +235,7 @@ class DoubleStandardizer:
             z = 0.6745 * (value - med) / mad
         else:
             sigma = float(np.std(arr, ddof=self.ddof))
-            if sigma == 0:
+            if sigma <= 0 or np.isnan(sigma):
                 return 0.0
             z = (value - med) / sigma
         return z

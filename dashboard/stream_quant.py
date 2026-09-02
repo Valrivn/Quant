@@ -54,47 +54,67 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # ----------------- LOCAL DATA & CONFIG -----------------
-DAMODARAN_DATA = [
-    {"industry": "Software (System & Application)", "unlevered_beta": 1.27, "ev_sales": 10.72},
-    {"industry": "Computer Services", "unlevered_beta": 0.85, "ev_sales": 7.50},
-    {"industry": "Information Services", "unlevered_beta": 0.90, "ev_sales": 5.20},
-    {"industry": "Interactive Media", "unlevered_beta": 1.15, "ev_sales": 6.80},
-    {"industry": "Retail (Internet)", "unlevered_beta": 1.21, "ev_sales": 2.50},
-    {"industry": "Semiconductor", "unlevered_beta": 1.35, "ev_sales": 8.20},
-    {"industry": "Semiconductor Equipment", "unlevered_beta": 1.30, "ev_sales": 7.50},
-    {"industry": "Computers/Peripherals", "unlevered_beta": 1.05, "ev_sales": 3.80},
-    {"industry": "Telecom Services", "unlevered_beta": 0.60, "ev_sales": 1.80},
-    {"industry": "Advertising", "unlevered_beta": 0.95, "ev_sales": 2.10},
-    {"industry": "Aerospace/Defense", "unlevered_beta": 0.82, "ev_sales": 1.50},
-    {"industry": "Air Transport", "unlevered_beta": 0.75, "ev_sales": 0.90},
-    {"industry": "Apparel", "unlevered_beta": 0.90, "ev_sales": 1.20},
-    {"industry": "Auto & Truck", "unlevered_beta": 0.70, "ev_sales": 0.80},
-    {"industry": "Beverage (Soft Drink)", "unlevered_beta": 0.65, "ev_sales": 3.50},
-    {"industry": "Chemical (Specialty)", "unlevered_beta": 0.92, "ev_sales": 1.90},
-    {"industry": "Drugs (Biotechnology)", "unlevered_beta": 1.35, "ev_sales": 6.50},
-    {"industry": "Drugs (Pharmaceutical)", "unlevered_beta": 0.98, "ev_sales": 3.20},
-    {"industry": "Electronics (General)", "unlevered_beta": 1.02, "ev_sales": 2.00},
-    {"industry": "Financial Services", "unlevered_beta": 0.85, "ev_sales": 3.00},
-    {"industry": "Hospitals/Healthcare Providers", "unlevered_beta": 0.68, "ev_sales": 1.10},
-    {"industry": "Hotel/Gaming", "unlevered_beta": 0.88, "ev_sales": 2.20},
-    {"industry": "Machinery", "unlevered_beta": 0.95, "ev_sales": 1.40},
-    {"industry": "Oil/Gas (Integrated)", "unlevered_beta": 0.78, "ev_sales": 1.10},
-    {"industry": "Real Estate (General)", "unlevered_beta": 0.55, "ev_sales": 4.50},
-    {"industry": "Restaurant/Dining", "unlevered_beta": 0.82, "ev_sales": 1.80},
-    {"industry": "Steel", "unlevered_beta": 1.05, "ev_sales": 0.80},
-    {"industry": "Utility (General)", "unlevered_beta": 0.45, "ev_sales": 2.20},
-]
+# Industry unlevered betas come from the LIVE Damodaran source via the
+# discovery/industry_beta loader (validated fail-closed). The dashboard carries
+# only the EV/Sales overrides that are NOT part of the source table.
+_EV_SALES_OVERRIDES = {
+    "Software (System & Application)": 10.72,
+    "Computer Services": 7.50,
+    "Information Services": 5.20,
+    "Entertainment": 6.80,
+    "Retail (General)": 2.50,
+    "Semiconductor": 8.20,
+    "Semiconductor Equip": 7.50,
+    "Computers/Peripherals": 3.80,
+    "Telecom. Services": 1.80,
+    "Advertising": 2.10,
+    "Aerospace/Defense": 1.50,
+    "Air Transport": 0.90,
+    "Apparel": 1.20,
+    "Auto & Truck": 0.80,
+    "Beverage (Soft)": 3.50,
+    "Chemical (Specialty)": 1.90,
+    "Drugs (Biotechnology)": 6.50,
+    "Drugs (Pharmaceutical)": 3.20,
+    "Electronics (General)": 2.00,
+    "Financial Svcs. (Non-bank & Insurance)": 3.00,
+    "Hospitals/Healthcare Facilities": 1.10,
+    "Hotel/Gaming": 2.20,
+    "Machinery": 1.40,
+    "Oil/Gas (Integrated)": 1.10,
+    "Real Estate (General/Diversified)": 4.50,
+    "Restaurant/Dining": 1.80,
+    "Steel": 0.80,
+    "Utility (General)": 2.20,
+}
+
+
+def _load_damodaran_data() -> list:
+    from discovery.industry_beta import load_industry_beta
+
+    cfg = load_industry_beta()
+    rows = []
+    for ind, entry in cfg["industries"].items():
+        rows.append({
+            "industry": ind,
+            "unlevered_beta": entry["unlevered_beta"],
+            "ev_sales": _EV_SALES_OVERRIDES.get(ind, 2.0),
+        })
+    return rows
+
+
+DAMODARAN_DATA = _load_damodaran_data()
 
 SECTOR_ETF_CANDIDATES = {
     "Semiconductor": ["SMH", "SOXX"],
+    "Semiconductor Equip": ["SMH", "SOXX"],
     "Software (System & Application)": ["IGV", "XSW"],
     "Computers/Peripherals": ["XLK", "IYW"],
     "Computer Services": ["XLK", "IYW"],
-    "Interactive Media": ["XLC", "FCOM"],
+    "Entertainment": ["XLC", "FCOM"],
     "Information Services": ["XLC", "IYW"],
-    "Retail (Internet)": ["XLY", "IBUY"],
     "Retail (General)": ["XLY", "XRT"],
-    "Financial Services": ["XLF", "IYF"],
+    "Financial Svcs. (Non-bank & Insurance)": ["XLF", "IYF"],
     "Oil/Gas (Integrated)": ["XLE", "VDE"],
     "Utility (General)": ["XLU", "IDU"],
     "Aerospace/Defense": ["ITA", "PPA"]
@@ -318,7 +338,7 @@ try:
                 presets = {
                     "MSFT": [{"segment": "Software (System & Application)", "revenue": 0.6}, {"segment": "Computer Services", "revenue": 0.4}],
                     "ORCL": [{"segment": "Computer Services", "revenue": 0.75}, {"segment": "Software (System & Application)", "revenue": 0.25}],
-                    "AMZN": [{"segment": "Retail (Internet)", "revenue": 0.8}, {"segment": "Computer Services", "revenue": 0.2}],
+                    "AMZN": [{"segment": "Retail (General)", "revenue": 0.8}, {"segment": "Computer Services", "revenue": 0.2}],
                     "NVDA": [{"segment": "Semiconductor", "revenue": 0.75}, {"segment": "Computers/Peripherals", "revenue": 0.25}],
                     "AVGO": [{"segment": "Semiconductor", "revenue": 0.6}, {"segment": "Software (System & Application)", "revenue": 0.4}],
                     "QCOM": [{"segment": "Semiconductor", "revenue": 0.8}, {"segment": "Information Services", "revenue": 0.2}],
@@ -428,7 +448,7 @@ for ticker in all_tickers:
                     {"segment": "Software (System & Application)", "revenue": 11000000000}
                 ],
                 "AMZN": [
-                    {"segment": "Retail (Internet)", "revenue": 480000000000},
+                    {"segment": "Retail (General)", "revenue": 480000000000},
                     {"segment": "Computer Services", "revenue": 90000000000}
                 ],
                 "NVDA": [

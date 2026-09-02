@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from typing import List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from collections import defaultdict
 from scraper.fintech_clients.base import FintechMessage
 
@@ -49,7 +49,7 @@ class DataFusionEngine:
             engagement = sum(msg.engagement.values())
             eng_weight = np.log1p(engagement) / 10.0
 
-            hours_old = (datetime.utcnow() - msg.created_at).total_seconds() / 3600
+            hours_old = (datetime.now(timezone.utc) - msg.created_at).total_seconds() / 3600
             recency_weight = np.exp(-hours_old / self.recency_half_life_hours)
 
             conf_weight = msg.metadata.get("extraction_confidence", 0.5)
@@ -84,7 +84,7 @@ class DataFusionEngine:
             "sources": list(set(m.source for m in messages)),
             "provenance": provenance,
             "category_breakdown": category_breakdown,
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
 
     def _compute_category_breakdown(self, messages: List[FintechMessage]) -> Dict:
