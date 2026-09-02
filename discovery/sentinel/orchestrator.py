@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 def as_of_date(cfg: Dict) -> str:
     drift = int(cfg.get("as_of_drift_days", 5))
-    return (pd.Timestamp.utcnow() - pd.Timedelta(days=drift)).strftime("%Y-%m-%d")
+    return (pd.Timestamp.now("UTC") - pd.Timedelta(days=drift)).strftime("%Y-%m-%d")
 
 
 def _ensure_fundamentals(conn, item, cfg, cik_resolver) -> int:

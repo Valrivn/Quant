@@ -83,12 +83,15 @@ def run_threads_parallel(
     }
 
     # Determine peer industries: same unlevered-beta band, different sub-area,
-    # derived locally from the config (no network).
+    # derived locally from the config (no network) -- optionally widened along
+    # the ecosystem sub_area_chain ("continue the path that is different",
+    # up AND down the stack) when thread_b.ecosystem.enabled.
     seed_industries = {
         ind for ind in resolved_ticker_industry.values()
         if _beta_known(ind, industry_beta_cfg)
     }
     peer_keys = _peer_industries(seed_industries, industry_beta_cfg, thread_b_cfg)
+    peer_keys |= _ecosystem_peers(seed_industries, industry_beta_cfg, thread_b_cfg)
     peer_labels = _wikidata_labels_for_peers(peer_keys, industry_beta_cfg)
 
     # Bounded peer-member fetch (network). Failure degrades to empty, never raising.
@@ -170,6 +173,69 @@ def _peer_industries(seed_industries: set, cfg: Optional[dict],
                 if anchor_sub and cand_sub and cand_sub == anchor_sub:
                     continue
             peers.add(cand)
+    return peers
+
+
+def _ecosystem_peers(seed_industries: set, cfg: Optional[dict],
+                     thread_b_cfg: dict) -> set:
+    """BFS along the ecosystem sub_area_chain, continuing the DIFFERENT path.
+
+    ``thread_b.ecosystem`` (validated fail-closed by the loader) declares:
+      enabled, max_hop_depth, max_industries_per_hop, sub_area_chain.
+    The chain edges are treated as UNDIRECTED so the traversal runs up AND down
+    the stack (software -> hardware -> chips/materials -> equipment -> ... and
+    back), never staying inside the already-reached sub_area(s). Deterministic:
+    sub_areas and industries are walked in sorted order, revisited sub_areas are
+    skipped (cycle protection), and each hop adds at most max_industries_per_hop
+    peers. Local computation only; never network.
+    """
+    if cfg is None or not seed_industries:
+        return set()
+    eco = thread_b_cfg.get("ecosystem")
+    if not isinstance(eco, dict) or not eco.get("enabled"):
+        return set()
+    chain = eco.get("sub_area_chain") or {}
+    max_depth = int(eco.get("max_hop_depth", 2))
+    per_hop = int(eco.get("max_industries_per_hop", 12))
+
+    start_subs = sorted(
+        s for s in (_canonical_sub_area_local(i, cfg) for i in seed_industries)
+        if s
+    )
+    if not start_subs:
+        return set()
+
+    peers: set = set()
+    visited: set = set(start_subs)
+    frontier: set = set(start_subs)
+    for hop in range(max_depth):
+        hop_added = 0
+        next_frontier: set = set()
+        for sub in sorted(frontier):
+            fwd = chain.get(sub, [])
+            rev = [k for k, targets in chain.items() if sub in targets]
+            for nbr in sorted(set(fwd) | set(rev)):
+                if nbr in visited or nbr in next_frontier:
+                    continue
+                cands = sorted(
+                    k for k, entry in cfg.get("industries", {}).items()
+                    if entry.get("sub_area") == nbr and k not in seed_industries
+                )
+                for cand in cands:
+                    if cand in peers:
+                        continue
+                    peers.add(cand)
+                    hop_added += 1
+                    if hop_added >= per_hop:
+                        break
+                if hop_added >= per_hop:
+                    break
+                next_frontier.add(nbr)
+            if hop_added >= per_hop:
+                break
+        frontier = next_frontier
+        if not frontier:
+            break
     return peers
 
 

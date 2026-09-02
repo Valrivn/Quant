@@ -36,6 +36,7 @@ UA = (
 )
 
 SOURCE_GLASSDOOR = "glassdoor"
+SOURCE_CAPTERRA = "capterra"
 
 # Resolved via Wayback CDX (verified 2026-08-30). `GLASSDOOR_PATH` is the
 # case-sensitive archived URL-key prefix that scopes each company's page
@@ -59,6 +60,16 @@ GLASSDOOR_PATH = {
     "DELL": "glassdoor.com/Reviews/Dell-Technologies",
     "SMCI": "glassdoor.com/Reviews/Super-Micro-Computer",
     "IBM": "glassdoor.com/Reviews/IBM",
+    "ORCL": "glassdoor.com/Reviews/Oracle",
+    "CSCO": "glassdoor.com/Reviews/Cisco-Systems",
+    "PANW": "glassdoor.com/Reviews/Palo-Alto-Networks",
+    "CDNS": "glassdoor.com/Reviews/Cadence-Design-Systems",
+    "SNPS": "glassdoor.com/Reviews/Synopsys",
+    "ADSK": "glassdoor.com/Reviews/Autodesk",
+    "NOW": "glassdoor.com/Reviews/ServiceNow",
+    "CRWD": "glassdoor.com/Reviews/CrowdStrike",
+    "SHOP": "glassdoor.com/Reviews/Shopify",
+    "ABNB": "glassdoor.com/Reviews/Airbnb",
 }
 
 GLASSDOOR_EIDS = {
@@ -66,7 +77,18 @@ GLASSDOOR_EIDS = {
     "GOOGL": 9079, "META": 40772, "TSLA": 43129, "AAPL": 1138, "AMZN": 6036,
     "QCOM": 640, "MU": 1648, "TSM": 4130, "CRM": 11159, "ADBE": 1090,
     "DELL": 1327, "SMCI": 7993, "IBM": 354,
+    # Unverified EIDs (eid=0 sentinel -> canonical page skipped, family scan used).
+    "ORCL": 0, "CSCO": 0, "PANW": 0, "CDNS": 0, "SNPS": 0,
+    "ADSK": 0, "NOW": 0, "CRWD": 0, "SHOP": 0, "ABNB": 0,
 }
+
+# Capterra: entries resolved via Wayback CDX on a live run (verified 2026-08-30).
+# Canonical URL shape: www.capterra.com/p/{eid}/{slug}/
+CAPTERRA_PATH: Dict[str, str] = {}
+CAPTERRA_EIDS: Dict[str, int] = {}
+
+_SOURCE_PATHS = {SOURCE_GLASSDOOR: GLASSDOOR_PATH, SOURCE_CAPTERRA: CAPTERRA_PATH}
+_SOURCE_EIDS = {SOURCE_GLASSDOOR: GLASSDOOR_EIDS, SOURCE_CAPTERRA: CAPTERRA_EIDS}
 
 _RATING_PATTERNS: List[Tuple[str, re.Pattern]] = [
     ("jsonld_ratingValue", re.compile(r'"ratingValue"\s*:\s*"?(\d+(?:\.\d+)?)"?', re.I)),
@@ -84,6 +106,18 @@ _REVIEW_COUNT_PATTERNS: List[Tuple[str, re.Pattern]] = [
 ]
 
 _MIN_HTML_LEN = 3000
+
+_CAPTERRA_RATING_PATTERNS: List[Tuple[str, re.Pattern]] = [
+    ("jsonld_ratingValue", re.compile(r'"ratingValue"\s*:\s*"?(\d+(?:\.\d+)?)"?', re.I)),
+    ("meta_ratingValue", re.compile(r'<meta[^>]+itemprop="ratingValue"[^>]+content="(\d+(?:\.\d+)?)"', re.I)),
+    ("average_rating", re.compile(r'average-rating[^>]*>\s*([\d.]+)\s*<', re.I)),
+    ("embedded_rating_json", re.compile(r'"rating"\s*:\s*([\d.]+)', re.I)),
+]
+
+_CAPTERRA_REVIEW_COUNT_PATTERNS: List[Tuple[str, re.Pattern]] = [
+    ("jsonld_reviewCount", re.compile(r'"reviewCount"\s*:\s*"?(\d+)"?', re.I)),
+    ("review_count_text", re.compile(r'(\d[\d,]+)\s*(?:reviews?|ratings?)', re.I)),
+]
 
 _SUBPAGE_RE = re.compile(r"_K[HO]|_IL|_IS|_IN\d")
 
@@ -113,30 +147,38 @@ def cdx_rows(params: dict, tries: int = 3) -> List[List[str]]:
     return []
 
 
-def list_tickers(include: Optional[List[str]] = None) -> List[str]:
-    """Tickers with a resolved archived Glassdoor path, filtered by ``include``."""
-    tickers = list(GLASSDOOR_PATH.keys())
+def list_tickers(include: Optional[List[str]] = None,
+                 source: str = SOURCE_GLASSDOOR) -> List[str]:
+    """Tickers with a resolved archived path for *source*, filtered by ``include``."""
+    path_reg = _SOURCE_PATHS.get(source, {})
+    tickers = list(path_reg.keys())
     if include:
         tickers = [t for t in tickers if t in include]
     return tickers
 
 
 def month_snapshots(ticker: str, since: Optional[str] = None,
-                    until: Optional[str] = None, sleep: float = 0.3) -> Dict[str, Tuple[str, str]]:
+                    until: Optional[str] = None, sleep: float = 0.3,
+                    source: str = SOURCE_GLASSDOOR) -> Dict[str, Tuple[str, str]]:
     """Map calendar months (YYYYMM) to the first archived snapshot in that month.
 
-    The canonical company review page (``glassdoor.com/Reviews/{Name}-Reviews-
-    E{id}.htm``) has a stable URL since 2008 and always renders the aggregate
-    rating, so it is the primary target (collapse=timestamp:6 -> one capture
-    per month). Tickers whose canonical page was sparsely archived fall back
-    to the whole page family, preferring company-level pages over job/location
-    subpages.
+    The canonical company review page has a stable URL and always renders the
+    aggregate rating, so it is the primary target (collapse=timestamp:6 -> one
+    capture per month). When the ticker has no verified EID the canonical page
+    is skipped and the whole page family is scanned instead. Tickers whose
+    canonical page was sparsely archived fall back to the whole page family,
+    preferring company-level pages over job/location subpages.
     """
-    canonical = f"{GLASSDOOR_PATH[ticker]}-Reviews-E{eid_for(ticker)}"
-    months = _scan_prefix(ticker, canonical, since, until, sleep)
-    if len(months) >= 12:
-        return months
-    family = _scan_prefix(ticker, GLASSDOOR_PATH[ticker], since, until, 0.0)
+    url_prefix = _SOURCE_PATHS[source][ticker]
+    eid = eid_for(ticker, registry=_SOURCE_EIDS[source])
+    if eid is not None:
+        canonical = f"{url_prefix}-Reviews-E{eid}"
+        months = _scan_prefix(ticker, canonical, since, until, sleep)
+        if len(months) >= 12:
+            return months
+    else:
+        months = {}
+    family = _scan_prefix(ticker, url_prefix, since, until, sleep if eid is None else 0.0)
     merged = dict(family)
     for mm, target in months.items():
         if mm not in merged or _subpage_weight(target[1]) >= _subpage_weight(merged[mm][1]):
@@ -170,8 +212,12 @@ def _scan_prefix(ticker: str, url_prefix: str, since: Optional[str],
     return months
 
 
-def eid_for(ticker: str) -> int:
-    return GLASSDOOR_EIDS[ticker]
+def eid_for(ticker: str, registry: Optional[Dict[str, int]] = None) -> Optional[int]:
+    reg = registry if registry is not None else GLASSDOOR_EIDS
+    val = reg.get(ticker)
+    if val is None or val == 0:
+        return None
+    return val
 
 
 def _subpage_weight(url: str) -> int:
@@ -233,6 +279,42 @@ def parse_glassdoor_rating(html: str) -> Optional[Dict]:
                 snippet = html[start:match.end() + 80]
                 review_count = None
                 for _, rc_pat in _REVIEW_COUNT_PATTERNS:
+                    rc = rc_pat.search(html)
+                    if rc:
+                        try:
+                            review_count = int(rc.group(1).replace(",", ""))
+                        except ValueError:
+                            review_count = None
+                        break
+                return {
+                    "rating": round(value, 2),
+                    "pattern": name,
+                    "snippet": snippet,
+                    "review_count": review_count,
+                }
+    return None
+
+
+def parse_capterra_rating(html: str) -> Optional[Dict]:
+    """Extract the aggregate Capterra rating (1-5) plus review count.
+
+    Tries every known markup generation (JSON-LD, schema.org meta, average-
+    rating divs, embedded JSON). Returns None when nothing validates in range.
+    """
+    if not html:
+        return None
+    for name, pattern in _CAPTERRA_RATING_PATTERNS:
+        match = pattern.search(html)
+        if match:
+            try:
+                value = float(match.group(1))
+            except (ValueError, IndexError):
+                continue
+            if 1.0 <= value <= 5.0:
+                start = max(0, match.start() - 80)
+                snippet = html[start:match.end() + 80]
+                review_count = None
+                for _, rc_pat in _CAPTERRA_REVIEW_COUNT_PATTERNS:
                     rc = rc_pat.search(html)
                     if rc:
                         try:

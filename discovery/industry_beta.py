@@ -90,7 +90,7 @@ def load_industry_beta(path: Optional[str] = None) -> Dict[str, Any]:
         if not isinstance(tb, dict):
             raise IndustryBetaConfigError("thread_b must be a mapping")
         _check_contains_keys(
-            tb, {"beta_band", "prefer_different_sub_area"}, "thread_b"
+            tb, {"beta_band", "prefer_different_sub_area", "ecosystem"}, "thread_b"
         )
         for k in ("beta_band",):
             if k in tb:
@@ -98,6 +98,54 @@ def load_industry_beta(path: Optional[str] = None) -> Dict[str, Any]:
                 _check_nan(v, f"thread_b.{k}")
                 if not isinstance(v, (int, float)) or v <= 0:
                     raise IndustryBetaConfigError(f"thread_b.{k} must be > 0")
+
+        if "ecosystem" in tb:
+            eco = tb["ecosystem"]
+            if not isinstance(eco, dict):
+                raise IndustryBetaConfigError("thread_b.ecosystem must be a mapping")
+            _check_contains_keys(
+                eco,
+                {"enabled", "max_hop_depth", "max_industries_per_hop", "sub_area_chain"},
+                "thread_b.ecosystem",
+            )
+            if "enabled" in eco and not isinstance(eco["enabled"], bool):
+                raise IndustryBetaConfigError("thread_b.ecosystem.enabled must be a bool")
+            for k in ("max_hop_depth", "max_industries_per_hop"):
+                if k in eco:
+                    v = eco[k]
+                    if not isinstance(v, int) or isinstance(v, bool) or v < 1:
+                        raise IndustryBetaConfigError(
+                            f"thread_b.ecosystem.{k} must be an int >= 1"
+                        )
+            if "sub_area_chain" in eco:
+                chain = eco["sub_area_chain"]
+                if not isinstance(chain, dict):
+                    raise IndustryBetaConfigError(
+                        "thread_b.ecosystem.sub_area_chain must be a mapping"
+                    )
+                declared = {
+                    str(entry.get("sub_area"))
+                    for entry in ind.values()
+                    if isinstance(entry, dict) and entry.get("sub_area")
+                }
+                declared |= {
+                    str(v) for v in cfg["sub_area_aliases"].values()
+                } if isinstance(cfg.get("sub_area_aliases"), dict) else set()
+                for src, targets in chain.items():
+                    if src not in declared:
+                        raise IndustryBetaConfigError(
+                            f"thread_b.ecosystem.sub_area_chain.{src} is not a declared sub_area"
+                        )
+                    if not isinstance(targets, list) or not targets:
+                        raise IndustryBetaConfigError(
+                            f"thread_b.ecosystem.sub_area_chain.{src} must be a non-empty list"
+                        )
+                    for tgt in targets:
+                        if tgt not in declared:
+                            raise IndustryBetaConfigError(
+                                f"thread_b.ecosystem.sub_area_chain.{src} target {tgt!r} "
+                                "is not a declared sub_area"
+                            )
 
     return cfg
 
