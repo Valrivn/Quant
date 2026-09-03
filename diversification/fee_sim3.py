@@ -83,6 +83,7 @@ from diversification.sleeves import (
     P3_TICKERS,
     SLEEVE_BOUNDS,
     SLEEVES,
+    pit_tickers_for_date,
 )
 
 START = "2000-01-01"
@@ -156,6 +157,10 @@ def sleeve_target(date, rets, spread_series, credit_ratio, within_fx):
 
     Uses the FRED BAA10Y spread classifier when FRED data is present; otherwise
     the price-based HYG/LQD credit proxy fallback (documented degradation).
+
+    PIT (point-in-time) universe: at each rebalance date, tickers are filtered
+    to only those in the PIT universe as of that date, eliminating survivorship
+    bias from the sleeve allocation (Decision 2: Static PIT snapshot).
     """
     equity = rets.get("SPY", pd.Series(dtype=float))
     if spread_series is not None and not spread_series.empty:
@@ -165,7 +170,9 @@ def sleeve_target(date, rets, spread_series, credit_ratio, within_fx):
     sleeve_t = macro_target_weights(state)
     target = {}
     for sleeve, sw in sleeve_t.items():
-        tickers = [t for t in SLEEVES[sleeve] if t in rets.columns]
+        # PIT filter: only tickers in the universe as of this rebalance date
+        tickers = pit_tickers_for_date(SLEEVES[sleeve], date)
+        tickers = [t for t in tickers if t in rets.columns]
         avail = [t for t in tickers if _has_price(rets, t, date)]
         if not avail:
             continue
@@ -421,7 +428,9 @@ def run_sim():
         for sleeve, sw in sleeve_t.items():
             if sleeve == "equity":
                 continue
-            tickers = [t for t in SLEEVES[sleeve] if t in rets.columns]
+            # PIT filter: only tickers in the universe as of this date
+            tickers = pit_tickers_for_date(SLEEVES[sleeve], date)
+            tickers = [t for t in tickers if t in rets.columns]
             avail = [t for t in tickers if _has_price(rets, t, date)]
             if not avail:
                 continue
@@ -472,7 +481,9 @@ def run_sim():
             return None, {"state": "n/a"}
         sleeve_ret = {}
         for s in sleeve_names:
-            cols = [t for t in SLEEVES[s] if t in avail_all]
+            # PIT filter: only tickers in the universe as of this date
+            cols = pit_tickers_for_date(SLEEVES[s], date)
+            cols = [t for t in cols if t in avail_all]
             if not cols:
                 continue
             sleeve_ret[s] = window[cols].sum(axis=1) / len(cols)
@@ -486,7 +497,9 @@ def run_sim():
             return None, {"state": "n/a"}
         target = {}
         for i, s in enumerate(sleeve_names):
-            cols = [t for t in SLEEVES[s] if t in avail_all]
+            # PIT filter: only tickers in the universe as of this date
+            cols = pit_tickers_for_date(SLEEVES[s], date)
+            cols = [t for t in cols if t in avail_all]
             for t in cols:
                 target[t] = wv[i] / len(cols)
         return target, {"state": "minvar"}

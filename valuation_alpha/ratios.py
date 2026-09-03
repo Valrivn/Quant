@@ -1,9 +1,17 @@
 """Lifecycle metric computation and cross-sectional peer statistics."""
 
+import logging
+
 import numpy as np
 import pandas as pd
+from sklearn.covariance import LedoitWolf
 
 from Quantitative.stochastic.markov_lifecycle import LifecycleMetrics
+
+logger = logging.getLogger(__name__)
+
+_COND_THRESHOLD = 1e12
+_RIDGE_EPS = 1e-6
 
 _METRIC_KEYS = [
     "reinvestment_rate",
@@ -189,6 +197,19 @@ def mahalanobis_state(metrics_by_ticker: dict, metric_keys: list) -> pd.DataFram
         if np.linalg.matrix_rank(S) < len(metric_keys):
             dist = np.sqrt(np.sum(Z ** 2, axis=1))
         else:
+            cond = np.linalg.cond(S)
+            if cond > _COND_THRESHOLD:
+                logger.warning(
+                    "Mahalanobis covariance condition number %.2e exceeds "
+                    "threshold %.0e — applying shrinkage.",
+                    cond,
+                    _COND_THRESHOLD,
+                )
+                try:
+                    lw = LedoitWolf().fit(S)
+                    S = lw.covariance_
+                except Exception:
+                    S = S + _RIDGE_EPS * np.eye(S.shape[0])
             Sinv = np.linalg.pinv(S)
             dist = np.sqrt(np.einsum("ij,jk,ik->i", Z, Sinv, Z))
         return pd.DataFrame({"mahalanobis": dist}, index=tickers)

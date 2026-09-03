@@ -19,6 +19,40 @@ logger = logging.getLogger(__name__)
 RNG_SEED = 42
 
 
+def _compute_var_cvar(values: List[float], percentile: float) -> Tuple[float, float]:
+    """Compute Value at Risk and Conditional VaR at a given percentile.
+
+    VaR = the value at the given percentile of the distribution.
+    CVaR = the mean of all values at or below VaR (expected shortfall).
+    """
+    arr = np.array(values)
+    var = float(np.percentile(arr, percentile))
+    tail = arr[arr <= var]
+    cvar = float(tail.mean()) if len(tail) > 0 else var
+    return var, cvar
+
+
+def _compute_ulcer_maxdd(values: List[float]) -> Tuple[float, float]:
+    """Compute Ulcer Index and Maximum Drawdown from a value trajectory.
+
+    Treats the values array as an ordered trajectory (simulation index order).
+    Drawdown at point i = (value_i - peak_up_to_i) / peak_up_to_i  (negative).
+    Ulcer Index = sqrt(mean(drawdown^2)).
+    Max Drawdown = min(drawdown) (most negative value).
+    """
+    arr = np.array(values, dtype=float)
+    if len(arr) < 2:
+        return 0.0, 0.0
+    running_peak = np.maximum.accumulate(arr)
+    # Avoid division by zero: where peak is zero, drawdown is zero
+    with np.errstate(divide="ignore", invalid="ignore"):
+        drawdowns = np.where(running_peak > 0, (arr - running_peak) / running_peak, 0.0)
+    drawdowns = np.nan_to_num(drawdowns, nan=0.0)
+    ulcer = float(np.sqrt(np.mean(drawdowns ** 2)))
+    max_dd = float(drawdowns.min())  # most negative drawdown (always <= 0)
+    return ulcer, max_dd
+
+
 @dataclass
 class MonteCarloInput:
     ticker: str
@@ -101,6 +135,13 @@ class MonteCarloResult:
     lifecycle_state: str = ""
     lifecycle_projected_state: str = ""
     lifecycle_entropy: float = 0.0
+    # Risk metrics
+    var_95: float = 0.0
+    cvar_95: float = 0.0
+    var_99: float = 0.0
+    cvar_99: float = 0.0
+    ulcer_index: float = 0.0
+    max_drawdown: float = 0.0
     source_weights_snapshot: Optional[Dict[str, float]] = None
     computed_at: str = field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
@@ -108,15 +149,25 @@ class MonteCarloResult:
 
 
 class MonteCarloEngine:
-    def __init__(self, config_dict: Optional[dict] = None):
+    def __init__(
+        self,
+        config_dict: Optional[dict] = None,
+        rng_seed: int = RNG_SEED,
+    ):
         self.config = config_dict or load_hybrid_config()
         self.mc_config = self.config.get("monte_carlo", {})
-        random.seed(RNG_SEED)
-        np.random.seed(RNG_SEED)
+        self.rng_seed = rng_seed
 
     @staticmethod
     def _clamp_growth(g: float) -> float:
-        return max(-0.50, min(0.50, g))
+        # 0.5th–99.5th pctile of CRSP 10-year trailing revenue growth
+        return max(-0.35, min(0.40, g))
+
+    def _clamp_growth_cfg(self, g: float) -> float:
+        """Configurable growth clamp. Bounds from monte_carlo.growth_bounds
+        in the hybrid config, falling back to empirical defaults."""
+        bounds = self.mc_config.get("growth_bounds", (-0.35, 0.40))
+        return max(bounds[0], min(bounds[1], g))
 
     @staticmethod
     def _compute_eva_spread(roic: float, wacc: float) -> float:
@@ -152,7 +203,7 @@ class MonteCarloEngine:
             else:
                 margin += magnitude
 
-        growth = self._clamp_growth(growth)
+        growth = self._clamp_growth_cfg(growth)
         margin = max(0.01, min(0.60, margin))
 
         return growth, margin, shock_applied, total_shocks
@@ -252,14 +303,22 @@ class MonteCarloEngine:
         )
 
         # Compute FCF penalty vector (graded, not binary)
+        # Uses LGD from shock_result to modulate severity — avoids re-running
+        # a second Bernoulli trial inside compute_fcf_vector_penalty, which
+        # could diverge from the already-resolved shock_result.
         if shock_result.shock_occurred:
-            fcf_penalty = bernoulli.compute_fcf_vector_penalty(
-                icr=input_data.interest_coverage_ratio,
-                n_years=input_data.projection_years,
-                supplier_concentration=input_data.supplier_concentration,
-                geopolitical_stress_factor=input_data.geopolitical_stress_factor,
-                shock_severity=1.0,
-            )
+            lgd = shock_result.lgd
+            base_penalty = shock_result.penalty_multiplier
+            # Blend: effective penalty reflects both the multiplier AND the
+            # LGD magnitude.  severity_scale is a knob for calibration.
+            severity_scale = 1.0
+            effective_penalty = 1.0 - (1.0 - base_penalty) * (1.0 - lgd * severity_scale)
+            # Recovery trajectory (matches bernoulli_shock_filter.py)
+            recovery_curve = [1.0, 0.6, 0.3, 0.1]
+            fcf_penalty = [
+                effective_penalty * recovery_curve[min(year, len(recovery_curve) - 1)]
+                for year in range(input_data.projection_years)
+            ]
         else:
             fcf_penalty = [1.0] * input_data.projection_years
 
@@ -318,7 +377,7 @@ class MonteCarloEngine:
         sim_sc = np.random.lognormal(np.log(mu_SC), sigma_SC)
 
         expected_growth = input_data.reinvestment_rate * input_data.roic
-        growth = self._clamp_growth(
+        growth = self._clamp_growth_cfg(
             np.random.normal(expected_growth, input_data.expected_growth_std)
         )
 
@@ -393,7 +452,13 @@ class MonteCarloEngine:
         catastrophes = 0
         bernoulli_shocks = 0
         poisson_total = 0
-        for _ in range(n):
+
+        base_ss = np.random.SeedSequence(self.rng_seed)
+        child_seeds = base_ss.spawn(n)
+        for i, child_seed in enumerate(child_seeds):
+            seed_val = int(child_seed.generate_state(1)[0])
+            np.random.seed(seed_val)
+            random.seed(seed_val)
             run = self._simulate_single(input_data)
             runs.append(run)
             if run.macro_shock_applied:
@@ -449,6 +514,11 @@ class MonteCarloEngine:
             positive_eva_prob, mean_val, median_val, std_val
         )
 
+        # Risk metrics from simulation value distribution
+        var_95, cvar_95 = _compute_var_cvar(values, 5.0)
+        var_99, cvar_99 = _compute_var_cvar(values, 1.0)
+        ulcer_idx, max_dd = _compute_ulcer_maxdd(values)
+
         return MonteCarloResult(
             ticker=input_data.ticker,
             n_simulations=n,
@@ -476,6 +546,12 @@ class MonteCarloEngine:
             lifecycle_state=markov_result.current_state.value,
             lifecycle_projected_state=markov_result.projected_state.value,
             lifecycle_entropy=markov_result.transition_volatility,
+            var_95=var_95,
+            cvar_95=cvar_95,
+            var_99=var_99,
+            cvar_99=cvar_99,
+            ulcer_index=ulcer_idx,
+            max_drawdown=max_dd,
             source_weights_snapshot=source_weights,
         )
 

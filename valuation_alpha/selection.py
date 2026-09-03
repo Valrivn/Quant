@@ -140,7 +140,8 @@ def rank_candidates(
         prices = prices.pct_change()
     for cand in candidates:
         port = portfolio_returns(prices, cand["weights"])
-        port_net = apply_slippage(port, slippage=0.005)
+        w_df = pd.DataFrame(cand["weights"], index=port.index)
+        port_net = apply_slippage(port, weights=w_df, slippage=0.005)
         alpha_res = ff5_residual_alpha(port_net, factors, horizon_days=horizon_days)
         if alpha_res is None:
             continue

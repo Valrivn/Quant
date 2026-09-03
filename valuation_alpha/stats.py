@@ -25,14 +25,28 @@ def _block_indices(n: int, block_len: int, rng) -> np.ndarray:
 
 
 def _bootstrap_aligned(returns, factors, block_len, rng):
+    aligned = align_factors(returns, factors)
+    # When factors are at coarser (monthly) frequency, resample returns to
+    # monthly via geometric linking so the block bootstrap operates on a
+    # consistent frequency.
+    if len(aligned) > 0:
+        a_dates = pd.DatetimeIndex(aligned.index)
+        a_gaps = a_dates.to_series().diff().dropna()
+        is_monthly = bool(a_gaps.empty) or float(a_gaps.median().days) > 10
+    else:
+        is_monthly = False
+    if is_monthly:
+        returns = returns.resample("ME").apply(lambda x: (1 + x).prod() - 1)
+        block_len = max(block_len // 21, 1)
+
     if isinstance(returns, pd.Series):
-        df = pd.concat([returns.rename("ret"), align_factors(returns, factors)], axis=1).dropna()
+        df = pd.concat([returns.rename("ret"), aligned], axis=1).dropna()
         if len(df) == 0:
             return returns.iloc[:0], pd.DataFrame(columns=factors.columns)
         idx = _block_indices(len(df), block_len, rng)
         boot = df.iloc[idx].reset_index(drop=True)
         return boot["ret"], boot[factors.columns]
-    df = pd.concat([returns, align_factors(returns, factors)], axis=1).dropna()
+    df = pd.concat([returns, aligned], axis=1).dropna()
     if len(df) == 0:
         return returns.iloc[:0], pd.DataFrame(columns=factors.columns)
     idx = _block_indices(len(df), block_len, rng)
@@ -141,7 +155,8 @@ def reality_check_mc(
     best_observed = -np.inf
     for cand in candidates:
         port = portfolio_returns(returns_df, cand["weights"])
-        port_net = apply_slippage(port, slippage=0.005)
+        w_df = pd.DataFrame(cand["weights"], index=port.index)
+        port_net = apply_slippage(port, weights=w_df, slippage=0.005)
         a = ff5_residual_alpha(port_net, factors, horizon_days=horizon_days)
         if a is not None:
             best_observed = max(best_observed, a["alpha_annualized"])
@@ -151,7 +166,8 @@ def reality_check_mc(
         mx = -np.inf
         for cand in candidates:
             port = portfolio_returns(br, cand["weights"])
-            port_net = apply_slippage(port, slippage=0.005)
+            w_df = pd.DataFrame(cand["weights"], index=port.index)
+            port_net = apply_slippage(port, weights=w_df, slippage=0.005)
             a = ff5_residual_alpha(port_net, bf, horizon_days=horizon_days)
             if a is not None:
                 mx = max(mx, a["alpha_annualized"])

@@ -1,4 +1,11 @@
-"""Data layer for the diversification sleeve: price and FRED series fetching."""
+"""Data layer for the diversification sleeve: price and FRED series fetching.
+
+PIT (point-in-time) universe support eliminates survivorship bias by filtering
+tickers to only those that were in the universe at each rebalance date.
+The ``pit_universe`` module loads quarterly snapshots from
+``data/pit_sp500_constituents.json`` and exposes
+``pit_tickers_for_date(tickers, as_of)`` for upstream consumers.
+"""
 
 import json
 import logging
@@ -13,6 +20,124 @@ import yfinance as yf
 from Quantitative.shared.fred_scraper import FREDScraper
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# PIT (point-in-time) universe — survivorship bias elimination
+# ---------------------------------------------------------------------------
+
+_PIT_DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "pit_sp500_constituents.json"
+_pit_cache: dict | None = None
+
+
+def _load_pit_data() -> dict:
+    """Load the PIT constituent snapshots from disk (cached after first read).
+
+    The file maps quarter-end date strings (YYYY-MM-DD) to lists of ticker
+    symbols that were in the universe as of that date.  On any load error,
+    returns an empty dict (degrades gracefully — callers fall back to the full
+    ticker list).
+    """
+    global _pit_cache
+    if _pit_cache is not None:
+        return _pit_cache
+    if not _PIT_DATA_PATH.exists():
+        logger.warning("PIT data file not found: %s — falling back to full universe", _PIT_DATA_PATH)
+        _pit_cache = {}
+        return _pit_cache
+    try:
+        with open(_PIT_DATA_PATH, "r") as fh:
+            data = json.load(fh)
+        # Strip metadata keys (those starting with _)
+        snapshots = {k: v for k, v in data.items() if not k.startswith("_")}
+        _pit_cache = snapshots
+        logger.debug("Loaded PIT snapshots: %d quarter-ends", len(snapshots))
+    except Exception as exc:
+        logger.error("Failed to load PIT data from %s: %s", _PIT_DATA_PATH, exc)
+        _pit_cache = {}
+    return _pit_cache
+
+
+def _quarter_end_date(dt) -> str:
+    """Return the quarter-end date string (YYYY-MM-DD) that contains *dt*.
+
+    Uses the standard finance convention:
+      Q1: Jan-Mar -> quarter-end 03-31
+      Q2: Apr-Jun -> quarter-end 06-30
+      Q3: Jul-Sep -> quarter-end 09-30
+      Q4: Oct-Dec -> quarter-end 12-31
+
+    If dt is already a quarter-end in the PIT file, it is returned directly.
+    """
+    ts = pd.Timestamp(dt)
+    q = (ts.month - 1) // 3
+    ends = {0: (3, 31), 1: (6, 30), 2: (9, 30), 3: (12, 31)}
+    m, d = ends[q]
+    qe = pd.Timestamp(ts.year, m, d)
+    return qe.strftime("%Y-%m-%d")
+
+
+def pit_quarter_ends() -> list:
+    """Return sorted list of quarter-end date strings in the PIT file."""
+    data = _load_pit_data()
+    return sorted(data.keys())
+
+
+def pit_tickers_for_date(tickers: list, as_of) -> list:
+    """Filter *tickers* to only those present in the PIT universe at *as_of*.
+
+    Parameters
+    ----------
+    tickers : list[str]
+        The candidate ticker list (e.g. P3_TICKERS or SLEEVES values).
+    as_of : str or Timestamp
+        The reference date (rebalance date).  The most recent quarter-end
+        <= as_of is used as the snapshot.
+
+    Returns
+    -------
+    list[str]
+        Subset of *tickers* that were in the PIT universe.  If no PIT data
+        is available or *as_of* is before the earliest snapshot, returns the
+        original *tickers* unchanged (graceful degradation — no survivorship
+        bias fix, but also no breakage).
+
+    Notes
+    -----
+    MVP: The synthetic PIT file includes ALL ETF proxies for ALL dates, so
+    this is effectively a no-op for the ETF sleeve simulation.  Once real
+    S&P 500 constituent data is loaded (TODO: replace with
+    github.com/fja05680/sp500 or WRDS/Compustat), this function will
+    actually filter out tickers that weren't in the index as of each date.
+    """
+    data = _load_pit_data()
+    if not data:
+        # No PIT data available — degrade gracefully, return all tickers.
+        return tickers
+
+    qe_str = _quarter_end_date(as_of)
+    sorted_dates = sorted(data.keys())
+
+    # Find the most recent quarter-end <= as_of
+    snapshot = None
+    for d in sorted_dates:
+        if d <= qe_str:
+            snapshot = data[d]
+        else:
+            break
+
+    if snapshot is None:
+        # as_of is before the earliest PIT snapshot — degrade gracefully.
+        logger.debug("as_of %s is before earliest PIT snapshot %s; using full ticker list",
+                     as_of, sorted_dates[0] if sorted_dates else "none")
+        return tickers
+
+    pit_set = set(snapshot)
+    filtered = [t for t in tickers if t in pit_set]
+    if len(filtered) < len(tickers):
+        dropped = set(tickers) - pit_set
+        logger.info("PIT filter at %s: %d -> %d tickers (dropped: %s)",
+                     qe_str, len(tickers), len(filtered), sorted(dropped))
+    return filtered
 
 SLEEVES = {
     "corporate_bonds": ["VCSH", "VCIT"],
@@ -185,6 +310,35 @@ def fetch_sleeve_prices(tickers: list, start: str, end: str) -> pd.DataFrame:
     # Rename columns back to prefixed names
     close = close.rename(columns=clean_map)
     return close
+
+
+def pit_aware_sleeve_prices(tickers: list, start: str, end: str,
+                            as_of: str | None = None) -> pd.DataFrame:
+    """Fetch daily close prices for *tickers*, filtered through the PIT universe.
+
+    If *as_of* is provided, tickers not in the PIT universe at that date are
+    excluded before the yfinance download — preventing look-ahead into
+    constituents that weren't yet in the index.  This is the primary
+    survivorship-bias elimination hook for the simulation pipeline.
+
+    Parameters
+    ----------
+    tickers : list[str]
+        Candidate tickers (e.g. P3_TICKERS).
+    start, end : str
+        Price window (YYYY-MM-DD).
+    as_of : str or None
+        Reference date for PIT filtering.  If None, no PIT filtering is
+        applied (equivalent to calling fetch_sleeve_prices directly).
+
+    Returns
+    -------
+    pd.DataFrame
+        Daily close prices indexed by date, one column per surviving ticker.
+    """
+    if as_of is not None:
+        tickers = pit_tickers_for_date(tickers, as_of)
+    return fetch_sleeve_prices(tickers, start, end)
 
 
 def fetch_dividend_history(tickers: list, start: str, end: str, cache_dir: Path = None) -> dict:

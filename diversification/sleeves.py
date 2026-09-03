@@ -17,6 +17,14 @@ Sleeve proxies chosen from public research (2026):
 - corporate bonds: VCSH (short IG) + VCIT (intermediate IG), both low-cost.
 - equity: SPY (megacap sleeve proxy for the Phase-1 sim; the S&P600 relative-
   moat sleeve is Phase-2 / opportunistic-deferred).
+
+PIT (point-in-time) universe support:
+  ``pit_tickers_for_date`` filters any ticker list to only those in the PIT
+  universe as of a given date, eliminating survivorship bias.  The synthetic
+  MVP file (``data/pit_sp500_constituents.json``) includes all ETF proxies for
+  all dates — no actual filtering happens yet, but the plumbing is in place.
+  TODO: replace with real S&P 500 historical constituents for genuine
+  survivorship-bias elimination.
 """
 
 SLEEVES = {
@@ -98,6 +106,12 @@ DIVIDEND_EXCLUDED_KEYWORDS = ("REIT", "BDC", "MLP", "REALTY", "Real Estate")
 DIVIDEND_EXCLUDED_TICKERS = ("O",)
 
 ALL_TICKERS = sorted({t for ts in SLEEVES.values() for t in ts})
+
+# ---------------------------------------------------------------------------
+# PIT re-export: ``pit_tickers_for_date`` is the primary survivorship-bias
+# elimination hook.  Import from sleeves to keep the API surface tidy.
+# ---------------------------------------------------------------------------
+from diversification.datastore import pit_tickers_for_date  # noqa: E402, F401
 
 # Phase-3 (D-20260803-005) price universe: the four-sleeve allocator adds a
 # small/mid sleeve (MDY midcap, IWM smallcap proxies, pre-registered; kept under

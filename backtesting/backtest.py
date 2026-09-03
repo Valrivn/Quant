@@ -16,6 +16,37 @@ from config import CATEGORY_WEIGHTS, SUBREDDIT_TAXONOMY
 logger = logging.getLogger(__name__)
 
 
+def _compute_var_cvar(returns: pd.Series, percentile: float) -> tuple:
+    """Compute Value at Risk and Conditional VaR from a returns Series.
+
+    VaR = value at the given percentile (e.g. 5th for VaR-95).
+    CVaR = mean of returns at or below VaR (expected shortfall).
+    """
+    var = float(np.percentile(returns.values, percentile))
+    tail = returns.values[returns.values <= var]
+    cvar = float(tail.mean()) if len(tail) > 0 else var
+    return var, cvar
+
+
+def _compute_ulcer_maxdd(returns: pd.Series) -> tuple:
+    """Compute Maximum Drawdown and Ulcer Index from daily returns.
+
+    Drawdown is derived from cumulative returns: cum = (1+r).cumprod().
+    Ulcer Index = sqrt(mean(drawdown^2)).
+    Max Drawdown = min drawdown (most negative).
+    """
+    if returns.empty or returns.std() < 1e-15:
+        return 0.0, 0.0
+    cum = (1 + returns).cumprod()
+    running_peak = cum.cummax()
+    with np.errstate(divide="ignore", invalid="ignore"):
+        drawdowns = np.where(running_peak > 0, (cum - running_peak) / running_peak, 0.0)
+    drawdowns = np.nan_to_num(drawdowns, nan=0.0)
+    ulcer = float(np.sqrt(np.mean(drawdowns ** 2)))
+    max_dd = float(drawdowns.min())
+    return ulcer, max_dd
+
+
 def fetch_historical_returns(tickers: List[str], start: str, end: str) -> pd.DataFrame:
     """Fetch daily returns for tickers between dates (inclusive). Returns DataFrame indexed by date."""
     if not tickers:
@@ -74,7 +105,7 @@ def run_walk_forward_backtest(
 
     df = _load_aggregations(lookback_days)
     if df is None or df.empty:
-        return {"ic": 0.0, "sharpe": 0.0, "hit_rate": 0.0, "returns": []}
+        return {"ic": 0.0, "sharpe": 0.0, "hit_rate": 0.0, "max_drawdown": 0.0, "ulcer_index": 0.0, "var_95": 0.0, "cvar_95": 0.0, "returns": []}
 
     df = df.copy()
     if "weighted_sentiment" not in df.columns:
@@ -94,7 +125,7 @@ def run_walk_forward_backtest(
 
     active = df[df["combo_w"] > 0]
     if active.empty:
-        return {"ic": 0.0, "sharpe": 0.0, "hit_rate": 0.0, "returns": []}
+        return {"ic": 0.0, "sharpe": 0.0, "hit_rate": 0.0, "max_drawdown": 0.0, "ulcer_index": 0.0, "var_95": 0.0, "cvar_95": 0.0, "returns": []}
 
     active = active.copy()
     active["predicted"] = active["weighted_sentiment"] * active["combo_w"]
@@ -104,20 +135,21 @@ def run_walk_forward_backtest(
     pred_pivot = grouped.pivot_table(
         index="date", columns="ticker", values="predicted_sentiment", aggfunc="mean"
     ).fillna(0.0)
+    # Ensure date index is DatetimeIndex (SQLite returns strings; yfinance returns datetime)
+    pred_pivot.index = pd.to_datetime(pred_pivot.index)
 
     tickers = list(pred_pivot.columns)
-    start = (datetime.strptime(str(pred_pivot.index.min()), "%Y-%m-%d")).strftime("%Y-%m-%d")
-    end = (datetime.strptime(str(pred_pivot.index.max()), "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    start = pred_pivot.index.min().strftime("%Y-%m-%d")
+    end = (pred_pivot.index.max() + timedelta(days=1)).strftime("%Y-%m-%d")
 
     returns = fetch_historical_returns(tickers, start, end)
     if returns is None or returns.empty:
-        return {"ic": 0.0, "sharpe": 0.0, "hit_rate": 0.0, "returns": []}
+        return {"ic": 0.0, "sharpe": 0.0, "hit_rate": 0.0, "max_drawdown": 0.0, "ulcer_index": 0.0, "var_95": 0.0, "cvar_95": 0.0, "returns": []}
 
     returns.index = pd.to_datetime(returns.index)
-    pred_dates = pd.to_datetime(pred_pivot.index)
-    common = pred_dates[pred_dates.isin(returns.index)]
+    common = pred_pivot.index[pred_pivot.index.isin(returns.index)]
     if common.empty:
-        return {"ic": 0.0, "sharpe": 0.0, "hit_rate": 0.0, "returns": []}
+        return {"ic": 0.0, "sharpe": 0.0, "hit_rate": 0.0, "max_drawdown": 0.0, "ulcer_index": 0.0, "var_95": 0.0, "cvar_95": 0.0, "returns": []}
 
     P = pred_pivot.loc[common].to_numpy(dtype=float)
     R = returns.loc[common, tickers].to_numpy(dtype=float)
@@ -133,9 +165,13 @@ def run_walk_forward_backtest(
     if not np.isfinite(ic):
         ic = 0.0
 
-    positions = np.sign(P)
-    daily_ret = (positions * R).mean(axis=1)
-    daily_ret = pd.Series(daily_ret, index=common).fillna(0.0)
+    # t+1 execution: signal at t trades at t+1's return (shift by 1 day)
+    pos_df = pd.DataFrame(np.sign(P), index=common, columns=tickers)
+    shifted_pos = pos_df.shift(1).fillna(0.0)
+    daily_ret = (shifted_pos.values * R).mean(axis=1)
+    # Align with shifted dates (first date drops due to shift)
+    shifted_dates = common[1:]
+    daily_ret = pd.Series(daily_ret[1:], index=shifted_dates).fillna(0.0)
 
     if daily_ret.std() > 1e-12:
         sharpe = float(daily_ret.mean() / daily_ret.std() * np.sqrt(252))
@@ -144,14 +180,24 @@ def run_walk_forward_backtest(
 
     nonzero_actual = R[np.abs(R) > 1e-12]
     if nonzero_actual.size > 0:
-        pred_at = np.sign(P)[np.abs(R) > 1e-12]
+        # Use shifted positions for hit-rate (same lag as execution)
+        shifted_pos_arr = shifted_pos.values
+        pred_at = shifted_pos_arr[np.abs(R) > 1e-12]
         hit_rate = float((pred_at == np.sign(nonzero_actual)).mean())
     else:
         hit_rate = 0.0
+
+    # Risk metrics from daily returns
+    var_95, cvar_95 = _compute_var_cvar(daily_ret, 5.0)
+    ulcer_idx, max_dd = _compute_ulcer_maxdd(daily_ret)
 
     return {
         "ic": ic,
         "sharpe": sharpe,
         "hit_rate": hit_rate,
+        "max_drawdown": max_dd,
+        "ulcer_index": ulcer_idx,
+        "var_95": var_95,
+        "cvar_95": cvar_95,
         "returns": [float(x) for x in daily_ret.tolist()],
     }

@@ -15,6 +15,7 @@ from valuation_alpha.alpha import (
     apply_slippage,
     excess_vs_sp500,
     portfolio_returns,
+    align_factors,
 )
 from valuation_alpha.engine import run_l1
 
@@ -147,38 +148,62 @@ class TestFf5ResidualAlpha:
         assert ff5_residual_alpha(pd.Series(dtype=float), factors) is None
 
     def test_rescales_monthly_factors_to_daily(self):
-        """Monthly FF5 factors forward-filled to daily must be rescaled to the
-        per-day equivalent or the regression alpha is inflated by ~21x.
-        Uses piecewise-constant daily factors (constant within each month), the
-        case where the monthly rescale is exact."""
+        """Monthly FF5 factors should be regressed against geometrically
+        resampled monthly returns, not naively divided by row count.
+
+        Constructs synthetic daily returns whose monthly aggregation
+        recovers a known alpha, then verifies annualised alpha (x12)."""
         rng = np.random.default_rng(1)
         r_dates = pd.date_range("2022-01-03", periods=756, freq="B")
         periods = r_dates.to_period("M")
         months = sorted(periods.unique())
-        n_days = periods.value_counts()
+        n_days_map = periods.value_counts()
+        # Monthly factor values (at month-end timestamps)
+        monthly_idx = pd.PeriodIndex(months).to_timestamp("M")
         monthly_f = pd.DataFrame(
             {
-                col: rng.normal(0.0003, 0.01, len(months))
+                col: rng.normal(0.003, 0.01, len(months))
                 for col in ["Mkt-RF", "SMB", "HML", "RMW", "CMA"]
             },
-            index=months,
+            index=monthly_idx,
         )
-        f_daily = monthly_f.reindex(periods).reset_index(drop=True)
-        f_daily.index = r_dates
-        rf_daily = np.full(len(r_dates), 0.0001)
-        alpha = 0.0005
+        alpha_monthly = 0.005  # constant monthly alpha
         beta = np.array([1.0, 0.5, -0.3, 0.2, 0.1])
-        excess = alpha + f_daily[["Mkt-RF", "SMB", "HML", "RMW", "CMA"]].values @ beta
-        returns = pd.Series(excess + rf_daily, index=r_dates)
-        monthly = (
-            f_daily * n_days.reindex(periods).values[:, None]
-        ).groupby(periods).first()
-        monthly.index = pd.PeriodIndex(months).to_timestamp("M")
-        monthly["RF"] = rf_daily[0] * n_days.reindex(months).values
-        res = ff5_residual_alpha(returns, monthly, horizon_days=756)
+        rf_daily = 0.0001
+        # Build daily returns: for each month, daily excess = (alpha + F_m @ beta) / n_d
+        # so that geometric linking to monthly recovers alpha_monthly + F_m @ beta.
+        daily_list = []
+        for m in months:
+            m_ts = pd.Period(m, freq="M").to_timestamp("M")
+            n_d = n_days_map[m]
+            f_m = monthly_f.loc[m_ts, ["Mkt-RF", "SMB", "HML", "RMW", "CMA"]].values
+            daily_excess = (alpha_monthly + f_m @ beta) / n_d
+            m_dates = r_dates[periods == m]
+            daily_list.append(pd.Series(daily_excess + rf_daily, index=m_dates))
+        returns = pd.concat(daily_list)
+        # RF column for the factor DataFrame (monthly RF ≈ daily RF * n_days)
+        monthly_f["RF"] = rf_daily * n_days_map.reindex(months).values
+        res = ff5_residual_alpha(returns, monthly_f, horizon_days=756)
         assert res is not None
-        assert res["alpha_annualized"] == pytest.approx(alpha * 252, rel=0.05)
-        assert res["n_obs"] >= 700
+        # Monthly regression, annualised by x12
+        assert res["alpha_annualized"] == pytest.approx(alpha_monthly * 12, rel=0.10)
+        assert res["n_obs"] >= 10
+
+    def test_align_factors_keeps_monthly_frequency(self):
+        """align_factors should return monthly-frequency rows when factors are
+        coarser than daily returns."""
+        r_dates = pd.date_range("2022-01-03", periods=63, freq="B")  # ~3 months
+        monthly_idx = r_dates.to_period("M").unique().to_timestamp("M")
+        factors = pd.DataFrame(
+            {"Mkt-RF": [0.01, 0.02, 0.03], "SMB": [0.005] * 3,
+             "HML": [0.003] * 3, "RMW": [0.001] * 3, "CMA": [0.002] * 3},
+            index=monthly_idx,
+        )
+        returns = pd.Series(np.full(63, 0.001), index=r_dates)
+        aligned = align_factors(returns, factors)
+        # Should have one row per month, not one per day
+        assert len(aligned) == 3
+        assert isinstance(aligned.index, pd.DatetimeIndex)
 
 
 class TestApplySlippage:
