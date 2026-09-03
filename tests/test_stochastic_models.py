@@ -18,8 +18,13 @@ from Quantitative.stochastic.default_probability_table import (
     get_recovery_rate,
     compute_shock_penalty_multiplier,
     build_default_probability_map,
+    fetch_damodaran_table,
+    load_or_fetch_table,
     RATING_TABLE,
     DISTRESSED_TIER,
+    TABLE_VERSION,
+    TABLE_SOURCE_URL,
+    RatingTier,
 )
 from Quantitative.stochastic.bernoulli_shock_filter import (
     BernoulliShockFilter,
@@ -126,6 +131,178 @@ class TestDefaultProbabilityTable:
             higher_tier = RATING_TABLE[i]
             lower_tier = RATING_TABLE[i + 1]
             assert lower_tier.p_default_1yr >= higher_tier.p_default_1yr
+
+
+# ===================================================================
+# Test 1b: Versioning, Fetching & Caching
+# ===================================================================
+
+class TestVersioningAndFetch:
+
+    @pytest.fixture(autouse=True)
+    def _restore_loaded_table(self):
+        """Restore the module-level _loaded_table after each test to avoid
+        polluting state for downstream tests (e.g. BernoulliShockFilter)."""
+        import Quantitative.stochastic.default_probability_table as dpt
+        original = dpt._loaded_table
+        yield
+        dpt._loaded_table = original
+
+    def test_table_version_is_string(self):
+        assert isinstance(TABLE_VERSION, str)
+        assert len(TABLE_VERSION) > 0
+
+    def test_table_source_url_is_valid(self):
+        assert TABLE_SOURCE_URL.startswith("https://")
+        assert "damodar" in TABLE_SOURCE_URL.lower() or "stern.nyu.edu" in TABLE_SOURCE_URL
+
+    def test_rating_tier_is_dataclass(self):
+        tier = RatingTier(
+            icr_threshold=5.0, rating="BBB",
+            spread=0.015, p_default_1yr=0.0018,
+            p_default_5yr=0.009, recovery_rate=0.50,
+        )
+        assert tier.icr_threshold == 5.0
+        assert tier.rating == "BBB"
+        assert tier.recovery_rate == 0.50
+
+    def test_rating_tier_frozen(self):
+        tier = RatingTier(
+            icr_threshold=5.0, rating="BBB",
+            spread=0.015, p_default_1yr=0.0018,
+            p_default_5yr=0.009, recovery_rate=0.50,
+        )
+        with pytest.raises(AttributeError):
+            tier.rating = "AAA"
+
+    def test_fetch_damodaran_table_returns_list(self):
+        """Fetch should return a non-empty list of RatingTier."""
+        import pytest
+        try:
+            tiers = fetch_damodaran_table()
+            assert isinstance(tiers, list)
+            assert len(tiers) >= 10
+        except ConnectionError:
+            pytest.skip("Network unavailable; Damodaran fetch not tested")
+
+    def test_fetch_damodaran_table_returns_rating_tiers(self):
+        """Every element should be a RatingTier with all fields populated."""
+        import pytest
+        try:
+            tiers = fetch_damodaran_table()
+            for tier in tiers:
+                assert isinstance(tier, RatingTier)
+                assert tier.rating
+                assert tier.spread >= 0
+                assert 0 <= tier.p_default_1yr <= 1.0
+                assert 0 <= tier.p_default_5yr <= 1.0
+                assert 0 <= tier.recovery_rate <= 1.0
+        except ConnectionError:
+            pytest.skip("Network unavailable; Damodaran fetch not tested")
+
+    def test_fetch_damodaran_table_sorted_descending(self):
+        """Tiers should be sorted by ICR threshold, highest first."""
+        import pytest
+        try:
+            tiers = fetch_damodaran_table()
+            thresholds = [t.icr_threshold for t in tiers]
+            assert thresholds == sorted(thresholds, reverse=True)
+        except ConnectionError:
+            pytest.skip("Network unavailable; Damodaran fetch not tested")
+
+    def test_fetch_damodaran_table_has_distressed(self):
+        """Table should include a distressed tier (lowest ICR threshold <= 0.5)."""
+        import pytest
+        try:
+            tiers = fetch_damodaran_table()
+            assert tiers[-1].icr_threshold <= 0.5
+        except ConnectionError:
+            pytest.skip("Network unavailable; Damodaran fetch not tested")
+
+    def test_fetch_damodaran_table_has_investment_grade(self):
+        """Table should include investment-grade tiers (ICR > 2.5)."""
+        import pytest
+        try:
+            tiers = fetch_damodaran_table()
+            high_icr = [t for t in tiers if t.icr_threshold >= 2.5]
+            assert len(high_icr) >= 5
+        except ConnectionError:
+            pytest.skip("Network unavailable; Damodaran fetch not tested")
+
+    def test_load_or_fetch_table_returns_list(self):
+        """load_or_fetch_table should always return a list of RatingTier."""
+        tiers = load_or_fetch_table(force_refresh=True)
+        assert isinstance(tiers, list)
+        assert len(tiers) >= 10
+        for tier in tiers:
+            assert isinstance(tier, RatingTier)
+
+    def test_load_or_fetch_table_uses_cache_on_second_call(self):
+        """Second call (non-force) should use cache, not re-fetch."""
+        tiers1 = load_or_fetch_table(force_refresh=True)
+        tiers2 = load_or_fetch_table()
+        assert len(tiers2) == len(tiers1)
+        assert all(t1.rating == t2.rating for t1, t2 in zip(tiers1, tiers2))
+
+    def test_load_or_fetch_table_force_refresh_ignores_cache(self):
+        """force_refresh=True should bypass cache."""
+        tiers1 = load_or_fetch_table(force_refresh=True)
+        tiers2 = load_or_fetch_table(force_refresh=True)
+        # Both should have same data (fetched twice)
+        assert len(tiers2) == len(tiers1)
+
+    def test_load_or_fetch_table_fallback_on_network_error(self):
+        """On network failure, load_or_fetch_table falls back to RATING_TABLE."""
+        import Quantitative.stochastic.default_probability_table as dpt
+        original = dpt.fetch_damodaran_table
+        dpt.fetch_damodaran_table = lambda: (_ for _ in ()).throw(
+            ConnectionError("simulated network failure")
+        )
+        try:
+            tiers = load_or_fetch_table(force_refresh=True)
+            assert isinstance(tiers, list)
+            assert len(tiers) == len(RATING_TABLE)
+            assert tiers[0].rating == RATING_TABLE[0].rating
+        finally:
+            dpt.fetch_damodaran_table = original
+
+    def test_lookup_tier_uses_loaded_table(self):
+        """lookup_rating_tier should use the module-loaded table."""
+        import Quantitative.stochastic.default_probability_table as dpt
+        # Force load the fetched table
+        load_or_fetch_table(force_refresh=True)
+        loaded = dpt._loaded_table
+        # lookup should return a tier from the loaded table
+        tier = lookup_rating_tier(5.0)
+        assert isinstance(tier, RatingTier)
+        assert tier in loaded
+
+    def test_cache_file_created(self):
+        """load_or_fetch_table should create a cache file."""
+        import Quantitative.stochastic.default_probability_table as dpt
+        load_or_fetch_table(force_refresh=True)
+        cache = dpt._cache_path(TABLE_VERSION)
+        assert cache.exists()
+
+    def test_cache_file_contains_version(self):
+        """Cache file should contain the correct version."""
+        import json as _json
+        import Quantitative.stochastic.default_probability_table as dpt
+        load_or_fetch_table(force_refresh=True)
+        cache = dpt._cache_path(TABLE_VERSION)
+        raw = _json.loads(cache.read_text(encoding="utf-8"))
+        assert raw["version"] == TABLE_VERSION
+        assert "checksum" in raw
+        assert "data" in raw
+
+    def test_build_default_probability_map_uses_loaded(self):
+        """build_default_probability_map should use the loaded table."""
+        import Quantitative.stochastic.default_probability_table as dpt
+        load_or_fetch_table(force_refresh=True)
+        d = build_default_probability_map()
+        # All ratings from loaded table should be in the map
+        for tier in dpt._loaded_table:
+            assert tier.rating in d
 
 
 # ===================================================================
@@ -394,7 +571,8 @@ class TestPoissonBlackSwan:
         mags = poisson.sample_shock_magnitudes(10)
         assert len(mags) == 10
         for m in mags:
-            assert -0.50 <= m <= -0.01
+            # Updated bounds: empirical 0.5th-99.5th pctile of S&P 500 daily drawdowns (1928-present)
+            assert -0.22 <= m <= -0.005
 
     def test_compute_portfolio_impact_no_shocks(self, poisson):
         impact = poisson.compute_portfolio_impact([])

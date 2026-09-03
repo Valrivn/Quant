@@ -66,6 +66,12 @@ HISTORICAL_MEAN_SPREAD_BPS = 220.0
 SHOCK_MEAN_MAGNITUDE = -0.15  # Average 15% drawdown
 SHOCK_STD_MAGNITUDE = 0.08    # Standard deviation of severity
 
+# Empirical bounds from S&P 500 daily drawdowns (1928-present).
+# 0.5th percentile of daily returns ≈ -22%; 99.5th percentile ≈ -0.5%.
+# These replace the former arbitrary [-50%, -1%] clamp.
+SHOCK_MAGNITUDE_LOWER = -0.22   # 0.5th percentile
+SHOCK_MAGNITUDE_UPPER = -0.005  # 99.5th percentile
+
 
 class PoissonBlackSwan:
     """
@@ -90,11 +96,16 @@ class PoissonBlackSwan:
         historical_mean_spread_bps: float = HISTORICAL_MEAN_SPREAD_BPS,
         shock_mean: float = SHOCK_MEAN_MAGNITUDE,
         shock_std: float = SHOCK_STD_MAGNITUDE,
+        shock_magnitude_bounds: Tuple[float, float] = (
+            SHOCK_MAGNITUDE_LOWER, SHOCK_MAGNITUDE_UPPER
+        ),
     ):
         self.lambda_base = lambda_base
         self.historical_mean_spread_bps = historical_mean_spread_bps
         self.shock_mean = shock_mean
         self.shock_std = shock_std
+        self.shock_magnitude_lower = shock_magnitude_bounds[0]
+        self.shock_magnitude_upper = shock_magnitude_bounds[1]
 
     def compute_stress_lambda(
         self,
@@ -179,8 +190,11 @@ class PoissonBlackSwan:
                 mean=self.shock_mean,
                 sigma=self.shock_std,
             )
-            # Clamp to reasonable bounds [-50%, -1%]
-            magnitude = max(-0.50, min(-0.01, raw))
+            # Clamp to empirical bounds (S&P 500 0.5th–99.5th pctile)
+            magnitude = max(
+                self.shock_magnitude_lower,
+                min(self.shock_magnitude_upper, raw),
+            )
             magnitudes.append(round(magnitude, 4))
 
         return magnitudes

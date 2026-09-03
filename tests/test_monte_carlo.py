@@ -8,6 +8,8 @@ from psychological.monte_carlo import (
     MonteCarloResult,
     MonteCarloSimRun,
     create_monte_carlo_engine,
+    _compute_var_cvar,
+    _compute_ulcer_maxdd,
 )
 
 
@@ -40,10 +42,20 @@ class TestMonteCarloEngine:
         assert engine.mc_config == {}
 
     def test_clamp_growth(self, engine):
-        assert engine._clamp_growth(0.60) == 0.50
-        assert engine._clamp_growth(-0.60) == -0.50
+        # Static clamp uses empirical CRSP bounds [-0.35, +0.40]
+        assert engine._clamp_growth(0.60) == 0.40
+        assert engine._clamp_growth(-0.60) == -0.35
         assert engine._clamp_growth(0.20) == 0.20
         assert engine._clamp_growth(-0.10) == -0.10
+
+    def test_clamp_growth_cfg(self, engine):
+        # Configurable version falls back to same empirical defaults
+        assert engine._clamp_growth_cfg(0.60) == 0.40
+        assert engine._clamp_growth_cfg(-0.60) == -0.35
+        # With custom bounds
+        engine.mc_config["growth_bounds"] = (-0.20, 0.30)
+        assert engine._clamp_growth_cfg(0.60) == 0.30
+        assert engine._clamp_growth_cfg(-0.60) == -0.20
 
     def test_compute_eva_spread(self, engine):
         assert engine._compute_eva_spread(0.15, 0.10) == pytest.approx(0.05)
@@ -53,7 +65,7 @@ class TestMonteCarloEngine:
     def test_simulate_single(self, engine, sample_input):
         run = engine._simulate_single(sample_input)
         assert isinstance(run, MonteCarloSimRun)
-        assert -0.50 <= run.growth_rate <= 0.50
+        assert -0.35 <= run.growth_rate <= 0.40
         assert run.intrinsic_value > 0
         assert isinstance(run.eva_positive, bool)
         assert isinstance(run.macro_shock_applied, bool)
@@ -68,6 +80,13 @@ class TestMonteCarloEngine:
         assert result.p5_intrinsic_value <= result.p25_intrinsic_value <= result.median_intrinsic_value <= result.p75_intrinsic_value <= result.p95_intrinsic_value
         assert 0.0 <= result.macro_risk_adjustment <= 1.0
         assert result.confidence_band is not None
+        # Risk metrics: VaR <= median <= VaR99, CVaR <= VaR
+        assert result.var_95 <= result.median_intrinsic_value
+        assert result.var_99 <= result.var_95
+        assert result.cvar_95 <= result.var_95
+        assert result.cvar_99 <= result.var_99
+        assert result.ulcer_index >= 0.0
+        assert result.max_drawdown <= 0.0
 
     def test_run_with_macro_shocks(self, engine):
         input_data = MonteCarloInput(
@@ -268,3 +287,48 @@ class TestCreateFunctions:
             mock.return_value = {}
             engine = create_monte_carlo_engine()
             assert isinstance(engine, MonteCarloEngine)
+
+
+class TestRiskMetricHelpers:
+    def test_compute_var_cvar_basic(self):
+        values = list(range(1, 101))  # 1..100
+        var_5, cvar_5 = _compute_var_cvar(values, 5.0)
+        # 5th percentile of 1..100 is approximately 5.0
+        assert 4.0 <= var_5 <= 6.0
+        # CVaR should be <= VaR
+        assert cvar_5 <= var_5
+        # CVaR should be mean of values <= VaR
+        tail = [v for v in values if v <= var_5]
+        assert cvar_5 == pytest.approx(np.mean(tail), abs=0.1)
+
+    def test_compute_var_cvar_constant(self):
+        values = [42.0] * 100
+        var, cvar = _compute_var_cvar(values, 5.0)
+        assert var == pytest.approx(42.0)
+        assert cvar == pytest.approx(42.0)
+
+    def test_compute_ulcer_maxdd_monotonic_increasing(self):
+        values = [1.0, 2.0, 3.0, 4.0, 5.0]
+        ulcer, max_dd = _compute_ulcer_maxdd(values)
+        assert ulcer == pytest.approx(0.0)
+        assert max_dd == pytest.approx(0.0)
+
+    def test_compute_ulcer_maxdd_with_drawdown(self):
+        # Peak at 100, drop to 80 (20% dd), recover to 90 (10% dd from 100)
+        values = [100.0, 80.0, 90.0]
+        ulcer, max_dd = _compute_ulcer_maxdd(values)
+        # Max drawdown should be -0.20 (20% from peak 100 to trough 80)
+        assert max_dd == pytest.approx(-0.20)
+        # Ulcer index = sqrt(mean([0, 0.20^2, 0.10^2])) = sqrt(mean([0, 0.04, 0.01]))
+        expected_ulcer = np.sqrt(np.mean([0.0, 0.04, 0.01]))
+        assert ulcer == pytest.approx(expected_ulcer, abs=1e-6)
+
+    def test_compute_ulcer_maxdd_single_value(self):
+        ulcer, max_dd = _compute_ulcer_maxdd([50.0])
+        assert ulcer == 0.0
+        assert max_dd == 0.0
+
+    def test_compute_ulcer_maxdd_empty(self):
+        ulcer, max_dd = _compute_ulcer_maxdd([])
+        assert ulcer == 0.0
+        assert max_dd == 0.0

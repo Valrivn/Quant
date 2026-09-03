@@ -18,6 +18,63 @@ def _softmax(logits):
     return e / e.sum()
 
 
+def _enforce_caps(weights, max_leverage, max_position, sector_bounds, sector_map):
+    """Project a raw weight vector onto the capped feasible set.
+
+    Applies in order:
+    1. Position cap: iteratively clamp |w[i]| <= max_position, redistributing
+       excess to uncapped weights until stable.
+    2. Sector bounds: clamp sector aggregates to [lo, hi], rescale.
+    3. Leverage cap: if sum(|w|) > max_leverage, rescale proportionally.
+    """
+    w = weights.copy().astype(float)
+    n = len(w)
+
+    # --- 1. Position cap (iterative projection onto capped simplex) ---
+    if max_position is not None and max_position > 0:
+        for _ in range(20):  # converges in 2-3 iterations
+            over = np.abs(w) - max_position
+            excess_total = np.maximum(over, 0.0).sum()
+            if excess_total < 1e-15:
+                break
+            # Clamp the over-cap positions
+            w = np.clip(w, -max_position, max_position)
+            # Redistribute excess to positions with room
+            room = max_position - np.abs(w)
+            room_total = room.sum()
+            if room_total < 1e-15:
+                break
+            # Scale the excess into positions that have room, preserving sign
+            sign = np.sign(w)
+            sign[sign == 0] = 1.0
+            add = np.where(room > 1e-15, sign * excess_total * room / room_total, 0.0)
+            # Don't let redistribution push past cap
+            w = w + add
+            w = np.clip(w, -max_position, max_position)
+
+    # --- 2. Sector bounds ---
+    if sector_bounds and sector_map is not None:
+        for sector, (lo, hi) in sector_bounds.items():
+            mask = np.array([sector_map.get(i) == sector for i in range(n)])
+            if not mask.any():
+                continue
+            sector_sum = w[mask].sum()
+            if sector_sum > hi:
+                scale = hi / sector_sum if sector_sum != 0 else 0.0
+                w[mask] *= scale
+            elif sector_sum < lo:
+                scale = lo / sector_sum if sector_sum != 0 else 0.0
+                w[mask] *= scale
+
+    # --- 3. Leverage cap ---
+    if max_leverage is not None and max_leverage > 0:
+        gross = np.sum(np.abs(w))
+        if gross > max_leverage:
+            w *= max_leverage / gross
+
+    return w
+
+
 def _objective_grad(R, w, objective, reg, max_drawdown_cap):
     """Return (objective_value, gradient_w) for a weight vector on return matrix R."""
     n = R.shape[1]
@@ -77,6 +134,10 @@ def portfolio_weights(
     max_iter=2000,
     lr=1e-3,
     seed=0,
+    max_leverage=2.0,
+    max_position=0.10,
+    sector_bounds=None,
+    sector_map=None,
 ):
     """Gradient descent over the sleeve weight simplex.
 
@@ -85,6 +146,13 @@ def portfolio_weights(
     minus reg*annualized variance (a differentiable proxy for FF5 alpha, which
     is evaluated post-hoc in the backtest); "sharpe" maximizes mean/std;
     "dual" maximizes a z-scaled blend of the alpha proxy and the Sharpe ratio.
+
+    Risk caps enforced after optimisation:
+    - *max_leverage*: total gross exposure capped (sum |w| <= max_leverage).
+    - *max_position*: any single weight clamped to [-max_position, max_position].
+    - *sector_bounds*: dict {sector_name: (min, max)} on aggregate sector weight.
+      *sector_map* must be an array mapping column index -> sector name.
+
     Returns a dict with weights, objective_value, iters, and converged.
     """
     df = sleeve_returns.dropna()
@@ -115,8 +183,10 @@ def portfolio_weights(
             converged = True
             break
         prev_val = val
+    # Enforce risk caps on the optimised weights
+    capped_w = _enforce_caps(best_w, max_leverage, max_position, sector_bounds, sector_map)
     return {
-        "weights": {c: float(best_w[i]) for i, c in enumerate(cols)},
+        "weights": {c: float(capped_w[i]) for i, c in enumerate(cols)},
         "objective_value": float(best_val),
         "iters": it + 1,
         "converged": converged,
@@ -146,6 +216,10 @@ def walk_forward_allocate(
     objective="dual",
     target_vol=0.10,
     seed=0,
+    max_leverage=2.0,
+    max_position=0.10,
+    sector_bounds=None,
+    sector_map=None,
 ):
     """Expanding walk-forward allocation over the sleeve return history.
 
@@ -167,11 +241,23 @@ def walk_forward_allocate(
     train_sizes = []
     for pos in rebalance:
         window = df.iloc[: pos + 1]
-        w = portfolio_weights(window, objective=objective, seed=seed)["weights"]
+        w = portfolio_weights(
+            window,
+            objective=objective,
+            seed=seed,
+            max_leverage=max_leverage,
+            max_position=max_position,
+            sector_bounds=sector_bounds,
+            sector_map=sector_map,
+        )["weights"]
         w = apply_vol_target(w, window, target_vol)
         total = sum(w.values())
         if total > 0:
             w = {c: v / total for c, v in w.items()}
+        # Re-enforce caps after vol-target normalisation (which can blow up positions)
+        w_arr = np.array([w.get(c, 0.0) for c in cols])
+        w_arr = _enforce_caps(w_arr, max_leverage, max_position, sector_bounds, sector_map)
+        w = {c: float(w_arr[i]) for i, c in enumerate(cols)}
         end = min(pos + rebalance_days, n)
         lo = pos - first
         hi = end - first
@@ -198,7 +284,7 @@ def portfolio_backtest(
     w = weights_daily.shift(1)
     cols = [c for c in w.columns if c in sleeve_returns.columns]
     port = (w[cols] * sleeve_returns[cols]).sum(axis=1)
-    port = apply_slippage(port, slippage)
+    port = apply_slippage(port, weights=weights_daily, slippage=slippage)
     r = port.dropna()
     n = len(r)
     ann_ret = float(r.mean() * _TRADING_DAYS) if n else np.nan

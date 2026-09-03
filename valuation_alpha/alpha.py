@@ -1,21 +1,53 @@
 """Alpha estimation, slippage, benchmark excess, and portfolio aggregation."""
 
+import logging
+import warnings
+
 import numpy as np
 import pandas as pd
+from sklearn.covariance import LedoitWolf
 from scipy import stats
+
+logger = logging.getLogger(__name__)
 
 _FACTOR_COLS = ["Mkt-RF", "SMB", "HML", "RMW", "CMA"]
 _TRADING_DAYS = 252
+_COND_THRESHOLD = 1e12
+_RIDGE_EPS = 1e-6
+
+
+def _conditioned_inverse(M):
+    """Invert a covariance-like matrix with conditioning guard.
+
+    If cond(M) > _COND_THRESHOLD, applies Ledoit-Wolf shrinkage (preferred)
+    or ridge regularisation as fallback, logging a warning. Returns the
+    regularised inverse.
+    """
+    cond = np.linalg.cond(M)
+    if cond <= _COND_THRESHOLD:
+        return np.linalg.pinv(M)
+    logger.warning(
+        "Covariance condition number %.2e exceeds threshold %.0e — "
+        "applying shrinkage.",
+        cond,
+        _COND_THRESHOLD,
+    )
+    try:
+        lw = LedoitWolf().fit(M)
+        regularised = lw.covariance_
+    except Exception:
+        regularised = M + _RIDGE_EPS * np.eye(M.shape[0])
+    return np.linalg.pinv(regularised)
 
 
 def align_factors(returns: pd.Series, factors: pd.DataFrame) -> pd.DataFrame:
     """Reindex factor data onto the returns index.
 
-    Ken French factors are monthly while returns may be daily; forward-fill the
-    factors to the returns frequency so inner joins keep full coverage. When the
-    factor frequency is coarser than the returns frequency, each factor value is
-    first rescaled to the per-observation (daily) equivalent by dividing by the
-    number of returns rows it covers, so the OLS sees consistent units.
+    Ken French factors are monthly while returns may be daily.  When the factor
+    frequency is coarser than the returns frequency, factors are kept at their
+    native monthly frequency (one row per month-end) rather than being rescaled
+    to a daily equivalent.  Callers that need a common frequency should
+    resample the coarser side (typically the returns) before regressing.
     """
     if factors is None or factors.empty or len(returns) == 0:
         return factors
@@ -33,18 +65,21 @@ def align_factors(returns: pd.Series, factors: pd.DataFrame) -> pd.DataFrame:
     if not coarse:
         idx = r_dates.union(f_dates)
         return factors.reindex(idx).ffill().reindex(r_dates)
+    # Monthly factors: keep at monthly frequency, one row per month-end.
     f_period = f_dates.to_period("M")
     r_period = r_dates.to_period("M")
-    counts = (
-        pd.Series(r_dates, index=r_dates).groupby(r_period).size().astype(float)
-    )
     per_period = factors.groupby(f_period).last()
-    scaled = per_period.divide(
-        counts.reindex(per_period.index).clip(lower=1.0), axis=0
-    )
-    out = scaled.reindex(sorted(r_period.unique())).reindex(r_period).reset_index(drop=True)
-    out.index = r_dates
+    monthly_idx = sorted(r_period.unique())
+    monthly_dates = pd.PeriodIndex(monthly_idx).to_timestamp("M")
+    out = per_period.reindex(monthly_idx)
+    out.index = monthly_dates
     return out
+
+
+def _is_coarse_index(idx: pd.DatetimeIndex) -> bool:
+    """Return True if the datetime index has median gap > 10 days (monthly)."""
+    gaps = idx.to_series().diff().dropna()
+    return bool(gaps.empty) or float(gaps.median().days) > 10
 
 
 def ff5_residual_alpha(
@@ -56,26 +91,56 @@ def ff5_residual_alpha(
 ) -> dict:
     """Regress excess returns on the FF5 factors and return residual alpha.
 
-    Uses numpy lstsq over the last horizon_days of aligned rows. Returns a dict
-    with alpha_daily, alpha_annualized (x252), t_stat, p_value, ci_lower,
-    ci_upper (95% CI on annualized alpha), n_obs, r2, residual_std. Returns
-    None when fewer than 60 usable observations.
+    When aligned factors are at a coarser (monthly) frequency, daily returns
+    are resampled to monthly via geometric linking before regression.  Alpha is
+    annualised by ×12 for monthly data, or ×252 for daily data.
+
+    Uses numpy lstsq over the last observations within the horizon window.
+    Returns a dict with alpha_daily (per-period intercept), alpha_annualized,
+    t_stat, p_value, ci_lower, ci_upper (95 % CI on annualized alpha),
+    n_obs, r2, residual_std.  Returns ``None`` when too few observations.
     """
     if returns is None or len(returns) == 0 or factors is None or factors.empty:
         return None
     if not all(c in factors.columns for c in _FACTOR_COLS) or "RF" not in factors.columns:
         return None
     aligned = align_factors(returns, factors)
-    df = pd.concat([returns.rename("ret"), aligned[_FACTOR_COLS + ["RF"]]], axis=1)
-    df = df.dropna()
-    if len(df) == 0:
+    if aligned.empty:
         return None
-    df = df.iloc[-horizon_days:]
-    y = (df["ret"] - df["RF"]).values
-    X = df[_FACTOR_COLS].values
+
+    # Detect whether aligned factors sit at a coarser (monthly) frequency.
+    is_monthly = _is_coarse_index(pd.DatetimeIndex(aligned.index))
+
+    if is_monthly:
+        # Geometric-link daily returns to monthly to match factor frequency.
+        returns_m = returns.resample("ME").apply(lambda x: (1 + x).prod() - 1)
+        df = pd.concat(
+            [returns_m.rename("ret"), aligned[_FACTOR_COLS + ["RF"]]], axis=1
+        ).dropna()
+        if len(df) == 0:
+            return None
+        horizon_months = max(horizon_days // 21, 1)
+        df = df.iloc[-horizon_months:]
+        y = (df["ret"] - df["RF"]).values
+        X = df[_FACTOR_COLS].values
+        annualize_factor = 12
+        min_obs = 10
+    else:
+        df = pd.concat(
+            [returns.rename("ret"), aligned[_FACTOR_COLS + ["RF"]]], axis=1
+        ).dropna()
+        if len(df) == 0:
+            return None
+        df = df.iloc[-horizon_days:]
+        y = (df["ret"] - df["RF"]).values
+        X = df[_FACTOR_COLS].values
+        annualize_factor = _TRADING_DAYS
+        min_obs = 60
+
     n_obs = len(y)
-    if n_obs < 60:
+    if n_obs < min_obs:
         return None
+
     Xd = np.column_stack([np.ones(n_obs), X])
     beta, _, _, _ = np.linalg.lstsq(Xd, y, rcond=None)
     alpha_daily = float(beta[0])
@@ -86,12 +151,12 @@ def ff5_residual_alpha(
     ss_res = float(np.sum(resid ** 2))
     ss_tot = float(np.sum((y - y.mean()) ** 2))
     r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else 0.0
-    cov = np.linalg.pinv(Xd.T @ Xd)
+    cov = _conditioned_inverse(Xd.T @ Xd)
     se_alpha = residual_std * np.sqrt(cov[0, 0])
     t_stat = alpha_daily / se_alpha if se_alpha > 0 else 0.0
     p_value = 2.0 * (1.0 - stats.t.cdf(abs(t_stat), dof)) if dof > 0 else 1.0
-    alpha_annualized = alpha_daily * _TRADING_DAYS
-    se_ann = se_alpha * _TRADING_DAYS
+    alpha_annualized = alpha_daily * annualize_factor if annualize else alpha_daily
+    se_ann = se_alpha * annualize_factor if annualize else se_alpha
     crit = stats.t.ppf(0.975, dof) if dof > 0 else 1.96
     ci_lower = alpha_annualized - crit * se_ann
     ci_upper = alpha_annualized + crit * se_ann
@@ -108,13 +173,38 @@ def ff5_residual_alpha(
     }
 
 
-def apply_slippage(returns: pd.Series, slippage: float = 0.005) -> pd.Series:
-    """Subtract the round-trip cost fraction on every position.
+def apply_slippage(
+    returns: pd.Series,
+    weights: "pd.DataFrame | None" = None,
+    slippage: float = 0.005,
+    min_turnover: float = 0.05,
+) -> pd.Series:
+    """Subtract slippage cost proportional to daily turnover.
 
-    Approximation: the cost is charged on the first and last day of each
-    consecutive holding streak (a single-day streak pays it twice, i.e. a full
-    round trip).
+    On each day the cost is ``|Δw| * slippage`` where ``Δw`` is the total
+    weight change across all positions.  Only days where ``|Δw| > min_turnover``
+    are charged (filters rounding noise).
+
+    Falls back to the old streak-based logic when *weights* is ``None``
+    (deprecated).
     """
+    if weights is None:
+        warnings.warn(
+            "apply_slippage(weights=None) is deprecated. "
+            "Pass a daily weights DataFrame to charge per-rebalance turnover.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return _apply_slippage_streak(returns, slippage)
+
+    w = weights.reindex(returns.index).fillna(0.0)
+    weight_diff = w.diff().abs().sum(axis=1)
+    fee = weight_diff.where(weight_diff > min_turnover, 0.0) * slippage
+    return returns - fee
+
+
+def _apply_slippage_streak(returns: pd.Series, slippage: float = 0.005) -> pd.Series:
+    """Legacy streak-based slippage — deprecated, kept for backward compat."""
     out = returns.copy()
     mask = returns.notna()
     in_streak = False
