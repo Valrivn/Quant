@@ -135,7 +135,7 @@ def portfolio_weights(
     lr=1e-3,
     seed=0,
     max_leverage=2.0,
-    max_position=0.10,
+    max_position=None,
     sector_bounds=None,
     sector_map=None,
 ):
@@ -161,6 +161,9 @@ def portfolio_weights(
         return {"weights": {}, "objective_value": 0.0, "iters": 0, "converged": False}
     R = df[cols].values
     n = R.shape[1]
+    # Adaptive default: if max_position not specified, set to 1/n so simplex constraint is satisfiable
+    if max_position is None:
+        max_position = 1.0 / n
     rng = np.random.default_rng(seed)
     logits = rng.normal(0.0, 0.05, n)
     w = _softmax(logits)
@@ -217,7 +220,7 @@ def walk_forward_allocate(
     target_vol=0.10,
     seed=0,
     max_leverage=2.0,
-    max_position=0.10,
+    max_position=None,
     sector_bounds=None,
     sector_map=None,
 ):

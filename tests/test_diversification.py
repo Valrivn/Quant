@@ -58,7 +58,7 @@ class TestDatastore:
         )
         fake.columns = pd.MultiIndex.from_tuples([("Close", "VCSH")])
 
-        def fake_download(tickers, start, end, progress, auto_adjust):
+        def fake_download(tickers, start, end, progress, auto_adjust, threads=True, **kwargs):
             return fake
 
         monkeypatch.setattr("diversification.datastore.yf.download", fake_download)
