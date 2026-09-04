@@ -31,7 +31,7 @@ class TestPortfolioWeights:
     def test_simplex_and_drift(self):
         r = _synthetic_returns()
         for obj in ("sharpe", "dual"):
-            res = portfolio_weights(r, objective=obj, seed=1)
+            res = portfolio_weights(r, objective=obj, seed=1, max_position=1.0)
             w = res["weights"]
             assert abs(sum(w.values()) - 1.0) < 1e-6
             assert all(v >= 0 for v in w.values())
@@ -40,7 +40,7 @@ class TestPortfolioWeights:
 
     def test_alpha_objective(self):
         r = _synthetic_returns()
-        res = portfolio_weights(r, objective="alpha", seed=2)
+        res = portfolio_weights(r, objective="alpha", seed=2, max_position=1.0)
         assert "objective_value" in res
         assert abs(sum(res["weights"].values()) - 1.0) < 1e-6
 
@@ -77,7 +77,7 @@ class TestPortfolioBacktest:
         r = _synthetic_returns(days=400, seed=5)
         w = pd.DataFrame(0.25, index=r.index, columns=SLEEVES)
         w.iloc[5] = [0.1, 0.2, 0.3, 0.4]
-        bt = portfolio_backtest(w, r)
+        bt = portfolio_backtest(w, r, slippage=0.0)
         assert "annualized_return" in bt
         assert bt["max_drawdown"] < 0
         assert len(bt["returns"]) == len(r)
