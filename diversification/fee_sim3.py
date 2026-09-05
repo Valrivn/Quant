@@ -50,9 +50,11 @@ from diversification.allocator import (
     sleeve_return_series,
 )
 from diversification.datastore import (
-    fetch_dividend_history,
     fetch_fred_series,
     fetch_nasdaq,
+)
+from diversification.master_data import (
+    fetch_dividend_history,
     fetch_sleeve_prices,
 )
 from diversification.dividend_audit import (

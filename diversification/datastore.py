@@ -28,6 +28,17 @@ logger = logging.getLogger(__name__)
 _PIT_DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "pit_sp500_constituents.json"
 _pit_cache: dict | None = None
 
+# Fixed tradable proxy instruments used as sleeve vehicles (SPY, bond/bill/gold
+# ETFs, MDY/IWM). These have existed as liquid ETFs throughout the window
+# regardless of S&P 500 index membership, so they are always considered present
+# in the PIT universe. Only S&P-membership-conditional tickers (individual
+# companies) are filtered against the real constituent history — this is where
+# survivorship bias actually lives.
+PIT_ALWAYS_AVAILABLE = frozenset({
+    "SPY", "VCSH", "VCIT", "BIL", "SHY", "SGOV", "GLD", "IAU",
+    "MDY", "IWM", "VTI", "VB", "BND",
+})
+
 
 def _load_pit_data() -> dict:
     """Load the PIT constituent snapshots from disk (cached after first read).
@@ -103,11 +114,14 @@ def pit_tickers_for_date(tickers: list, as_of) -> list:
 
     Notes
     -----
-    MVP: The synthetic PIT file includes ALL ETF proxies for ALL dates, so
-    this is effectively a no-op for the ETF sleeve simulation.  Once real
-    S&P 500 constituent data is loaded (TODO: replace with
-    github.com/fja05680/sp500 or WRDS/Compustat), this function will
-    actually filter out tickers that weren't in the index as of each date.
+    Real S&P 500 constituent data is loaded from
+    ``data/pit_sp500_constituents.json`` (built from github.com/fja05680/sp500
+    by ``scripts/build_pit_universe.py``), giving true point-in-time filtering
+    for membership-conditional tickers (individual companies; delisted names
+    drop out after their removal).  The fixed ETF sleeve proxies
+    (``PIT_ALWAYS_AVAILABLE``) are condition-independent tradable instruments
+    and are always considered present — they are not index members and never
+    were.
     """
     data = _load_pit_data()
     if not data:
@@ -131,7 +145,7 @@ def pit_tickers_for_date(tickers: list, as_of) -> list:
                      as_of, sorted_dates[0] if sorted_dates else "none")
         return tickers
 
-    pit_set = set(snapshot)
+    pit_set = set(snapshot) | set(PIT_ALWAYS_AVAILABLE)
     filtered = [t for t in tickers if t in pit_set]
     if len(filtered) < len(tickers):
         dropped = set(tickers) - pit_set

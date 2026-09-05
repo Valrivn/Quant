@@ -17,7 +17,7 @@ _CONFIG_PATH = os.path.join(
     os.path.dirname(__file__), "..", "config", "industry_beta.yaml"
 )
 
-_ALLOWED_TOP = {"industries", "sub_area_aliases", "industry_aliases", "thread_b", "update", "staging"}
+_ALLOWED_TOP = {"industries", "sub_area_aliases", "industry_aliases", "thread_b", "update", "staging", "default_ratings"}
 _REQUIRED_TOP = {"industries", "update"}
 
 
@@ -74,6 +74,23 @@ def load_industry_beta(path: Optional[str] = None) -> Dict[str, Any]:
     if not isinstance(upd, dict):
         raise IndustryBetaConfigError("update must be a mapping")
     _check_required(upd, {"auto_replace"}, "update")
+
+    if "default_ratings" in cfg:
+        dr = cfg["default_ratings"]
+        if not isinstance(dr, dict) or not isinstance(dr.get("tiers"), list) or not dr["tiers"]:
+            raise IndustryBetaConfigError("default_ratings.tiers must be a non-empty list")
+        for i, tier in enumerate(dr["tiers"]):
+            if not isinstance(tier, dict):
+                raise IndustryBetaConfigError(f"default_ratings.tiers[{i}] must be a mapping")
+            required = {"rating", "icr_threshold", "p_default_1yr", "p_default_5yr", "recovery_rate", "spread"}
+            _check_required(tier, required, f"default_ratings.tiers[{i}]")
+            for k in ("icr_threshold", "p_default_1yr", "p_default_5yr", "recovery_rate", "spread"):
+                v = tier[k]
+                _check_nan(v, f"default_ratings.tiers[{i}].{k}")
+                if not isinstance(v, (int, float)):
+                    raise IndustryBetaConfigError(f"default_ratings.tiers[{i}].{k} must be numeric")
+            if not isinstance(tier["rating"], str) or not tier["rating"]:
+                raise IndustryBetaConfigError(f"default_ratings.tiers[{i}].rating must be a non-empty string")
 
     if "industry_aliases" in cfg:
         aliases = cfg["industry_aliases"]

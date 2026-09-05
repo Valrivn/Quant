@@ -1,0 +1,130 @@
+﻿name: Refresh Damodaran Data
+
+on:
+  schedule:
+    # Monthly on the 1st at 06:00 UTC
+    - cron: '0 6 1 * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (parse & validate only)'
+        required: false
+        default: 'false'
+        type: boolean
+      use_mirror:
+        description: 'Prefer local mirror over live fetch'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 lxml pandas xlrd pyyaml
+
+      - name: Fetch Damodaran data
+        id: fetch
+        run: |
+          python scripts/refresh_damodaran.py \
+            --out config/industry_beta.yaml \
+            --mirror-dir data/damodaran_mirror \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }} \
+            ${{ github.event.inputs.use_mirror == 'true' && '--use-mirror' || '' }}
+        continue-on-error: false
+
+      - name: Validate YAML output
+        run: |
+          python -c "
+          import yaml, sys, hashlib, json
+          from pathlib import Path
+
+          # Load output
+          cfg = yaml.safe_load(Path('config/industry_beta.yaml').read_text()) or {}
+
+          # Validate required sections
+          assert 'industries' in cfg, 'Missing industries section'
+          assert 'update' in cfg, 'Missing update section'
+          assert 'default_ratings' in cfg, 'Missing default_ratings section'
+
+          # Validate version
+          version = cfg['update'].get('version', '')
+          assert version, 'Missing version'
+          parts = version.split('.')
+          assert len(parts) == 2, f'Invalid version format: {version}'
+          year, month = int(parts[0]), int(parts[1])
+          assert 2024 <= year <= 2030, f'Version year out of range: {year}'
+          assert 1 <= month <= 12, f'Version month out of range: {month}'
+
+          # Validate industries count
+          industries = cfg['industries']
+          assert len(industries) >= 70, f'Too few industries: {len(industries)}'
+
+          # Validate required industries
+          required = ['Semiconductor', 'Software (System', 'Aerospace/Defense']
+          for req in required:
+              found = any(req.lower() in n.lower() for n in industries.keys())
+              assert found, f'Required industry not found: {req}'
+
+          # Validate beta ranges
+          for name, info in industries.items():
+              beta = info.get('unlevered_beta', 0)
+              assert 0.05 <= beta <= 3.0, f'{name}: beta {beta} out of range'
+
+          # Validate checksum
+          checksum = cfg['update'].get('combined_checksum')
+          assert checksum, 'Missing combined_checksum'
+          assert len(checksum) == 64, f'Invalid checksum length: {len(checksum)}'
+
+          # Validate default_ratings
+          ratings = cfg['default_ratings'].get('tiers', [])
+          assert len(ratings) >= 10, f'Too few rating tiers: {len(ratings)}'
+
+          print(f'VALIDATION PASSED')
+          print(f'  Version: {version}')
+          print(f'  Industries: {len(industries)}')
+          print(f'  Rating tiers: {len(ratings)}')
+          print(f'  Checksum: {checksum[:16]}...')
+          "
+
+      - name: Commit and push if changed
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          git config user.name "damodaran-bot"
+          git config user.email "damodaran-bot@quant"
+          git add config/industry_beta.yaml
+          git add data/damodaran_mirror/
+          git add data/damodaran_icr_table_v*.json
+          # Check if there are changes
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            VERSION=$(python -c "import yaml; print(yaml.safe_load(open('config/industry_beta.yaml'))['update']['version'])")
+            git commit -m "chore(data): refresh Damodaran beta table v${VERSION}"
+            git push
+            echo "Committed and pushed version ${VERSION}"
+          fi
+
+      - name: Notification on failure
+        if: failure()
+        run: |
+          echo "::error::Damodaran refresh failed! Check logs above."
+          echo "Manual intervention may be required."
+          # GitHub Actions will automatically send email notifications on failure
+          # when the repository has notifications enabled
