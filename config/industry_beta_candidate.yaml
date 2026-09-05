@@ -1,0 +1,285 @@
+industries:
+  Advertising:
+    unlevered_beta: 0.9301
+    sub_area: ad_services
+  Aerospace/Defense:
+    unlevered_beta: 0.8467
+    sub_area: aero_defense
+  Air Transport:
+    unlevered_beta: 0.7041
+    sub_area: airlines
+  Apparel:
+    unlevered_beta: 0.758
+    sub_area: apparel
+  Auto & Truck:
+    unlevered_beta: 1.269
+    sub_area: autos
+  Auto Parts:
+    unlevered_beta: 1.0217
+    sub_area: unknown
+  Bank (Money Center):
+    unlevered_beta: 0.3411
+    sub_area: unknown
+  Banks (Regional):
+    unlevered_beta: 0.2865
+    sub_area: unknown
+  Beverage (Alcoholic):
+    unlevered_beta: 0.6132
+    sub_area: unknown
+  Beverage (Soft):
+    unlevered_beta: 0.5557
+    sub_area: unknown
+  Broadcasting:
+    unlevered_beta: 0.2864
+    sub_area: unknown
+  Brokerage & Investment Banking:
+    unlevered_beta: 0.5808
+    sub_area: unknown
+  Building Materials:
+    unlevered_beta: 0.9302
+    sub_area: unknown
+  Business & Consumer Services:
+    unlevered_beta: 0.7736
+    sub_area: unknown
+  Cable TV:
+    unlevered_beta: 0.3524
+    sub_area: unknown
+  Chemical (Basic):
+    unlevered_beta: 0.58
+    sub_area: unknown
+  Chemical (Diversified):
+    unlevered_beta: 0.3666
+    sub_area: unknown
+  Chemical (Specialty):
+    unlevered_beta: 0.7922
+    sub_area: specialty_chem
+  Coal & Related Energy:
+    unlevered_beta: 1.0165
+    sub_area: unknown
+  Computer Services:
+    unlevered_beta: 0.9155
+    sub_area: it_services
+  Computers/Peripherals:
+    unlevered_beta: 1.3051
+    sub_area: hardware_oem
+  Construction Supplies:
+    unlevered_beta: 1.0161
+    sub_area: unknown
+  Diversified:
+    unlevered_beta: 0.7889
+    sub_area: unknown
+  Drugs (Biotechnology):
+    unlevered_beta: 1.0341
+    sub_area: biotech
+  Drugs (Pharmaceutical):
+    unlevered_beta: 0.8862
+    sub_area: pharma
+  Education:
+    unlevered_beta: 0.6602
+    sub_area: unknown
+  Electrical Equipment:
+    unlevered_beta: 1.1478
+    sub_area: unknown
+  Electronics (Consumer & Office):
+    unlevered_beta: 0.8299
+    sub_area: unknown
+  Electronics (General):
+    unlevered_beta: 0.8974
+    sub_area: electronics
+  Engineering/Construction:
+    unlevered_beta: 1.0949
+    sub_area: unknown
+  Entertainment:
+    unlevered_beta: 0.7372
+    sub_area: unknown
+  Environmental & Waste Services:
+    unlevered_beta: 0.8145
+    sub_area: unknown
+  Farming/Agriculture:
+    unlevered_beta: 0.813
+    sub_area: unknown
+  Financial Svcs. (Non-bank & Insurance):
+    unlevered_beta: 0.3189
+    sub_area: unknown
+  Food Processing:
+    unlevered_beta: 0.4574
+    sub_area: unknown
+  Food Wholesalers:
+    unlevered_beta: 0.6409
+    sub_area: unknown
+  Furn/Home Furnishings:
+    unlevered_beta: 0.6248
+    sub_area: unknown
+  Green & Renewable Energy:
+    unlevered_beta: 0.4633
+    sub_area: unknown
+  Healthcare Products:
+    unlevered_beta: 0.8291
+    sub_area: unknown
+  Healthcare Support Services:
+    unlevered_beta: 0.6889
+    sub_area: unknown
+  Heathcare Information and Technology:
+    unlevered_beta: 0.9913
+    sub_area: unknown
+  Homebuilding:
+    unlevered_beta: 0.785
+    sub_area: unknown
+  Hospitals/Healthcare Facilities:
+    unlevered_beta: 0.5517
+    sub_area: unknown
+  Hotel/Gaming:
+    unlevered_beta: 0.8323
+    sub_area: hotel_gaming
+  Household Products:
+    unlevered_beta: 0.7178
+    sub_area: unknown
+  Information Services:
+    unlevered_beta: 0.7372
+    sub_area: data_services
+  Insurance (General):
+    unlevered_beta: 0.5636
+    sub_area: unknown
+  Insurance (Life):
+    unlevered_beta: 0.4272
+    sub_area: unknown
+  Insurance (Prop/Cas.):
+    unlevered_beta: 0.4357
+    sub_area: unknown
+  Investments & Asset Management:
+    unlevered_beta: 0.5297
+    sub_area: unknown
+  Machinery:
+    unlevered_beta: 0.868
+    sub_area: machinery
+  Metals & Mining:
+    unlevered_beta: 0.9636
+    sub_area: unknown
+  Office Equipment & Services:
+    unlevered_beta: 0.9806
+    sub_area: unknown
+  Oil/Gas (Integrated):
+    unlevered_beta: 0.2712
+    sub_area: oil_gas
+  Oil/Gas (Production and Exploration):
+    unlevered_beta: 0.5628
+    sub_area: unknown
+  Oil/Gas Distribution:
+    unlevered_beta: 0.4651
+    sub_area: unknown
+  Oilfield Svcs/Equip.:
+    unlevered_beta: 0.743
+    sub_area: unknown
+  Packaging & Container:
+    unlevered_beta: 0.7231
+    sub_area: unknown
+  Paper/Forest Products:
+    unlevered_beta: 0.7216
+    sub_area: unknown
+  Power:
+    unlevered_beta: 0.31
+    sub_area: unknown
+  Precious Metals:
+    unlevered_beta: 0.7932
+    sub_area: unknown
+  Publishing & Newspapers:
+    unlevered_beta: 0.4773
+    sub_area: unknown
+  R.E.I.T.:
+    unlevered_beta: 0.3929
+    sub_area: unknown
+  Real Estate (Development):
+    unlevered_beta: 0.4783
+    sub_area: unknown
+  Real Estate (General/Diversified):
+    unlevered_beta: 0.5779
+    sub_area: unknown
+  Real Estate (Operations & Services):
+    unlevered_beta: 0.8149
+    sub_area: unknown
+  Recreation:
+    unlevered_beta: 0.6951
+    sub_area: unknown
+  Reinsurance:
+    unlevered_beta: 0.4384
+    sub_area: unknown
+  Restaurant/Dining:
+    unlevered_beta: 0.7674
+    sub_area: restaurants
+  Retail (Automotive):
+    unlevered_beta: 0.6984
+    sub_area: unknown
+  Retail (Building Supply):
+    unlevered_beta: 1.307
+    sub_area: unknown
+  Retail (Distributors):
+    unlevered_beta: 0.7827
+    sub_area: unknown
+  Retail (General):
+    unlevered_beta: 0.76
+    sub_area: unknown
+  Retail (Grocery and Food):
+    unlevered_beta: 0.8048
+    sub_area: unknown
+  Retail (REITs):
+    unlevered_beta: 0.4362
+    sub_area: unknown
+  Retail (Special Lines):
+    unlevered_beta: 0.9488
+    sub_area: unknown
+  Rubber& Tires:
+    unlevered_beta: 0.1435
+    sub_area: unknown
+  Semiconductor:
+    unlevered_beta: 1.4893
+    sub_area: chip_design
+  Semiconductor Equip:
+    unlevered_beta: 1.3481
+    sub_area: unknown
+  Shipbuilding & Marine:
+    unlevered_beta: 0.644
+    sub_area: unknown
+  Shoe:
+    unlevered_beta: 0.9337
+    sub_area: unknown
+  Software (Entertainment):
+    unlevered_beta: 1.0128
+    sub_area: unknown
+  Software (Internet):
+    unlevered_beta: 1.5461
+    sub_area: unknown
+  Software (System & Application):
+    unlevered_beta: 1.2254
+    sub_area: application_software
+  Steel:
+    unlevered_beta: 0.9035
+    sub_area: steel
+  Telecom (Wireless):
+    unlevered_beta: 0.3873
+    sub_area: unknown
+  Telecom. Equipment:
+    unlevered_beta: 0.8635
+    sub_area: unknown
+  Telecom. Services:
+    unlevered_beta: 0.3654
+    sub_area: unknown
+  Tobacco:
+    unlevered_beta: 0.6776
+    sub_area: unknown
+  Transportation:
+    unlevered_beta: 0.6753
+    sub_area: unknown
+  Transportation (Railroads):
+    unlevered_beta: 0.8069
+    sub_area: unknown
+  Trucking:
+    unlevered_beta: 0.8504
+    sub_area: unknown
+  Utility (General):
+    unlevered_beta: 0.1486
+    sub_area: utilities
+  Utility (Water):
+    unlevered_beta: 0.2812
+    sub_area: unknown
+created: '2026-09-01'
+note: STAGED CANDIDATE for CEO review. Not live. Merge only after approval.

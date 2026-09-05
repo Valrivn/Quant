@@ -1,0 +1,8972 @@
+meta:
+  generated_utc: '2026-09-05T04:05:21.206830+00:00'
+  total_tickers: 794
+  source: ticker_master.csv + yfinance enrichment
+  tier_counts:
+    core: 186
+    mega: 4
+    large: 120
+    mid: 241
+    small: 243
+    micro: 0
+  sector_counts:
+    Real Estate: 80
+    Industrials: 141
+    Financial Services: 271
+    Technology: 64
+    Healthcare: 61
+    Consumer Defensive: 43
+    Energy: 63
+    Basic Materials: 55
+    Consumer Cyclical: 102
+    Unknown: 1613
+    Communication Services: 23
+    Utilities: 36
+  tags_summary:
+    core: 444
+    mega: 4
+    large: 120
+    mid: 241
+    small: 243
+    micro: 1500
+    sp500: 444
+    dividend_aristocrat: 23
+    bank: 17
+    tech: 6
+tickers:
+- ticker: BRK-B
+  cik: 1067983
+  company_name: BERKSHIRE HATHAWAY INC
+  exchange: NYSE
+  market_cap: 1083263352832
+  sector: Financial Services
+  industry: Insurance - Diversified
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ABBV
+  cik: 1551152
+  company_name: AbbVie Inc.
+  exchange: NYSE
+  market_cap: 453194874880
+  sector: Healthcare
+  industry: Drug Manufacturers - General
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BAC
+  cik: 70858
+  company_name: BANK OF AMERICA CORP /DE/
+  exchange: NYSE
+  market_cap: 438305488896
+  sector: Financial Services
+  industry: Banks - Diversified
+  tier: core
+  tags:
+  - core
+  - sp500
+  - bank
+  pit_eligible: true
+- ticker: CVX
+  cik: 93410
+  company_name: CHEVRON CORP
+  exchange: NYSE
+  market_cap: 409190465536
+  sector: Energy
+  industry: Oil & Gas Integrated
+  tier: core
+  tags:
+  - core
+  - sp500
+  - dividend_aristocrat
+  pit_eligible: true
+- ticker: CAT
+  cik: 18230
+  company_name: CATERPILLAR INC
+  exchange: NYSE
+  market_cap: 374147776512
+  sector: Industrials
+  industry: Farm & Heavy Construction Machinery
+  tier: core
+  tags:
+  - core
+  - sp500
+  - dividend_aristocrat
+  pit_eligible: true
+- ticker: GE
+  cik: 40545
+  company_name: GENERAL ELECTRIC CO
+  exchange: NYSE
+  market_cap: 349783064576
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DELL
+  cik: 1571996
+  company_name: Dell Technologies Inc.
+  exchange: NYSE
+  market_cap: 338669076480
+  sector: Technology
+  industry: Computer Hardware
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GS
+  cik: 886982
+  company_name: GOLDMAN SACHS GROUP INC
+  exchange: NYSE
+  market_cap: 302413512704
+  sector: Financial Services
+  industry: Capital Markets
+  tier: core
+  tags:
+  - core
+  - sp500
+  - bank
+  pit_eligible: true
+- ticker: GEV
+  cik: 1996810
+  company_name: GE Vernova Inc.
+  exchange: NYSE
+  market_cap: 250872922112
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ANET
+  cik: 1596532
+  company_name: Arista Networks, Inc.
+  exchange: NYSE
+  market_cap: 244400128000
+  sector: Technology
+  industry: Computer Hardware
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: C
+  cik: 831001
+  company_name: CITIGROUP INC
+  exchange: NYSE
+  market_cap: 231016595456
+  sector: Financial Services
+  industry: Banks - Diversified
+  tier: core
+  tags:
+  - core
+  - sp500
+  - bank
+  pit_eligible: true
+- ticker: AXP
+  cik: 4962
+  company_name: AMERICAN EXPRESS CO
+  exchange: NYSE
+  market_cap: 220259057664
+  sector: Financial Services
+  industry: Credit Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CRM
+  cik: 1108524
+  company_name: Salesforce, Inc.
+  exchange: NYSE
+  market_cap: 213346304000
+  sector: Technology
+  industry: Software - Application
+  tier: core
+  tags:
+  - core
+  - sp500
+  - tech
+  pit_eligible: true
+- ticker: APH
+  cik: 820313
+  company_name: AMPHENOL CORP /DE/
+  exchange: NYSE
+  market_cap: 204132728832
+  sector: Technology
+  industry: Electronic Components
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ABT
+  cik: 1800
+  company_name: ABBOTT LABORATORIES
+  exchange: NYSE
+  market_cap: 187452440576
+  sector: Healthcare
+  industry: Medical Devices
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DE
+  cik: 315189
+  company_name: DEERE & CO
+  exchange: NYSE
+  market_cap: 186993311744
+  sector: Industrials
+  industry: Farm & Heavy Construction Machinery
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BLK
+  cik: 2012383
+  company_name: BlackRock, Inc.
+  exchange: NYSE
+  market_cap: 182345416704
+  sector: Financial Services
+  industry: Asset Management
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DIS
+  cik: 1744489
+  company_name: Walt Disney Co
+  exchange: NYSE
+  market_cap: 181837381632
+  sector: Communication Services
+  industry: Entertainment
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BA
+  cik: 12927
+  company_name: BOEING CO
+  exchange: NYSE
+  market_cap: 167756038144
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BX
+  cik: 1393818
+  company_name: Blackstone Inc.
+  exchange: NYSE
+  market_cap: 162739781632
+  sector: Financial Services
+  industry: Asset Management
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: COP
+  cik: 1163165
+  company_name: CONOCOPHILLIPS
+  exchange: NYSE
+  market_cap: 161291567104
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ETN
+  cik: 1551182
+  company_name: Eaton Corp plc
+  exchange: NYSE
+  market_cap: 159574147072
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BUD
+  cik: 1668717
+  company_name: Anheuser-Busch InBev SA/NV
+  exchange: NYSE
+  market_cap: 158219304960
+  sector: Consumer Defensive
+  industry: Beverages - Brewers
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DHR
+  cik: 313616
+  company_name: DANAHER CORP /DE/
+  exchange: NYSE
+  market_cap: 145982078976
+  sector: Healthcare
+  industry: Diagnostics & Research
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BMY
+  cik: 14272
+  company_name: BRISTOL MYERS SQUIBB CO
+  exchange: NYSE
+  market_cap: 136494186496
+  sector: Healthcare
+  industry: Drug Manufacturers - General
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: COF
+  cik: 927628
+  company_name: CAPITAL ONE FINANCIAL CORP
+  exchange: NYSE
+  market_cap: 134721282048
+  sector: Financial Services
+  industry: Credit Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  - bank
+  pit_eligible: true
+- ticker: GLW
+  cik: 24741
+  company_name: CORNING INC /NY
+  exchange: NYSE
+  market_cap: 132912226304
+  sector: Technology
+  industry: Electronic Components
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CB
+  cik: 896159
+  company_name: Chubb Ltd
+  exchange: NYSE
+  market_cap: 131785375744
+  sector: Financial Services
+  industry: Insurance - Property & Casualty
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CVS
+  cik: 64803
+  company_name: CVS HEALTH Corp
+  exchange: NYSE
+  market_cap: 123727593472
+  sector: Healthcare
+  industry: Healthcare Plans
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ACN
+  cik: 1467373
+  company_name: Accenture plc
+  exchange: NYSE
+  market_cap: 114261827584
+  sector: Technology
+  industry: Information Technology Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FCX
+  cik: 831259
+  company_name: FREEPORT-MCMORAN INC
+  exchange: NYSE
+  market_cap: 104441561088
+  sector: Basic Materials
+  industry: Copper
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GD
+  cik: 40533
+  company_name: GENERAL DYNAMICS CORP
+  exchange: NYSE
+  market_cap: 97235550208
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DUK
+  cik: 1326160
+  company_name: Duke Energy CORP
+  exchange: NYSE
+  market_cap: 93735796736
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ELV
+  cik: 1156039
+  company_name: Elevance Health, Inc.
+  exchange: NYSE
+  market_cap: 88374239232
+  sector: Healthcare
+  industry: Healthcare Plans
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EMR
+  cik: 32604
+  company_name: EMERSON ELECTRIC CO
+  exchange: NYSE
+  market_cap: 85243002880
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: core
+  tags:
+  - core
+  - sp500
+  - dividend_aristocrat
+  pit_eligible: true
+- ticker: AMT
+  cik: 1053507
+  company_name: AMERICAN TOWER CORP /MA/
+  exchange: NYSE
+  market_cap: 81939079168
+  sector: Real Estate
+  industry: REIT - Specialty
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GM
+  cik: 1467858
+  company_name: General Motors Co
+  exchange: NYSE
+  market_cap: 79374663680
+  sector: Consumer Cyclical
+  industry: Auto Manufacturers
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: APO
+  cik: 1858681
+  company_name: Apollo Global Management, Inc.
+  exchange: NYSE
+  market_cap: 78937907200
+  sector: Financial Services
+  industry: Asset Management
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ECL
+  cik: 31462
+  company_name: ECOLAB INC.
+  exchange: NYSE
+  market_cap: 78290173952
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CMI
+  cik: 26172
+  company_name: CUMMINS INC
+  exchange: NYSE
+  market_cap: 77195354112
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FDX
+  cik: 1048911
+  company_name: FEDEX CORP
+  exchange: NYSE
+  market_cap: 76330942464
+  sector: Industrials
+  industry: Integrated Freight & Logistics
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EOG
+  cik: 821189
+  company_name: EOG RESOURCES INC
+  exchange: NYSE
+  market_cap: 76156395520
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CI
+  cik: 1739940
+  company_name: Cigna Group
+  exchange: NYSE
+  market_cap: 74653220864
+  sector: Healthcare
+  industry: Healthcare Plans
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DLR
+  cik: 1297996
+  company_name: DIGITAL REALTY TRUST, INC.
+  exchange: NYSE
+  market_cap: 71148068864
+  sector: Real Estate
+  industry: REIT - Specialty
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CL
+  cik: 21665
+  company_name: COLGATE PALMOLIVE CO
+  exchange: NYSE
+  market_cap: 70765027328
+  sector: Consumer Defensive
+  industry: Household & Personal Products
+  tier: core
+  tags:
+  - core
+  - sp500
+  - dividend_aristocrat
+  pit_eligible: true
+- ticker: BSX
+  cik: 885725
+  company_name: BOSTON SCIENTIFIC CORP
+  exchange: NYSE
+  market_cap: 69273174016
+  sector: Healthcare
+  industry: Medical Devices
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AON
+  cik: 315293
+  company_name: Aon plc
+  exchange: NYSE
+  market_cap: 68535607296
+  sector: Financial Services
+  industry: Insurance Brokers
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AJG
+  cik: 354190
+  company_name: Arthur J. Gallagher & Co.
+  exchange: NYSE
+  market_cap: 67338215424
+  sector: Financial Services
+  industry: Insurance Brokers
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: APD
+  cik: 2969
+  company_name: Air Products & Chemicals, Inc.
+  exchange: NYSE
+  market_cap: 67088470016
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ALL
+  cik: 899051
+  company_name: ALLSTATE CORP
+  exchange: NYSE
+  market_cap: 65634340864
+  sector: Financial Services
+  industry: Insurance - Property & Casualty
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: COR
+  cik: 1140859
+  company_name: Cencora, Inc.
+  exchange: NYSE
+  market_cap: 63154253824
+  sector: Healthcare
+  industry: Medical Distribution
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GWW
+  cik: 277135
+  company_name: W.W. GRAINGER, INC.
+  exchange: NYSE
+  market_cap: 62384730112
+  sector: Industrials
+  industry: Industrial Distribution
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AFL
+  cik: 4977
+  company_name: AFLAC INC
+  exchange: NYSE
+  market_cap: 58762448896
+  sector: Financial Services
+  industry: Insurance - Life
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CTVA
+  cik: 1755672
+  company_name: Corteva, Inc.
+  exchange: NYSE
+  market_cap: 58619842560
+  sector: Basic Materials
+  industry: Agricultural Inputs
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: F
+  cik: 37996
+  company_name: FORD MOTOR CO
+  exchange: NYSE
+  market_cap: 58298650624
+  sector: Consumer Cyclical
+  industry: Auto Manufacturers
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: D
+  cik: 715957
+  company_name: DOMINION ENERGY, INC
+  exchange: NYSE
+  market_cap: 57907986432
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CAH
+  cik: 721371
+  company_name: CARDINAL HEALTH INC
+  exchange: NYSE
+  market_cap: 57488068608
+  sector: Healthcare
+  industry: Medical Distribution
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AME
+  cik: 1037868
+  company_name: AMETEK INC/
+  exchange: NYSE
+  market_cap: 54499983360
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GRMN
+  cik: 1121788
+  company_name: GARMIN LTD
+  exchange: NYSE
+  market_cap: 53425938432
+  sector: Technology
+  industry: Scientific & Technical Instruments
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DVN
+  cik: 1090012
+  company_name: DEVON ENERGY CORP/DE
+  exchange: NYSE
+  market_cap: 52866002944
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DAL
+  cik: 27904
+  company_name: DELTA AIR LINES, INC.
+  exchange: NYSE
+  market_cap: 52721639424
+  sector: Industrials
+  industry: Airlines
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EW
+  cik: 1099800
+  company_name: Edwards Lifesciences Corp
+  exchange: NYSE
+  market_cap: 51818360832
+  sector: Healthcare
+  industry: Medical Devices
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ETR
+  cik: 65984
+  company_name: ENTERGY CORP /DE/
+  exchange: NYSE
+  market_cap: 51251187712
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BDX
+  cik: 10795
+  company_name: BECTON DICKINSON & CO
+  exchange: NYSE
+  market_cap: 50320740352
+  sector: Healthcare
+  industry: Medical Instruments & Supplies
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FITB
+  cik: 35527
+  company_name: FIFTH THIRD BANCORP
+  exchange: NYSE
+  market_cap: 49761193984
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: core
+  tags:
+  - core
+  - sp500
+  - bank
+  pit_eligible: true
+- ticker: AMP
+  cik: 820027
+  company_name: AMERIPRISE FINANCIAL INC
+  exchange: NYSE
+  market_cap: 49516068864
+  sector: Financial Services
+  industry: Asset Management
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CARR
+  cik: 1783180
+  company_name: CARRIER GLOBAL Corp
+  exchange: NYSE
+  market_cap: 49220448256
+  sector: Industrials
+  industry: Building Products & Equipment
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CMG
+  cik: 1058090
+  company_name: CHIPOTLE MEXICAN GRILL INC
+  exchange: NYSE
+  market_cap: 46769848320
+  sector: Consumer Cyclical
+  industry: Restaurants
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CIEN
+  cik: 936395
+  company_name: CIENA CORP
+  exchange: NYSE
+  market_cap: 45520535552
+  sector: Technology
+  industry: Communication Equipment
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CBRE
+  cik: 1138118
+  company_name: CBRE GROUP, INC.
+  exchange: NYSE
+  market_cap: 42813710336
+  sector: Real Estate
+  industry: Real Estate Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: A
+  cik: 1090872
+  company_name: AGILENT TECHNOLOGIES, INC.
+  exchange: NYSE
+  market_cap: 42537365504
+  sector: Healthcare
+  industry: Diagnostics & Research
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ADM
+  cik: 7084
+  company_name: Archer-Daniels-Midland Co
+  exchange: NYSE
+  market_cap: 40778600448
+  sector: Consumer Defensive
+  industry: Farm Products
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DHI
+  cik: 882184
+  company_name: HORTON D R INC /DE/
+  exchange: NYSE
+  market_cap: 39927357440
+  sector: Consumer Cyclical
+  industry: Residential Construction
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AIG
+  cik: 5272
+  company_name: AMERICAN INTERNATIONAL GROUP, INC.
+  exchange: NYSE
+  market_cap: 39849689088
+  sector: Financial Services
+  industry: Insurance - Diversified
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ED
+  cik: 1047862
+  company_name: CONSOLIDATED EDISON INC
+  exchange: NYSE
+  market_cap: 39678914560
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EL
+  cik: 1001250
+  company_name: ESTEE LAUDER COMPANIES INC
+  exchange: NYSE
+  market_cap: 37576396800
+  sector: Consumer Defensive
+  industry: Household & Personal Products
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EC
+  cik: 1444406
+  company_name: ECOPETROL S.A.
+  exchange: NYSE
+  market_cap: 35463147520
+  sector: Energy
+  industry: Oil & Gas Integrated
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EQT
+  cik: 33213
+  company_name: EQT Corp
+  exchange: NYSE
+  market_cap: 34509717504
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CCI
+  cik: 1051470
+  company_name: CROWN CASTLE INC.
+  exchange: NYSE
+  market_cap: 33137711104
+  sector: Real Estate
+  industry: REIT - Specialty
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CNC
+  cik: 1071739
+  company_name: CENTENE CORP
+  exchange: NYSE
+  market_cap: 33117425664
+  sector: Healthcare
+  industry: Healthcare Plans
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CCL
+  cik: 815097
+  company_name: Carnival Corp Ltd.
+  exchange: NYSE
+  market_cap: 32200452096
+  sector: Consumer Cyclical
+  industry: Travel Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FTI
+  cik: 1681459
+  company_name: TechnipFMC plc
+  exchange: NYSE
+  market_cap: 31310403584
+  sector: Energy
+  industry: Oil & Gas Equipment & Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CBOE
+  cik: 1374310
+  company_name: Cboe Global Markets, Inc.
+  exchange: BATS
+  market_cap: 31160127488
+  sector: Financial Services
+  industry: Financial Data & Stock Exchanges
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: HAL
+  cik: 45012
+  company_name: HALLIBURTON CO
+  exchange: NYSE
+  market_cap: 30884143104
+  sector: Energy
+  industry: Oil & Gas Equipment & Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EXR
+  cik: 1289490
+  company_name: Extra Space Storage Inc.
+  exchange: NYSE
+  market_cap: 30732828672
+  sector: Real Estate
+  industry: REIT - Industrial
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CFG
+  cik: 759944
+  company_name: CITIZENS FINANCIAL GROUP INC/RI
+  exchange: NYSE
+  market_cap: 29810892800
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: core
+  tags:
+  - core
+  - sp500
+  - bank
+  pit_eligible: true
+- ticker: AEE
+  cik: 1002910
+  company_name: AMEREN CORP
+  exchange: NYSE
+  market_cap: 29475502080
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DG
+  cik: 29534
+  company_name: DOLLAR GENERAL CORP
+  exchange: NYSE
+  market_cap: 29388363776
+  sector: Consumer Defensive
+  industry: Discount Stores
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ATI
+  cik: 1018963
+  company_name: ATI INC
+  exchange: NYSE
+  market_cap: 28684290048
+  sector: Industrials
+  industry: Metal Fabrication
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DTE
+  cik: 936340
+  company_name: DTE ENERGY CO
+  exchange: NYSE
+  market_cap: 28316624896
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ATO
+  cik: 731802
+  company_name: ATMOS ENERGY CORP
+  exchange: NYSE
+  market_cap: 28315721728
+  sector: Utilities
+  industry: Utilities - Regulated Gas
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AWK
+  cik: 1410636
+  company_name: American Water Works Company, Inc.
+  exchange: NYSE
+  market_cap: 27961167872
+  sector: Utilities
+  industry: Utilities - Regulated Water
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CPAY
+  cik: 1175454
+  company_name: CORPAY, INC.
+  exchange: NYSE
+  market_cap: 27338686464
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FE
+  cik: 1031296
+  company_name: FIRSTENERGY CORP
+  exchange: NYSE
+  market_cap: 27062990848
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ES
+  cik: 72741
+  company_name: EVERSOURCE ENERGY
+  exchange: NYSE
+  market_cap: 26762741760
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DGX
+  cik: 1022079
+  company_name: QUEST DIAGNOSTICS INC
+  exchange: NYSE
+  market_cap: 26173937664
+  sector: Healthcare
+  industry: Diagnostics & Research
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CNP
+  cik: 1130310
+  company_name: CENTERPOINT ENERGY INC
+  exchange: NYSE
+  market_cap: 26131431424
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DOV
+  cik: 29905
+  company_name: DOVER Corp
+  exchange: NYSE
+  market_cap: 25977122816
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: core
+  tags:
+  - core
+  - sp500
+  - dividend_aristocrat
+  pit_eligible: true
+- ticker: DRI
+  cik: 940944
+  company_name: DARDEN RESTAURANTS INC
+  exchange: NYSE
+  market_cap: 24624936960
+  sector: Consumer Cyclical
+  industry: Restaurants
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EXPD
+  cik: 746515
+  company_name: EXPEDITORS INTERNATIONAL OF WASHINGTON INC
+  exchange: NYSE
+  market_cap: 24542230528
+  sector: Industrials
+  industry: Integrated Freight & Logistics
+  tier: core
+  tags:
+  - core
+  - sp500
+  - dividend_aristocrat
+  pit_eligible: true
+- ticker: GPN
+  cik: 1123360
+  company_name: GLOBAL PAYMENTS INC
+  exchange: NYSE
+  market_cap: 24487786496
+  sector: Industrials
+  industry: Specialty Business Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BRO
+  cik: 79282
+  company_name: BROWN & BROWN, INC.
+  exchange: NYSE
+  market_cap: 23897872384
+  sector: Financial Services
+  industry: Insurance Brokers
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CHD
+  cik: 313927
+  company_name: CHURCH & DWIGHT CO INC /DE/
+  exchange: NYSE
+  market_cap: 23376445440
+  sector: Consumer Defensive
+  industry: Household & Personal Products
+  tier: core
+  tags:
+  - core
+  - sp500
+  - dividend_aristocrat
+  pit_eligible: true
+- ticker: BG
+  cik: 1996862
+  company_name: Bunge Global SA
+  exchange: NYSE
+  market_cap: 22806460416
+  sector: Consumer Defensive
+  industry: Farm Products
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EIX
+  cik: 827052
+  company_name: EDISON INTERNATIONAL
+  exchange: NYSE
+  market_cap: 21845889024
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FIS
+  cik: 1136893
+  company_name: Fidelity National Information Services, Inc.
+  exchange: NYSE
+  market_cap: 21602920448
+  sector: Technology
+  industry: Information Technology Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CMS
+  cik: 811156
+  company_name: CMS ENERGY CORP
+  exchange: NYSE
+  market_cap: 21467492352
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DOW
+  cik: 1751788
+  company_name: DOW INC.
+  exchange: NYSE
+  market_cap: 21265711104
+  sector: Basic Materials
+  industry: Chemicals
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AMCR
+  cik: 1748790
+  company_name: Amcor plc
+  exchange: NYSE
+  market_cap: 20874909696
+  sector: Consumer Cyclical
+  industry: Packaging & Containers
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EFX
+  cik: 33185
+  company_name: EQUIFAX INC
+  exchange: NYSE
+  market_cap: 20800700416
+  sector: Industrials
+  industry: Consulting Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GIS
+  cik: 40704
+  company_name: GENERAL MILLS INC
+  exchange: NYSE
+  market_cap: 20470962176
+  sector: Consumer Defensive
+  industry: Packaged Foods
+  tier: core
+  tags:
+  - core
+  - sp500
+  - dividend_aristocrat
+  pit_eligible: true
+- ticker: CF
+  cik: 1324404
+  company_name: CF Industries Holdings, Inc.
+  exchange: NYSE
+  market_cap: 20180940800
+  sector: Basic Materials
+  industry: Agricultural Inputs
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FICO
+  cik: 814547
+  company_name: FAIR ISAAC CORP
+  exchange: NYSE
+  market_cap: 20134612992
+  sector: Technology
+  industry: Software - Application
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BR
+  cik: 1383312
+  company_name: BROADRIDGE FINANCIAL SOLUTIONS, INC.
+  exchange: NYSE
+  market_cap: 19712090112
+  sector: Technology
+  industry: Information Technology Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ESS
+  cik: 920522
+  company_name: ESSEX PROPERTY TRUST, INC.
+  exchange: NYSE
+  market_cap: 19205390336
+  sector: Real Estate
+  industry: REIT - Residential
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GPC
+  cik: 40987
+  company_name: GENUINE PARTS CO
+  exchange: NYSE
+  market_cap: 19035676672
+  sector: Consumer Cyclical
+  industry: Auto Parts
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BBY
+  cik: 764478
+  company_name: BEST BUY CO INC
+  exchange: NYSE
+  market_cap: 19025946624
+  sector: Consumer Cyclical
+  industry: Specialty Retail
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DD
+  cik: 1666700
+  company_name: DuPont de Nemours, Inc.
+  exchange: NYSE
+  market_cap: 17770305536
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BEN
+  cik: 38777
+  company_name: FRANKLIN RESOURCES INC
+  exchange: NYSE
+  market_cap: 17645510656
+  sector: Financial Services
+  industry: Asset Management
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FTV
+  cik: 1659166
+  company_name: Fortive Corp
+  exchange: NYSE
+  market_cap: 17196851200
+  sector: Technology
+  industry: Scientific & Technical Instruments
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BALL
+  cik: 9389
+  company_name: BALL Corp
+  exchange: NYSE
+  market_cap: 16588958720
+  sector: Consumer Cyclical
+  industry: Packaging & Containers
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: H
+  cik: 1468174
+  company_name: Hyatt Hotels Corp
+  exchange: NYSE
+  market_cap: 15629163520
+  sector: Consumer Cyclical
+  industry: Lodging
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ALB
+  cik: 915913
+  company_name: ALBEMARLE CORP
+  exchange: NYSE
+  market_cap: 14901678080
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DOC
+  cik: 765880
+  company_name: HEALTHPEAK PROPERTIES, INC.
+  exchange: NYSE
+  market_cap: 14639760384
+  sector: Real Estate
+  industry: REIT - Healthcare Facilities
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EG
+  cik: 1095073
+  company_name: EVEREST GROUP, LTD.
+  exchange: NYSE
+  market_cap: 14603597824
+  sector: Financial Services
+  industry: Insurance - Reinsurance
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AIZ
+  cik: 1267238
+  company_name: ASSURANT, INC.
+  exchange: NYSE
+  market_cap: 14093772800
+  sector: Financial Services
+  industry: Insurance - Property & Casualty
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CRL
+  cik: 1100682
+  company_name: CHARLES RIVER LABORATORIES INTERNATIONAL, INC.
+  exchange: NYSE
+  market_cap: 13896389632
+  sector: Healthcare
+  industry: Diagnostics & Research
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BWA
+  cik: 908255
+  company_name: BORGWARNER INC
+  exchange: NYSE
+  market_cap: 13755625472
+  sector: Consumer Cyclical
+  industry: Auto Parts
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GL
+  cik: 320335
+  company_name: GLOBE LIFE INC.
+  exchange: NYSE
+  market_cap: 13392553984
+  sector: Financial Services
+  industry: Insurance - Life
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ALLE
+  cik: 1579241
+  company_name: Allegion plc
+  exchange: NYSE
+  market_cap: 13360978944
+  sector: Industrials
+  industry: Security & Protection Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BAX
+  cik: 10456
+  company_name: BAXTER INTERNATIONAL INC
+  exchange: NYSE
+  market_cap: 13354006528
+  sector: Healthcare
+  industry: Medical Instruments & Supplies
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AVY
+  cik: 8818
+  company_name: Avery Dennison Corp
+  exchange: NYSE
+  market_cap: 13267472384
+  sector: Consumer Cyclical
+  industry: Packaging & Containers
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GDDY
+  cik: 1609711
+  company_name: GoDaddy Inc.
+  exchange: NYSE
+  market_cap: 12830679040
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CCK
+  cik: 1219601
+  company_name: CROWN HOLDINGS, INC.
+  exchange: NYSE
+  market_cap: 12524861440
+  sector: Consumer Cyclical
+  industry: Packaging & Containers
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BF-B
+  cik: 14693
+  company_name: BROWN FORMAN CORP
+  exchange: NYSE
+  market_cap: 12265441280
+  sector: Consumer Defensive
+  industry: Beverages - Wineries & Distilleries
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BXP
+  cik: 1037540
+  company_name: BXP, Inc.
+  exchange: NYSE
+  market_cap: 12243593216
+  sector: Real Estate
+  industry: REIT - Office
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CPT
+  cik: 906345
+  company_name: CAMDEN PROPERTY TRUST
+  exchange: NYSE
+  market_cap: 12231776256
+  sector: Real Estate
+  industry: REIT - Residential
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EHC
+  cik: 785161
+  company_name: Encompass Health Corp
+  exchange: NYSE
+  market_cap: 12014995456
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CR
+  cik: 1944013
+  company_name: Crane Co
+  exchange: NYSE
+  market_cap: 11831154688
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FHN
+  cik: 36966
+  company_name: FIRST HORIZON CORP
+  exchange: NYSE
+  market_cap: 11816002560
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DVA
+  cik: 927066
+  company_name: DAVITA INC.
+  exchange: NYSE
+  market_cap: 11738562560
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DECK
+  cik: 910521
+  company_name: DECKERS OUTDOOR CORP
+  exchange: NYSE
+  market_cap: 11685765120
+  sector: Consumer Cyclical
+  industry: Footwear & Accessories
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CLX
+  cik: 21076
+  company_name: CLOROX CO /DE/
+  exchange: NYSE
+  market_cap: 11253838848
+  sector: Consumer Defensive
+  industry: Household & Personal Products
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GNRC
+  cik: 1474735
+  company_name: GENERAC HOLDINGS INC.
+  exchange: NYSE
+  market_cap: 11054841856
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FDS
+  cik: 1013237
+  company_name: FACTSET RESEARCH SYSTEMS INC
+  exchange: NYSE
+  market_cap: 10739371008
+  sector: Financial Services
+  industry: Financial Data & Stock Exchanges
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AM
+  cik: 1623925
+  company_name: Antero Midstream Corp
+  exchange: NYSE
+  market_cap: 10727631872
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AES
+  cik: 874761
+  company_name: AES CORP
+  exchange: NYSE
+  market_cap: 10551757824
+  sector: Utilities
+  industry: Utilities - Diversified
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BIO
+  cik: 12208
+  company_name: BIO-RAD LABORATORIES, INC.
+  exchange: NYSE
+  market_cap: 10323876864
+  sector: Healthcare
+  industry: Medical Devices
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FRT
+  cik: 34903
+  company_name: FEDERAL REALTY INVESTMENT TRUST
+  exchange: NYSE
+  market_cap: 10235812864
+  sector: Real Estate
+  industry: REIT - Retail
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AYI
+  cik: 1144215
+  company_name: ACUITY INC. (DE)
+  exchange: NYSE
+  market_cap: 9999969280
+  sector: Industrials
+  industry: Electrical Equipment & Parts
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: APTV
+  cik: 1521332
+  company_name: Aptiv PLC
+  exchange: NYSE
+  market_cap: 9956018176
+  sector: Consumer Cyclical
+  industry: Auto Parts
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FLS
+  cik: 30625
+  company_name: FLOWSERVE CORP
+  exchange: NYSE
+  market_cap: 9741923328
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AMG
+  cik: 1004434
+  company_name: AFFILIATED MANAGERS GROUP, INC.
+  exchange: NYSE
+  market_cap: 9573864448
+  sector: Financial Services
+  industry: Asset Management
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ARE
+  cik: 1035443
+  company_name: ALEXANDRIA REAL ESTATE EQUITIES, INC.
+  exchange: NYSE
+  market_cap: 9060816896
+  sector: Real Estate
+  industry: REIT - Office
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GME
+  cik: 1326380
+  company_name: GameStop Corp.
+  exchange: NYSE
+  market_cap: 8596924416
+  sector: Consumer Cyclical
+  industry: Specialty Retail
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AOS
+  cik: 91142
+  company_name: SMITH A O CORP
+  exchange: NYSE
+  market_cap: 8219750400
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EMN
+  cik: 915389
+  company_name: EASTMAN CHEMICAL CO
+  exchange: NYSE
+  market_cap: 8138912768
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FLR
+  cik: 1124198
+  company_name: FLUOR CORP
+  exchange: NYSE
+  market_cap: 7510898176
+  sector: Industrials
+  industry: Engineering & Construction
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CAG
+  cik: 23217
+  company_name: CONAGRA BRANDS INC.
+  exchange: NYSE
+  market_cap: 7408195584
+  sector: Consumer Defensive
+  industry: Packaged Foods
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CLF
+  cik: 764065
+  company_name: CLEVELAND-CLIFFS INC.
+  exchange: NYSE
+  market_cap: 7131750400
+  sector: Basic Materials
+  industry: Steel
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BLDR
+  cik: 1316835
+  company_name: Builders FirstSource, Inc.
+  exchange: NYSE
+  market_cap: 7078770688
+  sector: Industrials
+  industry: Building Products & Equipment
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ETSY
+  cik: 1370637
+  company_name: ETSY INC
+  exchange: NYSE
+  market_cap: 7022221312
+  sector: Consumer Cyclical
+  industry: Internet Retail
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AN
+  cik: 350698
+  company_name: AUTONATION, INC.
+  exchange: NYSE
+  market_cap: 7020792832
+  sector: Consumer Cyclical
+  industry: Auto & Truck Dealerships
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ANF
+  cik: 1018840
+  company_name: ABERCROMBIE & FITCH CO /DE/
+  exchange: NYSE
+  market_cap: 6650094080
+  sector: Consumer Cyclical
+  industry: Apparel Retail
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: G
+  cik: 1398659
+  company_name: Genpact LTD
+  exchange: NYSE
+  market_cap: 6271043584
+  sector: Technology
+  industry: Information Technology Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: EPAM
+  cik: 1352010
+  company_name: EPAM Systems, Inc.
+  exchange: NYSE
+  market_cap: 6037740032
+  sector: Technology
+  industry: Information Technology Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CNX
+  cik: 1070412
+  company_name: CNX Resources Corp
+  exchange: NYSE
+  market_cap: 5546406912
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ADT
+  cik: 1703056
+  company_name: ADT Inc.
+  exchange: NYSE
+  market_cap: 5449971712
+  sector: Industrials
+  industry: Security & Protection Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AMTM
+  cik: 2011286
+  company_name: Amentum Holdings, Inc.
+  exchange: NYSE
+  market_cap: 4904798720
+  sector: Industrials
+  industry: Specialty Business Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CE
+  cik: 1306830
+  company_name: Celanese Corp
+  exchange: NYSE
+  market_cap: 4902484480
+  sector: Basic Materials
+  industry: Chemicals
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BC
+  cik: 14930
+  company_name: BRUNSWICK CORP
+  exchange: NYSE
+  market_cap: 4822872576
+  sector: Consumer Cyclical
+  industry: Recreational Vehicles
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GHC
+  cik: 104889
+  company_name: Graham Holdings Co
+  exchange: NYSE
+  market_cap: 4810412544
+  sector: Industrials
+  industry: Conglomerates
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ALK
+  cik: 766421
+  company_name: ALASKA AIR GROUP, INC.
+  exchange: NYSE
+  market_cap: 4691795456
+  sector: Industrials
+  industry: Airlines
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BBWI
+  cik: 701985
+  company_name: Bath & Body Works, Inc.
+  exchange: NYSE
+  market_cap: 3934099968
+  sector: Consumer Cyclical
+  industry: Specialty Retail
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: GNW
+  cik: 1276520
+  company_name: GENWORTH FINANCIAL INC
+  exchange: NYSE
+  market_cap: 3910758400
+  sector: Financial Services
+  industry: Insurance - Life
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ASH
+  cik: 1674862
+  company_name: ASHLAND INC.
+  exchange: NYSE
+  market_cap: 3339710464
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BBT
+  cik: 1108134
+  company_name: Beacon Financial Corp
+  exchange: NYSE
+  market_cap: 2672894976
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AAP
+  cik: 1158449
+  company_name: ADVANCE AUTO PARTS INC
+  exchange: NYSE
+  market_cap: 2665344512
+  sector: Consumer Cyclical
+  industry: Auto Parts
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: COTY
+  cik: 1024305
+  company_name: COTY INC.
+  exchange: NYSE
+  market_cap: 2579766784
+  sector: Consumer Defensive
+  industry: Household & Personal Products
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DXC
+  cik: 1688568
+  company_name: DXC Technology Co
+  exchange: NYSE
+  market_cap: 1863019520
+  sector: Technology
+  industry: Information Technology Services
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: FMC
+  cik: 37785
+  company_name: FMC CORP
+  exchange: NYSE
+  market_cap: 1624192128
+  sector: Basic Materials
+  industry: Agricultural Inputs
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CPRI
+  cik: 1530721
+  company_name: Capri Holdings Ltd
+  exchange: NYSE
+  market_cap: 1556635264
+  sector: Consumer Cyclical
+  industry: Luxury Goods
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: DLX
+  cik: 27996
+  company_name: DELUXE CORP
+  exchange: NYSE
+  market_cap: 1113849216
+  sector: Industrials
+  industry: Conglomerates
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: ABX
+  cik: 1814287
+  company_name: Abacus Global Management, Inc.
+  exchange: NYSE
+  market_cap: 939783488
+  sector: Financial Services
+  industry: Insurance - Life
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: CSR
+  cik: 798359
+  company_name: CENTERSPACE
+  exchange: NYSE
+  market_cap: 936073536
+  sector: Real Estate
+  industry: REIT - Residential
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: AIV
+  cik: 922864
+  company_name: APARTMENT INVESTMENT & MANAGEMENT CO
+  exchange: NYSE
+  market_cap: 394941440
+  sector: Real Estate
+  industry: REIT - Residential
+  tier: core
+  tags:
+  - core
+  - sp500
+  pit_eligible: true
+- ticker: BRK-A
+  cik: 1067983
+  company_name: BERKSHIRE HATHAWAY INC
+  exchange: NYSE
+  market_cap: 1083698774016
+  sector: Financial Services
+  industry: Insurance - Diversified
+  tier: mega
+  tags:
+  - mega
+  pit_eligible: false
+- ticker: BABA
+  cik: 1577552
+  company_name: Alibaba Group Holding Ltd
+  exchange: NYSE
+  market_cap: 281472008192
+  sector: Consumer Cyclical
+  industry: Internet Retail
+  tier: mega
+  tags:
+  - mega
+  pit_eligible: false
+- ticker: AZN
+  cik: 901832
+  company_name: ASTRAZENECA PLC
+  exchange: NYSE
+  market_cap: 252330754048
+  sector: Healthcare
+  industry: Drug Manufacturers - General
+  tier: mega
+  tags:
+  - mega
+  pit_eligible: false
+- ticker: BHP
+  cik: 811809
+  company_name: BHP Group Ltd
+  exchange: NYSE
+  market_cap: 229800329216
+  sector: Basic Materials
+  industry: Other Industrial Metals & Mining
+  tier: mega
+  tags:
+  - mega
+  pit_eligible: false
+- ticker: BBVA
+  cik: 842180
+  company_name: BANCO BILBAO VIZCAYA ARGENTARIA, S.A.
+  exchange: NYSE
+  market_cap: 162845196288
+  sector: Financial Services
+  industry: Banks - Diversified
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BMO
+  cik: 927971
+  company_name: BANK OF MONTREAL /CAN/
+  exchange: NYSE
+  market_cap: 121919168512
+  sector: Financial Services
+  industry: Banks - Diversified
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BTI
+  cik: 1303523
+  company_name: British American Tobacco p.l.c.
+  exchange: NYSE
+  market_cap: 119204675584
+  sector: Consumer Defensive
+  industry: Tobacco
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BNS
+  cik: 9631
+  company_name: BANK OF NOVA SCOTIA
+  exchange: NYSE
+  market_cap: 114350628864
+  sector: Financial Services
+  industry: Banks - Diversified
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BP
+  cik: 313807
+  company_name: BP PLC
+  exchange: NYSE
+  market_cap: 112828473344
+  sector: Energy
+  industry: Oil & Gas Integrated
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BNY
+  cik: 1390777
+  company_name: Bank of New York Mellon Corp
+  exchange: NYSE
+  market_cap: 111844614144
+  sector: Financial Services
+  industry: Banks - Diversified
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: ENB
+  cik: 895728
+  company_name: ENBRIDGE INC
+  exchange: NYSE
+  market_cap: 109400842240
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CM
+  cik: 1045520
+  company_name: CANADIAN IMPERIAL BANK OF COMMERCE /CAN/
+  exchange: NYSE
+  market_cap: 106682408960
+  sector: Financial Services
+  industry: Banks - Diversified
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CNQ
+  cik: 1017413
+  company_name: CANADIAN NATURAL RESOURCES Ltd
+  exchange: NYSE
+  market_cap: 104023285760
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AEM
+  cik: 2809
+  company_name: AGNICO EAGLE MINES LTD
+  exchange: NYSE
+  market_cap: 103668072448
+  sector: Basic Materials
+  industry: Gold
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: GSK
+  cik: 1131399
+  company_name: GSK plc
+  exchange: NYSE
+  market_cap: 99919970304
+  sector: Healthcare
+  industry: Drug Manufacturers - General
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: EQNR
+  cik: 1140625
+  company_name: EQUINOR ASA
+  exchange: NYSE
+  market_cap: 99894976512
+  sector: Energy
+  industry: Oil & Gas Integrated
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: ASX
+  cik: 1122411
+  company_name: ASE Technology Holding Co., Ltd.
+  exchange: NYSE
+  market_cap: 97663483904
+  sector: Technology
+  industry: Semiconductors
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BCS
+  cik: 312069
+  company_name: BARCLAYS PLC
+  exchange: NYSE
+  market_cap: 90592247808
+  sector: Financial Services
+  industry: Banks - Diversified
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BN
+  cik: 1001085
+  company_name: BROOKFIELD Corp /ON/
+  exchange: NYSE
+  market_cap: 89986088960
+  sector: Financial Services
+  industry: Asset Management
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: EPD
+  cik: 1061219
+  company_name: ENTERPRISE PRODUCTS PARTNERS L.P.
+  exchange: NYSE
+  market_cap: 84090044416
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CVNA
+  cik: 1690820
+  company_name: CARVANA CO.
+  exchange: NYSE
+  market_cap: 82680307712
+  sector: Consumer Cyclical
+  industry: Auto & Truck Dealerships
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BAM
+  cik: 1937926
+  company_name: Brookfield Asset Management Ltd.
+  exchange: NYSE
+  market_cap: 80820928512
+  sector: Financial Services
+  industry: Asset Management
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CP
+  cik: 16875
+  company_name: CANADIAN PACIFIC KANSAS CITY LTD/CN
+  exchange: NYSE
+  market_cap: 80523657216
+  sector: Industrials
+  industry: Railroads
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: DB
+  cik: 1159508
+  company_name: DEUTSCHE BANK AKTIENGESELLSCHAFT
+  exchange: NYSE
+  market_cap: 77659078656
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: E
+  cik: 1002242
+  company_name: ENI SPA
+  exchange: NYSE
+  market_cap: 77191749632
+  sector: Energy
+  industry: Oil & Gas Integrated
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CNI
+  cik: 16868
+  company_name: CANADIAN NATIONAL RAILWAY CO
+  exchange: NYSE
+  market_cap: 74626506752
+  sector: Industrials
+  industry: Railroads
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BE
+  cik: 1664703
+  company_name: Bloom Energy Corp
+  exchange: NYSE
+  market_cap: 74477133824
+  sector: Industrials
+  industry: Electrical Equipment & Parts
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: ET
+  cik: 1276187
+  company_name: Energy Transfer LP
+  exchange: NYSE
+  market_cap: 74030940160
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: B
+  cik: 756894
+  company_name: BARRICK MINING CORP
+  exchange: NYSE
+  market_cap: 73653329920
+  sector: Basic Materials
+  industry: Gold
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AMX
+  cik: 1129137
+  company_name: AMERICA MOVIL SAB DE CV/
+  exchange: NYSE
+  market_cap: 68880973824
+  sector: Communication Services
+  industry: Telecom Services
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CRH
+  cik: 849395
+  company_name: CRH PUBLIC LTD CO
+  exchange: NYSE
+  market_cap: 62709714944
+  sector: Basic Materials
+  industry: Building Materials
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CVE
+  cik: 1475260
+  company_name: CENOVUS ENERGY INC.
+  exchange: NYSE
+  market_cap: 59698208768
+  sector: Energy
+  industry: Oil & Gas Integrated
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: FIX
+  cik: 1035983
+  company_name: COMFORT SYSTEMS USA INC
+  exchange: NYSE
+  market_cap: 56674832384
+  sector: Industrials
+  industry: Engineering & Construction
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: COHR
+  cik: 820318
+  company_name: COHERENT CORP.
+  exchange: NYSE
+  market_cap: 55197274112
+  sector: Technology
+  industry: Scientific & Technical Instruments
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AU
+  cik: 1973832
+  company_name: AngloGold Ashanti PLC
+  exchange: NYSE
+  market_cap: 55164252160
+  sector: Basic Materials
+  industry: Gold
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: FNV
+  cik: 1456346
+  company_name: FRANCO NEVADA Corp
+  exchange: NYSE
+  market_cap: 51339149312
+  sector: Basic Materials
+  industry: Gold
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: DEO
+  cik: 835403
+  company_name: DIAGEO PLC
+  exchange: NYSE
+  market_cap: 49580793856
+  sector: Consumer Defensive
+  industry: Beverages - Wineries & Distilleries
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: ABEV
+  cik: 1565025
+  company_name: AMBEV S.A.
+  exchange: NYSE
+  market_cap: 46568394752
+  sector: Consumer Defensive
+  industry: Beverages - Brewers
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: ARES
+  cik: 1176948
+  company_name: Ares Management Corp
+  exchange: NYSE
+  market_cap: 46228000768
+  sector: Financial Services
+  industry: Asset Management
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BSBR
+  cik: 1471055
+  company_name: Banco Santander (Brasil) S.A.
+  exchange: NYSE
+  market_cap: 44625661952
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: FERG
+  cik: 2011641
+  company_name: Ferguson Enterprises Inc. /DE/
+  exchange: NYSE
+  market_cap: 44186537984
+  sector: Industrials
+  industry: Industrial Distribution
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CCJ
+  cik: 1009001
+  company_name: CAMECO CORP
+  exchange: NYSE
+  market_cap: 43875594240
+  sector: Energy
+  industry: Uranium
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: GFI
+  cik: 1172724
+  company_name: GOLD FIELDS LTD
+  exchange: NYSE
+  market_cap: 42228494336
+  sector: Basic Materials
+  industry: Gold
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: FMX
+  cik: 1061736
+  company_name: MEXICAN ECONOMIC DEVELOPMENT INC
+  exchange: NYSE
+  market_cap: 41021456384
+  sector: Consumer Defensive
+  industry: Beverages - Brewers
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CLS
+  cik: 1030894
+  company_name: CELESTICA INC
+  exchange: NYSE
+  market_cap: 39390810112
+  sector: Technology
+  industry: Electronic Components
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BBD
+  cik: 1160330
+  company_name: BANK BRADESCO
+  exchange: NYSE
+  market_cap: 36744445952
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: ALC
+  cik: 1167379
+  company_name: ALCON INC
+  exchange: NYSE
+  market_cap: 34079700992
+  sector: Healthcare
+  industry: Medical Instruments & Supplies
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CHT
+  cik: 1132924
+  company_name: CHUNGHWA TELECOM CO LTD
+  exchange: NYSE
+  market_cap: 33993129984
+  sector: Communication Services
+  industry: Telecom Services
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BBDO
+  cik: 1160330
+  company_name: BANK BRADESCO
+  exchange: NYSE
+  market_cap: 33567690752
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CQP
+  cik: 1383650
+  company_name: Cheniere Energy Partners, L.P.
+  exchange: NYSE
+  market_cap: 33269286912
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: EME
+  cik: 105634
+  company_name: EMCOR Group, Inc.
+  exchange: NYSE
+  market_cap: 33265920000
+  sector: Industrials
+  industry: Engineering & Construction
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BAP
+  cik: 1001290
+  company_name: CREDICORP LTD
+  exchange: NYSE
+  market_cap: 30380271616
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BIP
+  cik: 1406234
+  company_name: Brookfield Infrastructure Partners L.P.
+  exchange: NYSE
+  market_cap: 29400461312
+  sector: Utilities
+  industry: Utilities - Diversified
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: FTS
+  cik: 1666175
+  company_name: Fortis Inc.
+  exchange: NYSE
+  market_cap: 28232333312
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CRCL
+  cik: 1876042
+  company_name: Circle Internet Group, Inc.
+  exchange: NYSE
+  market_cap: 27818229760
+  sector: Financial Services
+  industry: Capital Markets
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CPNG
+  cik: 1834584
+  company_name: Coupang, Inc.
+  exchange: NYSE
+  market_cap: 27483953152
+  sector: Consumer Cyclical
+  industry: Internet Retail
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AMRZ
+  cik: 2035989
+  company_name: Amrize Ltd
+  exchange: NYSE
+  market_cap: 23966281728
+  sector: Basic Materials
+  industry: Building Materials
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CIB
+  cik: 2058897
+  company_name: Grupo Cibest S.A.
+  exchange: NYSE
+  market_cap: 23753525248
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CRS
+  cik: 17843
+  company_name: CARPENTER TECHNOLOGY CORP
+  exchange: NYSE
+  market_cap: 23556673536
+  sector: Industrials
+  industry: Metal Fabrication
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CNH
+  cik: 1567094
+  company_name: CNH Industrial N.V.
+  exchange: NYSE
+  market_cap: 23157485568
+  sector: Industrials
+  industry: Farm & Heavy Construction Machinery
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AER
+  cik: 1378789
+  company_name: AerCap Holdings N.V.
+  exchange: NYSE
+  market_cap: 22854561792
+  sector: Industrials
+  industry: Rental & Leasing Services
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BCE
+  cik: 718940
+  company_name: BCE INC
+  exchange: NYSE
+  market_cap: 22072887296
+  sector: Communication Services
+  industry: Telecom Services
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CDE
+  cik: 215466
+  company_name: Coeur Mining, Inc.
+  exchange: NYSE
+  market_cap: 21833338880
+  sector: Basic Materials
+  industry: Gold
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BCH
+  cik: 1161125
+  company_name: BANK OF CHILE
+  exchange: NYSE
+  market_cap: 21390366720
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CW
+  cik: 26324
+  company_name: CURTISS WRIGHT CORP
+  exchange: NYSE
+  market_cap: 20932595712
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BEKE
+  cik: 1809587
+  company_name: KE Holdings Inc.
+  exchange: NYSE
+  market_cap: 19756496896
+  sector: Real Estate
+  industry: Real Estate Services
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: FDXF
+  cik: 2082247
+  company_name: FedEx Freight Holding Company, Inc.
+  exchange: NYSE
+  market_cap: 19355121664
+  sector: Industrials
+  industry: Integrated Freight & Logistics
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: DINO
+  cik: 1915657
+  company_name: HF Sinclair Corp
+  exchange: NYSE
+  market_cap: 18740197376
+  sector: Energy
+  industry: Oil & Gas Refining & Marketing
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: FLUT
+  cik: 1635327
+  company_name: Flutter Entertainment plc
+  exchange: NYSE
+  market_cap: 17372999680
+  sector: Consumer Cyclical
+  industry: Gambling
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: APG
+  cik: 1796209
+  company_name: APi Group Corp
+  exchange: NYSE
+  market_cap: 17303697408
+  sector: Industrials
+  industry: Engineering & Construction
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AS
+  cik: 1988894
+  company_name: Amer Sports, Inc.
+  exchange: NYSE
+  market_cap: 17181204480
+  sector: Consumer Cyclical
+  industry: Leisure
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BSAC
+  cik: 1027552
+  company_name: BANCO SANTANDER CHILE
+  exchange: NYSE
+  market_cap: 16804682752
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CLH
+  cik: 822818
+  company_name: CLEAN HARBORS INC
+  exchange: NYSE
+  market_cap: 16738836480
+  sector: Industrials
+  industry: Waste Management
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BURL
+  cik: 1579298
+  company_name: Burlington Stores, Inc.
+  exchange: NYSE
+  market_cap: 16666755072
+  sector: Consumer Cyclical
+  industry: Apparel Retail
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CX
+  cik: 1076378
+  company_name: CEMEX SAB DE CV
+  exchange: NYSE
+  market_cap: 15915764736
+  sector: Basic Materials
+  industry: Building Materials
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: GFL
+  cik: 1780232
+  company_name: GFL Environmental Inc.
+  exchange: NYSE
+  market_cap: 15781734400
+  sector: Industrials
+  industry: Waste Management
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AGI
+  cik: 1178819
+  company_name: ALAMOS GOLD INC
+  exchange: NYSE
+  market_cap: 15475808256
+  sector: Basic Materials
+  industry: Gold
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: EMA
+  cik: 1127248
+  company_name: EMERA INC
+  exchange: NYSE
+  market_cap: 15465003008
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CRBG
+  cik: 1889539
+  company_name: Corebridge Financial, Inc.
+  exchange: NYSE
+  market_cap: 15365644288
+  sector: Financial Services
+  industry: Asset Management
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BEP
+  cik: 1533232
+  company_name: Brookfield Renewable Partners L.P.
+  exchange: NYSE
+  market_cap: 15280036864
+  sector: Utilities
+  industry: Utilities - Renewable
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: GIB
+  cik: 1061574
+  company_name: CGI INC
+  exchange: NYSE
+  market_cap: 15251103744
+  sector: Technology
+  industry: Information Technology Services
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: DT
+  cik: 1773383
+  company_name: Dynatrace, Inc.
+  exchange: NYSE
+  market_cap: 15062878208
+  sector: Technology
+  industry: Software - Application
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BMNR
+  cik: 1829311
+  company_name: BITMINE IMMERSION TECHNOLOGIES, INC.
+  exchange: NYSE
+  market_cap: 15062561792
+  sector: Financial Services
+  industry: Capital Markets
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: ARMK
+  cik: 1584509
+  company_name: Aramark
+  exchange: NYSE
+  market_cap: 14968629248
+  sector: Industrials
+  industry: Specialty Business Services
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: FN
+  cik: 1408710
+  company_name: Fabrinet
+  exchange: NYSE
+  market_cap: 14599122944
+  sector: Technology
+  industry: Electronic Components
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: EQH
+  cik: 1333986
+  company_name: Equitable Holdings, Inc.
+  exchange: NYSE
+  market_cap: 14445676544
+  sector: Financial Services
+  industry: Asset Management
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BWXT
+  cik: 1486957
+  company_name: BWX Technologies, Inc.
+  exchange: NYSE
+  market_cap: 14438708224
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CSL
+  cik: 790051
+  company_name: CARLISLE COMPANIES INC
+  exchange: NYSE
+  market_cap: 13984934912
+  sector: Industrials
+  industry: Building Products & Equipment
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CACI
+  cik: 16058
+  company_name: CACI INTERNATIONAL INC /DE/
+  exchange: NYSE
+  market_cap: 13781493760
+  sector: Technology
+  industry: Information Technology Services
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AEG
+  cik: 769218
+  company_name: AEGON LTD.
+  exchange: NYSE
+  market_cap: 13571937280
+  sector: Financial Services
+  industry: Insurance - Diversified
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: GWRE
+  cik: 1528396
+  company_name: Guidewire Software, Inc.
+  exchange: NYSE
+  market_cap: 13522499584
+  sector: Technology
+  industry: Software - Application
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AMH
+  cik: 1562401
+  company_name: American Homes 4 Rent
+  exchange: NYSE
+  market_cap: 13311141888
+  sector: Real Estate
+  industry: REIT - Residential
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: ALLY
+  cik: 40729
+  company_name: Ally Financial Inc.
+  exchange: NYSE
+  market_cap: 13302651904
+  sector: Financial Services
+  industry: Credit Services
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: DOCN
+  cik: 1582961
+  company_name: DigitalOcean Holdings, Inc.
+  exchange: NYSE
+  market_cap: 13224172544
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: DTM
+  cik: 1842022
+  company_name: DT Midstream, Inc.
+  exchange: NYSE
+  market_cap: 13213021184
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AA
+  cik: 1675149
+  company_name: Alcoa Corp
+  exchange: NYSE
+  market_cap: 13187555328
+  sector: Basic Materials
+  industry: Aluminum
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: EMBJ
+  cik: 1355444
+  company_name: EMBRAER S.A.
+  exchange: NYSE
+  market_cap: 13135096832
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CNA
+  cik: 21175
+  company_name: CNA FINANCIAL CORP
+  exchange: NYSE
+  market_cap: 13116026880
+  sector: Financial Services
+  industry: Insurance - Property & Casualty
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: FIG
+  cik: 1579878
+  company_name: Figma, Inc.
+  exchange: NYSE
+  market_cap: 12856198144
+  sector: Technology
+  industry: Software - Application
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: GGG
+  cik: 42888
+  company_name: GRACO INC
+  exchange: NYSE
+  market_cap: 12612963328
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: ELS
+  cik: 895417
+  company_name: EQUITY LIFESTYLE PROPERTIES INC
+  exchange: NYSE
+  market_cap: 12515891200
+  sector: Real Estate
+  industry: REIT - Residential
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BF-A
+  cik: 14693
+  company_name: BROWN FORMAN CORP
+  exchange: NYSE
+  market_cap: 12448987136
+  sector: Consumer Defensive
+  industry: Beverages - Wineries & Distilleries
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: DKS
+  cik: 1089063
+  company_name: DICK'S SPORTING GOODS, INC.
+  exchange: NYSE
+  market_cap: 12374130688
+  sector: Consumer Cyclical
+  industry: Specialty Retail
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: FNF
+  cik: 1331875
+  company_name: Fidelity National Financial, Inc.
+  exchange: NYSE
+  market_cap: 12277867520
+  sector: Financial Services
+  industry: Insurance - Specialty
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: ELAN
+  cik: 1739104
+  company_name: Elanco Animal Health Inc
+  exchange: NYSE
+  market_cap: 12236514304
+  sector: Healthcare
+  industry: Drug Manufacturers - Specialty & Generic
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AR
+  cik: 1433270
+  company_name: ANTERO RESOURCES Corp
+  exchange: NYSE
+  market_cap: 12116170752
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: FMS
+  cik: 1333141
+  company_name: Fresenius Medical Care AG
+  exchange: NYSE
+  market_cap: 12060090368
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AIT
+  cik: 109563
+  company_name: APPLIED INDUSTRIAL TECHNOLOGIES INC
+  exchange: NYSE
+  market_cap: 11948046336
+  sector: Industrials
+  industry: Industrial Distribution
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AHR
+  cik: 1632970
+  company_name: American Healthcare REIT, Inc.
+  exchange: NYSE
+  market_cap: 11928892416
+  sector: Real Estate
+  industry: REIT - Healthcare Facilities
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AFG
+  cik: 1042046
+  company_name: AMERICAN FINANCIAL GROUP INC
+  exchange: NYSE
+  market_cap: 11834551296
+  sector: Financial Services
+  industry: Insurance - Property & Casualty
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BJ
+  cik: 1531152
+  company_name: BJ's Wholesale Club Holdings, Inc.
+  exchange: NYSE
+  market_cap: 11771266048
+  sector: Consumer Defensive
+  industry: Discount Stores
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: EVR
+  cik: 1360901
+  company_name: Evercore Inc.
+  exchange: NYSE
+  market_cap: 11457341440
+  sector: Financial Services
+  industry: Capital Markets
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: EGO
+  cik: 918608
+  company_name: ELDORADO GOLD CORP /FI
+  exchange: NYSE
+  market_cap: 11220061184
+  sector: Basic Materials
+  industry: Gold
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: BNT
+  cik: 1837429
+  company_name: Brookfield Wealth Solutions Ltd.
+  exchange: NYSE
+  market_cap: 11040811008
+  sector: Financial Services
+  industry: Insurance - Diversified
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: ARW
+  cik: 7536
+  company_name: ARROW ELECTRONICS, INC.
+  exchange: NYSE
+  market_cap: 10994044928
+  sector: Technology
+  industry: Electronics & Computer Distribution
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: ALSN
+  cik: 1411207
+  company_name: Allison Transmission Holdings Inc
+  exchange: NYSE
+  market_cap: 10837542912
+  sector: Consumer Cyclical
+  industry: Auto Parts
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: EGP
+  cik: 49600
+  company_name: EASTGROUP PROPERTIES INC
+  exchange: NYSE
+  market_cap: 10680456192
+  sector: Real Estate
+  industry: REIT - Industrial
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: GMED
+  cik: 1237831
+  company_name: GLOBUS MEDICAL INC
+  exchange: NYSE
+  market_cap: 10511366144
+  sector: Healthcare
+  industry: Medical Devices
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: GKOS
+  cik: 1192448
+  company_name: GLAUKOS Corp
+  exchange: NYSE
+  market_cap: 10467878912
+  sector: Healthcare
+  industry: Medical Devices
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AG
+  cik: 1308648
+  company_name: FIRST MAJESTIC SILVER CORP
+  exchange: NYSE
+  market_cap: 10336245760
+  sector: Basic Materials
+  industry: Silver
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: DAR
+  cik: 916540
+  company_name: DARLING INGREDIENTS INC.
+  exchange: NYSE
+  market_cap: 10287172608
+  sector: Consumer Defensive
+  industry: Packaged Foods
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: FRO
+  cik: 913290
+  company_name: Frontline plc
+  exchange: NYSE
+  market_cap: 10267367424
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: AVTR
+  cik: 1722482
+  company_name: Avantor, Inc.
+  exchange: NYSE
+  market_cap: 10125091840
+  sector: Healthcare
+  industry: Medical Instruments & Supplies
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: CFR
+  cik: 39263
+  company_name: CULLEN/FROST BANKERS, INC.
+  exchange: NYSE
+  market_cap: 10106635264
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: large
+  tags:
+  - large
+  pit_eligible: false
+- ticker: GIL
+  cik: 1061894
+  company_name: Gildan Activewear Inc.
+  exchange: NYSE
+  market_cap: 9889244160
+  sector: Consumer Cyclical
+  industry: Apparel Manufacturing
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BIO-B
+  cik: 12208
+  company_name: BIO-RAD LABORATORIES, INC.
+  exchange: NYSE
+  market_cap: 9761572864
+  sector: Healthcare
+  industry: Medical Devices
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GGB
+  cik: 1073404
+  company_name: GERDAU S.A.
+  exchange: NYSE
+  market_cap: 9751768064
+  sector: Basic Materials
+  industry: Steel
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CHWY
+  cik: 1766502
+  company_name: Chewy, Inc.
+  exchange: NYSE
+  market_cap: 9686976512
+  sector: Consumer Cyclical
+  industry: Internet Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ESTC
+  cik: 1707753
+  company_name: Elastic N.V.
+  exchange: NYSE
+  market_cap: 9639248896
+  sector: Technology
+  industry: Software - Application
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: EAT
+  cik: 703351
+  company_name: BRINKER INTERNATIONAL, INC
+  exchange: NYSE
+  market_cap: 9615139840
+  sector: Consumer Cyclical
+  industry: Restaurants
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FPS
+  cik: 2080126
+  company_name: Forgent Power Solutions, Inc.
+  exchange: NYSE
+  market_cap: 9543845888
+  sector: Industrials
+  industry: Electrical Equipment & Parts
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CIG-C
+  cik: 1157557
+  company_name: ENERGY CO OF MINAS GERAIS
+  exchange: NYSE
+  market_cap: 9383036928
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AGCO
+  cik: 880266
+  company_name: AGCO CORP /DE
+  exchange: NYSE
+  market_cap: 9342232576
+  sector: Industrials
+  industry: Farm & Heavy Construction Machinery
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CTRE
+  cik: 1590717
+  company_name: CareTrust REIT, Inc.
+  exchange: NYSE
+  market_cap: 9217797120
+  sector: Real Estate
+  industry: REIT - Healthcare Facilities
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ALV
+  cik: 1034670
+  company_name: AUTOLIV INC
+  exchange: NYSE
+  market_cap: 9169299456
+  sector: Consumer Cyclical
+  industry: Auto Parts
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ELPC
+  cik: 1041792
+  company_name: ENERGY CO OF PARANA
+  exchange: NYSE
+  market_cap: 9101856768
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ADC
+  cik: 917251
+  company_name: AGREE REALTY CORP
+  exchange: NYSE
+  market_cap: 9057670144
+  sector: Real Estate
+  industry: REIT - Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DY
+  cik: 67215
+  company_name: DYCOM INDUSTRIES INC
+  exchange: NYSE
+  market_cap: 9055223808
+  sector: Industrials
+  industry: Engineering & Construction
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BRX
+  cik: 1581068
+  company_name: Brixmor Property Group Inc.
+  exchange: NYSE
+  market_cap: 8945328128
+  sector: Real Estate
+  industry: REIT - Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CUBE
+  cik: 1298675
+  company_name: CubeSmart
+  exchange: NYSE
+  market_cap: 8941100032
+  sector: Real Estate
+  industry: REIT - Industrial
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ESI
+  cik: 1590714
+  company_name: Element Solutions Inc
+  exchange: NYSE
+  market_cap: 8775309312
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BAH
+  cik: 1443646
+  company_name: Booz Allen Hamilton Holding Corp
+  exchange: NYSE
+  market_cap: 8756746240
+  sector: Industrials
+  industry: Consulting Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BVN
+  cik: 1013131
+  company_name: BUENAVENTURA MINING CO INC
+  exchange: NYSE
+  market_cap: 8610155520
+  sector: Basic Materials
+  industry: Other Precious Metals & Mining
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CNM
+  cik: 1856525
+  company_name: Core & Main, Inc.
+  exchange: NYSE
+  market_cap: 8577694208
+  sector: Industrials
+  industry: Industrial Distribution
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ACM
+  cik: 868857
+  company_name: AECOM
+  exchange: NYSE
+  market_cap: 8568608256
+  sector: Industrials
+  industry: Engineering & Construction
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: COMP
+  cik: 1563190
+  company_name: Compass, Inc.
+  exchange: NYSE
+  market_cap: 8536207872
+  sector: Real Estate
+  industry: Real Estate Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FR
+  cik: 921825
+  company_name: FIRST INDUSTRIAL REALTY TRUST INC
+  exchange: NYSE
+  market_cap: 8474623488
+  sector: Real Estate
+  industry: REIT - Industrial
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BROS
+  cik: 1866581
+  company_name: Dutch Bros Inc.
+  exchange: NYSE
+  market_cap: 8169966080
+  sector: Consumer Cyclical
+  industry: Restaurants
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ATR
+  cik: 896622
+  company_name: APTARGROUP, INC.
+  exchange: NYSE
+  market_cap: 8100871680
+  sector: Healthcare
+  industry: Medical Instruments & Supplies
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CEF
+  cik: 1726122
+  company_name: Sprott Physical Gold & Silver Trust
+  exchange: NYSE Arca
+  market_cap: 7938826240
+  sector: Unknown
+  industry: Unknown
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GAP
+  cik: 39911
+  company_name: GAP INC
+  exchange: NYSE
+  market_cap: 7878989312
+  sector: Consumer Cyclical
+  industry: Apparel Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CWEN
+  cik: 1567683
+  company_name: Clearway Energy, Inc.
+  exchange: NYSE
+  market_cap: 7847957504
+  sector: Utilities
+  industry: Utilities - Renewable
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AXTA
+  cik: 1616862
+  company_name: Axalta Coating Systems Ltd.
+  exchange: NYSE
+  market_cap: 7657635328
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FAF
+  cik: 1472787
+  company_name: First American Financial Corp
+  exchange: NYSE
+  market_cap: 7427774976
+  sector: Financial Services
+  industry: Insurance - Specialty
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AXS
+  cik: 1214816
+  company_name: AXIS CAPITAL HOLDINGS LTD
+  exchange: NYSE
+  market_cap: 7379813376
+  sector: Financial Services
+  industry: Insurance - Specialty
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AWI
+  cik: 7431
+  company_name: ARMSTRONG WORLD INDUSTRIES INC
+  exchange: NYSE
+  market_cap: 7325415424
+  sector: Industrials
+  industry: Building Products & Equipment
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FSS
+  cik: 277509
+  company_name: FEDERAL SIGNAL CORP /DE/
+  exchange: NYSE
+  market_cap: 7281043456
+  sector: Industrials
+  industry: Farm & Heavy Construction Machinery
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ACA
+  cik: 1739445
+  company_name: Arcosa, Inc.
+  exchange: NYSE
+  market_cap: 7142584832
+  sector: Industrials
+  industry: Engineering & Construction
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ESE
+  cik: 866706
+  company_name: ESCO TECHNOLOGIES INC
+  exchange: NYSE
+  market_cap: 7099191296
+  sector: Technology
+  industry: Scientific & Technical Instruments
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CAVA
+  cik: 1639438
+  company_name: CAVA GROUP, INC.
+  exchange: NYSE
+  market_cap: 7097144320
+  sector: Consumer Cyclical
+  industry: Restaurants
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CHE
+  cik: 19584
+  company_name: CHEMED CORP
+  exchange: NYSE
+  market_cap: 6794288640
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DPC
+  cik: 2107018
+  company_name: DPC Holdings PLC
+  exchange: NYSE
+  market_cap: 6704759296
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FNB
+  cik: 37808
+  company_name: FNB CORP/PA/
+  exchange: NYSE
+  market_cap: 6645846528
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  - bank
+  pit_eligible: false
+- ticker: GTES
+  cik: 1718512
+  company_name: Gates Industrial Corp Ltd.
+  exchange: NYSE
+  market_cap: 6569272832
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ENS
+  cik: 1289308
+  company_name: EnerSys
+  exchange: NYSE
+  market_cap: 6560625152
+  sector: Industrials
+  industry: Electrical Equipment & Parts
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ELF
+  cik: 1600033
+  company_name: e.l.f. Beauty, Inc.
+  exchange: NYSE
+  market_cap: 6471406592
+  sector: Consumer Defensive
+  industry: Household & Personal Products
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BLCO
+  cik: 1860742
+  company_name: Bausch & Lomb Corp
+  exchange: NYSE
+  market_cap: 6443261440
+  sector: Healthcare
+  industry: Medical Instruments & Supplies
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: EPRT
+  cik: 1728951
+  company_name: ESSENTIAL PROPERTIES REALTY TRUST, INC.
+  exchange: NYSE
+  market_cap: 6427309056
+  sector: Real Estate
+  industry: REIT - Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ANDG
+  cik: 2065708
+  company_name: Andersen Group Inc.
+  exchange: NYSE
+  market_cap: 6351044096
+  sector: Consumer Cyclical
+  industry: Personal Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AVAL
+  cik: 1504764
+  company_name: Grupo Aval Acciones Y Valores S.A.
+  exchange: NYSE
+  market_cap: 6339508224
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GATX
+  cik: 40211
+  company_name: GATX CORP
+  exchange: NYSE
+  market_cap: 6288183296
+  sector: Industrials
+  industry: Rental & Leasing Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ESNT
+  cik: 1448893
+  company_name: Essent Group Ltd.
+  exchange: NYSE
+  market_cap: 6217655808
+  sector: Financial Services
+  industry: Insurance - Specialty
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ENIC
+  cik: 1659939
+  company_name: Enel Chile S.A.
+  exchange: NYSE
+  market_cap: 6155823616
+  sector: Utilities
+  industry: Utilities - Renewable
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CIG
+  cik: 1157557
+  company_name: ENERGY CO OF MINAS GERAIS
+  exchange: NYSE
+  market_cap: 6121859584
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GBCI
+  cik: 868671
+  company_name: GLACIER BANCORP, INC.
+  exchange: NYSE
+  market_cap: 6097825792
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ACI
+  cik: 1646972
+  company_name: Albertsons Companies, Inc.
+  exchange: NYSE
+  market_cap: 6090837504
+  sector: Consumer Defensive
+  industry: Grocery Stores
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ECG
+  cik: 2015845
+  company_name: Everus Construction Group, Inc.
+  exchange: NYSE
+  market_cap: 5984117760
+  sector: Industrials
+  industry: Engineering & Construction
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: EXP
+  cik: 918646
+  company_name: EAGLE MATERIALS INC
+  exchange: NYSE
+  market_cap: 5965736960
+  sector: Basic Materials
+  industry: Building Materials
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BEPC
+  cik: 1791863
+  company_name: Brookfield Renewable Corp
+  exchange: NYSE
+  market_cap: 5894162944
+  sector: Utilities
+  industry: Utilities - Renewable
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ASB
+  cik: 7789
+  company_name: ASSOCIATED BANC-CORP
+  exchange: NYSE
+  market_cap: 5867558912
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AGX
+  cik: 100591
+  company_name: ARGAN INC
+  exchange: NYSE
+  market_cap: 5864333312
+  sector: Industrials
+  industry: Engineering & Construction
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AUB
+  cik: 883948
+  company_name: Atlantic Union Bankshares Corp
+  exchange: NYSE
+  market_cap: 5842557440
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DLB
+  cik: 1308547
+  company_name: Dolby Laboratories, Inc.
+  exchange: NYSE
+  market_cap: 5803718144
+  sector: Industrials
+  industry: Specialty Business Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ABCB
+  cik: 351569
+  company_name: Ameris Bancorp
+  exchange: NYSE
+  market_cap: 5774578176
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BXSL
+  cik: 1736035
+  company_name: Blackstone Secured Lending Fund
+  exchange: NYSE
+  market_cap: 5759020032
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BBUC
+  cik: 1654795
+  company_name: Brookfield Business Corp
+  exchange: NYSE
+  market_cap: 5756485632
+  sector: Industrials
+  industry: Conglomerates
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ENVA
+  cik: 1529864
+  company_name: Enova International, Inc.
+  exchange: NYSE
+  market_cap: 5741066752
+  sector: Financial Services
+  industry: Credit Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AROC
+  cik: 1389050
+  company_name: Archrock, Inc.
+  exchange: NYSE
+  market_cap: 5731805184
+  sector: Energy
+  industry: Oil & Gas Equipment & Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BYD
+  cik: 906553
+  company_name: BOYD GAMING CORP
+  exchange: NYSE
+  market_cap: 5668575232
+  sector: Consumer Cyclical
+  industry: Resorts & Casinos
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CMBT
+  cik: 1604481
+  company_name: CMB.TECH NV
+  exchange: NYSE
+  market_cap: 5655408640
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BIRK
+  cik: 1977102
+  company_name: Birkenstock Holding plc
+  exchange: NYSE
+  market_cap: 5614290944
+  sector: Consumer Cyclical
+  industry: Footwear & Accessories
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FLG
+  cik: 910073
+  company_name: FLAGSTAR BANK, NATIONAL ASSOCIATION
+  exchange: NYSE
+  market_cap: 5612055040
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BKH
+  cik: 1130464
+  company_name: BLACK HILLS CORP /SD/
+  exchange: NYSE
+  market_cap: 5582492672
+  sector: Utilities
+  industry: Utilities - Regulated Gas
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AX
+  cik: 1299709
+  company_name: Axos Financial, Inc.
+  exchange: NYSE
+  market_cap: 5557100032
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GXO
+  cik: 1852244
+  company_name: GXO Logistics, Inc.
+  exchange: NYSE
+  market_cap: 5541558784
+  sector: Industrials
+  industry: Integrated Freight & Logistics
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BLSH
+  cik: 1872195
+  company_name: Bullish
+  exchange: NYSE
+  market_cap: 5459340800
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CRGY
+  cik: 1866175
+  company_name: Crescent Energy Co
+  exchange: NYSE
+  market_cap: 5417160704
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CPA
+  cik: 1345105
+  company_name: Copa Holdings, S.A.
+  exchange: NYSE
+  market_cap: 5400817664
+  sector: Industrials
+  industry: Airlines
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BETA
+  cik: 1784570
+  company_name: BETA Technologies, Inc.
+  exchange: NYSE
+  market_cap: 5382224896
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FND
+  cik: 1507079
+  company_name: Floor & Decor Holdings, Inc.
+  exchange: NYSE
+  market_cap: 5348990976
+  sector: Consumer Cyclical
+  industry: Home Improvement Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GVA
+  cik: 861459
+  company_name: GRANITE CONSTRUCTION INC
+  exchange: NYSE
+  market_cap: 5300128256
+  sector: Industrials
+  industry: Engineering & Construction
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CNO
+  cik: 1224608
+  company_name: CNO Financial Group, Inc.
+  exchange: NYSE
+  market_cap: 5250587648
+  sector: Financial Services
+  industry: Insurance - Life
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FBIN
+  cik: 1519751
+  company_name: Fortune Brands Innovations, Inc.
+  exchange: NYSE
+  market_cap: 5142739456
+  sector: Industrials
+  industry: Building Products & Equipment
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AIR
+  cik: 1750
+  company_name: AAR CORP
+  exchange: NYSE
+  market_cap: 5094353408
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GOLF
+  cik: 1672013
+  company_name: Acushnet Holdings Corp.
+  exchange: NYSE
+  market_cap: 5074230272
+  sector: Consumer Cyclical
+  industry: Leisure
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CSW
+  cik: 1624794
+  company_name: CSW INDUSTRIALS, INC.
+  exchange: NYSE
+  market_cap: 5025888768
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BMA
+  cik: 1347426
+  company_name: Macro Bank Inc.
+  exchange: NYSE
+  market_cap: 5023689728
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GBTG
+  cik: 1820872
+  company_name: Global Business Travel Group, Inc.
+  exchange: NYSE
+  market_cap: 4952099840
+  sector: Consumer Cyclical
+  industry: Travel Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CNR
+  cik: 1710366
+  company_name: Core Natural Resources, Inc.
+  exchange: NYSE
+  market_cap: 4944763904
+  sector: Energy
+  industry: Thermal Coal
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: HASI
+  cik: 1561894
+  company_name: HA Sustainable Infrastructure Capital, Inc.
+  exchange: NYSE
+  market_cap: 4926528512
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GEF
+  cik: 43920
+  company_name: GREIF, INC
+  exchange: NYSE
+  market_cap: 4832093696
+  sector: Consumer Cyclical
+  industry: Packaging & Containers
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BOX
+  cik: 1372612
+  company_name: BOX INC
+  exchange: NYSE
+  market_cap: 4828094976
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CRC
+  cik: 1609253
+  company_name: California Resources Corp
+  exchange: NYSE
+  market_cap: 4815814656
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CUZ
+  cik: 25232
+  company_name: COUSINS PROPERTIES INC
+  exchange: NYSE
+  market_cap: 4792293888
+  sector: Real Estate
+  industry: REIT - Office
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BDC
+  cik: 913142
+  company_name: BELDEN INC.
+  exchange: NYSE
+  market_cap: 4778481152
+  sector: Technology
+  industry: Communication Equipment
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DOCS
+  cik: 1516513
+  company_name: Doximity, Inc.
+  exchange: NYSE
+  market_cap: 4696781824
+  sector: Healthcare
+  industry: Health Information Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: HAE
+  cik: 313143
+  company_name: HAEMONETICS CORP
+  exchange: NYSE
+  market_cap: 4682556416
+  sector: Healthcare
+  industry: Medical Devices
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BOOT
+  cik: 1610250
+  company_name: Boot Barn Holdings, Inc.
+  exchange: NYSE
+  market_cap: 4672648192
+  sector: Consumer Cyclical
+  industry: Apparel Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ESAB
+  cik: 1877322
+  company_name: ESAB Corp
+  exchange: NYSE
+  market_cap: 4661440000
+  sector: Industrials
+  industry: Metal Fabrication
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FHI
+  cik: 1056288
+  company_name: FEDERATED HERMES, INC.
+  exchange: NYSE
+  market_cap: 4658801664
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AKO-B
+  cik: 925261
+  company_name: ANDINA BOTTLING CO INC
+  exchange: NYSE
+  market_cap: 4619264512
+  sector: Consumer Defensive
+  industry: Beverages - Non-Alcoholic
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: HAFN
+  cik: 1815779
+  company_name: Hafnia Ltd
+  exchange: NYSE
+  market_cap: 4607983616
+  sector: Industrials
+  industry: Marine Shipping
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BIPC
+  cik: 1788348
+  company_name: Brookfield Infrastructure Corp
+  exchange: NYSE
+  market_cap: 4595824128
+  sector: Utilities
+  industry: Utilities - Regulated Gas
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: EPR
+  cik: 1045450
+  company_name: EPR PROPERTIES
+  exchange: NYSE
+  market_cap: 4595769344
+  sector: Real Estate
+  industry: REIT - Specialty
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CHH
+  cik: 1046311
+  company_name: CHOICE HOTELS INTERNATIONAL INC /DE
+  exchange: NYSE
+  market_cap: 4577756672
+  sector: Consumer Cyclical
+  industry: Lodging
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GFF
+  cik: 50725
+  company_name: GRIFFON CORP
+  exchange: NYSE
+  market_cap: 4571985920
+  sector: Industrials
+  industry: Building Products & Equipment
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: EE
+  cik: 1888447
+  company_name: Excelerate Energy, Inc.
+  exchange: NYSE
+  market_cap: 4539486208
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ALH
+  cik: 1317685
+  company_name: Alliance Laundry Holdings Inc.
+  exchange: NYSE
+  market_cap: 4518475776
+  sector: Consumer Cyclical
+  industry: Furnishings, Fixtures & Appliances
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BB
+  cik: 1070235
+  company_name: BLACKBERRY Ltd
+  exchange: NYSE
+  market_cap: 4512973312
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BCO
+  cik: 78890
+  company_name: BRINKS CO
+  exchange: NYSE
+  market_cap: 4483378688
+  sector: Industrials
+  industry: Security & Protection Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CGAU
+  cik: 1854640
+  company_name: Centerra Gold Inc.
+  exchange: NYSE
+  market_cap: 4483324928
+  sector: Basic Materials
+  industry: Gold
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CRK
+  cik: 23194
+  company_name: COMSTOCK RESOURCES INC
+  exchange: NYSE
+  market_cap: 4480649728
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CVI
+  cik: 1376139
+  company_name: CVR ENERGY INC
+  exchange: NYSE
+  market_cap: 4473611776
+  sector: Energy
+  industry: Oil & Gas Refining & Marketing
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BNL
+  cik: 1424182
+  company_name: Broadstone Net Lease, Inc.
+  exchange: NYSE
+  market_cap: 4430378496
+  sector: Real Estate
+  industry: REIT - Diversified
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DK
+  cik: 1694426
+  company_name: Delek US Holdings, Inc.
+  exchange: NYSE
+  market_cap: 4400144384
+  sector: Energy
+  industry: Oil & Gas Refining & Marketing
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ACHR
+  cik: 1824502
+  company_name: Archer Aviation Inc.
+  exchange: NYSE
+  market_cap: 4396853248
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CON
+  cik: 2014596
+  company_name: Concentra Group Holdings Parent, Inc.
+  exchange: NYSE
+  market_cap: 4395536384
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AQN
+  cik: 1174169
+  company_name: ALGONQUIN POWER & UTILITIES CORP.
+  exchange: NYSE
+  market_cap: 4365343744
+  sector: Utilities
+  industry: Utilities - Diversified
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CVSA
+  cik: 730464
+  company_name: Covista Inc.
+  exchange: NYSE
+  market_cap: 4360032256
+  sector: Consumer Defensive
+  industry: Education & Training Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FBP
+  cik: 1057706
+  company_name: FIRST BANCORP /PR/
+  exchange: NYSE
+  market_cap: 4352572416
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ARX
+  cik: 1997350
+  company_name: Accelerant Holdings
+  exchange: NYSE
+  market_cap: 4317708288
+  sector: Financial Services
+  industry: Insurance Brokers
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BFH
+  cik: 1101215
+  company_name: BREAD FINANCIAL HOLDINGS, INC.
+  exchange: NYSE
+  market_cap: 4259544320
+  sector: Financial Services
+  industry: Credit Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BRC
+  cik: 746598
+  company_name: BRADY CORP
+  exchange: NYSE
+  market_cap: 4230778112
+  sector: Industrials
+  industry: Security & Protection Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AZZ
+  cik: 8947
+  company_name: AZZ INC
+  exchange: NYSE
+  market_cap: 4207811072
+  sector: Industrials
+  industry: Specialty Business Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CBT
+  cik: 16040
+  company_name: CABOT CORP
+  exchange: NYSE
+  market_cap: 4206894592
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BILL
+  cik: 1786352
+  company_name: BILL Holdings, Inc.
+  exchange: NYSE
+  market_cap: 4192206592
+  sector: Technology
+  industry: Software - Application
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FCN
+  cik: 887936
+  company_name: FTI CONSULTING, INC
+  exchange: NYSE
+  market_cap: 4188676096
+  sector: Industrials
+  industry: Consulting Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GEO
+  cik: 923796
+  company_name: GEO GROUP INC
+  exchange: NYSE
+  market_cap: 4181554176
+  sector: Industrials
+  industry: Security & Protection Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ARIS
+  cik: 1964504
+  company_name: Aris Mining Corp
+  exchange: NYSE
+  market_cap: 4138935040
+  sector: Basic Materials
+  industry: Gold
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GEF-B
+  cik: 43920
+  company_name: GREIF, INC
+  exchange: NYSE
+  market_cap: 4116564736
+  sector: Consumer Cyclical
+  industry: Packaging & Containers
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CNS
+  cik: 1284812
+  company_name: COHEN & STEERS, INC.
+  exchange: NYSE
+  market_cap: 4109094912
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: COLD
+  cik: 1455863
+  company_name: AMERICOLD REALTY TRUST
+  exchange: NYSE
+  market_cap: 4078962688
+  sector: Real Estate
+  industry: REIT - Industrial
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CDP
+  cik: 860546
+  company_name: COPT DEFENSE PROPERTIES
+  exchange: NYSE
+  market_cap: 4073091072
+  sector: Real Estate
+  industry: REIT - Office
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DNP
+  cik: 806628
+  company_name: DNP SELECT INCOME FUND INC
+  exchange: NYSE
+  market_cap: 4068339968
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CNK
+  cik: 1385280
+  company_name: Cinemark Holdings, Inc.
+  exchange: NYSE
+  market_cap: 4061551616
+  sector: Communication Services
+  industry: Entertainment
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CAAP
+  cik: 1717393
+  company_name: CORPORACION AMERICA AIRPORTS S.A.
+  exchange: NYSE
+  market_cap: 3987896320
+  sector: Industrials
+  industry: Airports & Air Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AVNT
+  cik: 1122976
+  company_name: AVIENT CORP
+  exchange: NYSE
+  market_cap: 3980628736
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GPGI
+  cik: 1823144
+  company_name: GPGI, Inc.
+  exchange: NYSE
+  market_cap: 3951201792
+  sector: Industrials
+  industry: Metal Fabrication
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ATMU
+  cik: 1921963
+  company_name: Atmus Filtration Technologies Inc.
+  exchange: NYSE
+  market_cap: 3944327936
+  sector: Consumer Cyclical
+  industry: Auto Parts
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ABG
+  cik: 1144980
+  company_name: ASBURY AUTOMOTIVE GROUP INC
+  exchange: NYSE
+  market_cap: 3900233216
+  sector: Consumer Cyclical
+  industry: Auto & Truck Dealerships
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BMI
+  cik: 9092
+  company_name: BADGER METER INC
+  exchange: NYSE
+  market_cap: 3840467712
+  sector: Technology
+  industry: Scientific & Technical Instruments
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BWLP
+  cik: 1649313
+  company_name: BW LPG Ltd
+  exchange: NYSE
+  market_cap: 3774111232
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AKO-A
+  cik: 925261
+  company_name: ANDINA BOTTLING CO INC
+  exchange: NYSE
+  market_cap: 3691625216
+  sector: Consumer Defensive
+  industry: Beverages - Non-Alcoholic
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: APLE
+  cik: 1418121
+  company_name: Apple Hospitality REIT, Inc.
+  exchange: NYSE
+  market_cap: 3682890240
+  sector: Real Estate
+  industry: REIT - Hotel & Motel
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CSTM
+  cik: 1563411
+  company_name: CONSTELLIUM SE
+  exchange: NYSE
+  market_cap: 3678222336
+  sector: Basic Materials
+  industry: Aluminum
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FSM
+  cik: 1341335
+  company_name: FORTUNA MINING CORP.
+  exchange: NYSE
+  market_cap: 3643235328
+  sector: Basic Materials
+  industry: Gold
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ERO
+  cik: 1853860
+  company_name: Ero Copper Corp.
+  exchange: NYSE
+  market_cap: 3640162048
+  sector: Basic Materials
+  industry: Copper
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FOUR
+  cik: 1794669
+  company_name: Shift4 Payments, Inc.
+  exchange: NYSE
+  market_cap: 3627427840
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GPI
+  cik: 1031203
+  company_name: GROUP 1 AUTOMOTIVE INC
+  exchange: NYSE
+  market_cap: 3585728512
+  sector: Consumer Cyclical
+  industry: Auto & Truck Dealerships
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BTU
+  cik: 1064728
+  company_name: PEABODY ENERGY CORP
+  exchange: NYSE
+  market_cap: 3516815104
+  sector: Energy
+  industry: Thermal Coal
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AWR
+  cik: 1056903
+  company_name: AMERICAN STATES WATER CO
+  exchange: NYSE
+  market_cap: 3508941824
+  sector: Utilities
+  industry: Utilities - Regulated Water
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AB
+  cik: 825313
+  company_name: ALLIANCEBERNSTEIN HOLDING L.P.
+  exchange: NYSE
+  market_cap: 3476359168
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DAN
+  cik: 26780
+  company_name: DANA Inc
+  exchange: NYSE
+  market_cap: 3446756864
+  sector: Consumer Cyclical
+  industry: Auto Parts
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FSK
+  cik: 1422183
+  company_name: FS KKR Capital Corp
+  exchange: NYSE
+  market_cap: 3437672960
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CXW
+  cik: 1070985
+  company_name: CoreCivic, Inc.
+  exchange: NYSE
+  market_cap: 3432592896
+  sector: Industrials
+  industry: Security & Protection Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BFAM
+  cik: 1437578
+  company_name: BRIGHT HORIZONS FAMILY SOLUTIONS INC.
+  exchange: NYSE
+  market_cap: 3416630016
+  sector: Consumer Cyclical
+  industry: Personal Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: EROK
+  cik: 2104882
+  company_name: EagleRock Land, LLC
+  exchange: NYSE
+  market_cap: 3399780864
+  sector: Energy
+  industry: Oil & Gas Equipment & Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BTE
+  cik: 1279495
+  company_name: BAYTEX ENERGY CORP.
+  exchange: NYSE
+  market_cap: 3398112000
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CURB
+  cik: 2027317
+  company_name: Curbline Properties Corp.
+  exchange: NYSE
+  market_cap: 3390170368
+  sector: Real Estate
+  industry: REIT - Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: EROC
+  cik: 2110029
+  company_name: ERock, Inc.
+  exchange: NYSE
+  market_cap: 3369796352
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DHT
+  cik: 1331284
+  company_name: DHT Holdings, Inc.
+  exchange: NYSE
+  market_cap: 3364986368
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CBU
+  cik: 723188
+  company_name: COMMUNITY FINANCIAL SYSTEM, INC.
+  exchange: NYSE
+  market_cap: 3359525376
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AD
+  cik: 821130
+  company_name: ARRAY DIGITAL INFRASTRUCTURE, INC.
+  exchange: NYSE
+  market_cap: 3329439744
+  sector: Communication Services
+  industry: Telecom Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AGO
+  cik: 1273813
+  company_name: ASSURED GUARANTY LTD
+  exchange: NYSE
+  market_cap: 3328786432
+  sector: Financial Services
+  industry: Insurance - Specialty
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AAMI
+  cik: 1748824
+  company_name: Acadian Asset Management Inc.
+  exchange: NYSE
+  market_cap: 3321166336
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BKU
+  cik: 1504008
+  company_name: BankUnited, Inc.
+  exchange: NYSE
+  market_cap: 3303751680
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: EXK
+  cik: 1277866
+  company_name: ENDEAVOUR SILVER CORP
+  exchange: NYSE
+  market_cap: 3293126656
+  sector: Basic Materials
+  industry: Silver
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AAUC
+  cik: 1993344
+  company_name: Allied Gold Corp
+  exchange: NYSE
+  market_cap: 3291397120
+  sector: Basic Materials
+  industry: Gold
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FG
+  cik: 1934850
+  company_name: F&G Annuities & Life, Inc.
+  exchange: NYSE
+  market_cap: 3278617856
+  sector: Financial Services
+  industry: Insurance - Life
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ADX
+  cik: 2230
+  company_name: ADAMS DIVERSIFIED EQUITY FUND, INC.
+  exchange: NYSE
+  market_cap: 3264345856
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DKL
+  cik: 1552797
+  company_name: Delek Logistics Partners, LP
+  exchange: NYSE
+  market_cap: 3219309568
+  sector: Energy
+  industry: Oil & Gas Refining & Marketing
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CWK
+  cik: 1628369
+  company_name: Cushman & Wakefield Ltd.
+  exchange: NYSE
+  market_cap: 3206189312
+  sector: Real Estate
+  industry: Real Estate Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DX
+  cik: 826675
+  company_name: DYNEX CAPITAL INC
+  exchange: NYSE
+  market_cap: 3201352960
+  sector: Real Estate
+  industry: REIT - Mortgage
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CPK
+  cik: 19745
+  company_name: CHESAPEAKE UTILITIES CORP
+  exchange: NYSE
+  market_cap: 3197962496
+  sector: Utilities
+  industry: Utilities - Regulated Gas
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GPOR
+  cik: 874499
+  company_name: GULFPORT ENERGY CORP
+  exchange: NYSE
+  market_cap: 3172485376
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ATKR
+  cik: 1666138
+  company_name: Atkore Inc.
+  exchange: NYSE
+  market_cap: 3166514432
+  sector: Industrials
+  industry: Electrical Equipment & Parts
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AVA
+  cik: 104918
+  company_name: AVISTA CORP
+  exchange: NYSE
+  market_cap: 3144918784
+  sector: Utilities
+  industry: Utilities - Diversified
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BSM
+  cik: 1621434
+  company_name: Black Stone Minerals, L.P.
+  exchange: NYSE
+  market_cap: 3116209920
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CWT
+  cik: 1035201
+  company_name: CALIFORNIA WATER SERVICE GROUP
+  exchange: NYSE
+  market_cap: 3093810176
+  sector: Utilities
+  industry: Utilities - Regulated Water
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GPK
+  cik: 1408075
+  company_name: GRAPHIC PACKAGING HOLDING CO
+  exchange: NYSE
+  market_cap: 3088026624
+  sector: Consumer Cyclical
+  industry: Packaging & Containers
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GRBK
+  cik: 1373670
+  company_name: Green Brick Partners, Inc.
+  exchange: NYSE
+  market_cap: 3057630208
+  sector: Consumer Cyclical
+  industry: Residential Construction
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BOH
+  cik: 46195
+  company_name: BANK OF HAWAII CORP
+  exchange: NYSE
+  market_cap: 3045176064
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BBAR
+  cik: 913059
+  company_name: Banco BBVA Argentina S.A.
+  exchange: NYSE
+  market_cap: 3026787584
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CSQR
+  cik: 2105398
+  company_name: Csquare, Inc.
+  exchange: NYSE
+  market_cap: 3002744576
+  sector: Technology
+  industry: Information Technology Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BANC
+  cik: 1169770
+  company_name: BANC OF CALIFORNIA, INC.
+  exchange: NYSE
+  market_cap: 2997543168
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AMBP
+  cik: 1845097
+  company_name: Ardagh Metal Packaging S.A.
+  exchange: NYSE
+  market_cap: 2994508800
+  sector: Consumer Cyclical
+  industry: Packaging & Containers
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DBRG
+  cik: 1679688
+  company_name: DigitalBridge Group, Inc.
+  exchange: NYSE
+  market_cap: 2986799872
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CBZ
+  cik: 944148
+  company_name: CBIZ, Inc.
+  exchange: NYSE
+  market_cap: 2976373760
+  sector: Industrials
+  industry: Specialty Business Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AKR
+  cik: 899629
+  company_name: ACADIA REALTY TRUST
+  exchange: NYSE
+  market_cap: 2958199296
+  sector: Real Estate
+  industry: REIT - Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: APAM
+  cik: 1517302
+  company_name: Artisan Partners Asset Management Inc.
+  exchange: NYSE
+  market_cap: 2951321600
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DNOW
+  cik: 1599617
+  company_name: DNOW Inc.
+  exchange: NYSE
+  market_cap: 2914268672
+  sector: Industrials
+  industry: Industrial Distribution
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AEO
+  cik: 919012
+  company_name: AMERICAN EAGLE OUTFITTERS INC
+  exchange: NYSE
+  market_cap: 2914099968
+  sector: Consumer Cyclical
+  industry: Apparel Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FUL
+  cik: 39368
+  company_name: FULLER H B CO
+  exchange: NYSE
+  market_cap: 2898603520
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CXT
+  cik: 25445
+  company_name: Crane NXT, Co.
+  exchange: NYSE
+  market_cap: 2881518848
+  sector: Industrials
+  industry: Business Equipment & Supplies
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CSAN
+  cik: 1430162
+  company_name: Cosan S.A.
+  exchange: NYSE
+  market_cap: 2859665920
+  sector: Energy
+  industry: Oil & Gas Refining & Marketing
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AMR
+  cik: 1704715
+  company_name: Alpha Metallurgical Resources, Inc.
+  exchange: NYSE
+  market_cap: 2857983488
+  sector: Basic Materials
+  industry: Coking Coal
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BKV
+  cik: 1838406
+  company_name: BKV Corp
+  exchange: NYSE
+  market_cap: 2851949824
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FBK
+  cik: 1649749
+  company_name: FB Financial Corp
+  exchange: NYSE
+  market_cap: 2848253952
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CALY
+  cik: 837465
+  company_name: Callaway Golf Co
+  exchange: NYSE
+  market_cap: 2838317312
+  sector: Consumer Cyclical
+  industry: Leisure
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BKD
+  cik: 1332349
+  company_name: Brookdale Senior Living Inc.
+  exchange: NYSE
+  market_cap: 2810879232
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ECO
+  cik: 1964954
+  company_name: Okeanis Eco Tankers Corp.
+  exchange: NYSE
+  market_cap: 2788959744
+  sector: Industrials
+  industry: Marine Shipping
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BCC
+  cik: 1328581
+  company_name: BOISE CASCADE Co
+  exchange: NYSE
+  market_cap: 2763744000
+  sector: Basic Materials
+  industry: Lumber & Wood Production
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ABM
+  cik: 771497
+  company_name: ABM INDUSTRIES INC /DE/
+  exchange: NYSE
+  market_cap: 2756232448
+  sector: Industrials
+  industry: Specialty Business Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CUBI
+  cik: 1488813
+  company_name: Customers Bancorp, Inc.
+  exchange: NYSE
+  market_cap: 2737944576
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FCPT
+  cik: 1650132
+  company_name: Four Corners Property Trust, Inc.
+  exchange: NYSE
+  market_cap: 2736227328
+  sector: Real Estate
+  industry: REIT - Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: EFXT
+  cik: 1904856
+  company_name: Enerflex Ltd.
+  exchange: NYSE
+  market_cap: 2718010112
+  sector: Energy
+  industry: Oil & Gas Equipment & Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GRND
+  cik: 1820144
+  company_name: Grindr Inc.
+  exchange: NYSE
+  market_cap: 2650764544
+  sector: Technology
+  industry: Software - Application
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GDV
+  cik: 1260729
+  company_name: GABELLI DIVIDEND & INCOME TRUST
+  exchange: NYSE
+  market_cap: 2621639936
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BHE
+  cik: 863436
+  company_name: BENCHMARK ELECTRONICS INC
+  exchange: NYSE
+  market_cap: 2609223936
+  sector: Technology
+  industry: Electronic Components
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GRDN
+  cik: 1802255
+  company_name: Guardian Pharmacy Services, Inc.
+  exchange: NYSE
+  market_cap: 2582465792
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DCO
+  cik: 30305
+  company_name: DUCOMMUN INC /DE/
+  exchange: NYSE
+  market_cap: 2541594880
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ATHM
+  cik: 1527636
+  company_name: Autohome Inc.
+  exchange: NYSE
+  market_cap: 2537215232
+  sector: Communication Services
+  industry: Internet Content & Information
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BGSI
+  cik: 2091467
+  company_name: Boyd Group Services Inc.
+  exchange: NYSE
+  market_cap: 2517785856
+  sector: Consumer Cyclical
+  industry: Auto & Truck Dealerships
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AGM
+  cik: 845877
+  company_name: FEDERAL AGRICULTURAL MORTGAGE CORP
+  exchange: NYSE
+  market_cap: 2472144128
+  sector: Financial Services
+  industry: Credit Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BHC
+  cik: 885590
+  company_name: Bausch Health Companies Inc.
+  exchange: NYSE
+  market_cap: 2453378048
+  sector: Healthcare
+  industry: Drug Manufacturers - Specialty & Generic
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CDLR
+  cik: 1978867
+  company_name: Cadeler A/S
+  exchange: NYSE
+  market_cap: 2405026560
+  sector: Industrials
+  industry: Engineering & Construction
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FIGS
+  cik: 1846576
+  company_name: FIGS, Inc.
+  exchange: NYSE
+  market_cap: 2395742208
+  sector: Consumer Cyclical
+  industry: Apparel Manufacturing
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BXMT
+  cik: 1061630
+  company_name: BLACKSTONE MORTGAGE TRUST, INC.
+  exchange: NYSE
+  market_cap: 2393318912
+  sector: Real Estate
+  industry: REIT - Mortgage
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BHVN
+  cik: 1935979
+  company_name: Biohaven Ltd.
+  exchange: NYSE
+  market_cap: 2369876736
+  sector: Healthcare
+  industry: Biotechnology
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AMC
+  cik: 1411579
+  company_name: AMC ENTERTAINMENT HOLDINGS, INC.
+  exchange: NYSE
+  market_cap: 2365402368
+  sector: Communication Services
+  industry: Entertainment
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DBD
+  cik: 28823
+  company_name: DIEBOLD NIXDORF, Inc
+  exchange: NYSE
+  market_cap: 2331112192
+  sector: Technology
+  industry: Software - Application
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ARR
+  cik: 1428205
+  company_name: Armour Residential REIT, Inc.
+  exchange: NYSE
+  market_cap: 2314392320
+  sector: Real Estate
+  industry: REIT - Mortgage
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BOBS
+  cik: 2085187
+  company_name: Bob's Discount Furniture, Inc.
+  exchange: NYSE
+  market_cap: 2305319936
+  sector: Consumer Cyclical
+  industry: Specialty Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AERO
+  cik: 1561861
+  company_name: Grupo Aeromexico, S.A.B. de C.V.
+  exchange: NYSE
+  market_cap: 2303814912
+  sector: Industrials
+  industry: Airlines
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CC
+  cik: 1627223
+  company_name: Chemours Co
+  exchange: NYSE
+  market_cap: 2302634496
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DEI
+  cik: 1364250
+  company_name: Douglas Emmett Inc
+  exchange: NYSE
+  market_cap: 2296340224
+  sector: Real Estate
+  industry: REIT - Office
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FLOC
+  cik: 2035149
+  company_name: Flowco Holdings Inc.
+  exchange: NYSE
+  market_cap: 2295589888
+  sector: Energy
+  industry: Oil & Gas Equipment & Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CALX
+  cik: 1406666
+  company_name: CALIX, INC
+  exchange: NYSE
+  market_cap: 2264184832
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: AADX
+  cik: 2118195
+  company_name: Applied Aerospace & Defense, Inc.
+  exchange: NYSE
+  market_cap: 2229048320
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BKE
+  cik: 885245
+  company_name: BUCKLE INC
+  exchange: NYSE
+  market_cap: 2222915328
+  sector: Consumer Cyclical
+  industry: Apparel Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: EVT
+  cik: 1253327
+  company_name: Eaton Vance Tax-Advantaged Dividend Income Fund
+  exchange: NYSE
+  market_cap: 2167704064
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: FCF
+  cik: 712537
+  company_name: FIRST COMMONWEALTH FINANCIAL CORP /PA/
+  exchange: NYSE
+  market_cap: 2156533504
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BSTZ
+  cik: 1768666
+  company_name: BlackRock Science & Technology Term Trust
+  exchange: NYSE
+  market_cap: 2142755200
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ALG
+  cik: 897077
+  company_name: ALAMO GROUP INC
+  exchange: NYSE
+  market_cap: 2112392704
+  sector: Industrials
+  industry: Farm & Heavy Construction Machinery
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GNL
+  cik: 1526113
+  company_name: Global Net Lease, Inc.
+  exchange: NYSE
+  market_cap: 2109618816
+  sector: Real Estate
+  industry: REIT - Diversified
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CEPU
+  cik: 1717161
+  company_name: CENTRAL PUERTO S.A.
+  exchange: NYSE
+  market_cap: 2105806848
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GOF
+  cik: 1380936
+  company_name: GUGGENHEIM STRATEGIC OPPORTUNITIES FUND
+  exchange: NYSE
+  market_cap: 2095939968
+  sector: Financial Services
+  industry: Asset Management
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CTOS
+  cik: 1709682
+  company_name: Custom Truck One Source, Inc.
+  exchange: NYSE
+  market_cap: 2090775808
+  sector: Industrials
+  industry: Rental & Leasing Services
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: CTRI
+  cik: 1981599
+  company_name: Centuri Holdings, Inc.
+  exchange: NYSE
+  market_cap: 2073781248
+  sector: Utilities
+  industry: Utilities - Regulated Gas
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: DV
+  cik: 1819928
+  company_name: DoubleVerify Holdings, Inc.
+  exchange: NYSE
+  market_cap: 2070634112
+  sector: Communication Services
+  industry: Advertising Agencies
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BRSL
+  cik: 1619762
+  company_name: Brightstar Lottery PLC
+  exchange: NYSE
+  market_cap: 2064988672
+  sector: Consumer Cyclical
+  industry: Gambling
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: BXDC
+  cik: 2100161
+  company_name: Blackstone Digital Infrastructure Trust Inc.
+  exchange: NYSE
+  market_cap: 2046212480
+  sector: Real Estate
+  industry: REIT - Specialty
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: ASAN
+  cik: 1477720
+  company_name: Asana, Inc.
+  exchange: NYSE
+  market_cap: 2017226752
+  sector: Technology
+  industry: Software - Application
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GTY
+  cik: 1052752
+  company_name: GETTY REALTY CORP /MD/
+  exchange: NYSE
+  market_cap: 2014670592
+  sector: Real Estate
+  industry: REIT - Retail
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GENI
+  cik: 1834489
+  company_name: Genius Sports Ltd
+  exchange: NYSE
+  market_cap: 2004525824
+  sector: Communication Services
+  industry: Internet Content & Information
+  tier: mid
+  tags:
+  - mid
+  pit_eligible: false
+- ticker: GRC
+  cik: 42682
+  company_name: GORMAN RUPP CO
+  exchange: NYSE
+  market_cap: 1989747712
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BFLY
+  cik: 1804176
+  company_name: Butterfly Network, Inc.
+  exchange: NYSE
+  market_cap: 1959858944
+  sector: Healthcare
+  industry: Medical Devices
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GEL
+  cik: 1022321
+  company_name: GENESIS ENERGY LP
+  exchange: NYSE
+  market_cap: 1937096960
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ATS
+  cik: 1394832
+  company_name: ATS Corp /ATS
+  exchange: NYSE
+  market_cap: 1928193408
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EPAC
+  cik: 6955
+  company_name: ENERPAC TOOL GROUP CORP
+  exchange: NYSE
+  market_cap: 1924621952
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CMRE
+  cik: 1503584
+  company_name: Costamare Inc.
+  exchange: NYSE
+  market_cap: 1879880064
+  sector: Industrials
+  industry: Marine Shipping
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ETG
+  cik: 1270523
+  company_name: Eaton Vance Tax-Advantaged Global Dividend Income Fund
+  exchange: NYSE
+  market_cap: 1837831424
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CCS
+  cik: 1576940
+  company_name: Century Communities, Inc.
+  exchange: NYSE
+  market_cap: 1834206464
+  sector: Real Estate
+  industry: Real Estate - Development
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DCOM
+  cik: 846617
+  company_name: Dime Commercial Bancshares, Inc. /NY/
+  exchange: NYSE
+  market_cap: 1821459584
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EVTC
+  cik: 1559865
+  company_name: EVERTEC, Inc.
+  exchange: NYSE
+  market_cap: 1813489792
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ETV
+  cik: 1322436
+  company_name: Eaton Vance Tax-Managed Buy-Write Opportunities Fund
+  exchange: NYSE
+  market_cap: 1789847552
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ATEN
+  cik: 1580808
+  company_name: A10 Networks, Inc.
+  exchange: NYSE
+  market_cap: 1785455872
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DAO
+  cik: 1781753
+  company_name: Youdao, Inc.
+  exchange: NYSE
+  market_cap: 1784186240
+  sector: Consumer Defensive
+  industry: Education & Training Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GLP
+  cik: 1323468
+  company_name: GLOBAL PARTNERS LP
+  exchange: NYSE
+  market_cap: 1783841280
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AIN
+  cik: 819793
+  company_name: ALBANY INTERNATIONAL CORP /DE/
+  exchange: NYSE
+  market_cap: 1771210752
+  sector: Consumer Cyclical
+  industry: Textile Manufacturing
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EFC
+  cik: 1411342
+  company_name: Ellington Financial Inc.
+  exchange: NYSE
+  market_cap: 1768929024
+  sector: Real Estate
+  industry: REIT - Mortgage
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BY
+  cik: 1702750
+  company_name: BYLINE BANCORP, INC.
+  exchange: NYSE
+  market_cap: 1755492352
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BDJ
+  cik: 1332283
+  company_name: BlackRock Enhanced Equity Dividend Trust
+  exchange: NYSE
+  market_cap: 1749982976
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FOIL
+  cik: 2006960
+  company_name: Londian Wason New Energy Tech Inc.
+  exchange: NYSE
+  market_cap: 1749463424
+  sector: Industrials
+  industry: Electrical Equipment & Parts
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ARCO
+  cik: 1508478
+  company_name: Arcos Dorados Holdings Inc.
+  exchange: NYSE
+  market_cap: 1721117184
+  sector: Consumer Cyclical
+  industry: Restaurants
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AAT
+  cik: 1500217
+  company_name: American Assets Trust, Inc.
+  exchange: NYSE
+  market_cap: 1709990016
+  sector: Real Estate
+  industry: REIT - Diversified
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FLNG
+  cik: 1772253
+  company_name: Flex LNG Ltd.
+  exchange: NYSE
+  market_cap: 1704450816
+  sector: Energy
+  industry: Oil & Gas Midstream
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CBL
+  cik: 910612
+  company_name: CBL & ASSOCIATES PROPERTIES INC
+  exchange: NYSE
+  market_cap: 1701232768
+  sector: Real Estate
+  industry: REIT - Retail
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AGRO
+  cik: 1499505
+  company_name: Adecoagro S.A.
+  exchange: NYSE
+  market_cap: 1698504832
+  sector: Consumer Defensive
+  industry: Farm Products
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AGM-A
+  cik: 845877
+  company_name: FEDERAL AGRICULTURAL MORTGAGE CORP
+  exchange: NYSE
+  market_cap: 1693100800
+  sector: Financial Services
+  industry: Credit Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GLOB
+  cik: 1557860
+  company_name: Globant S.A.
+  exchange: NYSE
+  market_cap: 1689616128
+  sector: Technology
+  industry: Information Technology Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AESI
+  cik: 1984060
+  company_name: Atlas Energy Solutions Inc.
+  exchange: NYSE
+  market_cap: 1681229184
+  sector: Energy
+  industry: Oil & Gas Equipment & Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BCAT
+  cik: 1809541
+  company_name: BlackRock Capital Allocation Term Trust
+  exchange: NYSE
+  market_cap: 1676404352
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AI
+  cik: 1577526
+  company_name: C3.ai, Inc.
+  exchange: NYSE
+  market_cap: 1674512000
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: COUR
+  cik: 1651562
+  company_name: Coursera, Inc.
+  exchange: NYSE
+  market_cap: 1660880128
+  sector: Consumer Defensive
+  industry: Education & Training Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DCH
+  cik: 1062231
+  company_name: Dauch Corp
+  exchange: NYSE
+  market_cap: 1660856192
+  sector: Consumer Cyclical
+  industry: Auto Parts
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CTS
+  cik: 26058
+  company_name: CTS CORP
+  exchange: NYSE
+  market_cap: 1632843264
+  sector: Technology
+  industry: Electronic Components
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FUN
+  cik: 1999001
+  company_name: Six Flags Entertainment Corporation/NEW
+  exchange: NYSE
+  market_cap: 1586926080
+  sector: Consumer Cyclical
+  industry: Leisure
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GAM
+  cik: 40417
+  company_name: GENERAL AMERICAN INVESTORS CO INC
+  exchange: NYSE
+  market_cap: 1584358912
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ADNT
+  cik: 1670541
+  company_name: Adient plc
+  exchange: NYSE
+  market_cap: 1569051776
+  sector: Consumer Cyclical
+  industry: Auto Parts
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ADIG
+  cik: 2105139
+  company_name: ADI GLOBAL DISTRIBUTION INC.
+  exchange: NYSE
+  market_cap: 1567814016
+  sector: Technology
+  industry: Computer Hardware
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ARDT
+  cik: 1756655
+  company_name: Ardent Health, Inc.
+  exchange: NYSE
+  market_cap: 1538810752
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ECAT
+  cik: 1864843
+  company_name: BlackRock ESG Capital Allocation Term Trust
+  exchange: NYSE
+  market_cap: 1517886336
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GIC
+  cik: 945114
+  company_name: GLOBAL INDUSTRIAL Co
+  exchange: NYSE
+  market_cap: 1517093120
+  sector: Industrials
+  industry: Industrial Distribution
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DMC
+  cik: 1047340
+  company_name: DEL MONTE CORP
+  exchange: NYSE
+  market_cap: 1514336384
+  sector: Consumer Defensive
+  industry: Farm Products
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ARLO
+  cik: 1736946
+  company_name: Arlo Technologies, Inc.
+  exchange: NYSE
+  market_cap: 1503357824
+  sector: Industrials
+  industry: Building Products & Equipment
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AGL
+  cik: 1831097
+  company_name: agilon health, inc.
+  exchange: NYSE
+  market_cap: 1486022144
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CNMD
+  cik: 816956
+  company_name: CONMED Corp
+  exchange: NYSE
+  market_cap: 1477195520
+  sector: Healthcare
+  industry: Medical Devices
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ENR
+  cik: 1632790
+  company_name: ENERGIZER HOLDINGS, INC.
+  exchange: NYSE
+  market_cap: 1453907584
+  sector: Industrials
+  industry: Electrical Equipment & Parts
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AMPX
+  cik: 1899287
+  company_name: Amprius Technologies, Inc.
+  exchange: NYSE
+  market_cap: 1444737408
+  sector: Industrials
+  industry: Electrical Equipment & Parts
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BTT
+  cik: 1528437
+  company_name: BlackRock Municipal 2030 Target Term Trust
+  exchange: NYSE
+  market_cap: 1430935552
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FOR
+  cik: 1406587
+  company_name: Forestar Group Inc.
+  exchange: NYSE
+  market_cap: 1422881664
+  sector: Real Estate
+  industry: Real Estate - Development
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BORR
+  cik: 1715497
+  company_name: Borr Drilling Ltd
+  exchange: NYSE
+  market_cap: 1400647808
+  sector: Energy
+  industry: Oil & Gas Drilling
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BBAI
+  cik: 1836981
+  company_name: BigBear.ai Holdings, Inc.
+  exchange: NYSE
+  market_cap: 1400123904
+  sector: Technology
+  industry: Information Technology Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ANRO
+  cik: 1999480
+  company_name: Alto Neuroscience, Inc.
+  exchange: NYSE
+  market_cap: 1395056768
+  sector: Healthcare
+  industry: Biotechnology
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ESRT
+  cik: 1541401
+  company_name: Empire State Realty Trust, Inc.
+  exchange: NYSE
+  market_cap: 1390810112
+  sector: Real Estate
+  industry: REIT - Diversified
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AMBQ
+  cik: 1500412
+  company_name: Ambiq Micro, Inc.
+  exchange: NYSE
+  market_cap: 1389401600
+  sector: Technology
+  industry: Semiconductors
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AZUL
+  cik: 1432364
+  company_name: AZUL SA
+  exchange: NYSE
+  market_cap: 1380249344
+  sector: Industrials
+  industry: Airlines
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CXM
+  cik: 1569345
+  company_name: Sprinklr, Inc.
+  exchange: NYSE
+  market_cap: 1372132608
+  sector: Technology
+  industry: Software - Application
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GOLD
+  cik: 1591588
+  company_name: Gold.com, Inc.
+  exchange: NYSE
+  market_cap: 1343365248
+  sector: Financial Services
+  industry: Capital Markets
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ALX
+  cik: 3499
+  company_name: ALEXANDERS INC
+  exchange: NYSE
+  market_cap: 1340255104
+  sector: Real Estate
+  industry: REIT - Retail
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GBX
+  cik: 923120
+  company_name: GREENBRIER COMPANIES INC
+  exchange: NYSE
+  market_cap: 1338450816
+  sector: Industrials
+  industry: Railroads
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EFOR
+  cik: 890564
+  company_name: Everforth Inc
+  exchange: NYSE
+  market_cap: 1334550016
+  sector: Technology
+  industry: Information Technology Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EPC
+  cik: 1096752
+  company_name: EDGEWELL PERSONAL CARE Co
+  exchange: NYSE
+  market_cap: 1330587008
+  sector: Consumer Defensive
+  industry: Household & Personal Products
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FLO
+  cik: 1128928
+  company_name: FLOWERS FOODS INC
+  exchange: NYSE
+  market_cap: 1329197568
+  sector: Consumer Defensive
+  industry: Packaged Foods
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CLVT
+  cik: 1764046
+  company_name: CLARIVATE PLC
+  exchange: NYSE
+  market_cap: 1324104448
+  sector: Technology
+  industry: Information Technology Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DOLE
+  cik: 1857475
+  company_name: Dole plc
+  exchange: NYSE
+  market_cap: 1323367936
+  sector: Consumer Defensive
+  industry: Farm Products
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ASIC
+  cik: 2040491
+  company_name: Ategrity Specialty Insurance Co Holdings
+  exchange: NYSE
+  market_cap: 1313197824
+  sector: Financial Services
+  industry: Insurance - Property & Casualty
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AMN
+  cik: 1142750
+  company_name: AMN HEALTHCARE SERVICES INC
+  exchange: NYSE
+  market_cap: 1309073664
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CDRE
+  cik: 1860543
+  company_name: Cadre Holdings, Inc.
+  exchange: NYSE
+  market_cap: 1274345088
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DFIN
+  cik: 1669811
+  company_name: Donnelley Financial Solutions, Inc.
+  exchange: NYSE
+  market_cap: 1251887744
+  sector: Technology
+  industry: Software - Application
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ESBA
+  cik: 1553079
+  company_name: Empire State Realty OP, L.P.
+  exchange: NYSE Arca
+  market_cap: 1249661952
+  sector: Real Estate
+  industry: REIT - Office
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DFH
+  cik: 1825088
+  company_name: Dream Finders Homes, Inc.
+  exchange: NYSE
+  market_cap: 1249384704
+  sector: Consumer Cyclical
+  industry: Residential Construction
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AORT
+  cik: 784199
+  company_name: ARTIVION, INC.
+  exchange: NYSE
+  market_cap: 1246696576
+  sector: Healthcare
+  industry: Medical Devices
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CRI
+  cik: 1060822
+  company_name: CARTERS INC
+  exchange: NYSE
+  market_cap: 1231660160
+  sector: Consumer Cyclical
+  industry: Apparel Retail
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AMRC
+  cik: 1488139
+  company_name: Ameresco, Inc.
+  exchange: NYSE
+  market_cap: 1228482816
+  sector: Industrials
+  industry: Engineering & Construction
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BH-A
+  cik: 1726173
+  company_name: Biglari Holdings Inc.
+  exchange: NYSE
+  market_cap: 1228067328
+  sector: Consumer Cyclical
+  industry: Restaurants
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BH
+  cik: 1726173
+  company_name: Biglari Holdings Inc.
+  exchange: NYSE
+  market_cap: 1222043392
+  sector: Consumer Cyclical
+  industry: Restaurants
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CCO
+  cik: 1334978
+  company_name: Clear Channel Outdoor Holdings, Inc.
+  exchange: NYSE
+  market_cap: 1211643392
+  sector: Communication Services
+  industry: Advertising Agencies
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BRBR
+  cik: 1772016
+  company_name: BELLRING BRANDS, INC.
+  exchange: NYSE
+  market_cap: 1208130432
+  sector: Consumer Defensive
+  industry: Packaged Foods
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GNK
+  cik: 1326200
+  company_name: GENCO SHIPPING & TRADING LTD
+  exchange: NYSE
+  market_cap: 1205169536
+  sector: Industrials
+  industry: Marine Shipping
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DSL
+  cik: 1566388
+  company_name: DoubleLine Income Solutions Fund
+  exchange: NYSE
+  market_cap: 1204142208
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FISK
+  cik: 1553079
+  company_name: Empire State Realty OP, L.P.
+  exchange: NYSE Arca
+  market_cap: 1199227136
+  sector: Real Estate
+  industry: REIT - Office
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DEA
+  cik: 1622194
+  company_name: Easterly Government Properties, Inc.
+  exchange: NYSE
+  market_cap: 1191331200
+  sector: Real Estate
+  industry: REIT - Office
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ACVA
+  cik: 1637873
+  company_name: ACV Auctions Inc.
+  exchange: NYSE
+  market_cap: 1185259776
+  sector: Consumer Cyclical
+  industry: Auto & Truck Dealerships
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AMTB
+  cik: 1734342
+  company_name: Amerant Bancorp Inc.
+  exchange: NYSE
+  market_cap: 1163154944
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EOS
+  cik: 1308335
+  company_name: Eaton Vance Enhanced Equity Income Fund II
+  exchange: NYSE
+  market_cap: 1152692352
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AOD
+  cik: 1379400
+  company_name: abrdn Total Dynamic Dividend Fund
+  exchange: NYSE
+  market_cap: 1129544576
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BFS
+  cik: 907254
+  company_name: SAUL CENTERS, INC.
+  exchange: NYSE
+  market_cap: 1129387264
+  sector: Real Estate
+  industry: REIT - Retail
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GSBD
+  cik: 1572694
+  company_name: Goldman Sachs BDC, Inc.
+  exchange: NYSE
+  market_cap: 1123439232
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ECVT
+  cik: 1708035
+  company_name: Ecovyst Inc.
+  exchange: NYSE
+  market_cap: 1117672320
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BOW
+  cik: 2002473
+  company_name: Bowhead Specialty Holdings Inc.
+  exchange: NYSE
+  market_cap: 1108532096
+  sector: Financial Services
+  industry: Insurance - Property & Casualty
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CPAC
+  cik: 1221029
+  company_name: CEMENTOS PACASMAYO SAA
+  exchange: NYSE
+  market_cap: 1080541696
+  sector: Basic Materials
+  industry: Building Materials
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AGBK
+  cik: 2081206
+  company_name: AGI Inc
+  exchange: NYSE
+  market_cap: 1078891776
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FSCO
+  cik: 1568194
+  company_name: FS Credit Opportunities Corp.
+  exchange: NYSE
+  market_cap: 1072029184
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CII
+  cik: 1278895
+  company_name: BlackRock Enhanced Large Cap Core Fund, Inc.
+  exchange: NYSE
+  market_cap: 1071187712
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ENOV
+  cik: 1420800
+  company_name: Enovis CORP
+  exchange: NYSE
+  market_cap: 1070345792
+  sector: Healthcare
+  industry: Medical Devices
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ETW
+  cik: 1322435
+  company_name: Eaton Vance Tax-Managed Global Buy-Write Opportunities Fund
+  exchange: NYSE
+  market_cap: 1069688192
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DEC
+  cik: 1922446
+  company_name: Diversified Energy Co
+  exchange: NYSE
+  market_cap: 1066036992
+  sector: Energy
+  industry: Oil & Gas Integrated
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ABR
+  cik: 1253986
+  company_name: ARBOR REALTY TRUST INC
+  exchange: NYSE
+  market_cap: 1064323328
+  sector: Real Estate
+  industry: REIT - Mortgage
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CMP
+  cik: 1227654
+  company_name: COMPASS MINERALS INTERNATIONAL INC
+  exchange: NYSE
+  market_cap: 1062955648
+  sector: Basic Materials
+  industry: Other Industrial Metals & Mining
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FPF
+  cik: 1567569
+  company_name: First Trust Intermediate Duration Preferred & Income Fund
+  exchange: NYSE
+  market_cap: 1061794624
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BMEZ
+  cik: 1785971
+  company_name: BlackRock Health Sciences Term Trust
+  exchange: NYSE
+  market_cap: 1060648768
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BW
+  cik: 1630805
+  company_name: Babcock & Wilcox Enterprises, Inc.
+  exchange: NYSE
+  market_cap: 1057651968
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BV
+  cik: 1734713
+  company_name: BrightView Holdings, Inc.
+  exchange: NYSE
+  market_cap: 1051936000
+  sector: Industrials
+  industry: Specialty Business Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EQBK
+  cik: 1227500
+  company_name: EQUITY BANCSHARES INC
+  exchange: NYSE
+  market_cap: 1049599232
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BTX
+  cik: 1836057
+  company_name: BlackRock Technology & Private Equity Term Trust
+  exchange: NYSE
+  market_cap: 1043390016
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GHM
+  cik: 716314
+  company_name: GRAHAM CORP
+  exchange: NYSE
+  market_cap: 1030276736
+  sector: Industrials
+  industry: Specialty Industrial Machinery
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DXYZ
+  cik: 1843974
+  company_name: Destiny Tech100 Inc.
+  exchange: NYSE
+  market_cap: 996227264
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BCX
+  cik: 1506289
+  company_name: BlackRock Resources & Commodities Strategy Trust
+  exchange: NYSE
+  market_cap: 995669440
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CPF
+  cik: 701347
+  company_name: CENTRAL PACIFIC FINANCIAL CORP
+  exchange: NYSE
+  market_cap: 983294400
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CIM
+  cik: 1409493
+  company_name: CHIMERA INVESTMENT CORP
+  exchange: NYSE
+  market_cap: 973639680
+  sector: Real Estate
+  industry: REIT - Mortgage
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BBN
+  cik: 1493683
+  company_name: BlackRock Taxable Municipal Bond Trust
+  exchange: NYSE
+  market_cap: 967052800
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ACEL
+  cik: 1698991
+  company_name: Accel Entertainment, Inc.
+  exchange: NYSE
+  market_cap: 964578432
+  sector: Consumer Cyclical
+  industry: Gambling
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BUR
+  cik: 1714174
+  company_name: Burford Capital Ltd
+  exchange: NYSE
+  market_cap: 955192512
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BBDC
+  cik: 1379785
+  company_name: Barings BDC, Inc.
+  exchange: NYSE
+  market_cap: 944456128
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AVEX
+  cik: 2096300
+  company_name: AEVEX Corp.
+  exchange: NYSE
+  market_cap: 930066304
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FET
+  cik: 1401257
+  company_name: FORUM ENERGY TECHNOLOGIES, INC.
+  exchange: NYSE
+  market_cap: 921143040
+  sector: Energy
+  industry: Oil & Gas Equipment & Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FSSL
+  cik: 2065812
+  company_name: FS Specialty Lending Fund
+  exchange: NYSE
+  market_cap: 909494336
+  sector: Unknown
+  industry: Unknown
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GFR
+  cik: 1966287
+  company_name: Greenfire Resources Ltd.
+  exchange: NYSE
+  market_cap: 905572032
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AIO
+  cik: 1778114
+  company_name: Virtus Artificial Intelligence & Technology Opportunities Fund
+  exchange: NYSE
+  market_cap: 894037440
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EIG
+  cik: 1379041
+  company_name: Employers Holdings, Inc.
+  exchange: NYSE
+  market_cap: 891739136
+  sector: Financial Services
+  industry: Insurance - Specialty
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CVLG
+  cik: 928658
+  company_name: COVENANT LOGISTICS GROUP, INC.
+  exchange: NYSE
+  market_cap: 889491072
+  sector: Industrials
+  industry: Trucking
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BZH
+  cik: 915840
+  company_name: BEAZER HOMES USA INC
+  exchange: NYSE
+  market_cap: 887364224
+  sector: Consumer Cyclical
+  industry: Residential Construction
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ARI
+  cik: 1467760
+  company_name: Apollo Commercial Real Estate Finance, Inc.
+  exchange: NYSE
+  market_cap: 884385152
+  sector: Real Estate
+  industry: REIT - Mortgage
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CODI
+  cik: 1345126
+  company_name: Compass Diversified Holdings
+  exchange: NYSE
+  market_cap: 878003776
+  sector: Industrials
+  industry: Conglomerates
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CAPL
+  cik: 1538849
+  company_name: CrossAmerica Partners LP
+  exchange: NYSE
+  market_cap: 872258944
+  sector: Energy
+  industry: Oil & Gas Refining & Marketing
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AWF
+  cik: 906013
+  company_name: ALLIANCEBERNSTEIN GLOBAL HIGH INCOME FUND INC
+  exchange: NYSE
+  market_cap: 864883648
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BTGO
+  cik: 1740604
+  company_name: BITGO HOLDINGS, INC.
+  exchange: NYSE
+  market_cap: 858083072
+  sector: Financial Services
+  industry: Capital Markets
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ANGX
+  cik: 1865200
+  company_name: Angel Studios, Inc.
+  exchange: NYSE
+  market_cap: 855343936
+  sector: Communication Services
+  industry: Entertainment
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FTK
+  cik: 928054
+  company_name: FLOTEK INDUSTRIES INC/CN/
+  exchange: NYSE
+  market_cap: 852628928
+  sector: Energy
+  industry: Oil & Gas Equipment & Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BKSY
+  cik: 1753539
+  company_name: BlackSky Technology Inc.
+  exchange: NYSE
+  market_cap: 838959360
+  sector: Industrials
+  industry: Specialty Business Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GLAS
+  cik: 1848731
+  company_name: Glass House Brands Inc.
+  exchange: NYSE
+  market_cap: 836873472
+  sector: Healthcare
+  industry: Drug Manufacturers - Specialty & Generic
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DQ
+  cik: 1477641
+  company_name: DAQO NEW ENERGY CORP.
+  exchange: NYSE
+  market_cap: 832970176
+  sector: Technology
+  industry: Semiconductor Equipment & Materials
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EOI
+  cik: 1300391
+  company_name: Eaton Vance Enhanced Equity Income Fund
+  exchange: NYSE
+  market_cap: 820855040
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CTO
+  cik: 23795
+  company_name: CTO Realty Growth, Inc.
+  exchange: NYSE
+  market_cap: 805562432
+  sector: Real Estate
+  industry: REIT - Diversified
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FINV
+  cik: 1691445
+  company_name: FinVolution Group
+  exchange: NYSE
+  market_cap: 800358656
+  sector: Financial Services
+  industry: Credit Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BTO
+  cik: 925683
+  company_name: JOHN HANCOCK FINANCIAL OPPORTUNITIES FUND
+  exchange: NYSE
+  market_cap: 796297408
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GOOS
+  cik: 1690511
+  company_name: Canada Goose Holdings Inc.
+  exchange: NYSE
+  market_cap: 794957376
+  sector: Consumer Cyclical
+  industry: Apparel Manufacturing
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EVC
+  cik: 1109116
+  company_name: ENTRAVISION COMMUNICATIONS CORP
+  exchange: NYSE
+  market_cap: 777067520
+  sector: Communication Services
+  industry: Advertising Agencies
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EVEX
+  cik: 1823652
+  company_name: Eve Holding, Inc.
+  exchange: NYSE
+  market_cap: 773639680
+  sector: Industrials
+  industry: Aerospace & Defense
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BCSF
+  cik: 1655050
+  company_name: Bain Capital Specialty Finance, Inc.
+  exchange: NYSE
+  market_cap: 766745728
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FPH
+  cik: 1574197
+  company_name: Five Point Holdings, LLC
+  exchange: NYSE
+  market_cap: 763176832
+  sector: Real Estate
+  industry: Real Estate - Development
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FFC
+  cik: 1174164
+  company_name: Flaherty & Crumrine PREFERRED & INCOME SECURITIES FUND INC
+  exchange: NYSE
+  market_cap: 760247168
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GDOT
+  cik: 1386278
+  company_name: GREEN DOT CORP
+  exchange: NYSE
+  market_cap: 759612416
+  sector: Financial Services
+  industry: Credit Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BAK
+  cik: 1071438
+  company_name: BRASKEM SA
+  exchange: NYSE
+  market_cap: 753135104
+  sector: Basic Materials
+  industry: Chemicals
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GPRK
+  cik: 1464591
+  company_name: GeoPark Ltd
+  exchange: NYSE
+  market_cap: 750194944
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ASC
+  cik: 1577437
+  company_name: Ardmore Shipping Corp
+  exchange: NYSE
+  market_cap: 742278528
+  sector: Industrials
+  industry: Marine Shipping
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GMRS
+  cik: 1898718
+  company_name: GMR Solutions Inc.
+  exchange: NYSE
+  market_cap: 727132224
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FBRT
+  cik: 1562528
+  company_name: Franklin BSP Realty Trust, Inc.
+  exchange: NYSE
+  market_cap: 713360128
+  sector: Real Estate
+  industry: REIT - Mortgage
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BUI
+  cik: 1528988
+  company_name: BlackRock Utilities, Infrastructure & Power Opportunities Trust
+  exchange: NYSE
+  market_cap: 706995136
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ASGI
+  cik: 1793855
+  company_name: abrdn Global Infrastructure Income Fund
+  exchange: NYSE
+  market_cap: 700895232
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CNNE
+  cik: 1704720
+  company_name: Cannae Holdings, Inc.
+  exchange: NYSE
+  market_cap: 686614016
+  sector: Consumer Cyclical
+  industry: Restaurants
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BIT
+  cik: 1562818
+  company_name: BlackRock Multi-Sector Income Trust
+  exchange: NYSE
+  market_cap: 677904960
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DLY
+  cik: 1788399
+  company_name: DoubleLine Yield Opportunities Fund
+  exchange: NYSE
+  market_cap: 671295168
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GRNT
+  cik: 1928446
+  company_name: Granite Ridge Resources, Inc.
+  exchange: NYSE
+  market_cap: 670053184
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CTEV
+  cik: 1793229
+  company_name: Claritev Corp
+  exchange: NYSE
+  market_cap: 651291072
+  sector: Healthcare
+  industry: Health Information Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BXC
+  cik: 1301787
+  company_name: BlueLinx Holdings Inc.
+  exchange: NYSE
+  market_cap: 643044352
+  sector: Industrials
+  industry: Industrial Distribution
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CLDT
+  cik: 1476045
+  company_name: Chatham Lodging Trust
+  exchange: NYSE
+  market_cap: 638499136
+  sector: Real Estate
+  industry: REIT - Hotel & Motel
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AHRT
+  cik: 1569187
+  company_name: AH Realty Trust, Inc.
+  exchange: NYSE
+  market_cap: 633959808
+  sector: Real Estate
+  industry: REIT - Diversified
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CRD-A
+  cik: 25475
+  company_name: CRAWFORD & CO
+  exchange: NYSE
+  market_cap: 631542336
+  sector: Financial Services
+  industry: Insurance Brokers
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EGY
+  cik: 894627
+  company_name: VAALCO ENERGY INC /DE/
+  exchange: NYSE
+  market_cap: 631150656
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CARS
+  cik: 1683606
+  company_name: Cars.com Inc.
+  exchange: NYSE
+  market_cap: 627938688
+  sector: Communication Services
+  industry: Internet Content & Information
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BWMX
+  cik: 1788257
+  company_name: BETTERWARE DE MEXICO, S.A.P.I. DE C.V
+  exchange: NYSE
+  market_cap: 621494720
+  sector: Consumer Cyclical
+  industry: Specialty Retail
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ACP
+  cik: 1503290
+  company_name: abrdn Income Credit Strategies Fund
+  exchange: NYSE
+  market_cap: 621079872
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GTN-A
+  cik: 43196
+  company_name: GRAY MEDIA, INC
+  exchange: NYSE
+  market_cap: 614816768
+  sector: Communication Services
+  industry: Broadcasting
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DSU
+  cik: 1051003
+  company_name: BLACKROCK DEBT STRATEGIES FUND, INC.
+  exchange: NYSE
+  market_cap: 607664000
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BCSS
+  cik: 2064355
+  company_name: Bain Capital GSS Investment Corp.
+  exchange: NYSE
+  market_cap: 602395968
+  sector: Financial Services
+  industry: Shell Companies
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EVAC
+  cik: 2042902
+  company_name: EQV Ventures Acquisition Corp. II
+  exchange: NYSE
+  market_cap: 602012928
+  sector: Financial Services
+  industry: Shell Companies
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BRSP
+  cik: 1717547
+  company_name: BrightSpire Capital, Inc.
+  exchange: NYSE
+  market_cap: 592133120
+  sector: Real Estate
+  industry: REIT - Mortgage
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CMDB
+  cik: 2033535
+  company_name: Costamare Bulkers Holdings Ltd
+  exchange: NYSE
+  market_cap: 582020736
+  sector: Industrials
+  industry: Marine Shipping
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FVR
+  cik: 1988494
+  company_name: FrontView REIT, Inc.
+  exchange: NYSE
+  market_cap: 576651392
+  sector: Real Estate
+  industry: REIT - Diversified
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CLB
+  cik: 1958086
+  company_name: Core Laboratories Inc. /DE/
+  exchange: NYSE
+  market_cap: 575392192
+  sector: Energy
+  industry: Oil & Gas Equipment & Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CRD-B
+  cik: 25475
+  company_name: CRAWFORD & CO
+  exchange: NYSE
+  market_cap: 575384064
+  sector: Financial Services
+  industry: Insurance Brokers
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DDD
+  cik: 910638
+  company_name: 3D SYSTEMS CORP
+  exchange: NYSE
+  market_cap: 574868736
+  sector: Technology
+  industry: Computer Hardware
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ETD
+  cik: 896156
+  company_name: ETHAN ALLEN INTERIORS INC
+  exchange: NYSE
+  market_cap: 566804288
+  sector: Consumer Cyclical
+  industry: Furnishings, Fixtures & Appliances
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ETJ
+  cik: 1395325
+  company_name: Eaton Vance Risk-Managed Diversified Equity Income Fund
+  exchange: NYSE
+  market_cap: 566008000
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AEXA
+  cik: 2079173
+  company_name: American Exceptionalism Acquisition Corp. A
+  exchange: NYSE
+  market_cap: 564346688
+  sector: Financial Services
+  industry: Shell Companies
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ALIT
+  cik: 1809104
+  company_name: Alight, Inc. / Delaware
+  exchange: NYSE
+  market_cap: 552966464
+  sector: Technology
+  industry: Software - Application
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BDN
+  cik: 790816
+  company_name: BRANDYWINE REALTY TRUST
+  exchange: NYSE
+  market_cap: 538873536
+  sector: Real Estate
+  industry: REIT - Office
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CSV
+  cik: 1016281
+  company_name: CARRIAGE SERVICES INC
+  exchange: NYSE
+  market_cap: 538727424
+  sector: Consumer Cyclical
+  industry: Personal Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BGY
+  cik: 1393299
+  company_name: BlackRock Enhanced International Dividend Trust
+  exchange: NYSE
+  market_cap: 535531424
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ECC
+  cik: 1604174
+  company_name: Eagle Point Credit Co
+  exchange: NYSE
+  market_cap: 521402144
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GOTU
+  cik: 1768259
+  company_name: Gaotu Techedu Inc.
+  exchange: NYSE
+  market_cap: 517122816
+  sector: Consumer Defensive
+  industry: Education & Training Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ETO
+  cik: 1281926
+  company_name: Eaton Vance Tax-Advantaged Global Dividend Opportunities Fund
+  exchange: NYSE
+  market_cap: 517045728
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GTN
+  cik: 43196
+  company_name: GRAY MEDIA, INC
+  exchange: NYSE
+  market_cap: 509772672
+  sector: Communication Services
+  industry: Broadcasting
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GUG
+  cik: 1864208
+  company_name: Guggenheim Active Allocation Fund
+  exchange: NYSE
+  market_cap: 509542304
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AII
+  cik: 2007587
+  company_name: American Integrity Insurance Group, Inc.
+  exchange: NYSE
+  market_cap: 509429120
+  sector: Financial Services
+  industry: Insurance - Property & Casualty
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DPG
+  cik: 1515671
+  company_name: Duff & Phelps Utility & Infrastructure Fund Inc.
+  exchange: NYSE
+  market_cap: 508639040
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DDL
+  cik: 1854545
+  company_name: Dingdong (Cayman) Ltd
+  exchange: NYSE
+  market_cap: 494165088
+  sector: Consumer Defensive
+  industry: Grocery Stores
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BLW
+  cik: 1233681
+  company_name: BLACKROCK Ltd DURATION INCOME TRUST
+  exchange: NYSE
+  market_cap: 490693248
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EVH
+  cik: 1628908
+  company_name: Evolent Health, Inc.
+  exchange: NYSE
+  market_cap: 488416352
+  sector: Healthcare
+  industry: Health Information Services
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FTHY
+  cik: 1810523
+  company_name: FIRST TRUST HIGH YIELD OPPORTUNITIES 2027 TERM FUND
+  exchange: NYSE
+  market_cap: 487242080
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CPS
+  cik: 1320461
+  company_name: Cooper-Standard Holdings Inc.
+  exchange: NYSE
+  market_cap: 482967072
+  sector: Consumer Cyclical
+  industry: Auto Parts
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ASIX
+  cik: 1673985
+  company_name: AdvanSix Inc.
+  exchange: NYSE
+  market_cap: 471170720
+  sector: Basic Materials
+  industry: Chemicals
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GHY
+  cik: 1554697
+  company_name: PGIM Global High Yield Fund, Inc.
+  exchange: NYSE
+  market_cap: 470643264
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DNA
+  cik: 1830214
+  company_name: Ginkgo Bioworks Holdings, Inc.
+  exchange: NYSE
+  market_cap: 468014944
+  sector: Healthcare
+  industry: Biotechnology
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FPI
+  cik: 1591670
+  company_name: Farmland Partners Inc.
+  exchange: NYSE
+  market_cap: 467787776
+  sector: Real Estate
+  industry: REIT - Specialty
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FFA
+  cik: 1291334
+  company_name: FIRST TRUST ENHANCED EQUITY INCOME FUND
+  exchange: NYSE
+  market_cap: 466322048
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CBAN
+  cik: 711669
+  company_name: COLONY BANKCORP INC
+  exchange: NYSE
+  market_cap: 461567712
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BALY
+  cik: 1747079
+  company_name: Bally's Corp
+  exchange: NYSE
+  market_cap: 461291424
+  sector: Consumer Cyclical
+  industry: Resorts & Casinos
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ETB
+  cik: 1308927
+  company_name: Eaton Vance Tax-Managed Buy-Write Income Fund
+  exchange: NYSE
+  market_cap: 458539296
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CINT
+  cik: 1868995
+  company_name: CI&T Inc
+  exchange: NYSE
+  market_cap: 458199456
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EVMN
+  cik: 2044725
+  company_name: Evommune, Inc.
+  exchange: NYSE
+  market_cap: 445304224
+  sector: Healthcare
+  industry: Biotechnology
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CWH
+  cik: 1669779
+  company_name: Camping World Holdings, Inc.
+  exchange: NYSE
+  market_cap: 444242560
+  sector: Consumer Cyclical
+  industry: Auto & Truck Dealerships
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BNED
+  cik: 1634117
+  company_name: Barnes & Noble Education, Inc.
+  exchange: NYSE
+  market_cap: 440938560
+  sector: Consumer Cyclical
+  industry: Specialty Retail
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BGR
+  cik: 1306550
+  company_name: BlackRock Energy & Resources Trust
+  exchange: NYSE
+  market_cap: 437846176
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CHCT
+  cik: 1631569
+  company_name: Community Healthcare Trust Inc
+  exchange: NYSE
+  market_cap: 429807616
+  sector: Real Estate
+  industry: REIT - Healthcare Facilities
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EVN
+  cik: 1074540
+  company_name: Eaton Vance Municipal Income Trust
+  exchange: NYSE
+  market_cap: 423980928
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FINS
+  cik: 1745059
+  company_name: Angel Oak Financial Strategies Income Term Trust
+  exchange: NYSE
+  market_cap: 421052352
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CAL
+  cik: 14707
+  company_name: CALERES INC
+  exchange: NYSE
+  market_cap: 417520544
+  sector: Consumer Cyclical
+  industry: Apparel Retail
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BOC
+  cik: 1494582
+  company_name: BOSTON OMAHA Corp
+  exchange: NYSE
+  market_cap: 414541568
+  sector: Industrials
+  industry: Conglomerates
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DFP
+  cik: 1559991
+  company_name: Flaherty & Crumrine Dynamic Preferred & Income Fund Inc
+  exchange: NYSE
+  market_cap: 414459584
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CLBR
+  cik: 2091024
+  company_name: Colombier Acquisition Corp. III
+  exchange: NYSE
+  market_cap: 410170848
+  sector: Financial Services
+  industry: Shell Companies
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ASPN
+  cik: 1145986
+  company_name: ASPEN AEROGELS INC
+  exchange: NYSE
+  market_cap: 408304832
+  sector: Basic Materials
+  industry: Specialty Chemicals
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GNE
+  cik: 1528356
+  company_name: Genie Energy Ltd.
+  exchange: NYSE
+  market_cap: 408217376
+  sector: Utilities
+  industry: Utilities - Regulated Electric
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AVBC
+  cik: 2058758
+  company_name: Avidia Bancorp, Inc.
+  exchange: NYSE
+  market_cap: 408035424
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ACCO
+  cik: 712034
+  company_name: ACCO BRANDS Corp
+  exchange: NYSE
+  market_cap: 407999456
+  sector: Industrials
+  industry: Business Equipment & Supplies
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CYH
+  cik: 1108109
+  company_name: COMMUNITY HEALTH SYSTEMS INC
+  exchange: NYSE
+  market_cap: 407517056
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DIN
+  cik: 49754
+  company_name: Dine Brands Global, Inc.
+  exchange: NYSE
+  market_cap: 401041888
+  sector: Consumer Cyclical
+  industry: Restaurants
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GCO
+  cik: 18498
+  company_name: GENESCO INC
+  exchange: NYSE
+  market_cap: 397740704
+  sector: Consumer Cyclical
+  industry: Apparel Retail
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FCBM
+  cik: 1531193
+  company_name: First Carolina Financial Services, Inc.
+  exchange: NYSE
+  market_cap: 397059936
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AUNA
+  cik: 1799207
+  company_name: AUNA S.A.
+  exchange: NYSE
+  market_cap: 391017376
+  sector: Healthcare
+  industry: Medical Care Facilities
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: GBAB
+  cik: 1495825
+  company_name: Guggenheim Taxable Municipal Bond & Investment Grade Debt Trust
+  exchange: NYSE
+  market_cap: 378097504
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BKKT
+  cik: 1820302
+  company_name: Bakkt, Inc.
+  exchange: NYSE
+  market_cap: 375428576
+  sector: Technology
+  industry: Software - Infrastructure
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: DSX
+  cik: 1318885
+  company_name: DIANA SHIPPING INC.
+  exchange: NYSE
+  market_cap: 374485312
+  sector: Industrials
+  industry: Marine Shipping
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FOF
+  cik: 1375340
+  company_name: Cohen & Steers Closed-End Opportunity Fund, Inc.
+  exchange: NYSE
+  market_cap: 372584032
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BBW
+  cik: 1113809
+  company_name: BUILD-A-BEAR WORKSHOP INC
+  exchange: NYSE
+  market_cap: 368976960
+  sector: Consumer Cyclical
+  industry: Specialty Retail
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FCRS
+  cik: 2074697
+  company_name: FutureCrest Acquisition Corp.
+  exchange: NYSE
+  market_cap: 367460960
+  sector: Financial Services
+  industry: Shell Companies
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BLND
+  cik: 1855747
+  company_name: Blend Labs, Inc.
+  exchange: NYSE
+  market_cap: 364230496
+  sector: Technology
+  industry: Software - Application
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ALUB
+  cik: 2041493
+  company_name: Alussa Energy Acquisition Corp. II
+  exchange: NYSE
+  market_cap: 363507808
+  sector: Financial Services
+  industry: Shell Companies
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CION
+  cik: 1534254
+  company_name: CION Investment Corp
+  exchange: NYSE
+  market_cap: 361147840
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: AWP
+  cik: 1390195
+  company_name: abrdn Global Premier Properties Fund
+  exchange: NYSE
+  market_cap: 353605728
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CVEO
+  cik: 1590584
+  company_name: Civeo Corp
+  exchange: NYSE
+  market_cap: 352900352
+  sector: Consumer Cyclical
+  industry: Lodging
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FTW
+  cik: 2083125
+  company_name: PRESIDIO PRODUCTION Co
+  exchange: NYSE
+  market_cap: 343887552
+  sector: Energy
+  industry: Oil & Gas E&P
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EMF
+  cik: 809708
+  company_name: TEMPLETON EMERGING MARKETS FUND
+  exchange: NYSE
+  market_cap: 343801632
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FUBO
+  cik: 1484769
+  company_name: FuboTV Inc.
+  exchange: NYSE
+  market_cap: 339798112
+  sector: Communication Services
+  industry: Broadcasting
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CLW
+  cik: 1441236
+  company_name: Clearwater Paper Corp
+  exchange: NYSE
+  market_cap: 337392832
+  sector: Basic Materials
+  industry: Paper & Paper Products
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: COSO
+  cik: 1297107
+  company_name: CoastalSouth Bancshares, Inc.
+  exchange: NYSE
+  market_cap: 333409504
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: FVRR
+  cik: 1762301
+  company_name: Fiverr International Ltd.
+  exchange: NYSE
+  market_cap: 332544224
+  sector: Communication Services
+  industry: Internet Content & Information
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BRW
+  cik: 826020
+  company_name: Saba Capital Income & Opportunities Fund
+  exchange: NYSE
+  market_cap: 331835392
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BKT
+  cik: 832327
+  company_name: BLACKROCK INCOME TRUST, INC.
+  exchange: NYSE
+  market_cap: 331338976
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: BGT
+  cik: 1287480
+  company_name: BLACKROCK FLOATING RATE INCOME TRUST
+  exchange: NYSE
+  market_cap: 328966656
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: ASG
+  cik: 786035
+  company_name: LIBERTY ALL STAR GROWTH FUND INC.
+  exchange: NYSE
+  market_cap: 326234496
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EBS
+  cik: 1367644
+  company_name: Emergent BioSolutions Inc.
+  exchange: NYSE
+  market_cap: 318407424
+  sector: Healthcare
+  industry: Drug Manufacturers - Specialty & Generic
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CAF
+  cik: 1368493
+  company_name: Morgan Stanley China A Share Fund, Inc.
+  exchange: NYSE
+  market_cap: 316679712
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: CBNA
+  cik: 1392272
+  company_name: CHAIN BRIDGE BANCORP INC
+  exchange: NYSE
+  market_cap: 312145632
+  sector: Financial Services
+  industry: Banks - Regional
+  tier: small
+  tags:
+  - small
+  pit_eligible: false
+- ticker: EFR
+  cik: 1258623
+  company_name: Eaton Vance Senior Floating-Rate Trust
+  exchange: NYSE
+  market_cap: 309112288
+  sector: Financial Services
+  industry: Asset Management
+  tier: small
+  tags:
+  - small
+  pit_eligible: false

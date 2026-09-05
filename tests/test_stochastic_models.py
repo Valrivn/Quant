@@ -317,6 +317,227 @@ class TestVersioningAndFetch:
 
 
 # ===================================================================
+# ====================================================================
+# Test 1c: YAML Refresh Pipeline Integration
+# ====================================================================
+
+class TestYamlRefreshPipeline:
+    """Tests for the automated Damodaran refresh pipeline."""
+
+    def test_industry_beta_yaml_exists(self):
+        from pathlib import Path
+        assert Path("config/industry_beta.yaml").exists()
+
+    def test_industry_beta_yaml_has_required_sections(self):
+        import yaml
+        from pathlib import Path
+        cfg = yaml.safe_load(Path("config/industry_beta.yaml").read_text(encoding="utf-8")) or {}
+        assert "industries" in cfg
+        assert "update" in cfg
+
+    def test_industry_beta_yaml_version_format(self):
+        import yaml
+        from pathlib import Path
+        cfg = yaml.safe_load(Path("config/industry_beta.yaml").read_text(encoding="utf-8")) or {}
+        version = cfg.get("update", {}).get("version", "")
+        assert version
+        parts = version.split(".")
+        assert len(parts) == 2
+        year, month = int(parts[0]), int(parts[1])
+        assert 2024 <= year <= 2030
+        assert 1 <= month <= 12
+
+    def test_industry_beta_yaml_has_checksum(self):
+        import yaml
+        from pathlib import Path
+        cfg = yaml.safe_load(Path("config/industry_beta.yaml").read_text(encoding="utf-8")) or {}
+        checksum = cfg.get("update", {}).get("combined_checksum", "")
+        assert checksum
+        assert len(checksum) == 64
+
+    def test_industry_beta_yaml_checksum_matches_data(self):
+        import yaml, hashlib, json
+        from pathlib import Path
+        cfg = yaml.safe_load(Path("config/industry_beta.yaml").read_text(encoding="utf-8")) or {}
+        stored = cfg.get("update", {}).get("combined_checksum", "")
+        industries = cfg.get("industries", {})
+        betas = [{"industry": k, "unlevered_beta": v.get("unlevered_beta")} for k, v in industries.items()]
+        ratings = cfg.get("default_ratings", {}).get("tiers", [])
+        combined = json.dumps({"betas": betas, "ratings": ratings}, sort_keys=True, default=str)
+        computed = hashlib.sha256(combined.encode("utf-8")).hexdigest()
+        assert computed == stored
+
+    def test_industry_beta_yaml_sufficient_industries(self):
+        import yaml
+        from pathlib import Path
+        cfg = yaml.safe_load(Path("config/industry_beta.yaml").read_text(encoding="utf-8")) or {}
+        assert len(cfg.get("industries", {})) >= 70
+
+    def test_industry_beta_yaml_required_industries(self):
+        import yaml
+        from pathlib import Path
+        cfg = yaml.safe_load(Path("config/industry_beta.yaml").read_text(encoding="utf-8")) or {}
+        industries = cfg.get("industries", {})
+        reqs = ["Semiconductor", "Aerospace/Defense"]
+        for req in reqs:
+            found = any(req.lower() in n.lower() for n in industries.keys())
+            assert found, f"Required industry not found: {req}"
+
+    def test_industry_beta_yaml_beta_ranges(self):
+        import yaml
+        from pathlib import Path
+        cfg = yaml.safe_load(Path("config/industry_beta.yaml").read_text(encoding="utf-8")) or {}
+        for name, info in cfg.get("industries", {}).items():
+            beta = info.get("unlevered_beta", 0)
+            assert 0.05 <= beta <= 3.0, f"{name}: beta {beta} out of range"
+
+    def test_industry_beta_yaml_has_sub_areas(self):
+        import yaml
+        from pathlib import Path
+        cfg = yaml.safe_load(Path("config/industry_beta.yaml").read_text(encoding="utf-8")) or {}
+        for name, info in cfg.get("industries", {}).items():
+            assert "sub_area" in info
+            assert info["sub_area"]
+
+    def test_industry_beta_yaml_has_thread_b(self):
+        import yaml
+        from pathlib import Path
+        cfg = yaml.safe_load(Path("config/industry_beta.yaml").read_text(encoding="utf-8")) or {}
+        assert "thread_b" in cfg
+        tb = cfg["thread_b"]
+        assert "ecosystem" in tb
+        assert tb["ecosystem"].get("enabled")
+
+    def test_industry_beta_yaml_has_default_ratings(self):
+        import yaml
+        from pathlib import Path
+        cfg = yaml.safe_load(Path("config/industry_beta.yaml").read_text(encoding="utf-8")) or {}
+        tiers = cfg.get("default_ratings", {}).get("tiers", [])
+        assert len(tiers) >= 10
+        for t in tiers:
+            assert "icr_threshold" in t
+            assert "rating" in t
+            assert "spread" in t
+
+    def test_version_is_not_stale(self):
+        import yaml
+        from pathlib import Path
+        from datetime import date
+        cfg = yaml.safe_load(Path("config/industry_beta.yaml").read_text(encoding="utf-8")) or {}
+        version = cfg.get("update", {}).get("version", "")
+        if not version:
+            pytest.skip("No version in YAML")
+        parts = version.split(".")
+        year, month = int(parts[0]), int(parts[1])
+        today = date.today()
+        months_diff = (today.year - year) * 12 + (today.month - month)
+        assert months_diff <= 2
+
+    def test_icr_cache_exists_and_matches(self):
+        import json, hashlib
+        from pathlib import Path
+        cache = Path(f"data/damodaran_icr_table_v{TABLE_VERSION}.json")
+        if not cache.exists():
+            pytest.skip("ICR cache not found")
+        raw = json.loads(cache.read_text(encoding="utf-8"))
+        assert raw.get("version") == TABLE_VERSION
+        assert "checksum" in raw
+        serialized = json.dumps(raw["data"], sort_keys=True)
+        computed = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+        assert computed == raw["checksum"]
+
+    def test_icr_cache_rating_tiers_match_yaml(self):
+        import json, yaml
+        from pathlib import Path
+        cache = Path(f"data/damodaran_icr_table_v{TABLE_VERSION}.json")
+        if not cache.exists():
+            pytest.skip("ICR cache not found")
+        raw = json.loads(cache.read_text(encoding="utf-8"))
+        icr_ratings = {t["rating"] for t in raw["data"]}
+        cfg = yaml.safe_load(Path("config/industry_beta.yaml").read_text(encoding="utf-8")) or {}
+        yaml_ratings = {t["rating"] for t in cfg.get("default_ratings", {}).get("tiers", [])}
+        assert icr_ratings == yaml_ratings
+
+    def test_mirror_dir_structure(self):
+        from pathlib import Path
+        mirror = Path("data/damodaran_mirror")
+        if not mirror.exists():
+            pytest.skip("Mirror directory not created yet")
+        files = [f for f in mirror.iterdir() if not f.name.endswith(".meta")]
+        if files:
+            for f in files:
+                meta = f.with_name(f.name + ".meta")
+                assert meta.exists()
+
+    def test_refresh_script_exists_and_importable(self):
+        import importlib.util
+        from pathlib import Path
+        script = Path("scripts/refresh_damodaran.py")
+        assert script.exists()
+        spec = importlib.util.spec_from_file_location("refresh_damodaran", str(script))
+        assert spec is not None
+
+    def test_refresh_script_has_run_refresh_function(self):
+        import importlib.util
+        from pathlib import Path
+        script = Path("scripts/refresh_damodaran.py")
+        spec = importlib.util.spec_from_file_location("refresh_damodaran", str(script))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        assert hasattr(mod, "run_refresh")
+        assert callable(mod.run_refresh)
+
+    def test_refresh_script_dry_run(self):
+        import importlib.util
+        from pathlib import Path
+        script = Path("scripts/refresh_damodaran.py")
+        spec = importlib.util.spec_from_file_location("refresh_damodaran", str(script))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        try:
+            result = mod.run_refresh(dry_run=True)
+            assert "version" in result
+            assert "beta_count" in result
+            assert "rating_count" in result
+        except RuntimeError as exc:
+            if "Cannot fetch" in str(exc) or "network" in str(exc).lower():
+                pytest.skip("Network unavailable for dry run")
+            raise
+
+    def test_github_actions_workflow_exists(self):
+        from pathlib import Path
+        assert Path(".github/workflows/refresh-damodaran.yml").exists()
+
+    def test_github_actions_workflow_has_schedule(self):
+        from pathlib import Path
+        import yaml
+        cfg = yaml.safe_load(Path(".github/workflows/refresh-damodaran.yml").read_text(encoding="utf-8")) or {}
+        # PyYAML parses "on:" as True (boolean), so check both forms
+        on_cfg = cfg.get("on") or cfg.get(True) or {}
+        schedule = on_cfg.get("schedule", [])
+        assert len(schedule) > 0
+        cron = schedule[0].get("cron", "")
+        assert "0 6 1 * *" in cron or "0 1 1 * *" in cron
+
+    def test_github_actions_workflow_has_dispatch(self):
+        from pathlib import Path
+        import yaml
+        cfg = yaml.safe_load(Path(".github/workflows/refresh-damodaran.yml").read_text(encoding="utf-8")) or {}
+        # PyYAML parses "on:" as True (boolean), so check both forms
+        on_cfg = cfg.get("on") or cfg.get(True) or {}
+        assert "workflow_dispatch" in on_cfg
+
+    def test_default_probability_table_loads_from_cache_not_hardcoded(self):
+        import json
+        from pathlib import Path
+        cache = Path(f"data/damodaran_icr_table_v{TABLE_VERSION}.json")
+        if not cache.exists():
+            pytest.skip("ICR cache not produced by refresh pipeline")
+        tiers = load_or_fetch_table()
+        assert isinstance(tiers, list)
+        assert len(tiers) >= 10
+
+
 # Test 2: Bernoulli Shock Filter
 # ===================================================================
 
@@ -348,7 +569,7 @@ class TestBernoulliShockFilter:
         rng = random.Random(42)
         result = filter_engine.run_trial(icr=35.0, rng=rng)
         assert isinstance(result, BernoulliShockResult)
-        assert result.synthetic_rating == "AAA"
+        assert result.synthetic_rating in ("AAA", "Aaa/AAA")
         assert result.shock_probability < 0.01
         # With AAA, shock should almost never fire
         assert result.penalty_multiplier == 1.0 or result.shock_occurred
@@ -871,7 +1092,7 @@ class TestBernoulliShockFilterDynamic:
         )
         assert isinstance(result, BernoulliShockResult)
         assert result.shock_probability > 0.005
-        assert result.synthetic_rating == "AAA"
+        assert result.synthetic_rating in ("AAA", "Aaa/AAA")
 
     def test_run_trial_dynamic_sector_dominates_nvda(self, filter_engine):
         rng = random.Random(42)

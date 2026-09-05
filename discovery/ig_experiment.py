@@ -192,23 +192,20 @@ def run_ig_experiment(
 
 
 def current_scraper_cohort(limit: int = 50) -> List[str]:
-    """Companies the existing scrapers/knowledge base already surface.
+    """Companies from the master liquid universe (replaces SQLite daily_aggregations).
 
-    Reads distinct tickers from the repo DB's ``daily_aggregations`` (whatever
-    exists on disk; returns [] if the DB is absent). These are the "companies
-    from our scraper already" the IG alpha is compared against.
+    Uses the master universe built from yfinance enrichment (794 liquid tickers
+    >$300M MC). Filters to core/large-cap tickers for a quality cohort.
     """
-    db = Path(__file__).resolve().parents[1] / "reddit_quant.db"
-    if not db.exists():
-        return []
     try:
-        con = sqlite3.connect(str(db))
-        rows = con.execute(
-            "SELECT DISTINCT ticker FROM daily_aggregations ORDER BY ticker LIMIT ?",
-            (limit,),
-        )
-        tickers = [r[0] for r in rows.fetchall() if r[0]]
-        con.close()
-        return list(dict.fromkeys(tickers))
+        from diversification.master_data import get_discovery_universe
+        # Use core + large cap tickers for a high-quality traditional cohort
+        tickers = get_discovery_universe(tier="core", tags=["sp500"], limit=limit)
+        if len(tickers) < limit:
+            # Fill remaining with large-cap non-SP500
+            more = get_discovery_universe(tier="large", tags=["sp500"], limit=limit - len(tickers))
+            tickers.extend(more)
+        return tickers[:limit]
     except Exception:
+        # Fallback to empty list if master_data unavailable
         return []

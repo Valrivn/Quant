@@ -92,3 +92,20 @@ data/reddit_batches/
 data/test_batches/
 data/sentiment_training_cache/
 data/phrasebank_cache/
+
+# Scraped/downloaded market database — regenerate locally, NEVER push
+data/master_prices/
+data/master_dividends/
+data/damodaran/
+data/universe_cache/
+.cache/
+
+# Local run logs / scratch outputs
+bt_out.log
+bt_run.log
+bt_result.json
+bt_result_opp.json
+debug.log
+out.log
+stack.log
+static_ml_output.json

@@ -1,0 +1,37 @@
+yields:
+  BIL: 0.03719
+  BND: 0.040695
+  CL: 0.023657
+  GIS: 0.063724
+  GLD: 0.0
+  HD: 0.028936
+  IAU: 0.0
+  IWM: 0.008973
+  JNJ: 0.019184
+  KMB: 0.048399
+  KO: 0.023618
+  MCD: 0.029098
+  MDY: 0.010153
+  MO: 0.061556
+  O: 0.052996
+  PEP: 0.041771
+  PG: 0.029309
+  SGOV: 0.036946
+  SHY: 0.036259
+  SPY: 0.00977
+  TGT: 0.027852
+  VB: 0.012016
+  VCIT: 0.049373
+  VCSH: 0.045037
+  VTI: 0.01027
+  VZ: 0.055764
+meta:
+  description: Trailing 12-month dividend yields (sum of last 365 days of dividends
+    / current price) from yfinance
+  source: yfinance Ticker.dividends + current price
+  universe: SLEEVES ETFs + P3 proxies + DIVIDEND_CANDIDATES
+  method: TTM yield = sum(dividends in last 365 days) / last close
+  generated_utc: '2026-09-05T01:39:10Z'
+  tickers: 26
+  checksum: f8aa9228ec2bdcf8681df4b2c58d05122f1cc9eb5ceb780e5b86d12d74d88a6b
+  version: 2026.09.05
