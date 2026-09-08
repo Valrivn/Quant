@@ -1,0 +1,74 @@
+# Dynamic Position Sizing — Monte Carlo Calibration Configuration
+# NO static 5%/10% caps. Company-specific entry at Price <= IV_P25
+# Sector-calibrated discount: Discount_sector = max(0.08, 1.2 * sigma_sector_historical)
+
+monte_carlo:
+  n_passes: 10000
+  entry_percentile: 25        # IV_P25 for standard entry (legacy)
+  crisis_entry_percentile: 10 # IV_P10 for black swan Tier 2
+  fair_value_percentile: 50   # P50 = fair value
+  entry_margin_of_safety: 0.10  # 10% below fair value for entry
+  growth_rate_dist:
+    mean: 0.07
+    std: 0.015
+    min: 0.02
+    max: 0.15
+  wacc_dist:
+    mean: 0.08
+    std: 0.0075
+    min: 0.065
+    max: 0.10
+  terminal_multiple_dist:
+    mean: 18.0
+    std: 2.0
+    min: 13.0
+    max: 22.0
+  rd_capitalization_rate: 0.15  # Rate to capitalize R&D expense
+
+sector_calibration:
+  # Sector-specific historical volatility multipliers for discount calculation
+  # Discount_sector = max(0.08, 1.2 * sigma_sector_historical)
+  sector_sigma:
+    "Technology": 0.35
+    "Communication Services": 0.30
+    "Consumer Discretionary": 0.28
+    "Healthcare": 0.22
+    "Industrials": 0.25
+    "Financials": 0.24
+    "Consumer Staples": 0.18
+    "Energy": 0.40
+    "Materials": 0.30
+    "Utilities": 0.20
+    "Real Estate": 0.25
+  min_discount: 0.08  # Floor at 8%
+  sigma_multiplier: 1.2
+
+sizing_rules:
+  # Dynamic position sizing based on conviction and regime
+  base_position_pct: 0.05       # 5% base per position
+  max_single_position: 0.15     # 15% hard cap
+  max_sector_exposure: 0.30     # 30% per sector
+  conviction_multiplier:
+    high: 1.5    # IV_P25 + strong C_t acceleration
+    medium: 1.0  # IV_P25 + neutral C_t
+    low: 0.5     # Near IV_P25, weak signals
+  dry_powder:
+    baseline: 0.10  # 10% cash reserve
+    crisis_tier1: 0.25  # 25% deployed on fast trigger
+    crisis_tier2: 0.75  # 75-100% deployed on slow trigger
+
+statistical_tests:
+  anova_sector_variance:
+    enabled: true
+    alpha: 0.05
+  welch_t_test_dotcom_vs_ai:
+    enabled: true
+    alpha: 0.05
+  chi_square_winloss:
+    enabled: true
+    alpha: 0.05
+
+rebalancing:
+  band_width: 0.02  # 2% drift bands
+  min_trade_size: 1000  # Minimum $ per trade
+  cost_budget_bps: 15   # Max 15 bps per rebalance
