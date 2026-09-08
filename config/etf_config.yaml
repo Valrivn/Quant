@@ -45,6 +45,22 @@ allocation:
     inflation_threshold: 0.04
     regime_shift_spread_widening: 0.015  # 150 bps spread expansion
 
+# Fallback Engine Configuration (Black Swan / Crisis Allocation)
+fallback:
+  treasuries:
+    primary: "BIL"
+    secondary: "SHV"
+    nav_tolerance_bps: 10    # ±0.10%
+    max_spread_bps: 2        # ≤0.02%
+    min_adv_shares: 1000000
+  gold:
+    primary: "GLDM"
+    secondary: "IAU"
+    nav_tolerance_bps: 10
+    max_spread_bps: 2
+    min_adv_shares: 1000000
+  allocation: { treasuries: 0.60, gold: 0.40 }
+
 # Relative Sensitivity Vector Engine
 # Normalizes raw risk metrics into uniform [0, 1] space for cross-ticker comparison
 sensitivity:
@@ -69,7 +85,7 @@ sensitivity:
   allocation_adjustment:
     risk_tolerance: 0.3  # 0.0 = no adjustment, 1.0 = maximum tilt (conservative for youth account)
   risk_labels:
-    insulated: [0.00, 0.20)           # Safe baseline, no buffer overlay
-    moderate_exposure: [0.20, 0.45)   # Balanced, maintain tactical baseline
-    elevated_fragility: [0.45, 0.75)  # Risk flagged, trim equity exposure
-    acute_cliff_alert: [0.75, 1.00]   # Structural danger, flight-to-safety
+    insulated: "[0.00, 0.20)"           # Safe baseline, no buffer overlay
+    moderate_exposure: "[0.20, 0.45)"   # Balanced, maintain tactical baseline
+    elevated_fragility: "[0.45, 0.75)"  # Risk flagged, trim equity exposure
+    acute_cliff_alert: "[0.75, 1.00]"   # Structural danger, flight-to-safety

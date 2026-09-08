@@ -1,0 +1,61 @@
+{
+  "scraper_settings": {
+    "min_delay_sec": 2.0,
+    "max_delay_sec": 6.0,
+    "max_retries": 5,
+    "max_workers": 3,
+    "max_requests_per_hour_per_proxy": 100,
+    "cooldown_on_captcha_sec": 300
+  },
+  "tier_limits": {
+    "macro": 3,
+    "company": 4,
+    "product": 5,
+    "competitive": 3
+  },
+  "proxies": [],
+  "default_geos": ["US"],
+  "default_timeframes": ["today 5-y"],
+  "sample_companies": [
+    {
+      "ticker": "NVDA",
+      "name": "Nvidia",
+      "sector": "Semiconductors",
+      "ceo": "Jensen Huang",
+      "products": ["Blackwell GPU", "H100", "CUDA", "Omniverse", "GeForce RTX"],
+      "competitors": ["AMD", "Intel"]
+    },
+    {
+      "ticker": "AAPL",
+      "name": "Apple",
+      "sector": "Consumer Electronics",
+      "ceo": "Tim Cook",
+      "products": ["iPhone 16", "Vision Pro", "MacBook Air", "iPad Pro"],
+      "competitors": ["Samsung", "Google"]
+    },
+    {
+      "ticker": "TSLA",
+      "name": "Tesla",
+      "sector": "Automotive",
+      "ceo": "Elon Musk",
+      "products": ["Cybertruck", "Model Y", "Full Self-Driving", "Optimus Robot"],
+      "competitors": ["BYD", "Rivian"]
+    },
+    {
+      "ticker": "MSFT",
+      "name": "Microsoft",
+      "sector": "Software",
+      "ceo": "Satya Nadella",
+      "products": ["Copilot", "Azure", "Windows 11", "Office 365"],
+      "competitors": ["Amazon", "Google"]
+    },
+    {
+      "ticker": "AMZN",
+      "name": "Amazon",
+      "sector": "E-Commerce",
+      "ceo": "Andy Jassy",
+      "products": ["AWS", "Prime Video", "Alexa", "Kindle"],
+      "competitors": ["Walmart", "Microsoft"]
+    }
+  ]
+}

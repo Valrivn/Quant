@@ -1,0 +1,33 @@
+{
+  "schedule": {
+    "daily_update": {
+      "schedule_cron": "0 6 * * *",
+      "time_et": "06:00",
+      "description": "Daily incremental update for all 69 FRED daily/monthly series",
+      "max_business_day_gap": 5,
+      "alert_missing_threshold": 0.10
+    },
+    "weekly_refresh": {
+      "schedule_cron": "0 8 * * 0",
+      "day_of_week": "Sunday",
+      "time_et": "08:00",
+      "description": "Weekly ALFRED vintage refresh for macro series",
+      "batch_size": 10,
+      "std_dev_revision_threshold": 2.0
+    },
+    "monthly_revalidation": {
+      "schedule_cron": "0 0 1 * *",
+      "day_of_month": 1,
+      "time_et": "00:00",
+      "description": "Monthly full revalidation and parquet rebuild check"
+    }
+  },
+  "paths": {
+    "log_file": "logs/fred_pipeline.log",
+    "health_check_file": "logs/fred_health_check.json",
+    "data_lake_dir": "data/data_lake"
+  },
+  "series_config": {
+    "total_series_count": 69
+  }
+}

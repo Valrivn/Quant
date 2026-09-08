@@ -1,0 +1,1 @@
+"""EDGAR/XBRL Ingestion Pipeline."""
