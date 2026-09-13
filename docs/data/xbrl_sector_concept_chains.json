@@ -1,0 +1,2384 @@
+{
+  "concepts": {
+    "acquired_in_process_rd": {
+      "chain": [
+        "AcquiredInProcessResearchAndDevelopment",
+        "InProcessResearchAndDevelopmentExpense",
+        "ResearchAndDevelopmentExpenseAcquiredInProcess"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 350-20-25",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "pharma_biotech"
+      ],
+      "unit": "USD"
+    },
+    "acquisitions_of_properties": {
+      "chain": [
+        "PaymentsToAcquireRealEstate",
+        "AcquisitionsOfRealEstate",
+        "CapitalExpenditures"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 360-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "adjusted_patient_days": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Supplemental disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "healthcare_services"
+      ],
+      "unit": "shares"
+    },
+    "administrative_expenses_mc": {
+      "chain": [
+        "AdministrativeExpenses",
+        "SellingGeneralAndAdministrativeExpense",
+        "GeneralAndAdministrativeExpense"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Managed care",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "USD"
+    },
+    "affo": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "NAREIT AFFO definition",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "allowance_for_loan_losses": {
+      "chain": [
+        "AllowanceForLoanAndLeaseLosses",
+        "AllowanceForCreditLosses",
+        "AllowanceForDoubtfulAccounts"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 326-20-30",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "amortization_intangibles": {
+      "chain": [
+        "AmortizationOfIntangibleAssets",
+        "AmortizationExpense",
+        "AmortizationOfFiniteLivedIntangibleAssets"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 350-30",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "pharma_biotech"
+      ],
+      "unit": "USD"
+    },
+    "aum": {
+      "chain": [
+        "AssetsUnderManagement",
+        "ManagedAssets",
+        "TotalAssetsUnderManagement"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "AUM disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "asset_management"
+      ],
+      "unit": "USD"
+    },
+    "brokerage_commissions": {
+      "chain": [
+        "BrokerageRevenue",
+        "Commissions",
+        "BrokerageCommissions"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 606-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "asset_management"
+      ],
+      "unit": "USD"
+    },
+    "capitation_revenue": {
+      "chain": [
+        "CapitationRevenue",
+        "CapitationFees"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Managed care capitation",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "USD"
+    },
+    "collaboration_revenue": {
+      "chain": [
+        "CollaborationRevenue",
+        "ContractRevenue",
+        "CollaborationArrangements",
+        "RevenueFromCollaborativeArrangements"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 808-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "pharma_biotech"
+      ],
+      "unit": "USD"
+    },
+    "combined_ratio": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Combined ratio definition",
+        "source": "naic_sap",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "commercial_members": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Supplemental MD&A disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "shares"
+    },
+    "cost_of_goods_sold_pharma": {
+      "chain": [
+        "CostOfGoodsAndServicesSold",
+        "CostOfProductsSold",
+        "CostOfRevenue",
+        "CostOfSales"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 330-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "pharma_biotech"
+      ],
+      "unit": "USD"
+    },
+    "deferred_acquisition_costs": {
+      "chain": [
+        "DeferredAcquisitionCosts",
+        "DeferredPolicyAcquisitionCosts",
+        "DacAsset"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 944-30",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "deferred_premium_revenue": {
+      "chain": [
+        "DeferredPremiumRevenue",
+        "DeferredRevenue",
+        "UnearnedPremiumRevenue"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 944-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "USD"
+    },
+    "deferred_revenue_devices": {
+      "chain": [
+        "DeferredRevenue",
+        "ContractLiabilities",
+        "UnearnedRevenue"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 606-10-50",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "medical_devices"
+      ],
+      "unit": "USD"
+    },
+    "deposits": {
+      "chain": [
+        "Deposits",
+        "CustomerAccounts",
+        "DepositsLiabilities",
+        "DepositsInOtherFinancialInstitutions"
+      ],
+      "is_computed": false,
+      "parent_concept": "total_liabilities",
+      "provenance": {
+        "reference": "ASC 942-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "depreciation_amort_healthcare": {
+      "chain": [
+        "DepreciationAmortizationAndAccretionNet",
+        "DepreciationAndAmortization",
+        "Depreciation"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 360-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "healthcare_services"
+      ],
+      "unit": "USD"
+    },
+    "depreciation_real_estate": {
+      "chain": [
+        "DepreciationOfRealEstateAssets",
+        "DepreciationDepletionAndAmortization",
+        "DepreciationAndAmortization"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 360-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "device_cogs": {
+      "chain": [
+        "CostOfGoodsAndServicesSold",
+        "CostOfRevenue",
+        "CostOfProductRevenue"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 330-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "medical_devices"
+      ],
+      "unit": "USD"
+    },
+    "device_product_revenue": {
+      "chain": [
+        "ProductRevenue",
+        "SalesRevenueNet",
+        "RevenueFromContractWithCustomerExcludingAssessedTax"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 606-10-55",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "medical_devices"
+      ],
+      "unit": "USD"
+    },
+    "device_rd_expense": {
+      "chain": [
+        "ResearchAndDevelopmentExpense",
+        "ResearchAndDevelopmentExpenseExcludeAcquiredInProcessRAndD"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 730-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "medical_devices"
+      ],
+      "unit": "USD"
+    },
+    "discharges": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Supplemental disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "healthcare_services"
+      ],
+      "unit": "shares"
+    },
+    "dispositions_of_properties": {
+      "chain": [
+        "ProceedsFromSaleOfRealEstate",
+        "DispositionsOfRealEstate",
+        "GainOnSaleOfRealEstate"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 360-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "earning_assets": {
+      "chain": [
+        "EarningAssets",
+        "EarningAssetsAverage",
+        "InterestBearingDeposits",
+        "FederalFundsSoldSecuritiesPurchased"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 320",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "ffo": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "NAREIT FFO definition",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "ffo_depreciation_adjustment": {
+      "chain": [
+        "DepreciationDepletionAndAmortization",
+        "DepreciationAndAmortization"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "NAREIT FFO definition",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "ffo_gains_adjustment": {
+      "chain": [
+        "GainOnSaleOfRealEstate",
+        "RealizedGainsLossesOnSaleOfRealEstate",
+        "GainLossOnDisposalsOfRealEstate"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "NAREIT FFO definition",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "fund_operating_expenses": {
+      "chain": [
+        "FundOperatingExpenses",
+        "OperatingExpenses",
+        "OtherOperatingExpenses"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "SEC N-MEN/N-CSR",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "asset_management"
+      ],
+      "unit": "USD"
+    },
+    "goodwill": {
+      "chain": [
+        "Goodwill",
+        "GoodwillNet"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 350-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "pharma_biotech"
+      ],
+      "unit": "USD"
+    },
+    "gross_margin_pharma": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Gross margin = Revenue - COGS",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "pharma_biotech"
+      ],
+      "unit": "USD"
+    },
+    "incentive_fees": {
+      "chain": [
+        "IncentiveFees",
+        "PerformanceFeesAllocatedToGeneralPartner",
+        "CarriedInterest"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 820",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "asset_management"
+      ],
+      "unit": "USD"
+    },
+    "installation_costs": {
+      "chain": [
+        "InstallationCosts",
+        "CapitalizedSoftwareDevelopmentCosts"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 985-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "medical_devices"
+      ],
+      "unit": "USD"
+    },
+    "intangible_assets_gross": {
+      "chain": [
+        "IntangibleAssetsGrossExcludingGoodwill",
+        "IntangibleAssetsExcludingGoodwill",
+        "IntangibleAssetsNetExcludingGoodwill"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 350-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "pharma_biotech"
+      ],
+      "unit": "USD"
+    },
+    "interest_expense": {
+      "chain": [
+        "InterestExpense",
+        "InterestExpenseDeposits",
+        "InterestExpenseNoninterestExpense",
+        "InterestAndDebtExpense"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 835-20-45",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "interest_income": {
+      "chain": [
+        "InterestIncomeExpense",
+        "InterestIncome",
+        "InterestIncomeDepositsWithFinancialInstitutions",
+        "InterestAndDividendIncomeOperating",
+        "InvestmentIncomeNet"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 310-20-45",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "investment_income": {
+      "chain": [
+        "InvestmentIncome",
+        "InvestmentIncomeNet",
+        "NetInvestmentIncome",
+        "InterestAndDividendIncomeOperating"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 944-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "investment_income_mc": {
+      "chain": [
+        "InvestmentIncome",
+        "NetInvestmentIncome",
+        "InterestAndDividendIncomeOperating"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 320-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "USD"
+    },
+    "leasing_commissions": {
+      "chain": [
+        "LeasingCommissions",
+        "CapitalizedLeasingCommissions"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "AFFO adjustment",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "loss_adjustment_expenses": {
+      "chain": [
+        "LossAdjustmentExpenses",
+        "LossAdjustmentExpense"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 944-30",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "loss_reserve_discount": {
+      "chain": [
+        "DiscountFromUnpaidLosses",
+        "UnpaidLossesDiscount"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 944-30-30",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "loss_reserves": {
+      "chain": [
+        "LossReserves",
+        "LossReservesOnClosedClaims",
+        "ClaimsReserve",
+        "UnpaidLossesAndLossAdjustmentExpenses"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Schedule P",
+        "source": "naic_sap",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "losses_incurred": {
+      "chain": [
+        "LossesAndLossAdjustmentExpensesIncurred",
+        "ClaimsAndClaimsSettlementExpenses",
+        "LossesIncurred",
+        "NetIncurredClaims"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 944-30",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "management_fee_revenue": {
+      "chain": [
+        "InvestmentAdvisoryFees",
+        "ManagementFees",
+        "AdvisoryFees",
+        "InvestmentManagementFees"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 606-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "asset_management"
+      ],
+      "unit": "USD"
+    },
+    "marketing_rd_expense": {
+      "chain": [
+        "MarketingAndResearchExpense",
+        "SellingAndMarketingExpense",
+        "SellingGeneralAndAdministrativeExpense"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 350-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "pharma_biotech"
+      ],
+      "unit": "USD"
+    },
+    "mc_operating_margin": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "MC operating margin = Premium - Claims - Admin",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "USD"
+    },
+    "medicaid_members": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Supplemental MD&A disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "shares"
+    },
+    "medical_expenses": {
+      "chain": [
+        "MedicalExpenses",
+        "MedicalCosts",
+        "CostOfCareProvided",
+        "ClaimsAndClaimsSettlementExpenses"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Managed care MLR numerator",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "USD"
+    },
+    "medicare_advantage_members": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Supplemental MD&A disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "shares"
+    },
+    "mortgage_debt": {
+      "chain": [
+        "SecuredByMortgageReceivable",
+        "MortgagePayable",
+        "MortgageNotesPayable"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 842-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "net_chargeoffs": {
+      "chain": [
+        "NetChargeOffs",
+        "NetChargeoffs",
+        "LoanLossesChargedAgainstAllowance"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 310-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "net_income_common": {
+      "chain": [
+        "NetIncomeLoss",
+        "NetIncomeLossAvailableToCommonStockholdersBasic"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 260",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "net_interest_income": {
+      "chain": [
+        "NetInterestIncome",
+        "InterestIncomeNet",
+        "InterestIncomeNetOfInterestExpense"
+      ],
+      "is_computed": false,
+      "parent_concept": "net_revenue",
+      "provenance": {
+        "reference": "ASC 942-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "net_revenue": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Net Revenue = NII + Noninterest Income",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "noi": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "NOI = Revenue - Operating Costs",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "noninterest_expense": {
+      "chain": [
+        "NoninterestExpense",
+        "OtherNoninterestExpense",
+        "NoninterestExpenseEmployeeBenefits"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 942-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "noninterest_income": {
+      "chain": [
+        "NoninterestIncome",
+        "OtherNoninterestIncome",
+        "NoninterestIncomeOther",
+        "GainOnSaleOfLoans"
+      ],
+      "is_computed": false,
+      "parent_concept": "net_revenue",
+      "provenance": {
+        "reference": "ASC 942-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "num_beds": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Supplemental disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "healthcare_services"
+      ],
+      "unit": "shares"
+    },
+    "numerator_of_utilization": {
+      "chain": [
+        "InpatientRevenue",
+        "OutpatientRevenue",
+        "EmergencyDepartmentVisits"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Managed care utilization",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "USD"
+    },
+    "occupied_sqft": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Supplemental disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "shares"
+    },
+    "operating_expenses_healthcare": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Operating Expenses = sum of cost categories",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "healthcare_services"
+      ],
+      "unit": "USD"
+    },
+    "other_operating_revenue": {
+      "chain": [
+        "OtherOperatingRevenue",
+        "OtherRevenue",
+        "OtherIncome"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 606-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "healthcare_services"
+      ],
+      "unit": "USD"
+    },
+    "partners_capital": {
+      "chain": [
+        "PartnersCapital",
+        "LimitedPartnersCapital",
+        "StockholdersEquity"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 946",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "asset_management"
+      ],
+      "unit": "USD"
+    },
+    "patient_days": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Supplemental disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "healthcare_services"
+      ],
+      "unit": "shares"
+    },
+    "patient_revenue": {
+      "chain": [
+        "PatientRevenue",
+        "NetPatientRevenue",
+        "HealthCareServiceRevenue",
+        "RevenueFromContractWithCustomerExcludingAssessedTax"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Healthcare services revenue",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "healthcare_services"
+      ],
+      "unit": "USD"
+    },
+    "performance_fee_revenue": {
+      "chain": [
+        "PerformanceFees",
+        "IncentiveFees",
+        "PerformanceBasedFees",
+        "AllocatedPerformanceFees"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 606-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "asset_management"
+      ],
+      "unit": "USD"
+    },
+    "pharma_rd_expense": {
+      "chain": [
+        "ResearchAndDevelopmentExpense",
+        "ResearchAndDevelopmentExpenseExcludeAcquiredInProcessRAndD",
+        "CostsAndExpensesResearchAndDevelopment"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 730-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "pharma_biotech"
+      ],
+      "unit": "USD"
+    },
+    "policyholder_liabilities": {
+      "chain": [
+        "PolicyholderLiabilities",
+        "LiabilityForPolicyholderBenefits",
+        "PolicyReserves"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 944-40",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "premium_revenue_mc": {
+      "chain": [
+        "PremiumRevenue",
+        "PremiumsAndOtherConsiderations",
+        "HealthInsurancePremiumsRevenue",
+        "RevenueFromContractWithCustomerExcludingAssessedTax"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 944-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "USD"
+    },
+    "premiums_earned": {
+      "chain": [
+        "PremiumsEarned",
+        "PremiumsAndOtherConsiderations",
+        "DirectWrittenPremiums",
+        "PremiumRevenue",
+        "InsurancePremiumsWritten"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 944-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "premiums_written": {
+      "chain": [
+        "PremiumsWritten",
+        "DirectWrittenPremiums",
+        "GrossPremiumsWritten"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 944-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "product_revenue": {
+      "chain": [
+        "ProductRevenue",
+        "ProductSales",
+        "SalesRevenueNet",
+        "RevenueFromContractWithCustomerExcludingAssessedTax"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 606-10-55",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "pharma_biotech"
+      ],
+      "unit": "USD"
+    },
+    "property_operations_expense": {
+      "chain": [
+        "PropertyOperatingExpenses",
+        "OperatingExpensesOfRealEstate",
+        "RealEstateOperatingExpenses",
+        "PropertyMaintenance"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 942-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "provider_fees": {
+      "chain": [
+        "ProviderFees",
+        "PhysicianFees",
+        "ProfessionalFees"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Healthcare services expense",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "healthcare_services"
+      ],
+      "unit": "USD"
+    },
+    "provision_for_loan_losses": {
+      "chain": [
+        "ProvisionForLoanAndLeaseLosses",
+        "ProvisionForCreditLosses",
+        "ProvisionForDoubtfulAccounts",
+        "BadDebtExpense"
+      ],
+      "is_computed": false,
+      "parent_concept": "noninterest_expense",
+      "provenance": {
+        "reference": "ASC 326-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "real_estate_taxes": {
+      "chain": [
+        "RealEstateTaxes",
+        "PropertyTaxes",
+        "RealEstateTaxExpense"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "REIT specific",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "realized_gains_losses": {
+      "chain": [
+        "RealizedGainsLossesOnInvestments",
+        "RealizedGainsOnInvestments",
+        "NetRealizedGainsLossesOnInvestments"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 320-10-45",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "rental_revenue": {
+      "chain": [
+        "RentalRevenue",
+        "RentalIncome",
+        "MinimumLeasePayments",
+        "OperatingLeaseIncome"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 842-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "risk_adjustment": {
+      "chain": [
+        "RiskAdjustmentRevenue",
+        "RiskCorridorBenefit",
+        "RiskAdjustment"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ACA risk corridors",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "USD"
+    },
+    "risk_weighted_assets": {
+      "chain": [
+        "RiskWeightedAssets",
+        "RiskWeightedAssetsRWA"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Basel III disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "royalty_revenue": {
+      "chain": [
+        "RoyaltyRevenue",
+        "RoyaltyIncome",
+        "LicenseRevenue",
+        "AmortizationOfIntangibleAssetsRevenue"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 606-10-55",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "pharma_biotech"
+      ],
+      "unit": "USD"
+    },
+    "salaries_and_wages": {
+      "chain": [
+        "SalariesAndWages",
+        "CompensationCost",
+        "EmployeeCosts"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 710-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "healthcare_services"
+      ],
+      "unit": "USD"
+    },
+    "service_revenue_devices": {
+      "chain": [
+        "ServiceRevenue",
+        "ServiceRevenueProductRevenue",
+        "MaintenanceAndServiceRevenue"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 606-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "medical_devices"
+      ],
+      "unit": "USD"
+    },
+    "statutory_capital_surplus": {
+      "chain": [
+        "StatutorySurplus",
+        "StatutoryCapitalAndSurplus",
+        "AdditionalPaidInCapital",
+        "StockholdersEquity"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Schedule A",
+        "source": "naic_sap",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "straight_line_rent_adjustment": {
+      "chain": [
+        "StraightLineRentAdjustment",
+        "StraightLineRent"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "AFFO non-cash adjustment",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "supplies_expense": {
+      "chain": [
+        "MedicalSupplies",
+        "SuppliesAndDrugs",
+        "CostOfSupplies"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Healthcare services expense",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "healthcare_services"
+      ],
+      "unit": "USD"
+    },
+    "tenant_improvements": {
+      "chain": [
+        "TenantImprovementAllowance",
+        "TenantImprovements",
+        "CapitalizedTenantImprovements"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "AFFO adjustment",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "USD"
+    },
+    "tier1_capital": {
+      "chain": [
+        "Tier1Capital",
+        "CommonEquityTier1Capital",
+        "ShareholdersEquity",
+        "StockholdersEquity"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 942",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "total_assets": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 942-210-45",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "total_investment_fee_revenue": {
+      "chain": [
+        "InvestmentAdvisoryAndManagementFees",
+        "FeeAndCommissionRevenue",
+        "InvestmentAdvisoryFees"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 606-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "asset_management"
+      ],
+      "unit": "USD"
+    },
+    "total_leasable_sqft": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Supplemental disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "reits"
+      ],
+      "unit": "shares"
+    },
+    "total_loans": {
+      "chain": [
+        "LoansAndLeasesReceivableNet",
+        "LoansAndLeasesReceivableNetOfAllowance",
+        "LoansNet",
+        "LoansAndLeases"
+      ],
+      "is_computed": false,
+      "parent_concept": "total_assets",
+      "provenance": {
+        "reference": "ASC 310-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "total_members": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Supplemental MD&A disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "shares"
+    },
+    "total_revenue_pharma": {
+      "chain": [],
+      "is_computed": true,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Total revenue = all revenue streams",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "pharma_biotech"
+      ],
+      "unit": "USD"
+    },
+    "total_rwa": {
+      "chain": [
+        "TotalRiskWeightedAssets",
+        "RiskWeightedAssets"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Basel III disclosure",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "banking"
+      ],
+      "unit": "USD"
+    },
+    "underwriting_expenses": {
+      "chain": [
+        "UnderwritingExpenses",
+        "AcquisitionExpenses",
+        "PolicyAcquisitionCosts",
+        "CommissionsAndGeneralExpenses"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 944-30",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "unearned_premium_reserve": {
+      "chain": [
+        "UnearnedPremiums",
+        "UnearnedPremiumReserve",
+        "UnearnedPremiumsLiability"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 944-20",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "financial",
+      "sub_sectors": [
+        "insurance"
+      ],
+      "unit": "USD"
+    },
+    "unpaid_claims_liability": {
+      "chain": [
+        "UnpaidClaimsLiability",
+        "ClaimsPayable",
+        "LossReserves"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "Managed care",
+        "source": "internal",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "managed_care"
+      ],
+      "unit": "USD"
+    },
+    "warranty_reserve": {
+      "chain": [
+        "WarrantyReserve",
+        "ProductWarrantyLiability",
+        "WarrantyLiability"
+      ],
+      "is_computed": false,
+      "parent_concept": null,
+      "provenance": {
+        "reference": "ASC 460-10",
+        "source": "fasb_asc",
+        "version": "2024"
+      },
+      "sector": "healthcare",
+      "sub_sectors": [
+        "medical_devices"
+      ],
+      "unit": "USD"
+    }
+  },
+  "derived_ratios": [
+    "administrative_ratio",
+    "combined_ratio",
+    "expense_ratio",
+    "loss_ratio",
+    "medical_loss_ratio",
+    "occupancy_rate",
+    "payer_mix_commercial",
+    "payer_mix_ma",
+    "revenue_per_visit",
+    "tier1_ratio"
+  ],
+  "relations": [
+    {
+      "from": "interest_income",
+      "provenance": {
+        "reference": "ASC 942-20",
+        "source": "fasb_asc"
+      },
+      "to": "net_interest_income",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "interest_expense",
+      "provenance": {
+        "reference": "ASC 942-20",
+        "source": "fasb_asc"
+      },
+      "to": "net_interest_income",
+      "type": "calc_sum",
+      "weight": -1.0
+    },
+    {
+      "from": "net_interest_income",
+      "provenance": {
+        "reference": "",
+        "source": "internal"
+      },
+      "to": "net_revenue",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "noninterest_income",
+      "provenance": {
+        "reference": "",
+        "source": "internal"
+      },
+      "to": "net_revenue",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "tier1_capital",
+      "provenance": {
+        "reference": "Basel III",
+        "source": "internal"
+      },
+      "to": "tier1_ratio",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "total_rwa",
+      "provenance": {
+        "reference": "Basel III",
+        "source": "internal"
+      },
+      "to": "tier1_ratio",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "total_loans",
+      "provenance": {
+        "reference": "ASC 310-20",
+        "source": "fasb_asc"
+      },
+      "to": "total_assets",
+      "type": "def_member_of",
+      "weight": 1.0
+    },
+    {
+      "from": "provision_for_loan_losses",
+      "provenance": {
+        "reference": "ASC 326-20",
+        "source": "fasb_asc"
+      },
+      "to": "noninterest_expense",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "losses_incurred",
+      "provenance": {
+        "reference": "ASC 944-30",
+        "source": "fasb_asc"
+      },
+      "to": "loss_ratio",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "premiums_earned",
+      "provenance": {
+        "reference": "ASC 944-30",
+        "source": "fasb_asc"
+      },
+      "to": "loss_ratio",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "loss_ratio",
+      "provenance": {
+        "reference": "",
+        "source": "naic_sap"
+      },
+      "to": "combined_ratio",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "underwriting_expenses",
+      "provenance": {
+        "reference": "",
+        "source": "naic_sap"
+      },
+      "to": "combined_ratio",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "premiums_written",
+      "provenance": {
+        "reference": "ASC 944-20",
+        "source": "fasb_asc"
+      },
+      "to": "premiums_earned",
+      "type": "calc_sum",
+      "weight": -1.0
+    },
+    {
+      "from": "unearned_premium_reserve",
+      "provenance": {
+        "reference": "ASC 944-20",
+        "source": "fasb_asc"
+      },
+      "to": "premiums_earned",
+      "type": "calc_sum",
+      "weight": -1.0
+    },
+    {
+      "from": "management_fee_revenue",
+      "provenance": {
+        "reference": "ASC 606-10",
+        "source": "fasb_asc"
+      },
+      "to": "total_investment_fee_revenue",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "performance_fee_revenue",
+      "provenance": {
+        "reference": "ASC 606-10",
+        "source": "fasb_asc"
+      },
+      "to": "total_investment_fee_revenue",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "brokerage_commissions",
+      "provenance": {
+        "reference": "ASC 606-10",
+        "source": "fasb_asc"
+      },
+      "to": "total_investment_fee_revenue",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "fund_operating_expenses",
+      "provenance": {
+        "reference": "SEC N-MEN",
+        "source": "internal"
+      },
+      "to": "expense_ratio",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "aum",
+      "provenance": {
+        "reference": "SEC N-MEN",
+        "source": "internal"
+      },
+      "to": "expense_ratio",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "rental_revenue",
+      "provenance": {
+        "reference": "NOI definition",
+        "source": "internal"
+      },
+      "to": "noi",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "property_operations_expense",
+      "provenance": {
+        "reference": "NOI definition",
+        "source": "internal"
+      },
+      "to": "noi",
+      "type": "calc_sum",
+      "weight": -1.0
+    },
+    {
+      "from": "real_estate_taxes",
+      "provenance": {
+        "reference": "NOI definition",
+        "source": "internal"
+      },
+      "to": "noi",
+      "type": "calc_sum",
+      "weight": -1.0
+    },
+    {
+      "from": "net_income_common",
+      "provenance": {
+        "reference": "NAREIT FFO",
+        "source": "internal"
+      },
+      "to": "ffo",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "ffo_depreciation_adjustment",
+      "provenance": {
+        "reference": "NAREIT FFO",
+        "source": "internal"
+      },
+      "to": "ffo",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "ffo_gains_adjustment",
+      "provenance": {
+        "reference": "NAREIT FFO",
+        "source": "internal"
+      },
+      "to": "ffo",
+      "type": "calc_sum",
+      "weight": -1.0
+    },
+    {
+      "from": "ffo",
+      "provenance": {
+        "reference": "AFFO definition",
+        "source": "internal"
+      },
+      "to": "affo",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "straight_line_rent_adjustment",
+      "provenance": {
+        "reference": "AFFO non-cash",
+        "source": "internal"
+      },
+      "to": "affo",
+      "type": "calc_sum",
+      "weight": -1.0
+    },
+    {
+      "from": "tenant_improvements",
+      "provenance": {
+        "reference": "AFFO capex",
+        "source": "internal"
+      },
+      "to": "affo",
+      "type": "calc_sum",
+      "weight": -1.0
+    },
+    {
+      "from": "leasing_commissions",
+      "provenance": {
+        "reference": "AFFO capex",
+        "source": "internal"
+      },
+      "to": "affo",
+      "type": "calc_sum",
+      "weight": -1.0
+    },
+    {
+      "from": "occupied_sqft",
+      "provenance": {
+        "reference": "supplemental",
+        "source": "internal"
+      },
+      "to": "occupancy_rate",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "total_leasable_sqft",
+      "provenance": {
+        "reference": "supplemental",
+        "source": "internal"
+      },
+      "to": "occupancy_rate",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "product_revenue",
+      "provenance": {
+        "reference": "ASC 330-10",
+        "source": "fasb_asc"
+      },
+      "to": "gross_margin_pharma",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "cost_of_goods_sold_pharma",
+      "provenance": {
+        "reference": "ASC 330-10",
+        "source": "fasb_asc"
+      },
+      "to": "gross_margin_pharma",
+      "type": "calc_sum",
+      "weight": -1.0
+    },
+    {
+      "from": "product_revenue",
+      "provenance": {
+        "reference": "ASC 606-10",
+        "source": "fasb_asc"
+      },
+      "to": "total_revenue_pharma",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "royalty_revenue",
+      "provenance": {
+        "reference": "ASC 606-10",
+        "source": "fasb_asc"
+      },
+      "to": "total_revenue_pharma",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "collaboration_revenue",
+      "provenance": {
+        "reference": "ASC 606-10",
+        "source": "fasb_asc"
+      },
+      "to": "total_revenue_pharma",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "patient_revenue",
+      "provenance": {
+        "reference": "Healthcare KPI",
+        "source": "internal"
+      },
+      "to": "revenue_per_visit",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "discharges",
+      "provenance": {
+        "reference": "Healthcare KPI",
+        "source": "internal"
+      },
+      "to": "revenue_per_visit",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "salaries_and_wages",
+      "provenance": {
+        "reference": "ASC 710-10",
+        "source": "fasb_asc"
+      },
+      "to": "operating_expenses_healthcare",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "supplies_expense",
+      "provenance": {
+        "reference": "Healthcare services",
+        "source": "internal"
+      },
+      "to": "operating_expenses_healthcare",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "depreciation_amort_healthcare",
+      "provenance": {
+        "reference": "ASC 360-10",
+        "source": "fasb_asc"
+      },
+      "to": "operating_expenses_healthcare",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "provider_fees",
+      "provenance": {
+        "reference": "Healthcare services",
+        "source": "internal"
+      },
+      "to": "operating_expenses_healthcare",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "medical_expenses",
+      "provenance": {
+        "reference": "MLR definition",
+        "source": "internal"
+      },
+      "to": "medical_loss_ratio",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "premium_revenue_mc",
+      "provenance": {
+        "reference": "MLR definition",
+        "source": "internal"
+      },
+      "to": "medical_loss_ratio",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "administrative_expenses_mc",
+      "provenance": {
+        "reference": "Managed care",
+        "source": "internal"
+      },
+      "to": "administrative_ratio",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "premium_revenue_mc",
+      "provenance": {
+        "reference": "Managed care",
+        "source": "internal"
+      },
+      "to": "administrative_ratio",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "premium_revenue_mc",
+      "provenance": {
+        "reference": "Managed care",
+        "source": "internal"
+      },
+      "to": "mc_operating_margin",
+      "type": "calc_sum",
+      "weight": 1.0
+    },
+    {
+      "from": "medical_expenses",
+      "provenance": {
+        "reference": "Managed care",
+        "source": "internal"
+      },
+      "to": "mc_operating_margin",
+      "type": "calc_sum",
+      "weight": -1.0
+    },
+    {
+      "from": "administrative_expenses_mc",
+      "provenance": {
+        "reference": "Managed care",
+        "source": "internal"
+      },
+      "to": "mc_operating_margin",
+      "type": "calc_sum",
+      "weight": -1.0
+    },
+    {
+      "from": "commercial_members",
+      "provenance": {
+        "reference": "Supplemental",
+        "source": "internal"
+      },
+      "to": "payer_mix_commercial",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "total_members",
+      "provenance": {
+        "reference": "Supplemental",
+        "source": "internal"
+      },
+      "to": "payer_mix_commercial",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "medicare_advantage_members",
+      "provenance": {
+        "reference": "Supplemental",
+        "source": "internal"
+      },
+      "to": "payer_mix_ma",
+      "type": "derived",
+      "weight": 1.0
+    },
+    {
+      "from": "total_members",
+      "provenance": {
+        "reference": "Supplemental",
+        "source": "internal"
+      },
+      "to": "payer_mix_ma",
+      "type": "derived",
+      "weight": 1.0
+    }
+  ],
+  "validation_errors": []
+}

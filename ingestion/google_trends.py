@@ -14,6 +14,7 @@ Modules supported:
 
 from __future__ import annotations
 
+import os
 from collections import deque
 from dataclasses import dataclass, field
 import hashlib
@@ -194,11 +195,56 @@ class KeywordGenerator:
 # 2. Anti-Scrape Protections: Proxy Pool & Request Budgeting
 # ============================================================================
 
+def build_proxy_url(proxy_item: Union[str, Dict[str, Any]]) -> Optional[str]:
+    """Helper to convert proxy dict or string to HTTP Basic Auth proxy URL string.
+    
+    Supports resolution of ENV:VAR_NAME pattern for secure credential handling.
+    """
+    if not proxy_item:
+        return None
+    if isinstance(proxy_item, str):
+        url_str = proxy_item
+        # Check env var replacement in string if present
+        if url_str.startswith("ENV:"):
+            var_name = url_str[4:]
+            return os.getenv(var_name)
+        return url_str
+    if isinstance(proxy_item, dict):
+        host = proxy_item.get("host")
+        port = proxy_item.get("port")
+        user = proxy_item.get("user", "")
+        password = proxy_item.get("pass", proxy_item.get("password", ""))
+
+        if user.startswith("ENV:"):
+            user = os.getenv(user[4:], "")
+        if password.startswith("ENV:"):
+            password = os.getenv(password[4:], "")
+
+        if not host:
+            return None
+
+        if user and password:
+            return f"http://{user}:{password}@{host}:{port}"
+        elif user:
+            return f"http://{user}@{host}:{port}"
+        else:
+            return f"http://{host}:{port}"
+    return None
+
+
 class ProxyTracker:
     """Tracks rate limits, requests/hour budget, and cooldown state for a single proxy."""
 
-    def __init__(self, proxy_url: Optional[str], max_requests_per_hour: int = 120):
-        self.proxy_url = proxy_url
+    def __init__(
+        self,
+        proxy_input: Optional[Union[str, Dict[str, Any]]] = None,
+        max_requests_per_hour: int = 120,
+        proxy_url: Optional[Union[str, Dict[str, Any]]] = None,
+    ):
+        target_input = proxy_input if proxy_input is not None else proxy_url
+        self.proxy_input = target_input
+        self.proxy_url = build_proxy_url(target_input) if target_input else None
+        self.provider = target_input.get("provider", "generic") if isinstance(target_input, dict) else "generic"
         self.max_requests_per_hour = max_requests_per_hour
         self.request_timestamps: deque = deque()
         self.cooldown_until: float = 0.0
@@ -218,7 +264,7 @@ class ProxyTracker:
         try:
             res = self.session.get("https://trends.google.com/trends/", timeout=12)
             if res.status_code == 200:
-                logger.debug(f"Session initialized for proxy {self.proxy_url or 'DIRECT'}")
+                logger.debug(f"Session initialized for proxy {self.proxy_url or 'DIRECT'} (provider={self.provider})")
         except Exception as exc:
             logger.debug(f"Session warmup note for proxy {self.proxy_url or 'DIRECT'}: {exc}")
 
@@ -266,7 +312,7 @@ class ProxyPool:
 
     def __init__(
         self,
-        proxy_urls: Optional[List[str]] = None,
+        proxy_urls: Optional[List[Union[str, Dict[str, Any]]]] = None,
         max_requests_per_hour_per_proxy: int = 120,
     ):
         self.proxy_urls = proxy_urls or []
@@ -276,8 +322,8 @@ class ProxyPool:
         self._rr_index = 0
 
         if self.proxy_urls:
-            for url in self.proxy_urls:
-                self._trackers.append(ProxyTracker(url, max_requests_per_hour_per_proxy))
+            for url_or_dict in self.proxy_urls:
+                self._trackers.append(ProxyTracker(url_or_dict, max_requests_per_hour_per_proxy))
         else:
             # Direct connection fallback tracker
             self._trackers.append(ProxyTracker(None, max_requests_per_hour_per_proxy))

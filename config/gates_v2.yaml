@@ -1,0 +1,33 @@
+version: 2
+frozen: true
+sector_relative: true
+dual_track: true
+sector_quantile: true
+min_names_per_sector: 20
+mainstream_percentile: 0.25
+fallback_percentile: 0.3
+alpha_bonferroni: 0.0071428571428571435
+gates:
+  '3':
+    name: welch_c_vs_a
+    hypothesis: 'H0: E[C - A | sector s] = 0 for all s; H1: C > A within sector (one-sided)'
+    test: per-sector one-sample Welch t on sector-relative excess, Stouffer combined
+    combine_method: stouffer
+    alpha: 0.0071428571428571435
+    threshold: p_combined < 0.0071
+    frozen: true
+    re_registered_at: '2026-09-12T23:43:58.174053+00:00'
+  '4':
+    name: welch_c_vs_b
+    hypothesis: 'H0: E[C - B | sector s] = 0 for all s; H1: C > B within sector (one-sided)'
+    test: per-sector one-sample Welch t on sector-relative excess, Stouffer combined
+    combine_method: stouffer
+    alpha: 0.0071428571428571435
+    threshold: p_combined < 0.0071
+    frozen: true
+    re_registered_at: '2026-09-12T23:43:58.174053+00:00'
+calibration:
+  required_n_null: 10000
+  report_path: data/validation/gate_calibration_report.json
+  calibration_run_id: null
+frozen_at: '2026-09-12T23:43:58.174053+00:00'
