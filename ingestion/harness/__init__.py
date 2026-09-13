@@ -1,0 +1,3 @@
+"""
+Ingestion harness module initializer.
+"""

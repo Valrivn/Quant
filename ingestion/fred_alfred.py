@@ -151,6 +151,15 @@ EXPANDED_SERIES_CATALOG: Dict[str, List[Dict[str, Any]]] = {
 }
 
 
+def _lookup_catalog_info(series_id: str) -> Optional[Dict[str, Any]]:
+    """Search catalog info for series in expanded catalog."""
+    for cat, series_list in EXPANDED_SERIES_CATALOG.items():
+        for s in series_list:
+            if s["series_id"] == series_id:
+                return dict(s)
+    return None
+
+
 def _lookup_catalog_title(series_id: str) -> Optional[str]:
     """Search title for series in expanded catalog or key series map."""
     if series_id in KEY_ECONOMIC_SERIES:
@@ -228,22 +237,51 @@ class FredAlfredClient:
     def get_series_metadata(self, series_id: str) -> Dict[str, Any]:
         """Fetch metadata for a series."""
         fred_id = resolve_series_id(series_id)
+        cat_info = _lookup_catalog_info(series_id)
+        now_iso = datetime.now(timezone.utc).isoformat()
+
         if not self.api_key:
-            title = _lookup_catalog_title(series_id) or series_id
-            return {
+            title = (cat_info.get("title") if cat_info else None) or _lookup_catalog_title(series_id) or series_id
+            meta = {
                 "id": series_id,
                 "fred_id": fred_id,
                 "title": title,
-                "source": "FRED_FALLBACK",
+                "source": "FRED_PUBLIC_CSV_FALLBACK",
+                "last_updated": now_iso,
             }
+            if cat_info and "frequency" in cat_info:
+                meta["frequency"] = cat_info["frequency"]
+            if cat_info and "type" in cat_info:
+                meta["series_type"] = cat_info["type"]
+            return meta
+
         data = self._request("series", {"series_id": fred_id})
         series_list = data.get("seriess", [])
         if series_list:
             meta = dict(series_list[0])
             meta["requested_id"] = series_id
             meta["fred_id"] = fred_id
+            meta["source"] = "FRED_API"
+            if "last_updated" not in meta or not meta["last_updated"]:
+                meta["last_updated"] = now_iso
+            if cat_info and "frequency" in cat_info:
+                meta["frequency"] = cat_info["frequency"]
+            if cat_info and "type" in cat_info:
+                meta["series_type"] = cat_info["type"]
             return meta
-        return {"id": series_id, "fred_id": fred_id, "title": _lookup_catalog_title(series_id) or series_id}
+
+        meta = {
+            "id": series_id,
+            "fred_id": fred_id,
+            "title": _lookup_catalog_title(series_id) or series_id,
+            "source": "FRED_API",
+            "last_updated": now_iso,
+        }
+        if cat_info and "frequency" in cat_info:
+            meta["frequency"] = cat_info["frequency"]
+        if cat_info and "type" in cat_info:
+            meta["series_type"] = cat_info["type"]
+        return meta
 
     def get_vintage_dates(
         self,
@@ -443,10 +481,23 @@ class FredIngestionPipeline:
 
         # 1. Metadata
         metadata = self.client.get_series_metadata(series_id)
+        cat_info = _lookup_catalog_info(series_id)
+        if cat_info:
+            if "frequency" in cat_info:
+                metadata["frequency"] = cat_info["frequency"]
+            if "type" in cat_info:
+                metadata["series_type"] = cat_info["type"]
+
         if category:
             metadata["category"] = category
         if series_type:
             metadata["series_type"] = series_type
+
+        # Ensure required provenance fields
+        if "source" not in metadata or not metadata["source"]:
+            metadata["source"] = "FRED_API" if self.client.api_key else "FRED_PUBLIC_CSV_FALLBACK"
+        if "last_updated" not in metadata or not metadata["last_updated"]:
+            metadata["last_updated"] = datetime.now(timezone.utc).isoformat()
 
         # 2. Vintages (if ALFRED or vintage requested)
         vintages = []
@@ -469,17 +520,18 @@ class FredIngestionPipeline:
         metadata["execution_time_sec"] = round(time.time() - start_time, 3)
 
         # 4. Save to Data Lake
+        json_path = self.data_lake.save_json(
+            domain=domain,
+            series_id=series_id,
+            data=metadata,
+            metadata=metadata,
+            filename=f"{series_id}_meta.json",
+        )
         parquet_path = self.data_lake.save_dataframe(
             domain=domain,
             series_id=series_id,
             df=df,
             metadata=metadata,
-        )
-        json_path = self.data_lake.save_json(
-            domain=domain,
-            series_id=series_id,
-            data=metadata,
-            filename=f"{series_id}_meta.json",
         )
 
         report = {
