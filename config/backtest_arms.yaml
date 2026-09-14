@@ -1,0 +1,70 @@
+# Three-Arm Backtest Runner — config-driven parameters (big-pickle-worker)
+# LOCKED execution parameters from the decision matrix. Module fallback
+# constants mirror these for determinism when the YAML is absent.
+
+# ── Backtest windows (LOCKED) ─────────────────────────────────────────────────
+windows:
+  primary:
+    name: 2018_2024
+    start: 2018-01-01
+    end: 2024-12-31
+  extended:
+    name: 2020_2026
+    start: 2020-01-01
+    end: 2026-12-31
+
+# ── Inputs ────────────────────────────────────────────────────────────────────
+inputs:
+  factor_store: data/harness/factors.duckdb
+  universe: data/universe/monthly_reconstitution.parquet
+  price_cache: data/prices/price_cache.parquet
+  sector_stats_db: data/harness/factors.duckdb   # sector_stats table lives in the
+                                                 # factor_store DuckDB
+  staleness_days:
+    fundamentals: 400
+    qual: 120
+
+# ── Portfolio construction (LOCKED) ───────────────────────────────────────────
+portfolio:
+  top_n: 50                     # N = min(50, |Qualified|) (Arm A); Top 50 (Arm B)
+  arm_a_rank_by: FCF_Yield      # Arm A: rank Qualified_Set by FCF_Yield desc
+  arm_b_composite: equal_weight # equal-weight of 8 qual z-scores;
+                                # "pca" alternates to PCA1 with sign alignment
+  arm_a_screen_percentile: 0.25 # mirrors gates_v2.yaml mainstream_percentile
+  arm_a_fallback_percentile: 0.30
+  min_qualified_names: 20       # mirrors gates_v2.yaml min_names_per_sector
+
+# ── Arm C risk penalty (LOCKED, multiplicative) ───────────────────────────────
+risk_penalty:
+  cash_runway_months_lt: 18
+  cash_runway_months_penalty: 0.7
+  customer_concentration_gt: 0.30
+  customer_concentration_penalty: 0.8
+  insider_ownership_lt: 0.05
+  insider_ownership_penalty: 0.8
+  no_13f_sponsor_eq: 1
+  no_13f_sponsor_penalty: 0.9
+  missing_factor_penalty: 1.0   # missing risk data → no penalty (conservative)
+
+# ── Execution parameters (LOCKED) ─────────────────────────────────────────────
+execution:
+  rebalance: first_trading_day_of_month   # t+1 open; signals from prior month-end
+  max_one_way_turnover: 0.30              # 30% monthly cap via pro-rata scaling
+  transaction_cost:
+    base_bps_per_side: 10.0               # 10 bps/side base
+    slippage_bps_cap: 50.0                # quadratic slippage, 50 bps total cap
+  defensive_sweep:                        # idle cash: 60% short bills + 40% gold
+    enabled: true
+    bills_weight: 0.60
+    gold_weight: 0.40
+    bills_tickers: [BIL, SHY]
+    gold_tickers: [GLDM, IAU]
+    min_cash_for_sweep: 0.005
+
+# ── Outputs ───────────────────────────────────────────────────────────────────
+outputs:
+  weights_dir: data/backtests             # {window}_arm_{A,B,C}_weights.parquet
+  returns_dir: data/backtests             # {window}_arm_{A,B,C}_returns.parquet
+  gate_results_dir: data/backtests        # {window}_gate_results.json
+  qualified_set_dir: data/harness         # qualified_set_{window}.parquet (screen)
+  design_change_log: data/harness/design_changes.jsonl

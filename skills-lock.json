@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "philosopher": {
+      "source": "ghaida/intent",
+      "sourceType": "github",
+      "skillPath": "skills/philosopher/SKILL.md",
+      "computedHash": "95e3c149b939b13e454623d52bf6d0d2807fd80f9e3509da180e3aaa4eee84d6"
+    }
+  }
+}

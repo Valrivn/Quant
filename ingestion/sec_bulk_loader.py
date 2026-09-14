@@ -36,65 +36,119 @@ def write_provenance(partition_dir: Path, source_url: str, version: str, sha256_
     with open(partition_dir / "provenance.json", "w", encoding="utf-8") as f:
         json.dump(provenance, f, indent=2)
 
-def generate_synthetic_companyfacts_zip(dest_zip: Path, num_ciks: int = 10):
-    """Generates synthetic SEC companyfacts JSON files for testing."""
-    sample_ciks = [f"{i+1:010d}" for i in range(num_ciks)]
-    tickers = [f"TICK{i+1}" for i in range(num_ciks)]
+def generate_synthetic_companyfacts_zip(dest_zip: Path, num_ciks: int = 100, universe_path: str = None):
+    """Generates synthetic SEC companyfacts JSON files for testing with historical data from 2018-2024."""
+    import random
+    random.seed(42)
+    
+    # Load real tickers from universe if provided
+    if universe_path:
+        try:
+            import pandas as pd
+            universe_df = pd.read_parquet(universe_path)
+            # Get unique tickers from first date
+            first_date = universe_df['date'].min()
+            first_month = universe_df[universe_df['date'] == first_date]
+            real_tickers = first_month['ticker'].dropna().unique().tolist()
+            real_ciks = first_month[['ticker', 'cik']].drop_duplicates().set_index('ticker')['cik'].to_dict()
+            tickers = real_tickers[:num_ciks]
+            sample_ciks = [real_ciks.get(t, f"{i+1:010d}") for i, t in enumerate(tickers)]
+            print(f"Using {len(tickers)} real tickers from universe")
+        except Exception as e:
+            print(f"Could not load universe: {e}, using synthetic tickers")
+            sample_ciks = [f"{i+1:010d}" for i in range(num_ciks)]
+            tickers = [f"TICK{i+1}" for i in range(num_ciks)]
+    else:
+        sample_ciks = [f"{i+1:010d}" for i in range(num_ciks)]
+        tickers = [f"TICK{i+1}" for i in range(num_ciks)]
+    
+    def _synth_concept(base_val, growth_rate, unit, start_year=2017, end_year=2024):
+        """Helper to create synthetic concept data for multiple years."""
+        entries = []
+        # Add 2017 filing with filed date in early Jan 2018 (before 2018-01-31)
+        entries.append({
+            "end": "2017-12-31",
+            "val": base_val,
+            "accn": "0000000000-17-000001",
+            "fy": 2017,
+            "fp": "FY",
+            "form": "10-K",
+            "filed": "2018-01-15",
+            "frame": "CY2017"
+        })
+        for year in range(start_year, end_year + 1):
+            year_factor = (1 + growth_rate) ** (year - start_year + 1)
+            val = base_val * year_factor
+            entries.append({
+                "end": f"{year}-12-31",
+                "val": val,
+                "accn": f"0000000000-{year%100:02d}-000001",
+                "fy": year,
+                "fp": "FY",
+                "form": "10-K",
+                "filed": f"{year+1}-02-15",
+                "frame": f"CY{year}"
+            })
+        return {
+            "label": "Test",
+            "description": "Test",
+            "units": {
+                unit: entries
+            }
+        }
     
     with zipfile.ZipFile(dest_zip, "w", zipfile.ZIP_DEFLATED) as zf:
         for i, cik in enumerate(sample_ciks):
+            ticker = tickers[i] if i < len(tickers) else f"TICK{i+1}"
+            base_val = 1000000000 + i * 50000000
+            base_shares = 50000000 + i * 1000000
+            base_revenue = 500000000 + i * 20000000
+            base_ebit = 100000000 + i * 5000000
+            base_interest = 10000000 + i * 500000
+            base_tax = 20000000 + i * 1000000
+            base_pretax = 120000000 + i * 6000000
+            base_ocf = 150000000 + i * 7000000
+            base_capex = 50000000 + i * 2000000
+            base_debt = 300000000 + i * 10000000
+            base_cash = 50000000 + i * 2000000
+            base_equity = 700000000 + i * 30000000
+            base_rd = 50000000 + i * 2000000
+            base_deferred_rev = 20000000 + i * 1000000
+            base_contract_liab = 10000000 + i * 500000
+            
             facts_data = {
-                "cik": int(cik),
-                "entityName": f"Test Company {i+1}",
+                "cik": int(cik) if isinstance(cik, str) and cik.isdigit() else i + 1,
+                "entityName": f"Test Company {ticker}",
+                "tickers": [ticker],
                 "facts": {
                     "us-gaap": {
-                        "Assets": {
-                            "label": "Assets",
-                            "description": "Total Assets",
-                            "units": {
-                                "USD": [
-                                    {
-                                        "end": "2020-12-31",
-                                        "val": 1000000000 + i * 50000000,
-                                        "accn": f"0000000000-21-{i+1:06d}",
-                                        "fy": 2020,
-                                        "fp": "FY",
-                                        "form": "10-K",
-                                        "filed": "2021-02-15",
-                                        "frame": "CY2020"
-                                    },
-                                    {
-                                        "end": "2021-12-31",
-                                        "val": 1200000000 + i * 50000000,
-                                        "accn": f"0000000000-22-{i+1:06d}",
-                                        "fy": 2021,
-                                        "fp": "FY",
-                                        "form": "10-K",
-                                        "filed": "2022-02-16",
-                                        "frame": "CY2021"
-                                    }
-                                ]
-                            }
-                        },
-                        "EntityCommonStockSharesOutstanding": {
-                            "label": "Shares Outstanding",
-                            "units": {
-                                "shares": [
-                                    {
-                                        "end": "2021-12-31",
-                                        "val": 50000000 + i * 1000000,
-                                        "accn": f"0000000000-22-{i+1:06d}",
-                                        "fy": 2021,
-                                        "fp": "FY",
-                                        "form": "10-K",
-                                        "filed": "2022-02-16"
-                                    }
-                                ]
-                            }
-                        }
+                        "Assets": _synth_concept(base_val * 1.5, 0.05, "USD"),
+                        "Liabilities": _synth_concept(base_val * 0.5, 0.03, "USD"),
+                        "StockholdersEquity": _synth_concept(base_equity, 0.06, "USD"),
+                        "EntityCommonStockSharesOutstanding": _synth_concept(base_shares, 0.01, "shares"),
+                        "RevenueFromContractWithCustomerExcludingAssessedTax": _synth_concept(base_revenue, 0.08, "USD"),
+                        "EarningsBeforeInterestAndTaxes": _synth_concept(base_ebit, 0.07, "USD"),
+                        "OperatingIncomeLoss": _synth_concept(base_ebit * 0.95, 0.07, "USD"),
+                        "InterestExpense": _synth_concept(base_interest, 0.02, "USD"),
+                        "IncomeTaxExpenseBenefit": _synth_concept(base_tax, 0.05, "USD"),
+                        "IncomeBeforeTax": _synth_concept(base_pretax, 0.06, "USD"),
+                        "IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeTaxes": _synth_concept(base_pretax, 0.06, "USD"),
+                        "NetCashProvidedByUsedInOperatingActivities": _synth_concept(base_ocf, 0.08, "USD"),
+                        "PaymentsToAcquirePropertyPlantAndEquipment": _synth_concept(base_capex, 0.05, "USD"),
+                        "LongTermDebtNoncurrent": _synth_concept(base_debt, 0.03, "USD"),
+                        "LongTermDebtAndCapitalLeaseObligations": _synth_concept(base_debt * 1.1, 0.03, "USD"),
+                        "DebtAndCapitalLeaseObligations": _synth_concept(base_debt * 1.15, 0.03, "USD"),
+                        "CashAndCashEquivalentsAtCarryingValue": _synth_concept(base_cash, 0.05, "USD"),
+                        "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": _synth_concept(base_cash * 1.05, 0.05, "USD"),
+                        "ResearchAndDevelopmentExpense": _synth_concept(base_rd, 0.05, "USD"),
+                        "DeferredRevenue": _synth_concept(base_deferred_rev, 0.05, "USD"),
+                        "ContractLiabilities": _synth_concept(base_contract_liab, 0.05, "USD"),
+                        "ShortTermBorrowings": _synth_concept(base_debt * 0.1, 0.03, "USD"),
                     }
                 }
             }
+            
+            import json
             zf.writestr(f"CIK{cik}.json", json.dumps(facts_data))
 
 def parse_cik_json(content_bytes: bytes) -> tuple:
@@ -133,7 +187,8 @@ def parse_cik_json(content_bytes: bytes) -> tuple:
                         "val": float(val) if val is not None else None,
                         "filed": filed,
                         "frame": frame,
-                        "accession": accn
+                        "accession": accn,
+                        "form": item.get("form", "")
                     })
                     
                     filings_rows.append({
@@ -204,8 +259,9 @@ def main():
     if args.test:
         print("Running test mode with synthetic SEC companyfacts.zip...")
         test_zip = Path("temp_companyfacts_test.zip")
-        generate_synthetic_companyfacts_zip(test_zip, num_ciks=10)
-        process_bulk_zip(test_zip, output_dir, source_url="synthetic://sec_companyfacts", limit_ciks=10)
+        universe_path = "data/universe/pit_universe_2018_2024.parquet"
+        generate_synthetic_companyfacts_zip(test_zip, num_ciks=100, universe_path=universe_path)
+        process_bulk_zip(test_zip, output_dir, source_url="synthetic://sec_companyfacts", limit_ciks=100)
         if test_zip.exists():
             os.remove(test_zip)
         print("Test complete.")

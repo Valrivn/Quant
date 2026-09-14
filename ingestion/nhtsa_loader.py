@@ -27,11 +27,27 @@ DEFAULT_NHTSA_MAPPING = {
     "TESLA": {"ticker": "TSLA", "confidence": "high", "models": ["MODEL S", "MODEL 3", "MODEL X", "MODEL Y", "CYBERTRUCK"]},
     "FORD": {"ticker": "F", "confidence": "high", "models": ["F-150", "MUSTANG MACH-E", "EXPLORER", "ESCAPE"]},
     "GENERAL MOTORS": {"ticker": "GM", "confidence": "high", "models": ["BOLT EV", "SILVERADO", "EQUINOX", "LYRIQ"]},
-    "RIVIAN": {"ticker": "RIVN", "confidence": "high", "models": ["R1T", "R1S"]},
-    "LUCID": {"ticker": "LCID", "confidence": "high", "models": ["AIR"]},
-    "FISKER": {"ticker": "FSR", "confidence": "medium", "models": ["OCEAN"]},
-    "NIKOLA": {"ticker": "NKLA", "confidence": "medium", "models": ["TRE EV"]}
+    "RIVIAN": {"ticker": "RIVN", "confidence": "medium", "models": ["R1T", "R1S"]},
+    "LUCID": {"ticker": "LCID", "confidence": "medium", "models": ["AIR"]},
+    "FISKER": {"ticker": "FSR", "confidence": "low", "models": ["OCEAN"]},
+    "NIKOLA": {"ticker": "NKLA", "confidence": "low", "models": ["TRE EV"]}
 }
+
+
+def assign_mapping_confidence(make: str, model: str = "", ticker: str = "", sector_filtered: bool = True) -> str:
+    """
+    Grading per Data_Strategy §5 for NHTSA:
+    - High: Manual review verified exact primary make (e.g. TESLA, FORD, GENERAL MOTORS)
+    - Medium: Sector filter matched make/model alias (e.g. RIVIAN, LUCID)
+    - Low: Keyword match only without sector filter verification (e.g. FISKER, NIKOLA)
+    """
+    make_clean = str(make).upper().strip()
+    if make_clean in {"TESLA", "FORD", "GENERAL MOTORS"}:
+        return "high"
+    elif sector_filtered and make_clean in {"RIVIAN", "LUCID"}:
+        return "medium"
+    else:
+        return "low"
 
 
 def record_manifest(file_path: Path, source: str, row_count: int, metadata: dict) -> str:

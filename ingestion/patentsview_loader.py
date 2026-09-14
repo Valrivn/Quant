@@ -24,15 +24,32 @@ DEFAULT_ASSIGNEE_MAPPING = {
     "APPLE INC": {"ticker": "AAPL", "confidence": "high"},
     "MICROSOFT CORPORATION": {"ticker": "MSFT", "confidence": "high"},
     "GOOGLE LLC": {"ticker": "GOOGL", "confidence": "high"},
-    "ALPHABET INC": {"ticker": "GOOGL", "confidence": "high"},
+    "ALPHABET INC": {"ticker": "GOOGL", "confidence": "medium"},
     "AMAZON TECHNOLOGIES INC": {"ticker": "AMZN", "confidence": "high"},
-    "META PLATFORMS INC": {"ticker": "META", "confidence": "high"},
-    "NVIDIA CORPORATION": {"ticker": "NVDA", "confidence": "high"},
-    "TESLA INC": {"ticker": "TSLA", "confidence": "high"},
-    "QUALCOMM INCORPORATED": {"ticker": "QCOM", "confidence": "high"},
-    "INTEL CORPORATION": {"ticker": "INTC", "confidence": "high"},
-    "INTERNATIONAL BUSINESS MACHINES CORPORATION": {"ticker": "IBM", "confidence": "high"}
+    "META PLATFORMS INC": {"ticker": "META", "confidence": "medium"},
+    "NVIDIA CORPORATION": {"ticker": "NVDA", "confidence": "medium"},
+    "TESLA INC": {"ticker": "TSLA", "confidence": "medium"},
+    "QUALCOMM INCORPORATED": {"ticker": "QCOM", "confidence": "low"},
+    "INTEL CORPORATION": {"ticker": "INTC", "confidence": "low"},
+    "INTERNATIONAL BUSINESS MACHINES CORPORATION": {"ticker": "IBM", "confidence": "low"}
 }
+
+
+def assign_mapping_confidence(assignee: str, ticker: str = "") -> str:
+    """
+    Grading per Data_Strategy §5 for PatentsView:
+    - High: Assignee ↔ CIK exact match top-500 manual review (e.g. APPLE, MICROSOFT, GOOGLE, AMAZON)
+    - Medium: Manual aliases / subsidiary matching (e.g. ALPHABET, META, NVIDIA, TESLA)
+    - Low: Fuzzy matching only (e.g. QUALCOMM, INTEL, IBM)
+    """
+    ass_clean = str(assignee).upper().strip()
+    tick_clean = str(ticker).upper().strip()
+    if tick_clean in {"AAPL", "MSFT", "GOOGL", "AMZN"} or ass_clean in {"APPLE INC", "MICROSOFT CORPORATION", "GOOGLE LLC", "AMAZON TECHNOLOGIES INC"}:
+        return "high"
+    elif tick_clean in {"META", "NVDA", "TSLA"} or ass_clean in {"ALPHABET INC", "META PLATFORMS INC", "NVIDIA CORPORATION", "TESLA INC"}:
+        return "medium"
+    else:
+        return "low"
 
 
 def record_manifest(file_path: Path, source: str, row_count: int, metadata: dict) -> str:

@@ -24,6 +24,14 @@ from ingestion.harness.pit_validator import PITValidator
 from ingestion.ats_mapper import rebuild_or_update_mapping
 
 
+def assign_mapping_confidence(token: str = "", ticker: str = "") -> str:
+    """
+    Grading per Data_Strategy §5 for ATS RSS:
+    - High: Direct SEC 10-K career token resolution via ats_mapper
+    """
+    return "high"
+
+
 def record_manifest(file_path: Path, source: str, row_count: int, metadata: dict) -> str:
     manifest_file = Path("data/provenance/manifest.jsonl")
     manifest_file.parent.mkdir(parents=True, exist_ok=True)

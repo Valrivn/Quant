@@ -363,6 +363,31 @@ def record_manifest(file_path: Path, source: str, row_count: int, metadata: dict
     return sha256
 
 
+def assign_mapping_confidence(app_id: str = "", app_info: Optional[Dict[str, Any]] = None, ticker: str = "") -> str:
+    """
+    Grading per Data_Strategy §5 for App Store:
+    - High: Mapped & verified primary app in maintained table (e.g. AAPL, MSFT, GOOGL, AMZN, META, TSLA)
+    - Medium: Mapped & verified secondary app in maintained table (e.g. LYFT, ABNB, DASH, SBUX, SPOT)
+    - Low: Heuristic / unverified app mapping (e.g. RDDT, NVDA, SHOP, SQ, unverified)
+    """
+    if app_info is not None:
+        if "confidence" in app_info:
+            return app_info["confidence"]
+        if app_info.get("verified") is False:
+            return "low"
+        t = app_info.get("ticker", ticker)
+    else:
+        t = ticker
+
+    t_upper = str(t).upper().strip()
+    if t_upper in {"AAPL", "MSFT", "GOOGL", "AMZN", "META", "NFLX", "TSLA", "UBER", "PYPL"}:
+        return "high"
+    elif t_upper in {"LYFT", "ABNB", "DASH", "SBUX", "MCD", "NKE", "WMT", "TGT", "HOOD", "COIN", "SPOT", "PINS", "SNAP"}:
+        return "medium"
+    else:
+        return "low"
+
+
 def write_outputs(signals: pd.DataFrame, out_path: Path, provenance_extra: Dict[str, Any]) -> str:
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -375,8 +400,8 @@ def write_outputs(signals: pd.DataFrame, out_path: Path, provenance_extra: Dict[
         signals["app_rating_level"] = signals["app_rating_90d"].round()
     if "retrieval_timestamp" not in signals.columns:
         signals["retrieval_timestamp"] = datetime.now(timezone.utc).isoformat()
-    if "mapping_confidence" not in signals.columns:
-        signals["mapping_confidence"] = "high"
+    
+    signals["mapping_confidence"] = signals["ticker"].apply(lambda t: assign_mapping_confidence(ticker=t))
 
     signals["sha256"] = ""
     signals.to_parquet(out_path, index=False)

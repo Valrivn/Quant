@@ -22,27 +22,50 @@ from ingestion.harness.pit_validator import PITValidator
 
 # Default mapping seed from SEC 10-K / common tech tickers
 DEFAULT_ORGANIZATION_MAPPING = {
-    "tensorflow": {"ticker": "GOOGL", "confidence": "high"},
+    "tensorflow": {"ticker": "GOOGL", "confidence": "medium"},
     "google": {"ticker": "GOOGL", "confidence": "high"},
     "facebook": {"ticker": "META", "confidence": "high"},
-    "reactjs": {"ticker": "META", "confidence": "high"},
+    "reactjs": {"ticker": "META", "confidence": "medium"},
     "microsoft": {"ticker": "MSFT", "confidence": "high"},
-    "azure": {"ticker": "MSFT", "confidence": "high"},
+    "azure": {"ticker": "MSFT", "confidence": "medium"},
     "apple": {"ticker": "AAPL", "confidence": "high"},
     "amazon": {"ticker": "AMZN", "confidence": "high"},
-    "aws": {"ticker": "AMZN", "confidence": "high"},
+    "aws": {"ticker": "AMZN", "confidence": "medium"},
     "netflix": {"ticker": "NFLX", "confidence": "high"},
     "nvidia": {"ticker": "NVDA", "confidence": "high"},
     "tesla": {"ticker": "TSLA", "confidence": "high"},
     "uber": {"ticker": "UBER", "confidence": "high"},
     "airbnb": {"ticker": "ABNB", "confidence": "high"},
     "palantir": {"ticker": "PLTR", "confidence": "high"},
-    "snowflake-labs": {"ticker": "SNOW", "confidence": "medium"},
+    "snowflake-labs": {"ticker": "SNOW", "confidence": "low"},
     "datadog": {"ticker": "DDOG", "confidence": "high"},
-    "hashicorp": {"ticker": "HCP", "confidence": "high"},
-    "mongodb": {"ticker": "MDB", "confidence": "high"},
-    "cloudflare": {"ticker": "NET", "confidence": "high"}
+    "hashicorp": {"ticker": "HCP", "confidence": "medium"},
+    "mongodb": {"ticker": "MDB", "confidence": "medium"},
+    "cloudflare": {"ticker": "NET", "confidence": "low"}
 }
+
+
+def assign_mapping_confidence(org_name: str, cik_name: str = "", ticker: str = "") -> str:
+    """
+    Grading per Data_Strategy §5 for GH Archive:
+    - High: Direct exact match of org name to CIK/company name
+    - Medium: Fuzzy match (>0.85 similarity) or recognized product alias
+    - Low: Heuristic substring / keyword match only
+    """
+    org_clean = str(org_name).lower().strip()
+    comp_clean = str(cik_name).lower().strip()
+    
+    if comp_clean and org_clean == comp_clean:
+        return "high"
+    exact_high = {"google", "facebook", "microsoft", "apple", "amazon", "netflix", "nvidia", "tesla", "uber", "airbnb", "palantir", "datadog"}
+    if org_clean in exact_high:
+        return "high"
+    
+    medium_aliases = {"tensorflow", "reactjs", "azure", "aws", "hashicorp", "mongodb"}
+    if org_clean in medium_aliases or (comp_clean and (org_clean in comp_clean or comp_clean in org_clean)):
+        return "medium"
+        
+    return "low"
 
 
 def record_manifest(file_path: Path, source: str, row_count: int, metadata: dict) -> str:

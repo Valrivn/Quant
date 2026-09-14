@@ -1,0 +1,54 @@
+# Senior Stats Engine — config-driven parameters (big-pickle-worker)
+# All values here are the source of truth; module fallback constants mirror them
+# so the engine stays deterministic when the YAML is absent.
+
+factor_store: data/harness/factors.duckdb
+universe: data/universe/monthly_reconstitution.parquet
+
+# ── Inputs ─────────────────────────────────────────────────────────────────────
+inputs:
+  # Fundamental factor names persisted by ingestion/factor_computer.py
+  spread_factor: ROIC_WACC_Spread
+  fcf_yield_factor: FCF_Yield
+  fcf_margin_factor: FCF_Margin
+  # Staleness caps (days). A factor observation older than this many days
+  # before the as-of month-end T is treated as missing at T (PIT discipline).
+  staleness_days:
+    fundamentals: 400
+    qual: 120
+
+# ── Qual feature taxonomy (decision matrix, LOCKED) ───────────────────────────
+# canonical_name: candidate factor_store factor_names (priority order)
+qual_features:
+  RPO_Growth_YoY: [RPO_Growth_YoY]
+  GH_Velocity_90d: [gh_commits_90d]
+  ATS_Hiring_Velocity_90d: [ats_posted_90d]
+  App_Review_Velocity_90d: [app_store_reviews_90d_z]
+  Patent_Citation_Accel_1y: [patent_citations_1y]
+  CFPB_Complaint_Velocity_90d: [cfpb_complaints_90d]
+  NHTSA_Complaint_Velocity_90d: [nhtsa_complaints_90d]
+  MDA_Tone_Score: [mda_lm_tone, mda_finbert_pos]
+
+# ── Track 1 — sector percentiles ──────────────────────────────────────────────
+percentiles:
+  min_names_per_sector: 20        # mirrors gates_v2.yaml min_names_per_sector (LOCKED)
+  method: rank/total              # pctl = rank / n within sector; rank 1 = best
+  tie_break: ticker               # deterministic tie-break inside each sort key
+
+# ── Track 2 — 3yr rolling sector median ───────────────────────────────────────
+rolling_median:
+  window_months: 36               # 12 quarters = 3 years of FCF_Margin history
+  min_obs_per_sector: 30          # min observations (tickers) per sector per window
+  method: latest_observation_per_ticker_then_median
+
+# ── Arm B — cross-sectional z-scores ──────────────────────────────────────────
+zscore:
+  winsor_sigma: 3.0               # 3σ winsorization (prevents extreme qual outliers)
+  min_cross_section_obs: 10       # below this cross-section size → no z emitted
+  neutral_fill_mode: zero_z       # missing observation → z-score 0.0 (neutral);
+                                  # μ/σ computed on available obs only
+
+# ── Persistence ───────────────────────────────────────────────────────────────
+persistence:
+  refresh_on_rerun: true          # DELETE (date,stat_name) keys then INSERT (idempotent)
+  run_manifest: data/harness/sector_stats_runs.jsonl

@@ -1,0 +1,92 @@
+{
+    "method": "opportunistic",
+    "engine": "run_sim_phase3",
+    "strategy_label": "OPPORTUNISTIC-ONLY",
+    "initial": 10000.0,
+    "audit_status": "AUDITED CLEAN",
+    "chi_square": {
+        "statistic": 6.38782179538482,
+        "df": 1,
+        "p_value": 0.011490594466319393,
+        "expected": [
+            [
+                10.736842105263158,
+                13.263157894736842
+            ],
+            [
+                6.2631578947368425,
+                7.7368421052631575
+            ]
+        ],
+        "method": "chi2",
+        "verdict": "SYSTEMATIC (p<alpha)",
+        "alpha": 0.05
+    },
+    "regimes": {
+        "bull": {
+            "wins": 7,
+            "losses": 17,
+            "n_months": 24,
+            "win_rate": 0.2916666666666667
+        },
+        "bear": {
+            "wins": 10,
+            "losses": 4,
+            "n_months": 14,
+            "win_rate": 0.7142857142857143
+        }
+    },
+    "regime_returns": {
+        "bull:2023-01..2024-12": 0.1641835703967227,
+        "bear:2020-02..2020-03": -0.26126540623763395,
+        "bear:2022-01..2022-12": -0.08487809425547121
+    },
+    "rows": [
+        {
+            "strategy": "OPPORTUNISTIC-ONLY",
+            "window": "FULL:2000-01-31..2026-09-03",
+            "end_value": 231.8546401125424,
+            "gain": -9768.145359887458,
+            "total_return": -0.9768145359887458,
+            "ann_return": -0.1128722412153422,
+            "ann_vol": 0.22829206279475162,
+            "sharpe": -0.4944203483623571,
+            "sortino": -0.3618771596932458,
+            "calmar": -0.11324982791148207,
+            "win_rate": 0.5434425003738598,
+            "maxdd": -0.9966658960715155,
+            "excess_sp500": -0.21307148028704292,
+            "info_ratio": -1.0135514208757022,
+            "alpha_annualized": -0.1946244606819419,
+            "alpha_ci_lower": -0.26853225384523344,
+            "alpha_ci_upper": -0.12071666751865033,
+            "alpha_n_obs": 6687,
+            "fees": 70.32345917908502,
+            "fees_pct_of_gain": -0.71992641988996,
+            "trades": 31
+        },
+        {
+            "strategy": "OPPORTUNISTIC-ONLY",
+            "window": "RECENT:2025-02-03..2026-09-03",
+            "end_value": 231.8546401125424,
+            "gain": -9768.145359887458,
+            "total_return": -0.9768145359887458,
+            "ann_return": 0.14729886752501303,
+            "ann_vol": 0.1047432641554652,
+            "sharpe": 1.4062848691290035,
+            "sortino": 1.421896018334564,
+            "calmar": 1.5044343090459582,
+            "win_rate": 0.5491183879093199,
+            "maxdd": -0.09790980346521283,
+            "excess_sp500": -0.03531400775127509,
+            "info_ratio": -0.293352077440035,
+            "alpha_annualized": 0.03013383569461787,
+            "alpha_ci_lower": -0.07038045975723597,
+            "alpha_ci_upper": 0.13064813114647172,
+            "alpha_n_obs": 397,
+            "fees": 70.32345917908502,
+            "fees_pct_of_gain": -0.71992641988996,
+            "trades": 31
+        }
+    ]
+}

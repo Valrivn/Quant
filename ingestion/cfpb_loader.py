@@ -24,14 +24,30 @@ from ingestion.harness.factor_store import FactorStore
 from ingestion.harness.pit_validator import PITValidator
 
 TARGET_FINTECH_TICKERS = {
-    "SOFI": {"company": "Social Finance, Inc.", "confidence": "high"},
-    "UPST": {"company": "Upstart Network, Inc.", "confidence": "high"},
-    "AFRM": {"company": "Affirm, Inc.", "confidence": "high"},
+    "SOFI": {"company": "Social Finance, Inc.", "confidence": "low"},
+    "UPST": {"company": "Upstart Network, Inc.", "confidence": "low"},
+    "AFRM": {"company": "Affirm, Inc.", "confidence": "medium"},
     "SQ": {"company": "Block, Inc.", "confidence": "high"},
     "PYPL": {"company": "PayPal Holdings, Inc.", "confidence": "high"},
     "COIN": {"company": "Coinbase, Inc.", "confidence": "high"},
-    "HOOD": {"company": "Robinhood Financial LLC", "confidence": "high"}
+    "HOOD": {"company": "Robinhood Financial LLC", "confidence": "medium"}
 }
+
+
+def assign_mapping_confidence(company: str, ticker: str = "", sector_filtered: bool = True) -> str:
+    """
+    Grading per Data_Strategy §5 for CFPB:
+    - High: Manual review exact verified entity (e.g. PayPal, Block/Square, Coinbase)
+    - Medium: Sector filtered company name match (e.g. Robinhood, Affirm)
+    - Low: Keyword match only (e.g. SoFi, Upstart)
+    """
+    tick = str(ticker).upper().strip()
+    if tick in {"PYPL", "SQ", "COIN"}:
+        return "high"
+    elif sector_filtered and tick in {"HOOD", "AFRM"}:
+        return "medium"
+    else:
+        return "low"
 
 
 def record_manifest(file_path: Path, source: str, row_count: int, metadata: dict) -> str:

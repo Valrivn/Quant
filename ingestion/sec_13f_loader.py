@@ -600,6 +600,14 @@ def record_manifest(file_path: Path, source: str, row_count: int, metadata: dict
     return sha256
 
 
+def assign_mapping_confidence(cik: str = "", ticker: str = "") -> str:
+    """
+    Grading per Data_Strategy §5 for SEC 13F:
+    - High: Direct CIK/CUSIP to ticker mapping from SEC filings
+    """
+    return "high"
+
+
 def write_outputs(signals: pd.DataFrame, out_path: Path, provenance_extra: Dict[str, Any]) -> str:
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)

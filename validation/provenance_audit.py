@@ -99,14 +99,33 @@ PIT_COL_HINTS = [
     "retrieval_timestamp",
 ]
 
+# ---------------------------------------------------------------------------
+# Tracked estate scope (PROV-01/02: full 91-file manifest coverage)
+# ---------------------------------------------------------------------------
+
+#: Tree prefixes that ARE part of the audited estate.  Everything else under
+#: data/ (master_prices, master_dividends, archive, damodaran, … caches) is a
+#: bulk cache / archive and deliberately out of scope.  Mirrored by
+#: scripts/backfill_provenance_manifest.py so backfill and audit always agree.
+TRACKED_TREE_PREFIXES: Tuple[str, ...] = (
+    "factors/", "qual/", "universe/", "prices/", "provenance/",
+    "fred_cache/", "pit_fundamentals/", "data_lake/fred/",
+    "data_lake/alfred/", "source/yfinance/",
+)
+
+#: Hard exclusions INSIDE a tracked tree (brief: exclude _tests, cache,
+#: checkpoints; plus ad-hoc tmp/_ scratch dirs).
+TRACKED_SUB_EXCLUDE: set = {"cache", "checkpoints"}
+
 # Directories that are NOT part of the audited data estate (caches,
-# checkpoints, archives, test fixtures, raw bulk dumps).
+# checkpoints, archives, test fixtures, raw bulk dumps).  Only consulted for
+# paths OUTSIDE the tracked tree prefixes above.
 EPHEMERAL_TOKENS = {
     "archive", "checkpoints", "cache", "damodaran", "damodaran_mirror",
     "dividends", "master_dividends", "master_prices", "etf_cache", "gdelt",
     "edgar_cache", "phrasebank_cache", "pipeline_cache", "raw_chats",
     "reddit_batches", "sec_datasets", "sentiment_training_cache",
-    "test_batches", "universe_cache", "cdxj", "ken_french", "yfinance",
+    "test_batches", "universe_cache", "cdxj", "ken_french",
     "companyfacts", "13f_bulk", "gate_reports", "concepts", "facts", "filings",
 }
 EPHEMERAL_PREFIXES = ("_", "tmp")
@@ -119,6 +138,26 @@ def _is_ephemeral(path: Path) -> bool:
         name = Path(part).name
         if name in EPHEMERAL_TOKENS or name.startswith(EPHEMERAL_PREFIXES):
             return True
+    return False
+
+
+def _is_tracked_tree(rel: str) -> bool:
+    """True for repo-relative paths inside one of the tracked estate trees."""
+    rel = rel.replace("\\", "/")
+    return rel.startswith(TRACKED_TREE_PREFIXES)
+
+
+def _tracked_sub_excluded(rel: str) -> bool:
+    """cache/checkpoints/_*/tmp* dirs inside a tracked tree are still excluded."""
+    rel = rel.replace("\\", "/")
+    for prefix in TRACKED_TREE_PREFIXES:
+        if rel.startswith(prefix):
+            sub = rel[len(prefix):]
+            for part in sub.split("/"):
+                if part in TRACKED_SUB_EXCLUDE or \
+                        part.startswith(EPHEMERAL_PREFIXES):
+                    return True
+            return False
     return False
 
 
@@ -175,15 +214,22 @@ def load_manifest_latest(data_root: Path) -> Dict[str, Dict[str, Any]]:
 
 
 def track_parquets(data_root: Path) -> List[Path]:
-    """All auditable parquets under data_root (ephemeral dirs excluded)."""
+    """All auditable parquets under data_root.
+
+    Scope = the tracked estate trees (TRACKED_TREE_PREFIXES) minus
+    cache/checkpoints/_tests/tmp scratch dirs.  Bulk caches (master_prices,
+    master_dividends, archive, …) and anything outside the tracked trees are
+    out of scope.  Mirrors scripts/backfill_provenance_manifest.py.
+    """
     out: List[Path] = []
     for pf in sorted(data_root.rglob("*.parquet")):
-        rel = pf.relative_to(data_root)
-        # skip the manifest-adjacent auxiliary / cache dirs & test trees
-        if _is_ephemeral(rel):
-            continue
+        rel = _posix(pf.relative_to(data_root))
         if pf.name.endswith(".provenance.json"):
             continue
+        if not _is_tracked_tree(rel):
+            continue  # outside the audited estate (caches / archives / bulk)
+        if _tracked_sub_excluded(rel):
+            continue  # _tests / cache / checkpoints / tmp scratch inside a tree
         out.append(pf)
     return out
 
@@ -713,8 +759,9 @@ def bias_checklist(data_root: Path, sha: Dict[str, Any], pit: Dict[str, Any],
         flags.append({
             "severity": "MEDIUM", "id": "PROV-01",
             "finding": f"{n_missing_manifest}/{sha['total']} tracked parquets "
-                       "have NO manifest entry (manifest covers universe/prices/"
-                       "qual only); schema incomplete for factors/sec_facts/data_lake",
+                       "have NO manifest entry — run "
+                       "scripts/backfill_provenance_manifest.py --run to "
+                       "backfill the full §8 schema (91-file estate)",
         })
     if schema.get("missing_fields"):
         flags.append({
@@ -748,11 +795,8 @@ def run_audit(data_root: Path, universe_deep: Optional[Path] = None,
     pit = check_pit(pit_files, data_root, manifest)
 
     mconf = check_mapping_confidence(data_root / "qual")
-    schema_files = [pf for pf in files
-                    if _posix(pf.relative_to(data_root)).startswith(
-                        ("factors/", "qual/", "universe/", "prices/",
-                         "provenance/"))]
-    schema = check_schema(schema_files, data_root, manifest)
+    # §8 contract completeness spans the FULL tracked estate (PROV-02).
+    schema = check_schema(files, data_root, manifest)
 
     surv = check_survivorship(data_root)
 
@@ -829,8 +873,8 @@ def cmd_check_manifest(data_root: Path, report: Optional[Path]) -> int:
     manifest = load_manifest_latest(data_root)
     files = track_parquets(data_root)
     sha = check_sha256(files, data_root, manifest)
-    print(f"Manifest coverage: {sha['passed']}/{sha['total']} tracked parquets "
-          f"match; {len(sha['failed'])} failed; "
+    print(f"Manifest coverage: {sha['passed']}/{sha['total']} passed; "
+          f"{len(sha['failed'])} hash_mismatch; "
           f"{len(sha['missing_manifest'])} missing_manifest")
     for f in sha["failed"]:
         print(f"  [FAIL-SHA] {f['file']}")
@@ -841,10 +885,13 @@ def cmd_check_manifest(data_root: Path, report: Optional[Path]) -> int:
     if report is not None:
         report.parent.mkdir(parents=True, exist_ok=True)
         report.write_text(json.dumps(
-            {"check": "manifest", **sha,
+            {"check": "manifest", "passed": sha["passed"], "total": sha["total"],
+             "hash_mismatch": sha["failed"],
+             "missing_manifest": sha["missing_manifest"],
              "ran_at": datetime.now(timezone.utc).isoformat()},
             indent=2, sort_keys=True, default=str), encoding="utf-8")
-    return 0 if not sha["failed"] else 1
+    ok = not sha["failed"] and not sha["missing_manifest"]
+    return 0 if ok else 1
 
 
 def run_tests(tmp: Path) -> int:

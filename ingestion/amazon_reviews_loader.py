@@ -460,12 +460,36 @@ def record_manifest(file_path: Path, source: str, row_count: int, metadata: dict
     return sha256
 
 
+def assign_mapping_confidence(brand_name: str = "", brand_info: Optional[Dict[str, Any]] = None, ticker: str = "") -> str:
+    """
+    Grading per Data_Strategy §5 for Amazon Reviews:
+    - High: Direct main brand mapping in maintained table (e.g. Apple, Amazon, Microsoft, Google, Sony, Nike)
+    - Medium: Subsidiary/secondary brand mapping (e.g. Beats, Ring, Blink, Xbox, Fitbit, Callaway, Keurig)
+    - Low: Heuristic/ambiguous or unverified brand mapping (e.g. TP-Link, Shark, Ninja, Yeti, GoPro)
+    """
+    if brand_info and "confidence" in brand_info:
+        return brand_info["confidence"]
+    b_clean = str(brand_name).lower().strip()
+    t_clean = str(ticker).upper().strip()
+    high_brands = {"apple", "amazon", "microsoft", "google", "sony", "nike", "nintendo", "hp", "dell", "adobe", "starbucks", "coca-cola", "pepsi"}
+    high_tickers = {"AAPL", "AMZN", "MSFT", "GOOGL", "SONY", "NKE", "NTDOY", "HPQ", "DELL", "ADBE", "SBUX", "KO", "PEP"}
+    medium_brands = {"beats", "ring", "blink", "kindle", "echo", "fire tv", "xbox", "surface", "fitbit", "playstation", "logitech", "gopro", "keurig", "hershey", "kraft", "oreo"}
+    medium_tickers = {"UAA", "LULU", "GRMN", "LOGI", "GPRO", "ADSK", "DBX", "ZM", "SONO", "ROKU", "STX", "WDC", "PTON", "EL", "LRLCY", "CL", "PG", "ELF"}
+    
+    if b_clean in high_brands or t_clean in high_tickers:
+        return "high"
+    elif b_clean in medium_brands or t_clean in medium_tickers:
+        return "medium"
+    else:
+        return "low"
+
+
 def write_outputs(signals: pd.DataFrame, out_path: Path, provenance_extra: Dict[str, Any]) -> str:
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     if "amazon_reviews_90d" not in signals.columns:
-        signals["amazon_reviews_90d"] = signals.get("review_count", 0)
+        signals["amazon_reviews_90d"] = signals.get("reviews_90d_z", 0.0)
     if "amazon_sentiment" not in signals.columns:
         signals["amazon_sentiment"] = signals.get("sentiment_weighted", 0.0)
     if "amazon_rating" not in signals.columns:
@@ -474,8 +498,8 @@ def write_outputs(signals: pd.DataFrame, out_path: Path, provenance_extra: Dict[
         signals["review_date"] = signals["date"]
     if "retrieval_timestamp" not in signals.columns:
         signals["retrieval_timestamp"] = datetime.now(timezone.utc).isoformat()
-    if "mapping_confidence" not in signals.columns:
-        signals["mapping_confidence"] = "high"
+    
+    signals["mapping_confidence"] = signals["ticker"].apply(lambda t: assign_mapping_confidence(ticker=t))
 
     signals["sha256"] = ""
     signals.to_parquet(out_path, index=False)

@@ -1,0 +1,6 @@
+redis.asyncio not available, Redis caching disabled
+redis.asyncio not available, metrics will use local storage only
+Failed to save Instagram cookies: Session with given id not found. [code: -32001]
+Failed to save Instagram cookies: Session with given id not found. [code: -32001]
+Failed to save Instagram cookies: Session with given id not found. [code: -32001]
+Degraded: 3 consecutive empty blocks; hard-stopping.

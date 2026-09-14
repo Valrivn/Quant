@@ -1,0 +1,43 @@
+{
+  "status": "WARNING",
+  "last_updated": "2026-09-08T02:38:04.369026+00:00",
+  "next_scheduled": {
+    "daily_update": "2026-09-08T10:00:00+00:00",
+    "weekly_refresh": "2026-09-13T12:00:00+00:00",
+    "monthly_revalidation": "2026-10-01T04:00:00+00:00"
+  },
+  "tasks": {
+    "daily_update": {
+      "last_successful_run": "2026-09-08T02:38:04.363201+00:00",
+      "next_scheduled": "2026-09-08T10:00:00+00:00",
+      "status": "WARNING",
+      "duration_sec": 1.062,
+      "metrics": {
+        "task": "daily_update",
+        "timestamp": "2026-09-08T02:38:04.363201+00:00",
+        "total_series_processed": 3,
+        "rows_added": 0,
+        "total_rows_stored": 0,
+        "alerts_count": 0,
+        "alerts": [],
+        "error_count": 3,
+        "errors": [
+          {
+            "series_id": "DGS10",
+            "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Max retries exceeded with url: /graph/fredgraph.csv?id=DGS10 (Caused by NameResolutionError(\"HTTPSConnection(host='fred.stlouisfed.org', port=443): Failed to resolve 'fred.stlouisfed.org' ([Errno 11002] getaddrinfo failed)\"))"
+          },
+          {
+            "series_id": "UNRATE",
+            "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Max retries exceeded with url: /graph/fredgraph.csv?id=UNRATE (Caused by NameResolutionError(\"HTTPSConnection(host='fred.stlouisfed.org', port=443): Failed to resolve 'fred.stlouisfed.org' ([Errno 11002] getaddrinfo failed)\"))"
+          },
+          {
+            "series_id": "GDP",
+            "error": "HTTPSConnectionPool(host='fred.stlouisfed.org', port=443): Max retries exceeded with url: /graph/fredgraph.csv?id=GDP (Caused by NameResolutionError(\"HTTPSConnection(host='fred.stlouisfed.org', port=443): Failed to resolve 'fred.stlouisfed.org' ([Errno 11002] getaddrinfo failed)\"))"
+          }
+        ],
+        "duration_sec": 1.062,
+        "status": "WARNING"
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+redis.asyncio not available, Redis caching disabled
+redis.asyncio not available, metrics will use local storage only
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|##########| 201/201 [00:00<00:00, 29247.36it/s]
+Adzuna API error 401
+JobSpy not installed, skipping JobSpy fallback
+Browserless health check failed: Cannot connect to host localhost:3000 ssl:default [The remote computer refused the network connection]
+Browserless health check failed: Cannot connect to host localhost:3000 ssl:default [The remote computer refused the network connection]
+Browserless error on attempt 1/3: Cannot connect to host localhost:3000 ssl:default [The remote computer refused the network connection]
+Browserless error on attempt 2/3: Cannot connect to host localhost:3000 ssl:default [The remote computer refused the network connection]
+Browserless error on attempt 3/3: Cannot connect to host localhost:3000 ssl:default [The remote computer refused the network connection]
+Browserless endpoint unreachable (Cannot connect to host localhost:3000 ssl:default [The remote computer refused the network connection]); using free local nodriver fallback
+Adzuna API error 401
+JobSpy not installed, skipping JobSpy fallback
+Nodriver Glassdoor scrape failed for AVGO: time ran out while waiting for div[data-test='overallRating'], span[data-test='overall-rating'], .ratingNumber, [class*='RatingHeadline_rating'], [class*='ReviewOverview_overallRating']

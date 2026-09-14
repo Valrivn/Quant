@@ -1,0 +1,92 @@
+{
+  "method": "rm-final",
+  "engine": "run_sim_discovery",
+  "strategy_label": "RM-FINAL (Final bar)",
+  "initial": 10000.0,
+  "audit_status": "AUDITED CLEAN (env-degraded: FF5 factors unavailable -> alpha_ff5 n/a)",
+  "chi_square": {
+    "statistic": 7.818993506493506,
+    "df": 1,
+    "p_value": 0.0051699979749125005,
+    "expected": [
+      [
+        10.105263157894736,
+        13.894736842105264
+      ],
+      [
+        5.894736842105263,
+        8.105263157894736
+      ]
+    ],
+    "method": "chi2",
+    "verdict": "SYSTEMATIC (p<alpha)",
+    "alpha": 0.05
+  },
+  "regimes": {
+    "bull": {
+      "wins": 6,
+      "losses": 18,
+      "n_months": 24,
+      "win_rate": 0.25
+    },
+    "bear": {
+      "wins": 10,
+      "losses": 4,
+      "n_months": 14,
+      "win_rate": 0.7142857142857143
+    }
+  },
+  "regime_returns": {
+    "bull:2023-01..2024-12": 0.2654601755508663,
+    "bear:2020-02..2020-03": -0.2464835618305209,
+    "bear:2022-01..2022-12": -0.06811566177079875
+  },
+  "rows": [
+    {
+      "strategy": "RM-FINAL (Final bar)",
+      "window": "FULL:2000-01-31..2026-09-03",
+      "end_value": 39.32735909731221,
+      "gain": -9960.672640902687,
+      "total_return": -0.9960672640902688,
+      "ann_return": -0.1377177322225279,
+      "ann_vol": 0.31624160799007867,
+      "sharpe": -0.43548264599909464,
+      "sortino": -0.3046635402626421,
+      "calmar": -0.1377919085308769,
+      "win_rate": 0.5459847465231046,
+      "maxdd": -0.9994616787796914,
+      "excess_sp500": -0.23791695829463766,
+      "info_ratio": -0.7691237734180603,
+      "alpha_annualized": null,
+      "alpha_ci_lower": null,
+      "alpha_ci_upper": null,
+      "alpha_n_obs": null,
+      "fees": 61.491270045313094,
+      "fees_pct_of_gain": -0.6173405377544908,
+      "trades": 157
+    },
+    {
+      "strategy": "RM-FINAL (Final bar)",
+      "window": "RECENT:2025-02-03..2026-09-03",
+      "end_value": 39.32735909731221,
+      "gain": -9960.672640902687,
+      "total_return": -0.9960672640902688,
+      "ann_return": 0.14947494885805956,
+      "ann_vol": 0.12175858258907624,
+      "sharpe": 1.2276337789059475,
+      "sortino": 1.2484999601960145,
+      "calmar": 1.2901180854643695,
+      "win_rate": 0.5541561712846348,
+      "maxdd": -0.1158614475234312,
+      "excess_sp500": -0.03313807979852725,
+      "info_ratio": -0.3778339537899132,
+      "alpha_annualized": null,
+      "alpha_ci_lower": null,
+      "alpha_ci_upper": null,
+      "alpha_n_obs": null,
+      "fees": 61.491270045313094,
+      "fees_pct_of_gain": -0.6173405377544908,
+      "trades": 157
+    }
+  ]
+}

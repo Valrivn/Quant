@@ -1,0 +1,15 @@
+# Damodaran Equity Risk Premium (ERP) by year
+# Source: NYU Stern Damodaran Data (Updated Annually)
+
+default_erp: 0.050
+
+historical_erp:
+  2018: 0.0596
+  2019: 0.0520
+  2020: 0.0472
+  2021: 0.0424
+  2022: 0.0594
+  2023: 0.0460
+  2024: 0.0460
+  2025: 0.0450
+  2026: 0.0450

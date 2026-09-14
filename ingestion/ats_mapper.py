@@ -104,6 +104,14 @@ def parse_sec_filings_for_ats() -> dict:
     return results
 
 
+def assign_mapping_confidence(career_url: str = "", token: str = "", ticker: str = "") -> str:
+    """
+    Grading per Data_Strategy §5 for ATS Mapper:
+    - High: Direct SEC 10-K Item 1/7/8 career URL token extraction
+    """
+    return "high"
+
+
 def rebuild_or_update_mapping(rebuild: bool = False, is_test: bool = False) -> dict:
     mapping_path = Path("data/mappings/ats_ticker_mapping.json")
     mapping_path.parent.mkdir(parents=True, exist_ok=True)
