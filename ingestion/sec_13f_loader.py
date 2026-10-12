@@ -610,8 +610,8 @@ def write_outputs(signals: pd.DataFrame, out_path: Path, provenance_extra: Dict[
         signals["inst_sponsor_count"] = signals.get("inst_holders", 0)
     if "top_holder_shares" not in signals.columns:
         signals["top_holder_shares"] = signals.get("inst_value", 0.0)
-    if "filed_date" not in signals.columns:
-        signals["filed_date"] = signals["date"]
+    if "source_timestamp" not in signals.columns:
+        signals["source_timestamp"] = signals["date"]
     if "retrieval_timestamp" not in signals.columns:
         signals["retrieval_timestamp"] = datetime.now(timezone.utc).isoformat()
     if "mapping_confidence" not in signals.columns:
@@ -623,7 +623,7 @@ def write_outputs(signals: pd.DataFrame, out_path: Path, provenance_extra: Dict[
     metadata = {
         "source": "SEC_13F",
         "source_version": "form-13f-data-sets TSV (2023-format refresh; 13F XML bulk retired 404)",
-        "pit_timestamp_column": "filed_date",
+        "pit_timestamp_column": "source_timestamp",
         "entity_key": "cusip|ticker",
         "transformations": [
             "tsv_bulk_parse",

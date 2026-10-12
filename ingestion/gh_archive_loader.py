@@ -166,11 +166,11 @@ def calculate_velocity_signals(daily_df: pd.DataFrame) -> pd.DataFrame:
     out_df["date"] = out_df["date"].dt.strftime("%Y-%m-%d")
     out_df["retrieval_timestamp"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
     out_df["source_version"] = "gharchive_202609"
-    out_df["created_at"] = out_df["date"]  # PIT timestamp
+    out_df["source_timestamp"] = out_df["date"]  # PIT timestamp
     
     cols = [
         "date", "ticker", "gh_commits_90d", "gh_forks_90d", "gh_stars_90d",
-        "retrieval_timestamp", "mapping_confidence", "source_version", "created_at"
+        "retrieval_timestamp", "mapping_confidence", "source_version", "source_timestamp"
     ]
     return out_df[cols]
 
@@ -190,7 +190,7 @@ def run_gh_archive_loader(start_date: str, end_date: str, sample_orgs: int = 20,
     factor_df = calculate_velocity_signals(daily_df)
     
     # PIT Validation
-    PITValidator.validate_pit(factor_df, timestamp_col="created_at", trade_date_col="date", required_cols=["date", "ticker", "gh_commits_90d"])
+    PITValidator.validate_pit(factor_df, timestamp_col="source_timestamp", trade_date_col="date", required_cols=["date", "ticker", "gh_commits_90d"])
     
     output_dir = Path("data/qual")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -203,7 +203,7 @@ def run_gh_archive_loader(start_date: str, end_date: str, sample_orgs: int = 20,
     metadata = {
         "source": "GH_ARCHIVE",
         "source_version": "gharchive_202609",
-        "pit_timestamp_column": "created_at",
+        "pit_timestamp_column": "source_timestamp",
         "entity_key": "org",
         "transformations": ["velocity_90d"],
         "date_range": {"min": factor_df["date"].min(), "max": factor_df["date"].max()}

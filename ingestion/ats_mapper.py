@@ -131,7 +131,7 @@ def rebuild_or_update_mapping(rebuild: bool = False, is_test: bool = False) -> d
             "ats_vendor": vendor,
             "ats_token": token,
             "career_url": info["career_url"],
-            "source_filing_date": info["source_filing_date"],
+            "source_timestamp": info.get("source_filing_date", info.get("source_timestamp")),
             "retrieval_timestamp": today_iso,
             "mapping_confidence": "high"
         }
@@ -149,10 +149,10 @@ def rebuild_or_update_mapping(rebuild: bool = False, is_test: bool = False) -> d
     metadata = {
         "source": "ATS_MAPPER",
         "source_version": "ats_202609",
-        "pit_timestamp_column": "source_filing_date",
+        "pit_timestamp_column": "source_timestamp",
         "entity_key": "token",
         "transformations": ["sec_10k_regex"],
-        "date_range": {"min": df["source_filing_date"].min(), "max": df["source_filing_date"].max()}
+        "date_range": {"min": df["source_timestamp"].min(), "max": df["source_timestamp"].max()}
     }
     sha256 = record_manifest(qual_path, "ATS_MAPPER", len(df), metadata)
 

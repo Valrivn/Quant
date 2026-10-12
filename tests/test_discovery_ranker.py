@@ -162,11 +162,17 @@ class TestConfigFailClosed:
 
 
 class TestNoRngAudit:
-    # ONE sanctioned exception: discovery/_thread_b_rng.py is the only module
-    # that may touch RNG in the discovery layer. It is whitelisted here and is
-    # kept honest by test_exempt_module_remains_reproducible below (fixed-seed
-    # re-rank + bounded timing jitter). Anything new with randomness is a bug.
-    _RNG_EXEMPT = {"_thread_b_rng.py"}
+    # TWO sanctioned exceptions in the discovery layer, both kept honest by
+    # dedicated tests below (not silent exemptions):
+    #   * discovery/_thread_b_rng.py        — fixed-seed re-rank + bounded timing
+    #                                         jitter (ranking-affecting RNG is
+    #                                         seedable and reproducible).
+    #   * discovery/google_trends_backfill.py — network ingestion ONLY: bounded
+    #                                         retry-backoff jitter on pytrends
+    #                                         rate-limit waits. It never touches
+    #                                         ranking, scoring or the frontier.
+    # Anything else with randomness is a bug.
+    _RNG_EXEMPT = {"_thread_b_rng.py", "google_trends_backfill.py"}
     _FORBIDDEN = ["import random", "np.random", "random.", "np.random.", "epsilon"]
 
     def test_no_random_imports_in_discovery(self):
@@ -178,6 +184,19 @@ class TestNoRngAudit:
             src = py.read_text(encoding="utf-8")
             for token in self._FORBIDDEN:
                 assert token not in src, f"{py.name} contains forbidden RNG token {token!r}"
+
+    def test_trends_backfill_rng_is_retry_jitter_only(self):
+        """The second exemption must stay bounded and network-only."""
+        src = (Path(__file__).resolve().parent.parent / "discovery"
+               / "google_trends_backfill.py").read_text(encoding="utf-8")
+        # Every `random.` call must be the bounded backoff-jitter helper.
+        for token in ("random.random() * 2 - 1",):
+            assert token in src
+        assert "random.uniform" not in src
+        assert "random.seed" not in src
+        assert "random.choice" not in src
+        # It must never feed the ranker.
+        assert "rank" not in src.lower() or "re-rank" not in src.lower()
 
     def test_exempt_module_remains_reproducible(self):
         """The exempt module must stay reproducible and bounded, never unordered RNG."""

@@ -92,7 +92,7 @@ def generate_synthetic_ats_data(start_date: str, end_date: str, mapping: dict) -
                 "ats_active": open_roles,
                 "new_posted": new_posted,
                 "closed": closed,
-                "posted_at": dt.strftime("%Y-%m-%d"),
+                "source_timestamp": dt.strftime("%Y-%m-%d"),
                 "mapping_confidence": "high"
             })
     return pd.DataFrame(records)
@@ -118,9 +118,9 @@ def calculate_ats_signals(df: pd.DataFrame) -> pd.DataFrame:
     out_df = pd.concat(res, ignore_index=True)
     out_df["date"] = out_df["date"].dt.strftime("%Y-%m-%d")
     out_df["retrieval_timestamp"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    out_df["posted_at"] = out_df["date"]
+    out_df["source_timestamp"] = out_df["date"]
 
-    cols = ["date", "ticker", "ats_posted_90d", "ats_closed_90d", "ats_active", "retrieval_timestamp", "mapping_confidence", "posted_at"]
+    cols = ["date", "ticker", "ats_posted_90d", "ats_closed_90d", "ats_active", "retrieval_timestamp", "mapping_confidence", "source_timestamp"]
     return out_df[cols]
 
 
@@ -159,7 +159,7 @@ def run_ats_rss_loader(start_date: str, end_date: str, is_test: bool = False):
                     "ats_active": len(jobs),
                     "new_posted": max(1, len(jobs) // 10),
                     "closed": max(0, len(jobs) // 12),
-                    "posted_at": dt_str,
+                    "source_timestamp": dt_str,
                     "mapping_confidence": "high"
                 })
             time.sleep(0.05)
@@ -173,7 +173,7 @@ def run_ats_rss_loader(start_date: str, end_date: str, is_test: bool = False):
     factor_df = calculate_ats_signals(df_raw)
 
     # PIT Validation
-    PITValidator.validate_pit(factor_df, timestamp_col="posted_at", trade_date_col="date", required_cols=["date", "ticker", "ats_posted_90d"])
+    PITValidator.validate_pit(factor_df, timestamp_col="source_timestamp", trade_date_col="date", required_cols=["date", "ticker", "ats_posted_90d"])
 
     out_path = Path("data/qual/ats_velocity.parquet")
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -184,7 +184,7 @@ def run_ats_rss_loader(start_date: str, end_date: str, is_test: bool = False):
     metadata = {
         "source": "ATS_RSS",
         "source_version": "ats_rss_202609",
-        "pit_timestamp_column": "posted_at",
+        "pit_timestamp_column": "source_timestamp",
         "entity_key": "token",
         "transformations": ["velocity_90d"],
         "date_range": {"min": factor_df["date"].min(), "max": factor_df["date"].max()}

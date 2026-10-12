@@ -57,6 +57,12 @@ class ExitSignal:
     take_profit_level: float = 0.0
     take_profit_pct: float = 0.0
     
+    # Trailing Stop
+    trailing_stop_triggered: bool = False
+    trailing_stop_level: float = 0.0
+    trailing_stop_pct: float = 0.15  # 15% trailing from high
+    high_watermark: float = 0.0
+
     # Hysteria Exit
     hysteria_triggered: bool = False
     hype_p95: Optional[float] = None
@@ -72,7 +78,7 @@ class ExitSignal:
     # Final decision
     exit_triggered: bool = False
     exit_reason: str = ""
-    exit_type: str = ""         # "TAKE_PROFIT", "HYSTERIA", "STRUCTURAL_BREAK"
+    exit_type: str = ""         # "TAKE_PROFIT", "HYSTERIA", "STRUCTURAL_BREAK", "TRAILING_STOP"
     degraded: bool = False
     warnings: List[str] = field(default_factory=list)
 
@@ -86,6 +92,10 @@ class ExitSignal:
             "take_profit_triggered": self.take_profit_triggered,
             "take_profit_level": self.take_profit_level,
             "take_profit_pct": self.take_profit_pct,
+            "trailing_stop_triggered": self.trailing_stop_triggered,
+            "trailing_stop_level": self.trailing_stop_level,
+            "trailing_stop_pct": self.trailing_stop_pct,
+            "high_watermark": self.high_watermark,
             "hysteria_triggered": self.hysteria_triggered,
             "hype_p95": self.hype_p95,
             "t_t_swarm": self.t_t_swarm,
@@ -257,6 +267,70 @@ def load_hype_data(ticker: str) -> Tuple[Optional[float], bool, bool]:
     # For now, return None/False/False
     return None, False, False
 
+def evaluate_trailing_stop(
+    current_price: float,
+    high_watermark: float,
+    trailing_pct: float = 0.15,
+) -> Tuple[bool, float, float]:
+    """Trailing stop: exit if price drops trailing_pct from high watermark."""
+    new_high = max(high_watermark, current_price)
+    trailing_stop_level = new_high * (1 - trailing_pct)
+    triggered = current_price <= trailing_stop_level
+    return triggered, trailing_stop_level, new_high
+
+
+def evaluate_exit_priority(
+    structural_triggered: bool,
+    hysteria_triggered: bool,
+    trailing_triggered: bool,
+    take_profit_triggered: bool,
+) -> Tuple[bool, str, str]:
+    """
+    Evaluates exit priority:
+    Priority order: Structural > Hysteria > Trailing > Take Profit
+    """
+    if structural_triggered:
+        return True, "STRUCTURAL_BREAK", "Structural Break Triggered"
+    if hysteria_triggered:
+        return True, "HYSTERIA", "Hysteria Exit Triggered"
+    if trailing_triggered:
+        return True, "TRAILING_STOP", "Trailing Stop Triggered"
+    if take_profit_triggered:
+        return True, "TAKE_PROFIT", "Take Profit Triggered"
+    return False, "", ""
+
+
+def compute_twap_exit_schedule(
+    total_shares: float,
+    adv_shares: float,
+    regime: str = "EXPANSION",
+    max_adv_pct: float = 0.05,
+) -> Dict[str, Any]:
+    """
+    Computes TWAP exit schedule capped at 5% ADV, accelerated under SHOCK / CRISIS regimes.
+    """
+    base_daily_cap = adv_shares * max_adv_pct
+    regime_mult = {"EXPANSION": 1.0, "RECOVERY": 1.1, "SHOCK": 1.5, "CRISIS": 2.0}.get(regime.upper(), 1.0)
+    daily_cap = base_daily_cap * regime_mult
+
+    days_required = math.ceil(total_shares / max(1.0, daily_cap))
+    schedule = []
+    remaining = total_shares
+    for d in range(days_required):
+        sell_qty = min(remaining, daily_cap)
+        schedule.append({"day": d + 1, "shares": sell_qty})
+        remaining -= sell_qty
+
+    return {
+        "total_shares": total_shares,
+        "adv_shares": adv_shares,
+        "regime": regime,
+        "daily_cap": daily_cap,
+        "days_required": days_required,
+        "schedule": schedule,
+    }
+
+
 def evaluate_take_profit(
     current_price: float,
     iv_fair: float,
@@ -316,12 +390,62 @@ def evaluate_exit_signal(
     current_price: float,
     dcf_result: Dict[str, Any],
     entry_signal: Optional[Dict[str, Any]] = None,
+    high_watermark: Optional[float] = None,
+    trailing_pct: float = 0.15,
+    entry_date: Optional[Any] = None,  # Date of position entry
+    current_date: Optional[Any] = None,  # Current evaluation date
+    min_hold_days: int = 30,  # Minimum days before trailing stop can trigger
+    trailing_cooldown_days: int = 60,  # Cooldown after trailing stop trigger
+    last_trailing_trigger_date: Optional[Any] = None,  # Date of last trailing stop trigger
 ) -> ExitSignal:
     """Evaluate complete exit signal for a position."""
     iv_fair = dcf_result.get("iv_p50", 0)  # Fair value = IV_P50
     iv_p25 = dcf_result.get("iv_p25", 0)
     
     warnings = []
+    
+    # Initialize high watermark
+    if high_watermark is None or high_watermark <= 0:
+        if entry_signal and "entry_price" in entry_signal:
+            initial_hw = float(entry_signal["entry_price"])
+        else:
+            initial_hw = current_price
+    else:
+        initial_hw = high_watermark
+
+    # Check minimum hold period for trailing stop
+    ts_eligible = True
+    if entry_date is not None and current_date is not None:
+        entry_dt = pd.Timestamp(entry_date)
+        current_dt = pd.Timestamp(current_date)
+        days_held = (current_dt - entry_dt).days
+        if days_held < min_hold_days:
+            ts_eligible = False
+            warnings.append(f"Trailing stop not eligible: only {days_held} days held (min {min_hold_days})")
+    
+    # Check trailing stop cooldown
+    if ts_eligible and last_trailing_trigger_date is not None and current_date is not None:
+        last_dt = pd.Timestamp(last_trailing_trigger_date)
+        current_dt = pd.Timestamp(current_date)
+        days_since_last_ts = (current_dt - last_dt).days
+        if days_since_last_ts < trailing_cooldown_days:
+            ts_eligible = False
+            warnings.append(f"Trailing stop in cooldown: {days_since_last_ts} days since last trigger (cooldown {trailing_cooldown_days})")
+
+    # Initialize high watermark
+    if high_watermark is None or high_watermark <= 0:
+        if entry_signal and "entry_price" in entry_signal:
+            initial_hw = float(entry_signal["entry_price"])
+        else:
+            initial_hw = current_price
+    else:
+        initial_hw = high_watermark
+
+    # Trailing Stop (only if eligible)
+    if ts_eligible:
+        ts_triggered, ts_level, new_hw = evaluate_trailing_stop(current_price, initial_hw, trailing_pct)
+    else:
+        ts_triggered, ts_level, new_hw = False, 0.0, initial_hw
     
     # Take Profit
     tp_triggered, tp_level, tp_pct = evaluate_take_profit(current_price, iv_fair, iv_p25)
@@ -362,7 +486,7 @@ def evaluate_exit_signal(
     exit_reason = ""
     exit_type = ""
     
-    # Priority: Structural Break > Hysteria > Take Profit
+    # Priority: Structural Break > Hysteria > Trailing Stop > Take Profit
     if structural_triggered:
         exit_triggered = True
         exit_reason = structural_reason
@@ -371,6 +495,10 @@ def evaluate_exit_signal(
         exit_triggered = True
         exit_reason = hysteria_reason
         exit_type = "HYSTERIA"
+    elif ts_triggered:
+        exit_triggered = True
+        exit_reason = f"Trailing stop triggered: price {current_price:.2f} <= level {ts_level:.2f} (high {new_hw:.2f}, -{trailing_pct:.1%})"
+        exit_type = "TRAILING_STOP"
     elif tp_triggered:
         exit_triggered = True
         exit_reason = f"Take profit at {tp_pct:.1%} above IV_Fair"
@@ -389,6 +517,10 @@ def evaluate_exit_signal(
         take_profit_triggered=tp_triggered,
         take_profit_level=tp_level,
         take_profit_pct=tp_pct,
+        trailing_stop_triggered=ts_triggered,
+        trailing_stop_level=ts_level,
+        trailing_stop_pct=trailing_pct,
+        high_watermark=new_hw,
         hysteria_triggered=hysteria_triggered,
         hype_p95=hype_p95,
         t_t_swarm=t_t_swarm,

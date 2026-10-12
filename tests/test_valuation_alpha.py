@@ -110,7 +110,7 @@ class TestFetchCompanyfacts:
 
 
 class TestFactors:
-    def test_ff5_decimals_conversion(self, monkeypatch):
+    def test_ff5_decimals_conversion(self, monkeypatch, tmp_path):
         csv_text = (
             "This is the header line\n"
             "Annual Factors: January-December\n"
@@ -132,6 +132,11 @@ class TestFactors:
 
             return R()
 
+        # Redirect the cache into tmp_path. Without this the stubbed fetch wrote
+        # this 2-row 1946 frame to the SHARED data/fred_cache/ff5_factors_daily
+        # .parquet, replacing the real 1963-2026 panel for the whole repo. Every
+        # test that reaches _save_cache must pin the destination.
+        monkeypatch.setattr(factors, "_FF5_CACHE", tmp_path / "ff5.parquet")
         monkeypatch.setattr(factors.requests, "get", fake_get)
         df = factors.fetch_ff5_factors()
         assert list(df.columns) == ["Mkt-RF", "SMB", "HML", "RMW", "CMA", "RF"]

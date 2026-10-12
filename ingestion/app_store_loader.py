@@ -371,6 +371,8 @@ def write_outputs(signals: pd.DataFrame, out_path: Path, provenance_extra: Dict[
         signals["app_reviews_90d"] = signals.get("review_count", 0)
     if "app_rating_90d" not in signals.columns:
         signals["app_rating_90d"] = signals.get("avg_rating", 0.0)
+    if "source_timestamp" not in signals.columns:
+        signals["source_timestamp"] = signals["date"]
     if "app_rating_level" not in signals.columns:
         signals["app_rating_level"] = signals["app_rating_90d"].round()
     if "retrieval_timestamp" not in signals.columns:
@@ -384,7 +386,7 @@ def write_outputs(signals: pd.DataFrame, out_path: Path, provenance_extra: Dict[
     metadata = {
         "source": "APP_STORE",
         "source_version": "itunes_rss_customerreviews",
-        "pit_timestamp_column": "date",
+        "pit_timestamp_column": "source_timestamp",
         "entity_key": "app_id|ticker",
         "transformations": [
             "rss_parse",

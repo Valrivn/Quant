@@ -34,6 +34,8 @@ from Quantitative.black_swan import (
     load_position_sizing_config,
 )
 from Quantitative.hmm_regime import RegimeDetector, RegimeState, build_macro_features
+from Quantitative.contracts.feature_contract import assert_canonical_names
+from Quantitative.data.fred_feed import SyntheticDataViolation
 from Quantitative.consumer_signal import compute_c_t, validate_cascade_lead_lag
 
 logger = logging.getLogger(__name__)
@@ -78,6 +80,9 @@ class OrchestrationDecision:
     # Stage 4: Sizing/Rebalancing (Phase 2)
     sizing_plan: Optional[SizingPlan] = None
     target_weights: Dict[str, float] = field(default_factory=dict)
+
+    # Stage 1.5: Quarterly Unfunded-Growth Watchlist (Phase 8)
+    watchlist: Dict[str, Any] = field(default_factory=dict)
     
     # Black Swan
     black_swan_decisions: Dict[str, BlackSwanDecision] = field(default_factory=dict)
@@ -107,6 +112,7 @@ class OrchestrationDecision:
             "sell_orders": self.sell_orders,
             "fallback_orders": self.fallback_orders,
             "sizing_plan": sizing_dict,
+            "watchlist": self.watchlist,
             "degraded": self.degraded,
             "warnings": self.warnings,
         }
@@ -175,10 +181,18 @@ def get_hmm_regime() -> Tuple[RegimeState, bool, float]:
         except Exception:
             pass
     
-    # Fallback: run detector on synthetic/macro data
+    # Fallback: run the detector on REAL macro data.
+    #
+    # Zero-synthetic: SyntheticDataViolation is re-raised, not swallowed. The
+    # prior bare `except Exception` returned EXPANSION/0.0, which is a live
+    # position-sizing input: a missing macro cache would silently disable the
+    # regime overlay and size the book as if conditions were benign. Failing
+    # loudly is the only safe behaviour under the zero-synthetic rule.
     try:
-        # Build macro features
-        features = build_macro_features()
+        features = build_macro_features(context="portfolio_orchestrator.get_hmm_regime")
+        assert_canonical_names(
+            list(features.columns), "portfolio_orchestrator HMM features"
+        )
         if len(features) > 250:
             detector = RegimeDetector(n_states=3, seed=42)
             detector.retrain(features, until=features.index[-1])
@@ -192,9 +206,14 @@ def get_hmm_regime() -> Tuple[RegimeState, bool, float]:
                     "regimes": report.regimes,
                     "confident": report.confident,
                     "date": report.date.isoformat(),
+                    "feature_contract": list(features.columns),
                 }, f, indent=2)
             
             return report.detected, report.confident, report.crisis_prob
+    except SyntheticDataViolation:
+        # Missing authentic PIT data. Propagate: sizing off a fabricated
+        # regime is worse than not sizing at all.
+        raise
     except Exception as e:
         logger.warning(f"HMM regime detection failed: {e}")
     
@@ -365,6 +384,27 @@ def generate_black_swan_orders(
     return orders
 
 
+def _run_unfunded_watchlist(
+    regime: str,
+    as_of: Optional[datetime] = None,
+) -> Optional[Any]:
+    """Stage 1.5 quarterly unfunded-growth watchlist query (Phase 8 WS-6).
+    Lazy import keeps the PIT fundamentals dependency off the hot path and
+    degrades gracefully: returns None when the run is not due, when the
+    fundamentals are missing, or on any query error — the orchestration cycle
+    must never hard-fail on this advisory screen."""
+    try:
+        from ingestion.unfunded_watchlist import UnfundedWatchlist  # type: ignore
+        wl = UnfundedWatchlist()
+        return wl.run(as_of=as_of, regime=regime)
+    except FileNotFoundError as e:
+        logger.warning("Stage 1.5 unfunded watchlist skipped: %s", e)
+        return None
+    except Exception as e:  # noqa: BLE001 — advisory screen: never fatal
+        logger.warning("Stage 1.5 unfunded watchlist failed: %s", e)
+        return None
+
+
 def run_orchestration_cycle(
     portfolio_state: Optional[PortfolioState] = None,
 ) -> OrchestrationDecision:
@@ -382,6 +422,45 @@ def run_orchestration_cycle(
     dcf_results = run_dcf_screen(universe)
     dcf_passed = [t for t, r in dcf_results.items() if r.passes_screen]
     logger.info(f"DCF passed: {len(dcf_passed)}/{len(universe)}")
+
+    # ─── Stage 1.5: Quarterly Unfunded-Growth Watchlist (Phase 8 WS-6) ───
+    logger.info("Running Stage 1.5: Unfunded-Growth Watchlist")
+    wl_warnings: List[str] = []
+    wl_summary: Dict[str, Any] = {
+        "quarter": None, "as_of": None, "regime": None,
+        "screened": 0, "unfunded": [], "skipped": True,
+    }
+    try:
+        wl_result = _run_unfunded_watchlist(hmm_regime.value, timestamp)
+        if wl_result is not None:
+            wl_summary = {
+                "quarter": wl_result.quarter,
+                "as_of": wl_result.as_of,
+                "regime": wl_result.regime,
+                "screened": len(wl_result.rows),
+                "unfunded": list(wl_result.unfunded_tickers),
+                "skipped": False,
+            }
+            unfunded_in_universe = [t for t in dcf_passed
+                                    if t in wl_result.unfunded_tickers]
+            if wl_result.unfunded_tickers:
+                wl_warnings.append(
+                    f"Unfunded-growth watchlist {wl_result.quarter}: "
+                    f"{len(wl_result.unfunded_tickers)} names lack funding for "
+                    f"their growth plan (universe overlap: {unfunded_in_universe})")
+                college_event(
+                    "orchestration_unfunded_warning",
+                    timestamp=timestamp.isoformat(),
+                    quarter=wl_result.quarter,
+                    unfunded_count=len(wl_result.unfunded_tickers),
+                    universe_overlap=unfunded_in_universe,
+                )
+            else:
+                logger.info("Stage 1.5: no unfunded names in %s",
+                            wl_result.quarter)
+    except Exception as e:  # noqa: BLE001 — advisory screen: never fatal
+        logger.warning("Stage 1.5 unfunded watchlist raised: %s", e)
+        wl_summary["error"] = str(e)
     
     # ─── Phase 3: Consumer Signal (C_t) ───
     logger.info("Running Consumer Signal (C_t computation)")
@@ -480,11 +559,12 @@ def run_orchestration_cycle(
         target_weights={t: p.target_weight for t, p in sizing_plan.positions},
         black_swan_decisions=black_swan_decisions,
         fallback_weights=fallback_weights,
+        watchlist=wl_summary,
         buy_orders=buy_orders,
         sell_orders=sell_orders,
         fallback_orders=fb_orders,
         degraded=hmm_crisis_prob == 0.0 and not hmm_confident,
-        warnings=[],
+        warnings=wl_warnings,
     )
     
     # Save checkpoint
@@ -514,6 +594,8 @@ def run_orchestration_cycle(
         total_equity_weight=sizing_plan.total_equity_weight,
         total_fallback_weight=sizing_plan.total_fallback_weight,
         within_limits=sizing_plan.within_limits,
+        unfunded_watchlist_count=len(wl_summary.get("unfunded") or []),
+        unfunded_watchlist_skipped=bool(wl_summary.get("skipped")),
     )
     
     logger.info(

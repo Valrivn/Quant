@@ -63,10 +63,20 @@ class TestSleeves:
 
         # Pre-registered yields cover every tradeable ticker: sleeve ETFs plus
         # the Phase-2 stable-dividend candidates and the Phase-3 small/mid
-        # proxies (coverage measurement only).
-        assert set(DIVIDEND_YIELDS) == set(P3_TICKERS)
+        # proxies (coverage measurement only). The yields map may legitimately
+        # be a SUPERSET of P3_TICKERS: refresh_dividend_yields.py also records
+        # broad-market reference proxies (VTI/VB/BND), and fee_sim3.py only
+        # does lookups by ticker, never enumeration. The load-bearing direction
+        # is every P3 ticker must have a yield to measure fee coverage.
+        assert set(P3_TICKERS) <= set(DIVIDEND_YIELDS)
         assert DIVIDEND_YIELDS["GLD"] == 0.0
         assert DIVIDEND_YIELDS["IAU"] == 0.0
+
+        # The extras are a documented, non-tradeable reference set — if they
+        # ever grow to include an actual sleeve proxy, that is a config drift
+        # worth a look, not a hard failure.
+        extras = set(DIVIDEND_YIELDS) - set(P3_TICKERS)
+        assert extras <= {"VTI", "VB", "BND"}
 
 
 class TestMacroState:

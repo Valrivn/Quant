@@ -254,6 +254,8 @@ def write_outputs(signals: pd.DataFrame, out_path: Path, prov_extra: Dict[str, A
         signals["mention_volume"] = signals.get("mentions", 0)
     if "momentum_score" not in signals.columns:
         signals["momentum_score"] = signals.get("sentiment_score", 0.0)
+    if "source_timestamp" not in signals.columns:
+        signals["source_timestamp"] = signals["date"]
     if "retrieval_timestamp" not in signals.columns:
         signals["retrieval_timestamp"] = datetime.now(timezone.utc).isoformat()
     if "mapping_confidence" not in signals.columns:
@@ -265,7 +267,7 @@ def write_outputs(signals: pd.DataFrame, out_path: Path, prov_extra: Dict[str, A
     metadata = {
         "source": "APEWISDOM",
         "source_url": "https://apewisdom.io/api/v1.0/filter/all-stocks/page/{1..9}",
-        "pit_timestamp_column": "date",
+        "pit_timestamp_column": "source_timestamp",
         "entity_key": "ticker",
         "transformations": [
             "api_pages_1_9_concat",

@@ -81,6 +81,7 @@ def generate_synthetic_patent_data(start_date: str, end_date: str, sample_assign
                 "citations_received": citations_received,
                 "small_entity_flag": small_entity,
                 "grant_date": dt.strftime("%Y-%m-%d"),
+                "source_timestamp": dt.strftime("%Y-%m-%d"),
                 "mapping_confidence": conf
             })
     return pd.DataFrame(records)
@@ -137,11 +138,11 @@ def calculate_patent_signals(df: pd.DataFrame) -> pd.DataFrame:
     out_df = pd.concat(res, ignore_index=True)
     out_df["date"] = out_df["date"].dt.strftime("%Y-%m-%d")
     out_df["retrieval_timestamp"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    out_df["grant_date"] = out_df["date"]
+    out_df["source_timestamp"] = out_df["date"]
 
     cols = [
         "date", "ticker", "patent_citations_1y", "patent_grants_1y",
-        "patent_small_entity_flag", "retrieval_timestamp", "mapping_confidence", "grant_date"
+        "patent_small_entity_flag", "retrieval_timestamp", "mapping_confidence", "source_timestamp"
     ]
     return out_df[cols]
 
@@ -158,7 +159,7 @@ def run_patentsview_loader(start_date: str, end_date: str, sample_assignees: int
     factor_df = calculate_patent_signals(df_raw)
 
     # PIT Validation
-    PITValidator.validate_pit(factor_df, timestamp_col="grant_date", trade_date_col="date", required_cols=["date", "ticker", "patent_citations_1y"])
+    PITValidator.validate_pit(factor_df, timestamp_col="source_timestamp", trade_date_col="date", required_cols=["date", "ticker", "patent_citations_1y"])
 
     out_path = Path("data/qual/patents_signals.parquet")
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -169,7 +170,7 @@ def run_patentsview_loader(start_date: str, end_date: str, sample_assignees: int
     metadata = {
         "source": "USPTO",
         "source_version": "uspto_202609",
-        "pit_timestamp_column": "grant_date",
+        "pit_timestamp_column": "source_timestamp",
         "entity_key": "assignee",
         "transformations": ["citation_accel_1y", "grant_velocity_1y"],
         "date_range": {"min": factor_df["date"].min(), "max": factor_df["date"].max()}

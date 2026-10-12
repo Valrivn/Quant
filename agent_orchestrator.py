@@ -17,7 +17,17 @@ from pathlib import Path
 
 from config.logging_config import get_experiment_context, setup_logging, init_logging, college_event
 
+from ops.dispatch_prompts import build_plan_artifact
+from ops.efficient_paths import EfficientPathRegistry
+from ops.planning_gate import ExecutionPlan, PlanningGate
+
 logger = logging.getLogger(__name__)
+
+# Planning gate: the orchestrator MUST confirm an execution plan with
+# >= 0.90 composite confidence before routing any task (opencode.json
+# PLAN GATE). Route calls that cite a plan step are validated against the
+# confirmed plan; route calls without plan citation keep legacy behaviour.
+_PLANNING_GATE_THRESHOLD = 0.90
 
 
 # Sensory layer: agents that read the world and report state to the brain
@@ -38,8 +48,9 @@ SENSORY_AGENT_LANES: Dict[str, str] = {
     "backtest_worker": "risk_engine",
     "fallback_engine_worker": "risk_engine",
     "black_swan_worker": "risk_engine",
-    "hmm_regime_worker": "risk_engine",
+"hmm_regime_worker": "risk_engine",
     "portfolio_orchestrator": "risk_engine",
+    "unfunded_watchlist_worker": "risk_engine",
     # Phase 3: Consumer Signal
     "consumer_signal_worker": "screener",
 }
@@ -302,9 +313,18 @@ AGENT_REGISTRY: Dict[str, AgentSpec] = {
         name="consumer_signal_worker",
         role=AgentRole.EXECUTOR,
         model="gemini-3-flash",
-        capabilities=["consumer_signal", "c_t_computation", "gdelt_integration", "gh_archive_integration", "edgar_13f_integration", "ken_french_integration", "google_trends_integration", "kaggle_analyst_integration", "lead_lag_validation"],
+capabilities=["consumer_signal", "c_t_computation", "gdelt_integration", "gh_archive_integration", "edgar_13f_integration", "ken_french_integration", "google_trends_integration", "kaggle_analyst_integration", "lead_lag_validation"],
         tools=["read", "write", "edit", "bash", "grep", "glob"],
         description="Phase 3: Multi-source C_t computation engine - aggregates GDELT, GH Archive, EDGAR 13F, Ken French, Google Trends, Kaggle Analyst into unified C_t velocity with lead-lag validation",
+    ),
+    # Phase 8: Quarterly Unfunded-Growth Watchlist (Stage 1.5)
+    "unfunded_watchlist_worker": AgentSpec(
+        name="unfunded_watchlist_worker",
+        role=AgentRole.EXECUTOR,
+        model="gemini-3-flash",
+        capabilities=["unfunded_watchlist", "quarterly_screen", "sc_constraint"],
+        tools=["read", "write", "edit", "bash", "grep", "glob"],
+        description="Stage 1.5: Quarterly unfunded-growth watchlist over PIT valuation fundamentals (frozen credit_capacity/unfunded_growth_check, regime-conditioned)",
     ),
 }
 
@@ -330,6 +350,10 @@ class AgentOrchestrator:
         self.routing_map: Dict[str, Any] = {}
         self.cic_loaded: bool = False
         self.cic_error: Optional[str] = None
+        # Plan gate state (PLAN GATE: no dispatch without a confirmed plan).
+        self._confirmed_plan: Optional[ExecutionPlan] = None
+        self._plan_gate = PlanningGate(threshold=_PLANNING_GATE_THRESHOLD)
+        self._path_registry = EfficientPathRegistry()
         
     def startup(self) -> None:
         """Full startup sequence â€” call once at process initialization."""
@@ -471,12 +495,90 @@ class AgentOrchestrator:
             "sensory_lanes": lanes,
         }
     
+    # ------------------------------------------------------------------ plan gate
+
+    def confirm_plan(self, plan: ExecutionPlan) -> Dict[str, Any]:
+        """PLAN GATE entrypoint: confirm an execution plan before dispatch.
+
+        Runs the mathematical planning gate; on pass the plan is stored and
+        becomes the citation target for plan-scoped route_task calls. Never
+        raises — a blocked plan returns its blockers instead.
+        """
+        result = self._plan_gate.check(plan)
+        if result.passed:
+            self._confirmed_plan = plan
+            logger.info(
+                "Plan gate PASSED: %s (confidence %.3f, %d steps)",
+                plan.plan_id,
+                result.confidence,
+                len(plan.steps),
+            )
+            college_event(
+                "plan_gate_passed",
+                plan_id=plan.plan_id,
+                confidence=result.confidence,
+                step_count=len(plan.steps),
+                threshold=_PLANNING_GATE_THRESHOLD,
+            )
+            return {
+                "passed": True,
+                "plan_id": plan.plan_id,
+                "confidence": result.confidence,
+                "artifact": build_plan_artifact(plan, result),
+            }
+        logger.warning(
+            "Plan gate BLOCKED: %s (confidence %.3f) — %d blockers",
+            plan.plan_id,
+            result.confidence,
+            len(result.blockers),
+        )
+        college_event(
+            "plan_gate_blocked",
+            plan_id=plan.plan_id,
+            confidence=result.confidence,
+            blockers=len(result.blockers),
+        )
+        return {
+            "passed": False,
+            "plan_id": plan.plan_id,
+            "confidence": result.confidence,
+            "blockers": result.blockers,
+        }
+
+    def plan_summary(self) -> Dict[str, Any]:
+        """Compact plan-gate state for the brain's context window."""
+        plan = self._confirmed_plan
+        if plan is None:
+            return {"confirmed": False, "threshold": _PLANNING_GATE_THRESHOLD}
+        return {
+            "confirmed": True,
+            "plan_id": plan.plan_id,
+            "objective": plan.objective,
+            "threshold": _PLANNING_GATE_THRESHOLD,
+            "confidence": plan.composite_confidence,
+            "step_count": len(plan.steps),
+            "steps": [
+                {
+                    "step_id": s.step_id,
+                    "title": s.title,
+                    "workstream": s.workstream,
+                    "files_touched": list(s.files_touched),
+                }
+                for s in plan.steps
+            ],
+        }
+
+    def efficient_path(self, task_type: str) -> str:
+        """Labeled efficient pathway for a task type (best effort)."""
+        return self._path_registry.label_path(task_type)
+
     def route_task(
         self,
         task_type: str,
         payload: Dict[str, Any],
         priority: str = "normal",
         require_consensus: bool = False,
+        plan_step: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Route a task to the appropriate agent(s).
@@ -486,6 +588,9 @@ class AgentOrchestrator:
             payload: Task data and parameters
             priority: "low" | "normal" | "high" | "critical"
             require_consensus: If True, route to multiple agents for consensus
+            plan_step: Optional confirmed-plan step id this task implements.
+                Validated against the orchestrator's confirmed plan; unknown
+                ids surface as a "plan_step_error" key (never raises).
             
         Returns:
             Dict with routing info and agent assignment
@@ -512,6 +617,14 @@ class AgentOrchestrator:
         # Select primary agent (first match) + consensus agents if needed
         primary_name, primary_spec = matching[0]
         consensus_agents = [name for name, _ in matching[1:3]] if require_consensus else []
+
+        # Plan-gate validation for plan-scoped routing (PLAN GATE).
+        plan_step_error: Optional[str] = None
+        if plan_step is not None:
+            if self._confirmed_plan is None:
+                plan_step_error = "no_confirmed_plan"
+            elif plan_step not in {s.step_id for s in self._confirmed_plan.steps}:
+                plan_step_error = "unknown_plan_step"
         
         # Brain annotation: sensory lane (if the primary is a sensory agent),
         # plus blueprint module coverage for that lane.
@@ -529,6 +642,9 @@ class AgentOrchestrator:
             "lane_module_count": len(lane_modules),
             "payload": payload,
             "priority": priority,
+            "plan_step": plan_step,
+            "plan_step_error": plan_step_error,
+            "efficient_path": self.efficient_path(task_type),
             "experiment_context": self.experiment_context,
         }
         
@@ -716,12 +832,32 @@ class AgentOrchestrator:
             tickers = [
                 "AAPL", "MSFT", "GOOGL", "AMZN", "META", "NVDA", "TSLA",
                 "JPM", "V", "JNJ", "WMT", "PG", "MA", "UNH", "HD",
-                "DIS", "PYPL", "ADBE", "NFLX", "CRM", "INTC", "CSCO",
+"DIS", "PYPL", "ADBE", "NFLX", "CRM", "INTC", "CSCO",
                 "PFE", "TMO", "ABBV", "ACN", "COST"
             ]
         return self.route_task(
             task_type="consumer_signal",
             payload={"tickers": tickers, "lookback_days": lookback_days},
+            priority="high",
+        )
+
+    def run_unfunded_watchlist(
+        self,
+        regime: str = "EXPANSION",
+        as_of: Optional[str] = None,
+        quarter: Optional[str] = None,
+        force: bool = False,
+    ) -> Dict[str, Any]:
+        """Route Stage 1.5 quarterly unfunded-growth watchlist to
+        unfunded_watchlist_worker."""
+        return self.route_task(
+            task_type="unfunded_watchlist",
+            payload={
+                "regime": regime,
+                "as_of": as_of,
+                "quarter": quarter,
+                "force": force,
+            },
             priority="high",
         )
 
@@ -742,6 +878,15 @@ def get_orchestrator() -> AgentOrchestrator:
 def route_to_executor(task_type: str, payload: Dict[str, Any], **kwargs) -> Dict[str, Any]:
     """Convenience function: route task to executor layer (Gemini/BigPickle)."""
     return get_orchestrator().route_task(task_type, payload, **kwargs)
+
+
+def confirm_execution_plan(plan: ExecutionPlan) -> Dict[str, Any]:
+    """PLAN GATE convenience: confirm an execution plan before dispatch.
+
+    Returns the gate verdict dict; the plan is stored on the global
+    orchestrator as the citation target for plan-scoped route_task calls.
+    """
+    return get_orchestrator().confirm_plan(plan)
 
 
 def route_to_specialist(task_type: str, payload: Dict[str, Any], **kwargs) -> Dict[str, Any]:
@@ -788,6 +933,16 @@ def run_consumer_signal(
 ) -> Dict[str, Any]:
     """Run Phase 3: Consumer Signal (C_t Computation)."""
     return get_orchestrator().run_consumer_signal(tickers, lookback_days)
+
+
+def run_unfunded_watchlist(
+    regime: str = "EXPANSION",
+    as_of: Optional[str] = None,
+    quarter: Optional[str] = None,
+    force: bool = False,
+) -> Dict[str, Any]:
+    """Run Stage 1.5: Quarterly Unfunded-Growth Watchlist."""
+    return get_orchestrator().run_unfunded_watchlist(regime, as_of, quarter, force)
 
 
 def run_orchestration_cycle(portfolio_state: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

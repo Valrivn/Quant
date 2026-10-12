@@ -484,7 +484,9 @@ class SECEdgarScraper:
                     if val is not None:
                         rows.append({
                             "as_of": rec.filed,
+                            "filed": rec.filed,
                             "ticker": ticker,
+                            "cik": self.tickers_ciks.get(ticker, ""),
                             "accession": rec.accession,
                             "form": rec.form,
                             "fiscal_end": rec.fiscal_end,
@@ -543,6 +545,73 @@ class SECEdgarScraper:
         print("-" * 72)
         print(f"  TOTAL: {total_filings} filings, {total_rows} fact values")
         print("=" * 72)
+
+
+def main():
+    import argparse
+    import sqlite3
+    import sys
+    import time
+    import pandas as pd
+
+    parser = argparse.ArgumentParser(description="SEC EDGAR PIT Fundamentals Scraper")
+    parser.add_argument("--tickers", type=str, default=None, help="Comma-separated tickers")
+    parser.add_argument("--tickers-from-db", action="store_true", help="Load tickers & CIKs from db matching monthly_reconstitution")
+    parser.add_argument("--rate-limit", type=float, default=9.0, help="Max requests per second")
+    args = parser.parse_args()
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+
+    tickers_ciks = {}
+    if args.tickers_from_db:
+        univ_df = pd.read_parquet("data/universe/monthly_reconstitution.parquet")
+        univ_tickers = sorted(univ_df["ticker"].dropna().unique().tolist())
+        conn = sqlite3.connect("reddit_quant.db")
+        cur = conn.cursor()
+        placeholders = ",".join(["?"] * len(univ_tickers))
+        cur.execute(f"SELECT ticker, cik FROM sec_cik_map WHERE ticker IN ({placeholders})", univ_tickers)
+        for t, c in cur.fetchall():
+            if t and c:
+                tickers_ciks[t] = str(c).zfill(10)
+        conn.close()
+        logger.info("Loaded %d CIK mappings from DB matching universe", len(tickers_ciks))
+    elif args.tickers:
+        from valuation_alpha.universe.cik_resolver import resolve_ciks
+        raw_tickers = [t.strip().upper() for t in args.tickers.split(",")]
+        res = resolve_ciks(raw_tickers)
+        tickers_ciks = {t: c for t, c in res.items() if c}
+    else:
+        from valuation_alpha.universe.cik_resolver import resolve_ciks
+        res = resolve_ciks(DEFAULT_ROSTER)
+        tickers_ciks = {t: c for t, c in res.items() if c}
+
+    if not tickers_ciks:
+        logger.error("No valid CIK mappings found.")
+        sys.exit(1)
+
+    scraper = SECEdgarScraper(tickers_ciks=tickers_ciks, rate_limit=args.rate_limit)
+    t0 = time.time()
+    results = asyncio.run(scraper.run_all())
+    elapsed = time.time() - t0
+    logger.info("Scraping completed in %.2f seconds", elapsed)
+
+    # Save to data/sec_facts/facts/facts.parquet as required or default location
+    out_path = scraper.save_pit_parquet(results)
+    
+    # Also save/copy to data/sec_facts/facts/facts.parquet if specified
+    sec_facts_dir = Path("data/sec_facts/facts")
+    sec_facts_dir.mkdir(parents=True, exist_ok=True)
+    facts_parquet = sec_facts_dir / "facts.parquet"
+    if out_path.exists():
+        import shutil
+        shutil.copy(out_path, facts_parquet)
+        logger.info("Copied facts output to %s", facts_parquet)
+
+    scraper.print_summary(results)
+
+
+if __name__ == "__main__":
+    main()
 
 
 # ── Default 27-ticker roster ────────────────────────────────────────────────

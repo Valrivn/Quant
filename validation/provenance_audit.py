@@ -46,6 +46,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -93,7 +94,7 @@ FACTOR_FILE_SOURCES: Dict[str, str] = {
 # availability).  retrieval_timestamp still binds for mapping tables (which
 # carry no `date` column).
 PIT_COL_HINTS = [
-    "filed_date", "filing_date", "filed", "created_at", "date_received",
+    "source_timestamp", "filed_date", "filing_date", "filed", "created_at", "date_received",
     "DateReceived", "grant_date", "review_date", "posted_at", "delist_filed",
     "rebalance_date", "reconstitution_month", "trade_date", "date",
     "retrieval_timestamp",
@@ -275,7 +276,7 @@ def pit_check_one(pf: Path, rel: str,
     prov = merged_provenance(pf, rel, manifest, sidecar)
 
     df = pd.DataFrame()
-    for attempt in (["date", "filed_date", "filing_date", "created_at",
+    for attempt in (["date", "source_timestamp", "filed_date", "filing_date", "created_at",
                      "DateReceived", "grant_date", "review_date",
                      "posted_at", "retrieval_timestamp"], None):
         df = read_cols(pf, attempt)
@@ -344,6 +345,67 @@ def check_pit(files: List[Path], data_root: Path,
     violations = [r for r in results if not r["pit_passed"]]
     return {"total_files": len(results), "passed": len(results) - len(violations),
             "violations": violations}
+
+
+# ---------------------------------------------------------------------------
+# Check 1b — source_timestamp standardization (PIT Auditor, bigpickle-worker)
+# ---------------------------------------------------------------------------
+# Phase 8 PIT-Auditor Standardization: every feature output in the PIT estate
+# (factors/, qual/, universe/, prices/) must carry the CANONICAL
+# `source_timestamp` column (availability anchor, not period_end).  The column
+# is already the first PIT_COL_HINTS anchor; this check makes the
+# standardization EXPLICIT and reports the standardized issue codes so a
+# backfill (scripts/backfill_provenance_manifest.py + loader writes) can be
+# tracked to completion.
+SOURCE_TIMESTAMP_ISSUE_MISSING = "MISSING_SOURCE_TIMESTAMP"
+
+
+def check_source_timestamp_column(df: pd.DataFrame) -> Dict[str, Any]:
+    """Column-level source_timestamp compliance for one frame.  Returns
+    {column_present, rows, non_null, parseable, passed, issue} with the
+    standardized issue label (None when passed)."""
+    entry: Dict[str, Any] = {"column_present": False, "rows": 0,
+                             "non_null": 0, "parseable": 0, "passed": False,
+                             "issue": SOURCE_TIMESTAMP_ISSUE_MISSING}
+    if "source_timestamp" not in df.columns or df is None or len(df) == 0:
+        return entry
+    entry["column_present"] = True
+    entry["rows"] = int(len(df))
+    non_null = int(df["source_timestamp"].notna().sum())
+    entry["non_null"] = non_null
+    if non_null == 0:
+        entry["issue"] = "EMPTY_SOURCE_TIMESTAMP"
+        return entry
+    try:
+        parsed = pd.to_datetime(df["source_timestamp"].dropna(), errors="coerce")
+        entry["parseable"] = int(parsed.notna().sum())
+    except Exception:  # noqa: BLE001
+        entry["parseable"] = 0
+    entry["passed"] = entry["parseable"] > 0
+    entry["issue"] = None if entry["passed"] else "UNPARSEABLE_SOURCE_TIMESTAMP"
+    return entry
+
+
+def check_source_timestamp(files: List[Path]) -> Dict[str, Any]:
+    """Estate-wide source_timestamp scan (PIT feature estate).  Violations are
+    WARN severity (STMP-01) — PIT compliance itself is not downgraded; the
+    report section gives the backfill the exact file list + issue codes."""
+    results: List[Dict[str, Any]] = []
+    violations: List[Dict[str, Any]] = []
+    for pf in files:
+        rel = _repo_rel(pf)
+        try:
+            df = pd.read_parquet(pf, columns=["source_timestamp"])
+        except Exception:  # noqa: BLE001 — read/parse errors are violations
+            df = pd.DataFrame()
+        entry = check_source_timestamp_column(df)
+        entry = {"file": rel, **entry}
+        if not entry["passed"]:
+            violations.append(entry)
+        results.append(entry)
+    return {"total_files": len(results),
+            "passed_files": len(results) - len(violations),
+            "violations": violations, "results": results}
 
 
 # ---------------------------------------------------------------------------
@@ -541,7 +603,8 @@ def check_universe_pit(path: Path, data_root: Path,
 
 def bias_checklist(data_root: Path, sha: Dict[str, Any], pit: Dict[str, Any],
                    mconf: Dict[str, Any], surv: Dict[str, Any],
-                   schema: Dict[str, Any], manifest: Dict[str, Dict[str, Any]]
+                   schema: Dict[str, Any], manifest: Dict[str, Dict[str, Any]],
+                   st: Optional[Dict[str, Any]] = None
                    ) -> Tuple[List[Dict[str, str]], List[Dict[str, str]]]:
     """Returns (checklist_rows, bias_flags).  Code-path evidence is static and
     documented here; data evidence is computed live."""
@@ -707,6 +770,27 @@ def bias_checklist(data_root: Path, sha: Dict[str, Any], pit: Dict[str, Any],
                                  "embargo>=12mo, LASSO+RF) not implemented — "
                                  "train/test contamination guard is code-missing"})
 
+    # 10. Source timestamps (PIT Auditor standardization) ------------------
+    st_total = (st or {}).get("total_files", 0)
+    st_passed = (st or {}).get("passed_files", 0)
+    st_complete = bool(st_total) and st_passed == st_total
+    rows.append({
+        "bias": "Source Timestamp",
+        "status": "PASS" if st_complete else "WARN",
+        "check": "Every PIT estate feature output carries a parseable "
+                 "source_timestamp column (canonical availability anchor)",
+        "method": "estate-wide source_timestamp scan (factors/qual/universe/prices)",
+        "evidence": (f"{st_passed}/{st_total} files carry a parseable "
+                     f"source_timestamp; violations="
+                     f"{[v['file'] for v in (st or {}).get('violations', [])][:8]}"
+                     + (" [+ more]" if len((st or {}).get('violations', [])) > 8 else "")),
+    })
+    for v in (st or {}).get("violations", []):
+        flags.append({"severity": "WARN", "id": "STMP-01",
+                      "finding": f"source_timestamp {v.get('issue')} in {v['file']} "
+                                 f"(non_null={v.get('non_null', 0)}/{v.get('rows', 0)}, "
+                                 f"parseable={v.get('parseable', 0)})"})
+
     # Schema / manifest completeness flags ----------------------------------
     n_missing_manifest = len(sha.get("missing_manifest", []))
     if n_missing_manifest:
@@ -728,8 +812,333 @@ def bias_checklist(data_root: Path, sha: Dict[str, Any], pit: Dict[str, Any],
 
 
 # ---------------------------------------------------------------------------
+# Trade-audit ledger chain verification (Phase 3 / WS-2 C2.5)
+# ---------------------------------------------------------------------------
+
+def _load_ledger_blocks(ledger_dir: Path, month: str) -> Tuple[Any, pd.DataFrame, Dict[str, Any]]:
+    """Returns (TradeAuditLedger, month parquet df, manifest dict) or empty."""
+    from ingestion.trade_audit import TradeAuditLedger
+    ledger = TradeAuditLedger(ledger_dir=ledger_dir)
+    path = ledger_dir / f"month={month}" / f"trade_audit_{month}.parquet"
+    manifest: Dict[str, Any] = {}
+    manifest_path = ledger_dir / f"month={month}" / "partition.manifest.json"
+    if manifest_path.exists():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            manifest = {"_parse_error": True}
+    df = pd.DataFrame()
+    if path.exists():
+        try:
+            df = pd.read_parquet(path)
+        except Exception:  # noqa: BLE001
+            df = pd.DataFrame()
+    return ledger, df, manifest
+
+
+def _month_partitions(ledger_dir: Path) -> List[str]:
+    return sorted(p.name[len("month="):] for p in ledger_dir.glob("month=*")
+                  if p.is_dir())
+
+
+def _is_trade_ledger_dir(path: Path) -> bool:
+    """Heuristic: a ledger dir has month=* partitions or a .ledger.lock, or
+    carries the trade_audit partition parquets directly."""
+    if _month_partitions(path):
+        return True
+    return (path / ".ledger.lock").exists() or \
+        any(path.glob("trade_audit_*.parquet"))
+
+
+def check_trade_ledger(ledger_dir: Path) -> Dict[str, Any]:
+    """
+    WS-2 C2.5 chain verification of the immutable trade-audit ledger
+    (ingestion/trade_audit.py, phase8.trade_audit frozen config):
+
+      1. two-layer SHA-256 chain integrity per partition (verify_chain with
+         full forensic recompute — stored hashes are never trusted);
+      2. cross-partition chaining via verify_ledger (first block of P+1 must
+         carry the last chain_hash of P);
+      3. nanosecond TIMESTAMP ordering: retrieval_ts non-decreasing within a
+         partition (uuid7 time prefix, C2.2);
+      4. UUID v7 block ids (version nibble == 7, C2.2);
+      5. Appendix A trigger_reason re-validation on EVERY block (C2.3);
+      6. stage_gate enum {1..5} + action enum (C2.4);
+      7. frozen numeric bounds: erp_blend in [0.005, 0.08], wacc/ke/kd in
+         [0, 0.5]; beta_source non-null (coverage gate);
+      8. manifest consistency: declared n_blocks == parquet row count and
+         first/last chain hashes match (completeness, no silent truncation);
+      9. block_id uniqueness across the whole ledger.
+    Returns a report dict (status PASS/FAIL/SKIP)."""
+    from ingestion.trade_audit import (
+        ACTIONS, STAGE_GATES, TRIGGER_REASON_SCHEMA,
+        validate_trigger_reason, TradeAuditLedger,
+    )
+    months = _month_partitions(ledger_dir)
+    if not months:
+        return {"status": "SKIP", "ledger_dir": str(ledger_dir),
+                "reason": "no month=* partitions (ledger not built yet)"}
+
+    ledger = TradeAuditLedger(ledger_dir=ledger_dir)
+    partitions: Dict[str, Any] = {}
+    violations: List[Dict[str, Any]] = []
+    date_range = None
+    earliest = latest = None
+    seen_ids: Dict[str, str] = {}
+
+    total_blocks = 0
+    for month in months:
+        ok, n, brk = ledger.verify_chain(month, verify_hashes=True)
+        _, _, manifest = _load_ledger_blocks(ledger_dir, month)
+        blks = ledger.load_month(month)
+        total_blocks += len(blks)
+
+        issues: List[str] = []
+        if not ok:
+            issues.append(f"chain_verification failed break@{brk}")
+        # manifest consistency / completeness
+        decl_n = manifest.get("n_blocks")
+        if decl_n is not None and int(decl_n) != len(blks):
+            issues.append(f"manifest n_blocks {decl_n} != {len(blks)} rows")
+        if manifest.get("last_chain_hash") and blks:
+            if manifest["last_chain_hash"] != blks[-1].chain_hash:
+                issues.append("manifest last_chain_hash mismatch")
+        if manifest.get("first_chain_hash") and blks:
+            if manifest["first_chain_hash"] != blks[0].chain_hash:
+                issues.append("manifest first_chain_hash mismatch")
+        # per-block checks
+        prev_ts = None
+        for i, b in enumerate(blks):
+            # uuid v7
+            try:
+                if getattr(__import__("uuid"), "UUID")(b.block_id).version != 7:
+                    issues.append(f"block#{i + 1} block_id not uuid7")
+            except Exception:  # noqa: BLE001
+                issues.append(f"block#{i + 1} block_id not a uuid")
+            if b.block_id in seen_ids:
+                issues.append(f"block_id {b.block_id[:12]} duplicated "
+                              f"(also in {seen_ids[b.block_id]})")
+            seen_ids[b.block_id] = month
+            # timestamps + ordering (nanosecond precision, non-decreasing)
+            ts = b.retrieval_ts
+            if prev_ts is not None and ts < prev_ts:
+                issues.append(f"block#{i + 1} retrieval_ts decreasing")
+            prev_ts = ts
+            if earliest is None or ts < earliest:
+                earliest = ts
+            if latest is None or ts > latest:
+                latest = ts
+            # Appendix A re-validation
+            if b.trigger_reason is not None:
+                try:
+                    validate_trigger_reason(b.trigger_reason)
+                except ValueError as exc:
+                    issues.append(f"block#{i + 1} trigger_reason invalid: {exc}")
+            else:
+                issues.append(f"block#{i + 1} trigger_reason None")
+            # enums
+            if b.stage_gate not in STAGE_GATES:
+                issues.append(f"block#{i + 1} stage_gate {b.stage_gate} invalid")
+            if b.action not in ACTIONS:
+                issues.append(f"block#{i + 1} action '{b.action}' invalid")
+            # frozen numeric bounds + coverage
+            if not (0.005 - 1e-12 <= b.erp_blend <= 0.08 + 1e-12):
+                issues.append(f"block#{i + 1} erp_blend {b.erp_blend} outside [0.005, 0.08]")
+            for col, v in (("wacc_v2", b.wacc_v2), ("ke_v2", b.ke_v2),
+                           ("kd_pre_tax_v2", b.kd_pre_tax_v2)):
+                if not (0.0 - 1e-12 <= v <= 0.5 + 1e-12):
+                    issues.append(f"block#{i + 1} {col} {v} outside [0, 0.5]")
+            if not b.beta_source:
+                issues.append(f"block#{i + 1} empty beta_source (coverage gate)")
+
+        partitions[month] = {
+            "blocks": len(blks), "chain_intact": bool(ok),
+            "first_break": brk, "issues": issues,
+            "first_chain": (blks[0].chain_hash[:16] if blks else None),
+            "last_chain": (blks[-1].chain_hash[:16] if blks else None),
+        }
+        if issues:
+            violations.append({"month": month, "issues": issues})
+
+    global_rpt = ledger.verify_ledger(cross_partition=True)
+    if not global_rpt["intact"]:
+        violations.append({"month": "*", "issues": ["cross-partition chain broken"]})
+    if earliest is not None and latest is not None:
+        date_range = {"min": str(earliest.date()), "max": str(latest.date())}
+
+    passed = not violations
+    status = "PASS" if passed else "FAIL"
+    return {
+        "name": "trade_audit_chain",
+        "status": status,
+        "ledger_dir": str(ledger_dir),
+        "config_contract": {
+            "chain_verification": ledger.chain_verification,
+            "partition_by": ledger.partition_by,
+            "retention_years": ledger.retention_years,
+            "timestamp_precision": ledger.timestamp_precision,
+            "uuid_version": ledger.uuid_version,
+            "stage_gates": {str(k): v for k, v in STAGE_GATES.items()},
+            "trigger_reason_schema": "$schema draft 2020-12 (Appendix A)",
+        },
+        "global": {"intact": bool(global_rpt["intact"]),
+                   "n_blocks": int(global_rpt["n_blocks"]),
+                   "partitions": int(global_rpt["partitions"])},
+        "partitions": partitions,
+        "violations": violations,
+        "summary": {"status": status, "n_blocks": total_blocks,
+                    "n_partitions": len(months), "violation_count": len(violations),
+                    "date_range": date_range},
+    }
+
+
+def write_ledger_report(ledger_report: Dict[str, Any], report_path: Path) -> None:
+    content = json.dumps(ledger_report, sort_keys=True, default=str).encode("utf-8")
+    ledger_report["provenance"] = {
+        "source": "validation.provenance_audit",
+        "retrieval_timestamp": datetime.now(timezone.utc).isoformat(),
+        "sha256": hashlib.sha256(content).hexdigest(),
+        "row_count": int(ledger_report.get("summary", {}).get("n_blocks", 0)),
+        "date_range": ledger_report.get("summary", {}).get("date_range"),
+        "mapping_confidence": "n/a",
+    }
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(ledger_report, indent=2, sort_keys=True,
+                                      default=str), encoding="utf-8")
+
+
+def cmd_ledger_check(data_root: Path, report: Optional[Path]) -> int:
+    """`--run --data-root <ledger-dir>` -> data/validation/gates/
+    provenance_audit_report.json.  Exit 0 = PASS/SKIP, 1 = FAIL."""
+    rpt = check_trade_ledger(data_root)
+    out = report if report is not None else \
+        REPO_ROOT / "data" / "validation" / "gates" / "provenance_audit_report.json"
+    if "summary" not in rpt:     # early SKIP return (no partitions yet)
+        rpt["summary"] = {
+            "status": rpt.get("status", "SKIP"),
+            "n_blocks": 0,
+            "n_partitions": 0,
+            "violation_count": 0,
+            "date_range": None,
+        }
+    write_ledger_report(rpt, out)
+    s = rpt["summary"]
+    print(f"[provenance] trade-ledger chain: status={rpt['status']} "
+          f"blocks={s['n_blocks']} partitions={s['n_partitions']} "
+          f"violations={s['violation_count']}")
+    for v in rpt.get("violations", [])[:10]:
+        print(f"  [LEDGER-FAIL] {v.get('month', '*')}: {v['issues'][:2]}")
+    print(f"[provenance] report: {out}")
+    return 0 if rpt["status"] != "FAIL" else 1
+
+
+# ---------------------------------------------------------------------------
 # Report assembly / CLI
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Check "backtest chain" — Phase 4 gate 16
+#
+# The walk-forward certification requires the artifact chain to be intact:
+#   1) each fold dir's .provenance.json lists sha256 for every artifact;
+#   2) every listed artifact's CURRENT bytes hash to the listed value;
+#   3) the consolidated walk-forward parquet matches its own sidecar sha256.
+# A violation (tamper / missing listing / drift) fails gate 16.
+# ---------------------------------------------------------------------------
+
+WALKFORWARD_CONSOLIDATED = Path("data") / "backtests" / "walkforward_hybrid_fractal_v1.parquet"
+WALKFORWARD_CHAIN_REPORT = Path("data") / "validation" / "provenance_walkforward_report.json"
+WF_FOLD_PATTERN = re.compile(r"^.*-hybrid_fractal_v1-fold(\d+)$")
+
+
+def check_backtest_chain(data_root: Path,
+                         consolidated: Optional[Path] = None,
+                         fold_root: Path = Path("data") / "backtests",
+                         strategy: str = "hybrid_fractal_v1") -> Dict[str, Any]:
+    """
+    Verifies the Phase-4 walk-forward artifact chain (fold .provenance.json
+    listings vs current bytes + consolidated parquet sidecar).  Returns the
+    gate-16 shape consumed by ingestion/harness/gate_engine.py.
+    """
+    consolidated = Path(consolidated) if consolidated is not None else WALKFORWARD_CONSOLIDATED
+    violations: List[str] = []
+    folds_verified: List[str] = []
+    folder = fold_root if fold_root.exists() else Path(data_root) / "backtests"
+
+    fold_dirs = sorted(
+        (d for d in folder.iterdir() if d.is_dir() and WF_FOLD_PATTERN.match(d.name)),
+        key=lambda d: int(WF_FOLD_PATTERN.match(d.name).group(1)))
+    if not fold_dirs:
+        violations.append(f"no {strategy}-fold{{K}} dirs under {folder}")
+
+    for d in fold_dirs:
+        prov_file = d / ".provenance.json"
+        if not prov_file.exists():
+            violations.append(f"{d.name}: .provenance.json missing")
+            continue
+        try:
+            prov = json.loads(prov_file.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            violations.append(f"{d.name}: .provenance.json unparseable")
+            continue
+        listing = prov.get("files") or {}
+        # 1) every listed artifact must exist
+        for rel in listing:
+            ap = d / rel
+            if not ap.exists():
+                violations.append(f"{d.name}/{rel}: listed but missing")
+        # 2) current bytes must match the listing hash
+        for rel, expected in listing.items():
+            ap = d / rel
+            if ap.exists() and expected:
+                actual = sha256_file(ap)
+                if actual != expected:
+                    violations.append(f"{d.name}/{rel}: sha256 mismatch "
+                                      f"(actual {actual[:12]}… != listed {expected[:12]}…)")
+        # 3) sidecars must be self-consistent (own hash listed too)
+        for sp in d.glob("*.parquet.provenance.json"):
+            try:
+                side = json.loads(sp.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                violations.append(f"{d.name}/{sp.name}: sidecar unparseable")
+                continue
+            own = side.get("sha256")
+            base = sp.name.replace(".provenance.json", "")
+            if own and (d / base).exists():
+                if sha256_file(d / base) != own:
+                    violations.append(f"{d.name}/{base}: sidecar sha256 mismatch")
+        folds_verified.append(d.name)
+
+    # 4) consolidated parquet vs its provenances sidecar
+    consolidated_sha256 = None
+    if consolidated.exists():
+        consolidated_sha256 = sha256_file(consolidated)
+        side = Path(str(consolidated) + ".provenance.json")
+        if side.exists():
+            try:
+                side_sha = json.loads(side.read_text(encoding="utf-8")).get("sha256")
+                if side_sha and consolidated_sha256 != side_sha:
+                    violations.append(
+                        f"{consolidated.name}: parquet sha256 {consolidated_sha256[:12]}… "
+                        f"!= sidecar {side_sha[:12]}…")
+            except json.JSONDecodeError:
+                violations.append(f"{consolidated.name}: sidecar unparseable")
+        else:
+            violations.append(f"{consolidated.name}: sidecar {consolidated.name}.provenance.json missing")
+    else:
+        violations.append(f"{consolidated.name}: consolidated walk-forward parquet missing")
+
+    return {
+        "name": "backtest_chain",
+        "valid": not violations,
+        "status": "evaluated" if fold_dirs else "no_folds_discovered",
+        "folds_verified": folds_verified,
+        "fold_roots": [str(d) for d in fold_dirs],
+        "consolidated_sha256": consolidated_sha256,
+        "violations": violations,
+        "source": "validation/provenance_audit.check_backtest_chain",
+    }
+
 
 def run_audit(data_root: Path, universe_deep: Optional[Path] = None,
               report_path: Optional[Path] = None) -> Dict[str, Any]:
@@ -747,6 +1156,10 @@ def run_audit(data_root: Path, universe_deep: Optional[Path] = None,
             pit_files.append(pf)
     pit = check_pit(pit_files, data_root, manifest)
 
+    # PIT Auditor standardization: canonical source_timestamp on every
+    # feature output (WARN-level; never downgrades PIT compliance).
+    st = check_source_timestamp(pit_files)
+
     mconf = check_mapping_confidence(data_root / "qual")
     schema_files = [pf for pf in files
                     if _posix(pf.relative_to(data_root)).startswith(
@@ -756,8 +1169,10 @@ def run_audit(data_root: Path, universe_deep: Optional[Path] = None,
 
     surv = check_survivorship(data_root)
 
+    chain = check_backtest_chain(data_root)
+
     checklist, flags = bias_checklist(data_root, sha, pit, mconf, surv,
-                                      schema, manifest)
+                                      schema, manifest, st=st)
 
     report: Dict[str, Any] = {
         "status": "PASS",
@@ -767,9 +1182,14 @@ def run_audit(data_root: Path, universe_deep: Optional[Path] = None,
             "total": sha["total"], "passed": sha["passed"],
             "failed": sha["failed"], "missing_manifest": sha["missing_manifest"],
         },
+        "backtest_chain": chain,
         "pit_compliance": {
             "total_files": pit["total_files"], "passed": pit["passed"],
             "violations": pit["violations"],
+        },
+        "source_timestamp": {
+            "total_files": st["total_files"], "passed": st["passed_files"],
+            "violations": st["violations"],
         },
         "mapping_confidence": mconf,
         "provenance_schema": schema,
@@ -785,6 +1205,8 @@ def run_audit(data_root: Path, universe_deep: Optional[Path] = None,
         "summary": {
             "sha_passed": sha["passed"], "sha_total": sha["total"],
             "pit_passed": pit["passed"], "pit_total": pit["total_files"],
+            "source_timestamp_complete": st["passed_files"],
+            "source_timestamp_total": st["total_files"],
             "schema_complete": schema["complete"],
             "schema_total": schema["total_files"],
             "mapping_has_column": mconf["has_column"],
@@ -809,7 +1231,11 @@ def run_audit(data_root: Path, universe_deep: Optional[Path] = None,
 
     print(f"[provenance] SHA-256 {sha['passed']}/{sha['total']} (manifest); "
           f"{len(sha['missing_manifest'])} missing manifest")
+    print(f"[provenance] backtest chain: valid={chain['valid']} "
+          f"folds={len(chain['folds_verified'])} "
+          f"violations={len(chain['violations'])}")
     print(f"[provenance] PIT compliance {pit['passed']}/{pit['total_files']}")
+    print(f"[provenance] source_timestamp {st['passed_files']}/{st['total_files']}")
     print(f"[provenance] mapping_confidence {mconf['has_column']}/"
           f"{mconf['total_qual_files']}")
     print(f"[provenance] schema complete {schema['complete']}/"
@@ -823,6 +1249,471 @@ def run_audit(data_root: Path, universe_deep: Optional[Path] = None,
     for f in flags:
         print(f"  [{f['severity']:6s}] {f['id']}: {f['finding'][:140]}")
     return report
+
+
+# ---------------------------------------------------------------------------
+# Phase 9 — ProvenanceAuditor v2
+# ---------------------------------------------------------------------------
+# v1 (``run_audit``) proves the *data estate* is well-formed.  v2 adds the
+# *research-process* root of trust that gate 8's ``provenance_chain`` component
+# consumes:
+#
+#   R1  frozen pre-registration root   — the SHA-256 of config/pre_registration_v4.yaml
+#                                         must match its declared digest;
+#   R2  trial ledger integrity          — sidecar hash + per-trial SHA-256 recompute;
+#   R3  trial count vs the frozen N     — the ledger must actually contain the
+#                                         pre-registered number of trials, or any
+#                                         DSR computed from it is deflated with the
+#                                         WRONG multiple-testing count;
+#   R4  trial independence              — distinct parameter sets (no duplicates
+#                                         inflating the count);
+#   R5  data-estate spot check          — optional, the v1 SHA-256 manifest pass.
+#
+# The chain is a conjunction: every root must hold for ``provenance_chain`` to be
+# True.  A chain with an unverifiable root cannot be certified.
+
+
+class ProvenanceAuditor:
+    """
+    Phase-9 provenance auditor (v2).  Additive to the v1 checks.
+
+        auditor = ProvenanceAuditor()
+        rep = auditor.run()                    # -> report dict
+        rep["provenance_chain"]                # -> bool consumed by gate 8
+    """
+
+    def __init__(self,
+                 repo_root: Optional[Path] = None,
+                 trial_ledger: Optional[Path] = None,
+                 data_root: Optional[Path] = None,
+                 deep: bool = False) -> None:
+        self.repo_root = Path(repo_root) if repo_root else REPO_ROOT
+        if trial_ledger:
+            tp = Path(trial_ledger)
+            self.trial_ledger = tp if tp.is_file() else tp / "trial_ledger.json"
+        else:
+            v5_p = self.repo_root / "data" / "phase9_full" / "trial_ledger_v5.json"
+            self.trial_ledger = v5_p if v5_p.exists() else self.repo_root / "data" / "phase9_full" / "trial_ledger.json"
+        self.data_root = Path(data_root) if data_root else self.repo_root / "data"
+        self.deep = bool(deep)
+
+    # -- R1: frozen pre-registration root ------------------------------------
+
+    def check_prereg_root(self) -> Dict[str, Any]:
+        """The pre-registration is the root of the whole research chain."""
+        try:
+            from ingestion.harness.prereg import MODULE_PREREG as _PRE
+        except Exception as exc:                                  # noqa: BLE001
+            return {"ok": False, "reason": f"prereg_import_failed:{exc!r}"}
+        integ = _PRE.integrity
+        return {
+            "ok": bool(_PRE.integrity_verified),
+            "path": str(getattr(integ, "path", "")),
+            "expected_sha256": getattr(integ, "expected_sha256", None),
+            "actual_sha256": getattr(integ, "actual_sha256", None),
+            "status": getattr(integ, "status", None),
+            "detail": getattr(integ, "detail", None),
+            "phase": getattr(_PRE, "phase", None),
+            "version": getattr(_PRE, "version", None),
+        }
+
+    # -- R2/R3/R4: trial ledger ----------------------------------------------
+
+    #: Entries carrying a UUIDv7 + a chained hash satisfy the frozen v5 tracker
+    #: contract; anything else is audited forensically but reported as legacy.
+    def _classify_ledger_schema(self, trials: List[Dict[str, Any]],
+                                data: Dict[str, Any]) -> str:
+        declared = str(data.get("schema") or "")
+        if "trial_uuid" in trials[0] or "chain_sha256" in trials[0] or declared:
+            return declared or "uuid7_chained"
+        return "legacy_int_ids"
+
+    def check_trial_ledger(self) -> Dict[str, Any]:
+        """
+        Verify the TrialTracker ledger forensically.  Stored hashes are never
+        trusted — every trial is recomputed from its own contents — and the
+        recomputation imports the *writer's* formula from
+        ``research.ml_parameter_optimization`` rather than restating it, so the
+        two halves of the system cannot drift into "verifying" a definition
+        nobody actually wrote trials with.
+
+        Two schemas are handled:
+
+        ``v5``    ``trial_uuid`` (UUIDv7) + ``timestamp_ns`` + ``sha256`` +
+                  ``chain_sha256`` chaining back to the genesis hash.
+        ``legacy``integer ``trial_id`` + a standalone per-trial hash.  Still
+                  recomputed and reported, but it does **not** satisfy the frozen
+                  v5 tracker contract, so it cannot pass R2-R4: an unchained
+                  ledger lets an entry be edited and its own hash recomputed
+                  with no downstream evidence that anything changed.
+        """
+        from ingestion.harness.prereg import MODULE_PREREG as _PRE
+        from research.ml_parameter_optimization import (          # noqa: PLC0415
+            GENESIS_HASH, TRIAL_LEDGER_SCHEMA, canonical_trial_payload,
+            chain_hash, is_uuid7,
+        )
+
+        p = self.trial_ledger
+        if not p.exists():
+            return {"ok": False, "reason": "trial_ledger_missing",
+                    "path": _posix(p), "schema": None, "status": "FAIL"}
+        raw = p.read_bytes()
+        actual_sha = hashlib.sha256(raw).hexdigest()
+
+        sidecar = p.with_suffix(p.suffix + ".sha256")
+        sidecar_ok, sidecar_sha = False, None
+        if sidecar.exists():
+            sidecar_sha = sidecar.read_text(encoding="utf-8").strip()
+            sidecar_ok = bool(sidecar_sha == actual_sha)
+
+        try:
+            data = json.loads(raw.decode("utf-8"))
+        except Exception as exc:                                  # noqa: BLE001
+            return {"ok": False, "reason": f"ledger_unparseable:{exc!r}",
+                    "path": _posix(p), "status": "FAIL"}
+
+        trials = data.get("trials") or []
+        if not isinstance(trials, list) or not trials:
+            return {"ok": False, "reason": "trials_empty_or_not_a_list",
+                    "path": _posix(p), "status": "FAIL"}
+
+        schema = self._classify_ledger_schema(trials, data)
+        mismatches: List[Dict[str, Any]] = []
+        seen_ids: Dict[str, int] = {}
+        param_digests: Dict[str, List[str]] = {}
+        prev_chain = GENESIS_HASH
+        last_ts: Optional[int] = None
+        bad_uuid: List[Any] = []
+        missing_ts: List[Any] = []
+        ts_regressions: List[Dict[str, Any]] = []
+        chain_breaks: List[int] = []
+
+        for i, t in enumerate(trials):
+            if not isinstance(t, dict):
+                mismatches.append({"index": i, "reason": "malformed_trial_entry"})
+                continue
+            pj = json.dumps(t.get("params"), sort_keys=True, default=str)
+            try:
+                mv = t.get("metric_value", t.get("composite_score"))
+                folds = [float(v) for v in (t.get("fold_metrics") or [mv])]
+                mv = float(mv)
+            except (TypeError, ValueError):
+                mismatches.append({"trial_id": t.get("trial_id"),
+                                   "reason": "metric_value_unparseable"})
+                continue
+
+            if schema == "legacy_int_ids":
+                # The v4 formula, recomputed exactly as the v4 writer built it.
+                try:
+                    tid = int(t["trial_id"])
+                except (KeyError, TypeError, ValueError):
+                    mismatches.append({"trial_id": t.get("trial_id"),
+                                       "reason": "malformed_trial_entry"})
+                    continue
+                h = hashlib.sha256(
+                    "{}:{}:{}".format(tid, pj, mv).encode("utf-8")).hexdigest()
+                if h != t.get("sha256"):
+                    mismatches.append({"trial_id": tid, "reason": "sha256_mismatch",
+                                       "recomputed": h, "stored": t.get("sha256")})
+                seen_ids[str(tid)] = seen_ids.get(str(tid), 0) + 1
+                key = str(tid)
+            else:
+                uid = t.get("trial_uuid")
+                if not is_uuid7(uid):
+                    bad_uuid.append(uid)
+                ts = t.get("timestamp_ns")
+                if not isinstance(ts, int):
+                    missing_ts.append(uid)
+                elif last_ts is not None and ts < last_ts:
+                    ts_regressions.append({"index": i, "timestamp_ns": ts,
+                                           "previous": last_ts})
+                if isinstance(ts, int):
+                    last_ts = ts if last_ts is None else max(last_ts, ts)
+
+                payload = canonical_trial_payload(uid, int(ts or 0),
+                                                  t.get("params") or {}, mv, folds)
+                if hashlib.sha256(payload.encode("utf-8")).hexdigest() != t.get("sha256"):
+                    mismatches.append({"trial_uuid": uid, "index": i,
+                                       "reason": "sha256_mismatch",
+                                       "stored": t.get("sha256")})
+                expected_chain = chain_hash(prev_chain, payload)
+                if expected_chain != t.get("chain_sha256"):
+                    chain_breaks.append(i)
+                prev_chain = expected_chain
+                key = str(uid)
+                seen_ids[key] = seen_ids.get(key, 0) + 1
+
+            param_digests.setdefault(
+                hashlib.sha256(pj.encode("utf-8")).hexdigest(), []).append(key)
+
+        dup_ids = sorted(k for k, v in seen_ids.items() if v > 1)
+        dup_param_groups = sorted(
+            [sorted(v) for v in param_digests.values() if len(v) > 1])
+        n_trials = len(trials)
+        n_unique_params = len(param_digests)
+        required_n = int(getattr(_PRE, "dsr_n_trials", 513) or 513)
+        declared_target = data.get("target_n")
+        count_ok = bool(n_trials >= required_n)
+        target_ok = (declared_target is not None
+                     and int(declared_target) >= required_n)
+
+        is_v5 = schema != "legacy_int_ids"
+        contract_ok = bool(is_v5 and not bad_uuid and not missing_ts
+                           and not ts_regressions and not chain_breaks
+                           and not mismatches)
+        head_ok = (data.get("chain_head") == prev_chain) if is_v5 else None
+
+        # A valid chain proves the ledger was not edited after the fact. It says
+        # nothing about whether the trials were ever RUN. Surface that
+        # distinction so nobody reads `provenance_chain: true` as "513 results".
+        metric_status = data.get("metric_status")
+        n_evaluated = sum(
+            1 for t in trials
+            if (t.get("provenance") or {}).get("evaluation_status") == "EVALUATED"
+        ) if trials else 0
+
+        consequences: List[str] = []
+        if metric_status and str(metric_status).upper() != "EVALUATED":
+            consequences.append(
+                f"ledger metric_status is {metric_status!r} ({n_evaluated}/"
+                f"{n_trials} trials evaluated). The hash chain is intact and the "
+                f"trial COUNT is real, so R2-R4 pass — but no trial in this "
+                f"ledger carries a measured out-of-sample score. It is honest "
+                f"enumeration, not 513 results, and must not be cited as evidence "
+                f"of performance or fed to the DSR as observed returns.")
+        if not count_ok:
+            consequences.append(
+                f"ledger holds {n_trials} trials but the frozen pre-registration "
+                f"requires {required_n}; any DSR computed from this ledger is "
+                f"deflated with the wrong multiple-testing count and is "
+                f"anti-conservative by construction")
+        if not is_v5:
+            consequences.append(
+                "ledger predates the frozen v5 TrialTracker contract "
+                f"(expected schema {TRIAL_LEDGER_SCHEMA!r}): integer trial_id, "
+                "no UUIDv7, no timestamp_ns, and per-trial hashes that are NOT "
+                "chained, so a single edited entry can be re-hashed in place "
+                "with no downstream evidence. Forensic recompute below still "
+                "runs, but a legacy ledger does not satisfy R2-R4 and the "
+                "composite's provenance_chain component must fail closed until "
+                "the ledger is regenerated by the v5 tracker.")
+        if chain_breaks:
+            consequences.append(
+                f"hash chain broken at {len(chain_breaks)} entr"
+                f"{'y' if len(chain_breaks) == 1 else 'ies'} "
+                f"(first index {chain_breaks[0]})")
+        if head_ok is False:
+            consequences.append(
+                "declared chain_head does not equal the recomputed head")
+
+        return {
+            "ok": bool(contract_ok and sidecar_ok and count_ok and target_ok
+                       and not dup_ids and not dup_param_groups and head_ok is not False),
+            "path": _posix(p),
+            "schema": schema,
+            "schema_expected": TRIAL_LEDGER_SCHEMA,
+            "tracker_contract_ok": contract_ok,
+            "status": ("PASS" if contract_ok else
+                       "LEGACY_SCHEMA" if not is_v5 else "FAIL"),
+            "n_trials": n_trials,
+            "n_unique_param_sets": n_unique_params,
+            "required_n_trials": required_n,
+            "trial_count_ok": count_ok,
+            "trial_count_shortfall": max(0, required_n - n_trials),
+            "declared_target_n": declared_target,
+            "declared_target_ok": target_ok,
+            "sidecar_present": sidecar.exists(),
+            "sidecar_matches": sidecar_ok,
+            "actual_sha256": actual_sha,
+            "sidecar_sha256": sidecar_sha,
+            "per_trial_sha256_checked": n_trials,
+            "per_trial_sha256_mismatches": mismatches,
+            "uuid7_invalid": bad_uuid,
+            "timestamp_ns_missing": missing_ts,
+            "timestamp_ns_regressions": ts_regressions,
+            "chain_breaks": chain_breaks,
+            "declared_chain_head": data.get("chain_head"),
+            "recomputed_chain_head": prev_chain,
+            "chain_head_ok": head_ok,
+            "duplicate_trial_ids": dup_ids,
+            "duplicate_param_groups": dup_param_groups,
+            "metric_status": metric_status,
+            "n_trials_evaluated": n_evaluated,
+            "n_trials_unevaluated": n_trials - n_evaluated,
+            "consequence": " | ".join(consequences) if consequences else None,
+        }
+
+    # -- R5: data estate spot check ------------------------------------------
+
+    def check_data_estate(self) -> Dict[str, Any]:
+        if not self.deep:
+            return {"status": "SKIP", "reason": "deep=False (pass deep=True to run)"}
+        files = track_parquets(self.data_root)
+        sha = check_sha256(files, self.data_root, load_manifest_latest(self.data_root))
+        return {"status": "PASS" if not sha["failed"] else "FAIL",
+                "total": sha["total"], "passed": sha["passed"],
+                "failed": sha["failed"],
+                "missing_manifest": len(sha["missing_manifest"])}
+
+    # -- R6: v7 unified regime engine provenance checks -----------------------
+    # Verifies the frozen unified regime calibration params and pre-registration
+
+    def check_unified_regime_provenance(self) -> Dict[str, Any]:
+        """Verify v7 unified regime engine calibration params and pre-registration."""
+        issues: List[str] = []
+        checks: Dict[str, Any] = {}
+
+        # 1. Calibrated unified regime params exist and have valid provenance
+        params_path = self.repo_root / "config" / "calibrated_unified_regime_params.json"
+        params_sidecar = params_path.with_suffix(params_path.suffix + ".sha256")
+        if not params_path.exists():
+            issues.append("calibrated_unified_regime_params.json missing")
+        else:
+            try:
+                with open(params_path, "r") as f:
+                    params = json.load(f)
+                prov = params.get("provenance", {})
+                # Verify via sidecar (standard provenance pattern)
+                if params_sidecar.exists():
+                    expected_sha = params_sidecar.read_text(encoding="utf-8").strip().split()[0]
+                    actual_sha = hashlib.sha256(params_path.read_bytes()).hexdigest()
+                    if actual_sha != expected_sha:
+                        issues.append(f"calibrated params SHA-256 mismatch: expected {expected_sha[:12]}..., actual {actual_sha[:12]}...")
+                    else:
+                        checks["params_sha256_ok"] = True
+                else:
+                    issues.append("calibrated params missing .sha256 sidecar")
+                checks["params_source"] = prov.get("source")
+                checks["params_date_range"] = prov.get("date_range")
+                checks["params_version"] = params.get("version")
+            except Exception as e:
+                issues.append(f"calibrated params parse error: {e}")
+
+        # 2. Pre-registration v7 SHA-256 matches pinned value
+        prereg_path = self.repo_root / "config" / "pre_registration_v7.yaml"
+        if not prereg_path.exists():
+            issues.append("pre_registration_v7.yaml missing")
+        else:
+            try:
+                from ingestion.harness.prereg import EXPECTED_SHA256_V7, sha256_path
+                actual = sha256_path(prereg_path)
+                expected = EXPECTED_SHA256_V7
+                if actual != expected:
+                    issues.append(f"pre_registration_v7.yaml SHA-256 mismatch: expected {expected[:12]}..., actual {actual[:12]}...")
+                else:
+                    checks["prereg_sha256_ok"] = True
+            except Exception as e:
+                issues.append(f"pre-reg SHA-256 check error: {e}")
+
+        # 3. Zero-synthetic guard: scan for forbidden series in feature contract
+        try:
+            from Quantitative.contracts.feature_contract import FORBIDDEN_SERIES
+            # Check calibrated params don't reference forbidden series
+            if params_path.exists():
+                with open(params_path, "r") as f:
+                    params_data = json.load(f)
+                # Serialize and scan for forbidden strings
+                params_str = json.dumps(params_data)
+                for forbidden in FORBIDDEN_SERIES:
+                    if forbidden.lower() in params_str.lower():
+                        issues.append(f"Forbidden series '{forbidden}' found in calibrated params")
+                checks["forbidden_series_scan"] = "clean" if not any("Forbidden series" in i for i in issues) else "dirty"
+        except Exception as e:
+            issues.append(f"forbidden series scan error: {e}")
+
+        # 4. Verify unified regime engine can load frozen params
+        try:
+            from Quantitative.unified_regime import build_unified_engine, UnifiedRegimeConfig
+            from Quantitative.bocpd import BOCPDConfig
+            from Quantitative.io_hmm import IOHMMConfig
+            from Quantitative.micro_states import MicroStateConfig
+            # Just test import and config creation, not full init (needs FRED data)
+            cfg = UnifiedRegimeConfig()
+            checks["engine_imports_ok"] = True
+        except Exception as e:
+            issues.append(f"unified regime engine import/config error: {e}")
+
+        return {
+            "ok": len(issues) == 0,
+            "status": "PASS" if len(issues) == 0 else "FAIL",
+            "checks": checks,
+            "issues": issues,
+            "params_path": str(params_path),
+            "prereg_path": str(prereg_path),
+        }
+
+    # -- driver ---------------------------------------------------------------
+
+    def run(self, report_path: Optional[Path] = None) -> Dict[str, Any]:
+        roots: Dict[str, Any] = {
+            "R1_prereg_root": self.check_prereg_root(),
+            "R2_R4_trial_ledger": self.check_trial_ledger(),
+            "R5_data_estate": self.check_data_estate(),
+            "R6_unified_regime_provenance": self.check_unified_regime_provenance(),
+        }
+        prereg_ok = bool(roots["R1_prereg_root"].get("ok"))
+        ledger = roots["R2_R4_trial_ledger"]
+        ledger_ok = bool(ledger.get("ok"))
+        estate = roots["R5_data_estate"]
+        estate_ok = bool(estate.get("status") in ("PASS", "SKIP"))
+        regime = roots["R6_unified_regime_provenance"]
+        regime_ok = bool(regime.get("ok"))
+
+        valid = bool(prereg_ok and ledger_ok and estate_ok and regime_ok)
+        failed_roots = [k for k, v in roots.items() if not (
+            v.get("ok") if "ok" in v else v.get("status") in ("PASS", "SKIP"))]
+
+        report: Dict[str, Any] = {
+            "report_type": "provenance_audit_v2",
+            "version": 2,
+            "status": "PASS" if valid else "FAIL",
+            "valid": valid,
+            "provenance_chain": valid,
+            "logic": "AND over roots R1 (prereg) AND R2-R4 (ledger) AND R5 (estate) AND R6 (unified regime provenance)",
+            "failed_roots": failed_roots,
+            "roots": roots,
+            "ran_at": datetime.now(timezone.utc).isoformat(),
+        }
+        if report_path is not None:
+            report_path = Path(report_path)
+            report_path.parent.mkdir(parents=True, exist_ok=True)
+            report_path.write_text(
+                json.dumps(report, indent=2, sort_keys=True, default=str),
+                encoding="utf-8")
+
+        print(f"[prov-v2] status={report['status']} "
+              f"provenance_chain={valid} failed_roots={failed_roots}")
+        pr = roots["R1_prereg_root"]
+        print(f"[prov-v2] R1 prereg root ok={pr.get('ok')} "
+              f"({pr.get('expected_sha256', '')[:12]}... vs "
+              f"{(pr.get('actual_sha256') or '')[:12]}...)")
+        print(f"[prov-v2] R2-R4 ledger ok={ledger_ok} "
+              f"trials={ledger.get('n_trials')}/"
+              f"{ledger.get('required_n_trials')} "
+              f"unique_params={ledger.get('n_unique_param_sets')} "
+              f"sidecar_ok={ledger.get('sidecar_matches')} "
+              f"hash_mismatches="
+              f"{len(ledger.get('per_trial_sha256_mismatches') or [])}")
+        if ledger.get("consequence"):
+            print(f"[prov-v2]   ledger consequence: {ledger['consequence']}")
+        rg = roots["R6_unified_regime_provenance"]
+        print(f"[prov-v2] R6 unified regime provenance ok={regime_ok} "
+              f"checks={rg.get('checks', {})} "
+              f"issues={rg.get('issues', [])}")
+        if report_path is not None:
+            print(f"[prov-v2] report: {_posix(report_path)}")
+        return report
+
+
+def run_audit_v2(repo_root: Optional[Path] = None,
+                 trial_ledger: Optional[Path] = None,
+                 data_root: Optional[Path] = None,
+                 report_path: Optional[Path] = None,
+                 deep: bool = False) -> Dict[str, Any]:
+    """Functional wrapper around :class:`ProvenanceAuditor`."""
+    aud = ProvenanceAuditor(repo_root=repo_root, trial_ledger=trial_ledger,
+                            data_root=data_root, deep=deep)
+    return aud.run(report_path=report_path)
 
 
 def cmd_check_manifest(data_root: Path, report: Optional[Path]) -> int:
@@ -916,8 +1807,173 @@ def run_tests(tmp: Path) -> int:
     assert report["mapping_confidence"]["total_qual_files"] == 1
     print("[OK] sha missing-manifest accounting")
     print("[OK] schemas + mapping_confidence + survivorship accounting")
+
+    # ---- WS-2 C2.5 trade-audit ledger chain verification -----------------
+    from ingestion.trade_audit import TradeAuditLedger
+    ledger_dir = tmp / "ledger"
+    ledger_dir.mkdir(exist_ok=True)
+    trig = {"valuation": {
+        "iv_p25": 1.15, "price": 1.0, "discount_pct": 0.15,
+        "iv_method": "dcf_v2_nowcast", "iv_basis_filed_date": "2026-08-20",
+        "iv_nowcast_ts": "2026-09-01T00:00:00Z",
+    }}
+    ld = TradeAuditLedger(ledger_dir=ledger_dir)
+    ld.append_batch([
+        {"ticker": "A", "asof": "2026-08-31", "wacc_v2": 0.08, "ke_v2": 0.10,
+         "kd_pre_tax_v2": 0.05, "erp_blend": 0.04, "rf_10y": 0.04,
+         "beta_source": "bloomberg_60m", "action": "ENTRY", "stage_gate": 1,
+         "trigger_reason": trig, "retrieval_ts": "2026-09-01T00:00:00Z"},
+        {"ticker": "B", "asof": "2026-09-15", "wacc_v2": 0.09, "ke_v2": 0.11,
+         "kd_pre_tax_v2": 0.05, "erp_blend": 0.045, "rf_10y": 0.04,
+         "beta_source": "bloomberg_60m", "action": "REBALANCE", "stage_gate": 2,
+         "trigger_reason": trig, "retrieval_ts": "2026-09-16T00:00:00Z"},
+        {"ticker": "C", "asof": "2026-09-18", "wacc_v2": 0.085, "ke_v2": 0.105,
+         "kd_pre_tax_v2": 0.05, "erp_blend": 0.042, "rf_10y": 0.04,
+         "beta_source": "bloomberg_60m", "action": "QUARANTINE", "stage_gate": 5,
+         "trigger_reason": trig, "retrieval_ts": "2026-09-19T00:00:00Z"},
+    ])
+    rpt = check_trade_ledger(ledger_dir)
+    assert rpt["status"] == "PASS", rpt["violations"]
+    assert rpt["global"]["n_blocks"] == 3 and rpt["global"]["partitions"] == 2
+    assert rpt["config_contract"]["uuid_version"] == 7
+    # two partitions with a cross-partition boundary
+    assert set(rpt["partitions"].keys()) == {"2026-08", "2026-09"}
+    print("[OK] ledger chain PASS (2 partitions, cross-partition boundary)")
+
+    # forensic tamper: flip ke_v2 on disk -> hash mismatch must FAIL
+    p = ledger_dir / "month=2026-08" / "trade_audit_2026-08.parquet"
+    df = pd.read_parquet(p)
+    df.loc[0, "ke_v2"] = 0.999
+    df.to_parquet(p, engine="pyarrow", index=False)
+    broken = check_trade_ledger(ledger_dir)
+    assert broken["status"] == "FAIL"
+    assert any("chain_verification failed" in i
+               for v in broken["violations"] for i in v["issues"])
+    print("[OK] tampered block detected (chain_verification break@index)")
+
+    # empty ledger -> SKIP, not FAIL
+    empty = tmp / "ledger_empty"
+    empty.mkdir(exist_ok=True)
+    assert check_trade_ledger(empty)["status"] == "SKIP"
+    print("[OK] empty ledger SKIP path")
+
     print("\nAll Provenance Audit tests passed.")
     return 0
+
+
+def cmd_check_schema(schema_path: Path, data_root: Path,
+                     report: Optional[Path] = None) -> int:
+    """
+    Validates the backtest artifact tree against a JSON schema contract
+    (_schema_v3.json).  For every <file>.parquet declared in the schema's
+    `parquet_schemas`:
+        - the parquet exists somewhere under data_root (fold dirs are globbed
+          as `<run_id>/*.parquet`);
+        - every `required: true` column exists with the declared type (best
+          effort: pandas dtypes are mapped to DATE/DOUBLE/INTEGER/VARCHAR/BOOLEAN);
+        - the schema's `pit_timestamp_column` exists in the parquet.
+    Returns 0 when all declared schemas validate, else 1.
+    """
+    if not schema_path.exists():
+        print(f"schema not found: {schema_path}")
+        return 2
+    try:
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        print(f"schema JSON invalid: {exc}")
+        return 2
+    parquet_schemas = schema.get("parquet_schemas") or {}
+    if not parquet_schemas:
+        print("schema has no parquet_schemas section")
+        return 2
+
+    # index every parquet under data_root (fold dirs are <run_id>/<file>.parquet)
+    index: Dict[str, List[Path]] = {}
+    for pf in data_root.rglob("*.parquet"):
+        index.setdefault(pf.name, []).append(pf)
+
+    dtype_map = {
+        "DOUBLE": ["float64", "float32", "int64", "int32", "uint64", "uint32"],
+        "INTEGER": ["int64", "int32", "uint64", "uint32"],
+        "VARCHAR": ["object", "string"],
+        "DATE": ["datetime64[ns]", "datetime64[us]", "datetime64[ms]", "object"],
+        "BOOLEAN": ["bool"],
+        # timestamps stored as ISO-8601 strings (object) are accepted; the
+        # semantic pit_rule check (col <= retrieval_timestamp) is enforced by
+        # the PIT compliance audit, not the dtype check.
+        "TIMESTAMP": ["datetime64[ns]", "datetime64[us]", "datetime64[ms]", "object"],
+    }
+
+    results: Dict[str, Any] = {}
+    hard_fail = 0
+    for fname, spec in sorted(parquet_schemas.items()):
+        hits = index.get(fname, [])
+        columns = spec.get("columns") or []
+        pit_col = spec.get("pit_timestamp_column")
+        entry: Dict[str, Any] = {
+            "declared": True, "files_found": [str(p) for p in hits],
+            "n_files": len(hits),
+        }
+        if not hits:
+            entry["ok"] = False
+            entry["issues"] = ["no parquet file found under data_root"]
+            hard_fail += 1
+            results[fname] = entry
+            continue
+        # validate the column contract on the first hit (all folds share schema)
+        sample = hits[0]
+        try:
+            df = read_cols(sample)
+            actual = {str(c): str(dt) for c, dt in df.dtypes.items()}
+        except Exception as exc:  # noqa: BLE001
+            entry["ok"] = False
+            entry["issues"] = [f"unreadable: {type(exc).__name__}: {exc}"]
+            hard_fail += 1
+            results[fname] = entry
+            continue
+        issues: List[str] = []
+        for col in columns:
+            name = col.get("name")
+            if col.get("required") is True and name not in actual:
+                issues.append(f"missing required column: {name}")
+                continue
+            if name not in actual:
+                continue
+            exp = dtype_map.get(str(col.get("type", "")), [])
+            if exp and not any(actual[name].startswith(t) for t in exp):
+                issues.append(
+                    f"column {name}: dtype {actual[name]} not in "
+                    f"{col.get('type')} family")
+        if pit_col and pit_col not in actual:
+            issues.append(f"missing pit_timestamp_column: {pit_col}")
+        entry["columns_actual"] = actual
+        entry["ok"] = not issues
+        entry["issues"] = issues
+        hard_fail += 0 if entry["ok"] else 1
+        results[fname] = entry
+
+    out = {
+        "check": "schema_contract",
+        "schema_path": _posix(schema_path),
+        "schema_version": schema.get("schema_version"),
+        "schema_name": schema.get("name"),
+        "artifacts_declared": len(parquet_schemas),
+        "artifacts_ok": sum(1 for k, v in results.items() if v.get("ok")),
+        "artifacts_failed": sum(1 for k, v in results.items() if not v.get("ok")),
+        "details": results,
+        "ran_at": datetime.now(timezone.utc).isoformat(),
+        "status": "PASS" if hard_fail == 0 else "FAIL",
+    }
+    print(f"[provenance] schema contract {out['artifacts_ok']}/"
+          f"{out['artifacts_declared']} ok — status={out['status']}")
+    for k, v in sorted(results.items()):
+        if not v.get("ok"):
+            print(f"  [SCHEMA-FAIL] {k}: {v.get('issues')}")
+    if report is not None:
+        report.parent.mkdir(parents=True, exist_ok=True)
+        report.write_text(json.dumps(out, indent=2, sort_keys=True,
+                                     default=str), encoding="utf-8")
+    return 0 if hard_fail == 0 else 1
 
 
 def main() -> int:
@@ -932,11 +1988,28 @@ def main() -> int:
                              "provenance_audit_report.json)")
     parser.add_argument("--check-manifest", action="store_true",
                         help="SHA-256 reconciliation vs manifest only")
+    parser.add_argument("--check-backtest-chain", action="store_true",
+                        help="Phase 4 gate 16: verify fold .provenance.json "
+                             "chain + consolidated walk-forward parquet sidecar; "
+                             "writes data/validation/provenance_walkforward_report.json")
     parser.add_argument("--check-pit", action="store_true",
                         help="Deep PIT check of one universe file (--universe)")
     parser.add_argument("--universe", type=str, default=None,
                         help="Universe parquet for deep PIT check")
+    parser.add_argument("--schema", type=str, default=None,
+                        help="Validate the backtest artifact tree against a "
+                             "JSON schema contract (e.g. data/backtests/"
+                             "_schema_v3.json)")
     parser.add_argument("--test", action="store_true", help="Self-test")
+    parser.add_argument("--audit-v2", action="store_true",
+                        help="Phase-9 provenance auditor v2 (prereg root + trial "
+                             "ledger) -> data/validation/audit_report.json")
+    parser.add_argument("--trial-ledger", type=str, default=None,
+                        help="Phase-9 v2 trial ledger path (default "
+                             "data/phase9_full/trial_ledger.json)")
+    parser.add_argument("--deep", action="store_true",
+                        help="Phase-9 v2: also run the full v1 data-estate "
+                             "SHA-256 manifest pass")
     args = parser.parse_args()
 
     data_root = Path(args.data_root)
@@ -946,8 +2019,46 @@ def main() -> int:
     if args.test:
         return run_tests(Path("data/validation/_tests/provenance_audit") / "tmp")
 
+    if args.audit_v2:
+        v2_report = (Path(args.report) if args.report
+                     else data_root / "validation" / "audit_report.json")
+        rep = run_audit_v2(repo_root=REPO_ROOT,
+                           trial_ledger=Path(args.trial_ledger)
+                           if args.trial_ledger else None,
+                           data_root=data_root, report_path=v2_report,
+                           deep=bool(args.deep))
+        return 0 if rep["provenance_chain"] else 1
+
+    if args.schema:
+        schema_root = data_root if args.run else data_root
+        sc = Path(args.schema)
+        sc_report = Path(args.report) if args.report else (
+            sc.parent / (sc.stem + "_audit.json"))
+        return cmd_check_schema(sc, schema_root, sc_report)
+
     if args.check_manifest:
         return cmd_check_manifest(data_root, report_path)
+
+    if args.check_backtest_chain:
+        chain = check_backtest_chain(data_root)
+        out = {"check": "backtest_chain",
+               "gate": 16,
+               "backtest_chain": chain,
+               "valid": chain["valid"],
+               "status": chain["status"],
+               "folds_verified": chain["folds_verified"],
+               "consolidated_sha256": chain["consolidated_sha256"],
+               "violations": chain["violations"],
+               "ran_at": datetime.now(timezone.utc).isoformat()}
+        chain_report = Path(args.report) if args.report else WALKFORWARD_CHAIN_REPORT
+        chain_report.parent.mkdir(parents=True, exist_ok=True)
+        chain_report.write_text(json.dumps(out, indent=2, sort_keys=True,
+                                           default=str), encoding="utf-8")
+        print(f"[provenance] backtest chain: valid={chain['valid']} "
+              f"folds={chain['folds_verified']}")
+        for v in chain["violations"]:
+            print(f"  [CHAIN-VIOLATION] {v}")
+        return 0 if chain["valid"] else 1
 
     if args.check_pit:
         if not args.universe:
@@ -960,12 +2071,21 @@ def main() -> int:
         return 0
 
     if args.run:
+        # WS-2 C2.5: data-root pointing at the trade-audit ledger (or an
+        # as-yet-unbuilt ledger root) runs the two-layer SHA-256 chain +
+        # Appendix A verification (SKIP until the ledger exists).
+        if not data_root.exists() or _is_trade_ledger_dir(data_root):
+            lp = None if not args.report else Path(args.report)
+            return cmd_ledger_check(data_root, lp)
         uni = Path(args.universe) if args.universe else None
         run_audit(data_root, universe_deep=uni, report_path=report_path)
         return 0
 
     parser.print_help()
     return 1
+
+
+ProvenanceAuditV2 = ProvenanceAuditor
 
 
 if __name__ == "__main__":

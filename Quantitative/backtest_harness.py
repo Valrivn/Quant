@@ -48,6 +48,8 @@ from Quantitative.black_swan import (
     load_tier1_tracker,
 )
 from Quantitative.hmm_regime import RegimeDetector, RegimeState, build_macro_features
+from Quantitative.contracts.feature_contract import assert_canonical_names
+from Quantitative.data.fred_feed import SyntheticDataViolation
 from Quantitative.stat_tests import (
     run_full_stat_suite, ANOVAResult, WelchTTestResult,
     ChiSquareResult, DeflatedSharpeResult,
@@ -196,16 +198,34 @@ def load_macro_features_history(
     start_date: str,
     end_date: str,
 ) -> pd.DataFrame:
-    """Load macro features for HMM regime detection over backtest period."""
-    try:
-        features = build_macro_features()
-        start = pd.Timestamp(start_date)
-        end = pd.Timestamp(end_date)
-        features = features[(features.index >= start) & (features.index <= end)]
-        return features
-    except Exception as e:
-        logger.warning(f"Macro features load failed: {e}")
-        return pd.DataFrame()
+    """Load the canonical 6-feature macro matrix over a backtest period.
+
+    Zero-synthetic: the frame is built by
+    ``build_canonical_features`` (real FRED only, guarded) and validated
+    against the feature contract at this boundary. The previous version relied
+    on ``build_macro_features()`` emitting a hand-rolled 6-column frame whose
+    names did not match the detector's ``FEATURE_NAMES`` and whose CESI leg was
+    a market-momentum proxy.
+
+    The ``SyntheticDataViolation`` guard is NOT swallowed. On missing authentic
+    PIT data the caller must see the abort — a degraded or empty feature frame
+    would silently remove the regime overlay from the backtest, which is a
+    result-changing failure that looks like a clean run.
+    """
+    features = build_macro_features(
+        start=start_date, end=end_date, context="backtest_harness.load_macro_features_history"
+    )
+    assert_canonical_names(list(features.columns), "backtest_harness macro features")
+    if features.empty:
+        raise SyntheticDataViolation(
+            f"FATAL: Missing authentic PIT data — no canonical macro features in "
+            f"{start_date}..{end_date}. Aborting per zero-synthetic policy."
+        )
+    logger.info(
+        "Macro features loaded: %d rows x %d features (%s)",
+        len(features), features.shape[1], ", ".join(features.columns),
+    )
+    return features
 
 def get_trading_dates(
     price_data: Dict[str, pd.Series],
