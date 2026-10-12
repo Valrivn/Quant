@@ -1,0 +1,32 @@
+{
+  "initial_capital_usd": 10000.0,
+  "evaluation_months": 83,
+  "avg_monthly_turnover": 0.07156626506024097,
+  "sunny_day_15bps": {
+    "cagr": 0.1746086439833172,
+    "cumulative_return": 2.0438827176452405,
+    "annualized_volatility": 0.18625656741731073,
+    "sharpe_ratio": 0.8300842103251698,
+    "max_drawdown": -0.20772966413961896,
+    "calmar_ratio": 0.8405570995674431,
+    "final_wealth_usd": 30438.827176452407
+  },
+  "crisis_day_50bps": {
+    "cagr": 0.17111158609017596,
+    "cumulative_return": 1.981751318155308,
+    "annualized_volatility": 0.18633162479075704,
+    "sharpe_ratio": 0.8109819154426903,
+    "max_drawdown": -0.20831835116908148,
+    "calmar_ratio": 0.8213946833291386,
+    "final_wealth_usd": 29817.51318155308
+  },
+  "spy_benchmark": {
+    "cagr": 0.12996870251359427,
+    "cumulative_return": 1.3283201770968276,
+    "annualized_volatility": 0.17250044350960123,
+    "sharpe_ratio": 0.6374980487078749,
+    "max_drawdown": -0.23927178828328305,
+    "calmar_ratio": 0.5431843989886486,
+    "final_wealth_usd": 23283.201770968277
+  }
+}

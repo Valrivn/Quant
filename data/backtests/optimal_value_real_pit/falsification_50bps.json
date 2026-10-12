@@ -1,0 +1,72 @@
+{
+  "friction_scenario_bps": 50.0,
+  "all_gates_passed": true,
+  "passed_gates_count": 4,
+  "total_gates": 4,
+  "gates": {
+    "gate_1_ff5": {
+      "gate_name": "Gate 1: Fama-French 5-Factor Regression",
+      "passed": true,
+      "alpha_monthly": 0.005409217448984578,
+      "alpha_annualized": 0.06491060938781493,
+      "t_statistic": 2.1734345257975223,
+      "p_value": 0.03282161780753666,
+      "r_squared": 0.8478103224674407,
+      "betas": {
+        "const": 0.005409217448984578,
+        "Mkt-RF": 0.8381715815746065,
+        "SMB": 0.46308608577067595,
+        "HML": 0.04860162936008147,
+        "RMW": 0.10956401849533738,
+        "CMA": -0.08999389233518251
+      },
+      "t_values": {
+        "const": 2.1734345257975223,
+        "Mkt-RF": 14.877502316224998,
+        "SMB": 4.451690180078101,
+        "HML": 0.5691013045409055,
+        "RMW": 0.9517542236382146,
+        "CMA": -0.6765841864291515
+      }
+    },
+    "gate_2_bootstrap": {
+      "gate_name": "Gate 2: Moving-Block Bootstrap (B=1,000)",
+      "passed": true,
+      "empirical_p_value": 0.014,
+      "mean_bootstrapped_alpha": 0.006007430637348292,
+      "percentile_5th": 0.0013733186082969151,
+      "percentile_95th": 0.010668920092747286,
+      "iterations": 1000
+    },
+    "gate_3_dsr": {
+      "gate_name": "Gate 3: Bailey & L\u00f3pez de Prado Deflated Sharpe Ratio",
+      "passed": true,
+      "observed_monthly_sharpe": 0.27268143617922,
+      "annualized_sharpe": 0.9445962034865186,
+      "deflated_sharpe_ratio": 0.8681601665274461,
+      "skewness": -0.084256048312414,
+      "kurtosis": -0.0535654865918187,
+      "n_trials": 10,
+      "track_record_months": 83
+    },
+    "gate_4_regime": {
+      "gate_name": "Gate 4: Chi-Square Regime x Win/Loss Gate",
+      "passed": true,
+      "contingency_table": {
+        "Loss": {
+          "Bear": 9,
+          "Bull": 24
+        },
+        "Win": {
+          "Bear": 19,
+          "Bull": 31
+        }
+      },
+      "chi2_stat": 0.5997248130657223,
+      "p_value": 0.43868304162607374,
+      "bull_win_rate": 0.5636363635338842,
+      "bear_win_rate": 0.6785714283290816,
+      "consistent_across_regimes": true
+    }
+  }
+}
