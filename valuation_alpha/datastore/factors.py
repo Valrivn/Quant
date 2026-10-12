@@ -137,11 +137,44 @@ def _load_cache(max_age_days: int) -> pd.DataFrame | None:
         return None
 
 
-def _save_cache(df: pd.DataFrame) -> None:
-    """Atomically save FF5 data to parquet cache."""
+# A genuine Ken French / FRED daily 5-factor panel spans decades and thousands
+# of sessions. Anything smaller is a stub, a truncated download, or a test
+# fixture — and it must never be promoted to the shared cache.
+_MIN_CACHE_ROWS = 250
+_MIN_CACHE_SPAN_DAYS = 365
+
+
+def _cacheable(df: pd.DataFrame) -> bool:
+    """Refuse to cache a frame that cannot be a real FF5 daily panel.
+
+    ``fetch_ff5_factors`` writes whatever the fetch returned straight to
+    ``data/fred_cache/ff5_factors_daily.parquet``. A caller that stubs the
+    network — a unit test, an offline replay — therefore replaced the real
+    15,876-row (1963-2026) panel with a 2-row 1946 placeholder, and the next
+    process happily read it back as a fresh cache. R5 caught the hash drift
+    only after the damage; this stops the write.
+    """
+    if df is None or df.empty or len(df.columns) < 6:
+        return False
+    if len(df) < _MIN_CACHE_ROWS:
+        return False
+    try:
+        idx = pd.to_datetime(df.index)
+        if len(idx) > 1 and (idx.max() - idx.min()).days < _MIN_CACHE_SPAN_DAYS:
+            return False
+    except Exception:
+        return False
+    return True
+
+
+def _save_cache(df: pd.DataFrame) -> bool:
+    """Atomically save FF5 data to parquet cache. Returns False if refused."""
+    if not _cacheable(df):
+        return False
     tmp = _FF5_CACHE.with_suffix(".tmp")
     df.to_parquet(tmp)
     tmp.replace(_FF5_CACHE)
+    return True
 
 
 def fetch_ff5_factors(use_cache: bool = True, max_age_days: int = 1) -> pd.DataFrame:
@@ -151,7 +184,7 @@ def fetch_ff5_factors(use_cache: bool = True, max_age_days: int = 1) -> pd.DataF
     1. Local parquet cache (if fresh)
     2. Ken French authoritative daily CSV (primary source)
     3. FRED API (fallback, requires FRED_API_KEY)
-    
+
     Returns DataFrame with columns [date, Mkt-RF, SMB, HML, RMW, CMA, RF] as decimals.
     """
     if use_cache:

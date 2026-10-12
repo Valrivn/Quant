@@ -94,7 +94,7 @@ def generate_synthetic_cfpb_data(start_date: str, end_date: str) -> pd.DataFrame
                 "date": dt.strftime("%Y-%m-%d"),
                 "ticker": ticker,
                 "complaint_count": complaints,
-                "DateReceived": dt.strftime("%Y-%m-%d"),
+                "source_timestamp": dt.strftime("%Y-%m-%d"),
                 "mapping_confidence": conf
             })
     return pd.DataFrame(records)
@@ -120,9 +120,9 @@ def calculate_cfpb_signals(df: pd.DataFrame) -> pd.DataFrame:
     out_df = pd.concat(res, ignore_index=True)
     out_df["date"] = out_df["date"].dt.strftime("%Y-%m-%d")
     out_df["retrieval_timestamp"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    out_df["DateReceived"] = out_df["date"]
+    out_df["source_timestamp"] = out_df["date"]
     
-    cols = ["date", "ticker", "cfpb_complaints_90d", "retrieval_timestamp", "mapping_confidence", "DateReceived"]
+    cols = ["date", "ticker", "cfpb_complaints_90d", "retrieval_timestamp", "mapping_confidence", "source_timestamp"]
     return out_df[cols]
 
 
@@ -155,7 +155,7 @@ def run_cfpb_loader(start_date: str, end_date: str, is_test: bool = False):
     factor_df = calculate_cfpb_signals(df_raw)
     
     # PIT Validation
-    PITValidator.validate_pit(factor_df, timestamp_col="DateReceived", trade_date_col="date", required_cols=["date", "ticker", "cfpb_complaints_90d"])
+    PITValidator.validate_pit(factor_df, timestamp_col="source_timestamp", trade_date_col="date", required_cols=["date", "ticker", "cfpb_complaints_90d"])
     
     out_path = Path("data/qual/cfpb_velocity.parquet")
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -166,7 +166,7 @@ def run_cfpb_loader(start_date: str, end_date: str, is_test: bool = False):
     metadata = {
         "source": "CFPB",
         "source_version": "cfpb_202609",
-        "pit_timestamp_column": "DateReceived",
+        "pit_timestamp_column": "source_timestamp",
         "entity_key": "product_company",
         "transformations": ["complaints_90d"],
         "date_range": {"min": factor_df["date"].min(), "max": factor_df["date"].max()}

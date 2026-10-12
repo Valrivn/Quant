@@ -418,7 +418,7 @@ def compute_arm_analytics(
     # Downside Vol & Sortino
     downside_diff = np.where(excess_ret < 0, excess_ret, 0.0)
     downside_dev = float(np.sqrt(np.mean(downside_diff ** 2)) * np.sqrt(12.0))
-    sortino = float(np.mean(excess_ret) / downside_dev * np.sqrt(12.0)) if downside_dev > 0 else 0.0
+    sortino = float((np.mean(excess_ret) * 12.0) / downside_dev) if downside_dev > 0 else 0.0
     
     # Max Drawdown
     wealth = initial_capital * np.cumprod(1.0 + r_series)

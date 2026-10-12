@@ -9,7 +9,7 @@ import logging
 import logging.handlers
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 
 # Default log format
@@ -112,11 +112,48 @@ class LogContext:
 
 
 # Convenience function for quick setup
-def init_logging(level: str = "INFO", log_dir: str = "logs") -> None:
+def init_logging(level: str = "INFO", log_dir: str = "logs", inject_experiment: bool = False) -> None:
     """Initialize logging with standard configuration."""
     numeric_level = getattr(logging, level.upper(), logging.INFO)
     log_file = Path(log_dir) / "quant_pipeline.log"
     setup_logging(level=numeric_level, log_file=str(log_file), console=True)
+
+
+def college_event(event: str, **kwargs) -> None:
+    """College-audited event logging - emits structured event for audit trail."""
+    logger = get_logger("quant_audit")
+    logger.info(f"AUDIT_EVENT: {event} | {kwargs}")
+
+
+def get_experiment_context() -> Dict[str, Any]:
+    """Frozen experiment-design context injected into every agent payload.
+
+    Restores the context source consumed by agent_orchestrator
+    (`AgentOrchestrator._verify_experiment_context` hard-fails on mismatch
+    and `_log_startup_banner` renders these keys). Values are sourced from
+    the frozen design docs (startup/Data_Strategy.md sections 3 and 6;
+    pre-registration v7 SHA-256 c80a47bf...):
+
+        universe_filter     ~1,500 PIT names: top-1000 + next-500 mid/micro,
+                           monthly reconstitution (RPO-clean 2018-2024)
+        entry_gate          DCF value screen: ROIC > 10%, ICR > 3x, FCF > 0,
+                           Price <= IV_P25 (sector-relative dual track)
+        rebalance_cadence  monthly (data available at prior month-end)
+        cost_bps           20 bps round-trip (10 bps per side) + slippage model
+        max_drawdown       gate threshold 20% (Arm C max DD < -20%)
+        tiers             3 arms: A pure quant / B pure qual / C hybrid
+    """
+    return {
+        "experiment_id": "sentiment-cascade-value-v3",
+        "version": "2026-09-05-rev3",
+        "pre_registered": True,
+        "universe_filter": "PIT top-1500 (top-1000 + next-500, monthly reconstitution)",
+        "entry_gate": "DCF value: ROIC>10%, ICR>3x, FCF>0, Price<=IV_P25",
+        "rebalance_cadence": "monthly",
+        "cost_bps": 20,
+        "max_drawdown": 0.20,
+        "tiers": ["A_quant", "B_qual", "C_hybrid"],
+    }
 
 
 if __name__ == "__main__":

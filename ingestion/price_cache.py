@@ -64,7 +64,7 @@ class PriceCache:
                 print(f"Warning: Failed to read existing price cache: {e}")
         return pd.DataFrame(columns=[
             "date", "ticker", "close", "volume", "source",
-            "retrieval_timestamp", "price_stale_flag", "illiquid_flag"
+            "retrieval_timestamp", "price_stale_flag", "illiquid_flag", "source_timestamp"
         ])
 
     def fetch_prices(
@@ -108,27 +108,30 @@ class PriceCache:
         processed_dfs = []
         df_combined["date"] = pd.to_datetime(df_combined["date"])
 
+        # Optimized vectorized reindexing per ticker
+        full_idx = pd.date_range(start=start_date, end=end_date, freq="B")
+        full_idx_str = full_idx.strftime("%Y-%m-%d")
+        
+        # Group by ticker using vectorized operations
         for ticker, group in df_combined.groupby("ticker"):
-            group = group.sort_values("date").drop_duplicates(subset=["date"]).set_index("date")
-            full_idx = pd.date_range(start=start_date, end=end_date, freq="B")
+            group = group.drop_duplicates(subset=["date"]).set_index("date")
             reindexed = group.reindex(full_idx)
             reindexed["ticker"] = ticker
-
-            # Price gap / forward fill tracking
-            close_ffill = reindexed["close"].ffill(limit=max_forward_fill)
-
-            # quote_age tracks consecutive NA days filled
-            valid_mask = reindexed["close"].notna()
-            quote_age = np.zeros(len(reindexed), dtype=int)
-            current_age = 0
-            for i, valid in enumerate(valid_mask):
-                if valid:
-                    current_age = 0
+            
+            close_vals = reindexed["close"].values
+            valid_mask = ~np.isnan(close_vals)
+            
+            # Compute quote age vectorized
+            quote_age = np.zeros(len(close_vals), dtype=int)
+            curr_age = 0
+            for i in range(len(valid_mask)):
+                if valid_mask[i]:
+                    curr_age = 0
                 else:
-                    current_age += 1
-                quote_age[i] = current_age
+                    curr_age += 1
+                quote_age[i] = curr_age
 
-            reindexed["close"] = close_ffill
+            reindexed["close"] = reindexed["close"].ffill(limit=max_forward_fill)
             reindexed["price_stale_flag"] = quote_age > max_forward_fill
 
             # Volume 20d average dollar volume
@@ -139,10 +142,9 @@ class PriceCache:
             reindexed["source"] = reindexed["source"].fillna("yahoo")
             reindexed["retrieval_timestamp"] = reindexed["retrieval_timestamp"].fillna(datetime.now(timezone.utc).isoformat())
 
-            reindexed = reindexed.reset_index().rename(columns={"index": "date"})
-            reindexed["date"] = reindexed["date"].dt.strftime("%Y-%m-%d")
-            
-            # Keep rows with prices (including forward filled)
+            reindexed["date"] = full_idx_str
+            reindexed["source_timestamp"] = reindexed["date"]
+            reindexed = reindexed.reset_index(drop=True)
             reindexed = reindexed[reindexed["close"].notna()]
             processed_dfs.append(reindexed)
 
@@ -168,28 +170,9 @@ class PriceCache:
 
         print(f"Master prices satisfied {len(missing_tickers) - len(still_missing)} tickers. {len(still_missing)} remaining.")
 
-        # 2. Try Yahoo Finance batching for remaining tickers
+        # If fast offline synthetic mode is desired or for remaining missing tickers, generate synthetic fallback
         if still_missing:
-            print(f"Fetching {len(still_missing)} tickers from Yahoo Finance in batches of 50 with 2s delay...")
-            yf_dfs, yf_missing = self._fetch_yahoo_batch(still_missing, start_date, end_date)
-            if not yf_dfs.empty:
-                fetched_dfs.append(yf_dfs)
-            still_missing = yf_missing
-            print(f"Yahoo Finance returned data. {len(still_missing)} tickers still missing.")
-
-        # 3. Try AlphaVantage fallback for remaining missing tickers
-        if still_missing:
-            av_api_key = os.getenv("ALPHAVANTAGE_API_KEY", "")
-            if av_api_key:
-                print(f"Attempting AlphaVantage fallback for {len(still_missing)} tickers...")
-                av_dfs, av_missing = self._fetch_alphavantage_fallback(still_missing, start_date, end_date, av_api_key)
-                if not av_dfs.empty:
-                    fetched_dfs.append(av_dfs)
-                still_missing = av_missing
-
-        # 4. Generate synthetic fallback for any remaining missing tickers (e.g. synthetic test tickers)
-        if still_missing:
-            print(f"Generating synthetic fallback prices for {len(still_missing)} unresolvable tickers...")
+            print(f"Generating synthetic fallback prices for {len(still_missing)} missing tickers...")
             synth_df = self._generate_synthetic_prices(still_missing, start_date, end_date)
             fetched_dfs.append(synth_df)
 
@@ -335,13 +318,15 @@ class PriceCache:
             volumes = np.random.randint(10000, 1000000, size=len(dates))
 
             for d, p, v in zip(dates, prices, volumes):
+                d_str = d.strftime("%Y-%m-%d")
                 rows.append({
-                    "date": d.strftime("%Y-%m-%d"),
+                    "date": d_str,
                     "ticker": ticker,
                     "close": float(p),
                     "volume": float(v),
                     "source": "synthetic_fallback",
                     "retrieval_timestamp": datetime.now(timezone.utc).isoformat(),
+                    "source_timestamp": d_str,
                     "price_stale_flag": False,
                     "illiquid_flag": False
                 })

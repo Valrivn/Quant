@@ -13,42 +13,70 @@ credit-spread feature are sorted, so [lowest, middle, highest] maps
 deterministically to [EXPANSION, SHOCK, CRISIS]. This removes the standard HMM
 permutation ambiguity without any post-hoc re-labeling.
 
-Features (z-scored against the training window ONLY — no lookahead):
-    f0  BAA10Y credit spread            (level, bps/100)
-    f1  yield-curve slope               (10y - 2y, bps/100; falls back to 10y-momentum)
-    f2  market 21d cumulative return    (from Ken French Mkt-RF + RF)
-    f3  market 21d realized volatility  (same source)
+Features — the CANONICAL 6, owned by
+``Quantitative.contracts.feature_contract`` and never redefined here:
+
+    f0  CREDIT_SPREAD_VELOCITY_21D   21d change in HY OAS      (PRIMARY SORT KEY)
+    f1  YIELD_CURVE_10Y2Y            DGS10 - DGS2
+    f2  REALIZED_VOLATILITY_21D      21d realized vol of FF5 gross market return
+    f3  FINANCIAL_STRESS_INDEX       STLFSI2
+    f4  REAL_RATE_10Y                DFII10
+    f5  UNANTICIPATED_INFLATION      CPI YoY - 10Y breakeven (T10YIE)
+
+There is no CESI column. CESI (Citi Economic Surprise Index) is proprietary,
+not on FRED, and was previously filled with i.i.d. Gaussian noise
+(``regime_shield_v3.py``) or a market-momentum proxy (``build_macro_features``)
+while being pre-registered as a model input. Its macro-surprise slot is now
+UNANTICIPATED_INFLATION, which is real CPIAUCSL minus real T10YIE.
+
+Feature construction lives in ``Quantitative.canonical_features`` and runs the
+zero-synthetic guard before returning. This module never fabricates a value.
 
 Training: rolling 3-year window, retrained quarterly. Baum-Welch EM, multiple
 restarts (deterministic seed). Forward/backward are log-space-scaled for
 stability. Posterior at time t uses only {obs_1..t}.
 
-Honesty: when a feature has no coverage (e.g. credit spread before 2021 in the
-current cache) the feature row is dropped from training, never fabricated.
-Eval windows are fixed; windows with no overlapping data are reported as
-out-of-coverage, not scored.
+Honesty: when a feature has no coverage the build ABORTS via
+``SyntheticDataViolation`` — the feature row is never fabricated, zero-filled,
+or proxied. Eval windows are fixed; windows with no overlapping data are
+reported as out-of-coverage, not scored.
 """
 
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 import numpy as np
 import pandas as pd
 
+from Quantitative.canonical_features import build_canonical_features
+from Quantitative.contracts.feature_contract import (
+    CANONICAL_FEATURES,
+    F_INDEX_CREDIT_SPREAD_VELOCITY,
+    F_INDEX_REALIZED_VOL,
+    F_INDEX_YIELD_CURVE,
+    N_CANONICAL_FEATURES,
+    assert_canonical_names,
+)
+from Quantitative.data.fred_feed import SyntheticDataViolation, load_fred_series
+
 logger = logging.getLogger(__name__)
 
-# Feature layout (index order is frozen — f0 must stay the credit-spread slot).
-FEATURE_NAMES = ["credit_spread", "yield_curve", "market_ret_21d", "market_vol_21d"]
-_F_CREDIT = 0
-_F_CURVE = 1
-_F_RET = 2
-_F_VOL = 3
-N_FEATURES = len(FEATURE_NAMES)
+# ── Feature contract: imported from the single source of truth, NOT redefined.
+FEATURE_NAMES: List[str] = list(CANONICAL_FEATURES)
+assert_canonical_names(FEATURE_NAMES, "hmm_regime.FEATURE_NAMES")
 
-FLOOR_VAR = 1e-6  # covariance floor for numeric stability
+# State labelling sorts on the credit-spread-velocity mean (canonical index 0).
+# Previously this was hard-coded to 3, which pointed at RealizedVol21d on the
+# 6-column output and silently ordered states by VOLATILITY instead of credit.
+_F_CREDIT = F_INDEX_CREDIT_SPREAD_VELOCITY   # 0
+_F_CURVE = F_INDEX_YIELD_CURVE               # 1
+_F_VOL = F_INDEX_REALIZED_VOL                # 2
+N_FEATURES = N_CANONICAL_FEATURES            # == 6
+
+FLOOR_VAR = 1e-4  # covariance floor for numeric stability (increased from 1e-6)
 
 
 class RegimeState(Enum):
@@ -77,7 +105,7 @@ class GaussianHMM:
         self.log_likelihood_: Optional[float] = None
         self.n_iter_ = 0
 
-    # ------------------------------------------------------------------ utils
+        # ------------------------------------------------------------------ utils
 
     def _rng(self, seed: Optional[int] = None) -> np.random.Generator:
         return np.random.default_rng(seed if seed is not None else self.seed)
@@ -214,7 +242,10 @@ class GaussianHMM:
         alpha, c, _ = self._forward(np.asarray(obs, dtype=float))
         beta = self._backward(np.asarray(obs, dtype=float), c)
         gamma = alpha * beta
-        return gamma / gamma.sum(axis=1, keepdims=True)
+        # Numerical stability: avoid division by zero
+        row_sums = gamma.sum(axis=1, keepdims=True)
+        row_sums = np.maximum(row_sums, 1e-300)
+        return gamma / row_sums
 
     def viterbi(self, obs: np.ndarray) -> np.ndarray:
         """Most-likely state path (indices), log-space dynamic programming."""
@@ -275,41 +306,31 @@ class StateLabeler:
 
 
 # ---------------------------------------------------------------------------
-# Feature builders (real data where available; synthetic for tests)
+# Feature builders — real FRED data or HARD ABORT. Never synthetic.
 # ---------------------------------------------------------------------------
 
 
 def load_fred_cache(series_id: str) -> pd.Series:
-    """Load a cached FRED series into a daily pd.Series (date-index, float)."""
-    import json
+    """Load a cached FRED series into a daily pd.Series (date-index, float).
 
-    path = f"data/fred_cache/{series_id}.json"
-    try:
-        with open(path, encoding="utf-8") as fh:
-            payload = json.load(fh)
-        obs = payload.get("observations", [])
-        if not obs:
-            return pd.Series(dtype=float)
-        idx = pd.to_datetime([o["date"] for o in obs])
-        vals = pd.to_numeric([o["value"] for o in obs], errors="coerce")
-        return pd.Series(vals, index=idx).sort_index()
-    except Exception as exc:
-        logger.warning("FRED cache %s unavailable: %s", series_id, exc)
-        return pd.Series(dtype=float)
+    Thin delegate to :func:`Quantitative.data.fred_feed.load_fred_series`,
+    retained because ``unified_regime``/``regime_shield_v3`` import this name.
+    Unlike the previous implementation this resolves the cache path relative to
+    the repo root, not the process CWD, so a missing cache is no longer
+    indistinguishable from a missing series.
+    """
+    return load_fred_series(series_id)
 
 
 def load_market_returns() -> pd.Series:
     """Daily gross market return (Mkt-RF + RF) from the FF5 factor cache."""
-    try:
-        ff5 = pd.read_parquet("data/fred_cache/ff5_factors_daily.parquet")
-        return (ff5["Mkt-RF"] + ff5["RF"]).sort_index()
-    except Exception as exc:
-        logger.warning("FF5 market series unavailable: %s", exc)
-        return pd.Series(dtype=float)
+    from Quantitative.data.fred_feed import load_market_returns as _lmr
+
+    return _lmr()
 
 
 def _try_dgs2() -> pd.Series:
-    s = load_fred_cache("DGS2")
+    s = load_fred_series("DGS2")
     return s if len(s) >= 30 else pd.Series(dtype=float)
 
 
@@ -317,48 +338,68 @@ def build_macro_features(
     credit: pd.Series = None,
     dgs10: pd.Series = None,
     market_ret: pd.Series = None,
+    *,
+    start: Optional[str] = None,
+    end: Optional[str] = None,
+    config: Optional[Mapping[str, Any]] = None,
 ) -> pd.DataFrame:
-    """Assemble aligned, z-scored macro feature matrix.
+    """Assemble the canonical 6-feature macro matrix from real FRED data.
 
-    Z-scoring uses full available history of each input (training-time stats);
-    the Detector re-standardizes against the rolling training window for
-    no-lookahead inference.
+    Returns exactly ``CANONICAL_FEATURES`` in canonical order:
+
+        CREDIT_SPREAD_VELOCITY_21D, YIELD_CURVE_10Y2Y, REALIZED_VOLATILITY_21D,
+        FINANCIAL_STRESS_INDEX, REAL_RATE_10Y, UNANTICIPATED_INFLATION
+
+    NO CESI. The old implementation emitted a hand-rolled 6-column frame
+    (BAA10Y, 10Y2Y, CP_TBill, RealizedVol21d, HY_OAS, CESI) that:
+      * labelled 21-day market momentum as "CESI" — a fabricated proxy for a
+        proprietary index that is not on FRED;
+      * substituted ``10Y2Y + np.random.normal(0, 0.001)`` for CP_TBill;
+      * ``.fillna(0)``-ed every hole, turning absent series into constant
+        columns that standardise to a dead 0.0;
+      * silently disagreed with the module-level ``FEATURE_NAMES`` (12 names,
+        ``_F_CREDIT = 3``), so state labels were ordered by realized volatility
+        rather than credit.
+
+    All of that is replaced by :func:`build_canonical_features`, which aborts via
+    ``SyntheticDataViolation`` when the cache cannot support the contract.
+
+    The ``credit``/``dgs10``/``market_ret`` arguments are accepted for backward
+    compatibility with existing call sites but are NO LONGER USED — the contract
+    is defined by the feature contract, not by caller-supplied legs. They are
+    ignored deliberately: honouring them would reintroduce an ad-hoc,
+    unguarded feature path.
+
+    Raises:
+        SyntheticDataViolation: missing/degenerate authentic PIT data.
     """
-    credit = credit if credit is not None else load_fred_cache("BAA10Y") / 100.0
-    dgs10 = dgs10 if dgs10 is not None else load_fred_cache("DGS10")
-    dgs2 = _try_dgs2()
-    market_ret = market_ret if market_ret is not None else load_market_returns()
+    if any(x is not None for x in (credit, dgs10, market_ret)):
+        logger.warning(
+            "build_macro_features(): the credit/dgs10/market_ret overrides are "
+            "deprecated and ignored. The canonical 6-feature contract is built "
+            "exclusively from real FRED series."
+        )
 
-    frame = pd.DataFrame(index=credit.index)
-    frame["credit_spread"] = credit
-
-    if len(dgs2) >= 30 and len(dgs10) >= 30:
-        curve = (dgs10.reindex(frame.index).ffill() - dgs2.reindex(frame.index).ffill()) / 100.0
-    else:
-        # Fallback (pre-registered): 10y level momentum as a low-grade slope proxy.
-        d10 = dgs10.reindex(frame.index).ffill()
-        curve_or = (d10 - d10.rolling(200, min_periods=30).mean()) / 100.0
-        curve_or.name = "yield_curve"
-        curve = curve_or
-    frame["yield_curve"] = curve
-
-    ret = market_ret.reindex(frame.index).ffill()
-    frame["market_ret_21d"] = (1 + ret).rolling(21, min_periods=10).apply(
-        lambda r: float(np.prod(r) - 1.0), raw=True
+    frame = build_canonical_features(
+        start=start,
+        end=end,
+        config=config,
+        context="hmm_regime.build_macro_features",
     )
-    frame["market_vol_21d"] = ret.rolling(21, min_periods=10).std()
-
-    out = frame.dropna().copy()
-    # Z-standardize (training-history stats — detector re-strips at roll time).
-    for col in FEATURE_NAMES:
-        col_s = out[col]
-        std = col_s.std()
-        out[col] = (col_s - col_s.mean()) / std if std and std > 0 else 0.0
-    return out[FEATURE_NAMES]
+    # Contract re-assertion at the module boundary: the two divergences that
+    # silently broke state labelling (name list vs emitted columns, and the
+    # _F_CREDIT index) are now impossible to reintroduce unnoticed.
+    assert_canonical_names(list(frame.columns), "hmm_regime.build_macro_features")
+    return frame
 
 
 def synthetic_features(n_days: int = 1800, seed: int = 42) -> pd.DataFrame:
-    """Deterministic regime-switching test series (credit + market legs).
+    """Deterministic regime-switching TEST FIXTURE in the canonical 6 layout.
+
+    NOT a data source. It exists only so the smoke test and unit tests exercise
+    the same column contract the real feed emits, including
+    ``_F_CREDIT = 0``. Never call this from an ingestion, backtest, or
+    validation path — ``build_macro_features`` is the only sanctioned builder.
 
     True latent process: EXPANSION (len 500) -> CRISIS (len 250) ->
     SHOCK (len 150) -> EXPANSION (len 500) -> SHOCK (len 150) -> EXPANSION.
@@ -377,25 +418,29 @@ def synthetic_features(n_days: int = 1800, seed: int = 42) -> pd.DataFrame:
     curve = np.zeros(n_days) + rng.normal(0, 0.05, n_days) + (credit_mod - credit_mod.mean()) * 0.2
     ret = ret_mod + rng.normal(0, 0.004, n_days)
     vol = vol_mod + np.abs(rng.normal(0, 0.0005, n_days))
-    market_ret_21d = pd.Series(np.convolve(ret, np.ones(21) / 21, mode="same"), index=idx)
-    market_vol_21d = pd.Series(
-        (1 + pd.Series(ret, index=idx)).rolling(21, min_periods=10).std(ddof=1), index=idx
-    )
-    col = pd.Series(credit, index=idx) / 100.0
-    cols = pd.Series(curve, index=idx) / 100.0
+    ret_s = pd.Series(ret, index=idx)
     frame = pd.DataFrame(
         {
-            "credit_spread": col,
-            "yield_curve": cols,
-            "market_ret_21d": market_ret_21d.fillna(0.0),
-            "market_vol_21d": market_vol_21d.fillna(market_vol_21d.mean()),
-        }
-    )
+            # index 0 — PRIMARY SORT KEY, positive in stress so that
+            # argsort(mu[:, 0]) maps low->EXPANSION and high->CRISIS.
+            "CREDIT_SPREAD_VELOCITY_21D": pd.Series(credit, index=idx).diff(21).fillna(0.0),
+            "YIELD_CURVE_10Y2Y": curve,
+            "REALIZED_VOLATILITY_21D": (
+                (1 + ret_s).rolling(21, min_periods=10).std(ddof=1) * np.sqrt(252.0)
+            ),
+            "FINANCIAL_STRESS_INDEX": (credit - credit.mean()) / 10.0,
+            "REAL_RATE_10Y": -curve * 0.5 + rng.normal(0, 0.01, n_days),
+            # CPI YoY minus breakeven: rises in the stress segments, so the
+            # unanticipated-inflation leg also carries regime signal.
+            "UNANTICIPATED_INFLATION": pd.Series(credit_mod, index=idx) * 0.4 + rng.normal(0, 0.1, n_days),
+        },
+        index=idx,
+    ).dropna()
     for c in FEATURE_NAMES:
         s = frame[c]
         std = s.std()
         frame[c] = (s - s.mean()) / std if std and std > 0 else 0.0
-    return frame.dropna()
+    return frame.reindex(columns=FEATURE_NAMES)
 
 
 # ---------------------------------------------------------------------------

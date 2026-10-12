@@ -452,8 +452,10 @@ def evaluate_dcf_screen(outputs: DCFOutputs, config: Dict[str, Any]) -> bool:
     return True
 
 
-def run_dcf_for_ticker(ticker: str, config: Dict[str, Any]) -> DCFOutputs:
-    """Run complete DCF screen for a single ticker."""
+def run_dcf_for_ticker(ticker: str, config: Dict[str, Any], regime: str = "EXPANSION") -> DCFOutputs:
+    """Run complete DCF screen for a single ticker with Dynamic WACC."""
+    from Quantitative.wacc_panel import compute_dynamic_wacc
+    
     # Load raw financial data
     inputs = load_financial_inputs(ticker)
     
@@ -467,14 +469,28 @@ def run_dcf_for_ticker(ticker: str, config: Dict[str, Any]) -> DCFOutputs:
             shares_outstanding=inputs.shares_outstanding
         )
     
+    # Compute dynamic WACC adjustment for Monte Carlo / valuation
+    base_wacc = config["monte_carlo"]["wacc_dist"]["mean"]
+    dynamic_wacc = compute_dynamic_wacc(
+        base_wacc=base_wacc,
+        regime=regime,
+        risk_free_rate=config.get("risk_free_rate", 0.04),
+        equity_risk_premium=config.get("equity_risk_premium", 0.05),
+        beta=inputs.beta if hasattr(inputs, "beta") and inputs.beta else 1.0,
+    )
+    
+    # Clone config for Monte Carlo with dynamic WACC mean
+    config_mc = json.loads(json.dumps(config))
+    config_mc["monte_carlo"]["wacc_dist"]["mean"] = dynamic_wacc
+    
     # Capitalize R&D
     rd_capitalized = capitalize_rd(
         inputs.rd_expense or 0,
-        config["monte_carlo"]["rd_capitalization_rate"]
+        config_mc["monte_carlo"]["rd_capitalization_rate"]
     )
     
     # Compute metrics
-    fcf = compute_fcf(inputs, rd_capitalized, config)
+    fcf = compute_fcf(inputs, rd_capitalized, config_mc)
     invested_capital = compute_invested_capital(inputs, rd_capitalized)
     roic = compute_roic(fcf, invested_capital)
     solvency = compute_solvency_ratio(inputs)
@@ -482,11 +498,11 @@ def run_dcf_for_ticker(ticker: str, config: Dict[str, Any]) -> DCFOutputs:
     
     # Sector discount
     sigma = load_sector_sigma(ticker)
-    discount_sector = compute_sector_discount(sigma, config)
+    discount_sector = compute_sector_discount(sigma, config_mc)
     
     # Monte Carlo DCF
     _, percentiles = monte_carlo_dcf(
-        fcf, invested_capital, roic or discount_sector, discount_sector, config, inputs
+        fcf, invested_capital, roic or discount_sector, discount_sector, config_mc, inputs
     )
     
     outputs = DCFOutputs(

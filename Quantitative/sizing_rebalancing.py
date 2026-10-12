@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -49,6 +50,31 @@ SECTOR_MAP = {
     "NFLX": "Communication Services", "CRM": "Technology", "INTC": "Technology",
     "CSCO": "Technology", "PFE": "Healthcare", "TMO": "Healthcare",
     "ABBV": "Healthcare", "ACN": "Technology", "COST": "Consumer Staples",
+}
+
+# ---------------------------------------------------------------------------
+# Regime-Conditioned Kelly (Phase 8 WS-6 tuning, bigpickle-worker)
+# ---------------------------------------------------------------------------
+# Kelly fraction:  kelly = (edge_bps / 1e4) / variance x regime_mult, clipped
+# to [0, max_single_position].  edge_bps and variance are ANNUALIZED and share
+# the same basis in this engine (default variance = (0.32)^2, i.e. a 32%
+# annualized vol pool).  Regime multipliers are FROZEN and mirror
+# ingestion.unfunded_watchlist.REGIME_CREDIT_MULTIPLIERS — the sizing engine
+# and the funding watchlist condition on the SAME regime scale.
+KELLY_REGIME_MULTIPLIERS: Dict[str, float] = {
+    "EXPANSION": 1.0,   # full Kelly
+    "RECOVERY": 0.8,    # partial rebuild
+    "SHOCK": 0.7,       # frozen: 30% Kelly reduction in shock
+    "CRISIS": 0.5,      # frozen: 50% Kelly reduction in crisis
+}
+#: Conviction-band edge fallback (annualized bps) used only when the DCF row
+#: cannot supply a margin of safety.  conviction is audit-only for the weight:
+#: the legacy conviction_multiplier is NO LONGER applied to target weights.
+EDGE_BPS_CONVICTION_FALLBACK: Dict[str, float] = {
+    "high": 300.0, "medium": 200.0, "low": 100.0,
+}
+KELLY_DEFAULTS: Dict[str, Any] = {
+    "default_annual_variance": 0.1024,   # (0.32)^2 — 32% annualized vol fallback
 }
 
 @dataclass
@@ -205,27 +231,95 @@ def determine_conviction(
     
     return "low"
 
+def _regime_multiplier(regime: str, hmm_crisis_prob: float = 0.0) -> float:
+    """Frozen regime multiplier for the Kelly fraction.  Explicit regime wins;
+    a missing/unknown regime falls back on hmm_crisis_prob thresholds
+    (CRISIS > 0.40, SHOCK > 0.25), then EXPANSION."""
+    mode = str(regime).upper()
+    if mode in KELLY_REGIME_MULTIPLIERS:
+        return float(KELLY_REGIME_MULTIPLIERS[mode])
+    if hmm_crisis_prob > 0.40:
+        return float(KELLY_REGIME_MULTIPLIERS["CRISIS"])
+    if hmm_crisis_prob > 0.25:
+        return float(KELLY_REGIME_MULTIPLIERS["SHOCK"])
+    return float(KELLY_REGIME_MULTIPLIERS["EXPANSION"])
+
+
+def kelly_edge_bps_from_dcf(dcf: Optional[Dict[str, Any]], price: Optional[float],
+                            conviction: str) -> float:
+    """
+    Kelly edge (annualized bps) resolved from the pipeline: the DCF margin of
+    safety (intrinsic per share vs current price) when the row carries
+    iv_mean/iv_p25 + shares_outstanding + a price; otherwise the FROZEN
+    conviction-band fallback (high 300 / medium 200 / low 100 bps).  Floored
+    at 0 — a name trading AT or ABOVE intrinsic value has no positive edge and
+    earns a 0 Kelly weight from this signal.
+    """
+    if dcf:
+        iv_total = None
+        for k in ("iv_mean", "iv_p25"):
+            if dcf.get(k) is not None:
+                iv_total = dcf.get(k)
+                break
+        shares = dcf.get("shares_outstanding")
+        price_v = dcf.get("current_price") or price
+        if iv_total is not None and shares and price_v:
+            try:
+                iv_ps = float(iv_total) / float(shares)
+                px = float(price_v)
+                if iv_ps > 0.0 and px > 0.0:
+                    return float(max(0.0, (iv_ps - px) / px * 1e4))
+            except (TypeError, ValueError, ZeroDivisionError):
+                pass
+    return float(EDGE_BPS_CONVICTION_FALLBACK.get(str(conviction), 100.0))
+
+
+def compute_kelly_target_weight(
+    edge_bps: float,
+    variance: float,
+    conviction: str,
+    config: Dict[str, Any],
+    regime: str,
+    hmm_crisis_prob: float = 0.0,
+) -> float:
+    """
+    Regime-Conditioned Kelly target weight (Phase 8 WS-6):
+
+        kelly = (edge_bps / 1e4) / variance x regime_mult(regime)
+        w     = clip(kelly, 0, max_single_position)
+
+    edge_bps and variance share the same (annualized) basis.  A degenerate
+    edge (<= 0) or variance (<= 0) yields 0.  `conviction` is AUDIT-ONLY:
+    it is recorded on the position but the frozen legacy
+    conviction_multiplier is NOT applied to the target weight (upside
+    weighting removed).
+    """
+    sizing = config.get("sizing_rules", {})
+    max_pct = float(sizing.get("max_single_position", 0.15))
+    if edge_bps is None or float(edge_bps) <= 0.0:
+        return 0.0
+    if variance is None or float(variance) <= 0.0:
+        return 0.0
+    mult = _regime_multiplier(regime, hmm_crisis_prob)
+    kelly = (float(edge_bps) / 1e4) / float(variance) * mult
+    return float(max(0.0, min(kelly, max_pct)))
+
+
 def compute_base_target_weight(
     conviction: str,
     config: Dict[str, Any],
     regime: str,
     hmm_crisis_prob: float,
 ) -> float:
-    """Compute base target weight for a position."""
-    sizing = config["sizing_rules"]
-    base_pct = sizing["base_position_pct"]  # 0.05
-    max_pct = sizing["max_single_position"]  # 0.15
-    
-    mult = sizing["conviction_multiplier"][conviction]
-    target = base_pct * mult
-    
-    # Regime adjustment
-    if regime == "SHOCK" or hmm_crisis_prob > 0.25:
-        target *= 0.7  # Reduce in shock
-    elif regime == "CRISIS" or hmm_crisis_prob > 0.40:
-        target *= 0.3  # Drastically reduce in crisis
-    
-    return min(target, max_pct)
+    """Regime-conditioned Kelly base target weight (v2).  Kept for backward
+    compatibility with the pre-Kelly signature: resolves the conviction-band
+    fallback edge and flows through the SAME Kelly math as the main path."""
+    sizing = config.get("sizing_rules", {})
+    edge = EDGE_BPS_CONVICTION_FALLBACK.get(str(conviction), 100.0)
+    variance = float(sizing.get("kelly_variance_annual",
+                                KELLY_DEFAULTS["default_annual_variance"]))
+    return compute_kelly_target_weight(edge, variance, conviction,
+                                       config, regime, hmm_crisis_prob)
 
 def enforce_sector_caps(
     targets: List[PositionTarget],
@@ -401,13 +495,26 @@ def run_sizing_rebalancing(
         
         # Determine conviction
         conviction = determine_conviction(entry_sig, exit_sig, bs_tier)
-        
-        # Compute target weight
-        base_weight = compute_base_target_weight(conviction, config, regime, hmm_crisis_prob)
-        
+
+        # Regime-Conditioned Kelly (v2): edge = DCF margin of safety (conviction
+        # band fallback when the DCF row is bare), variance = frozen annualized
+        # pool (config override allowed), regime multiplier frozen.  conviction
+        # is audit-only — the legacy conviction_multiplier is NOT applied.
+        edge_bps = kelly_edge_bps_from_dcf(dcf_results.get(ticker, {}), price, conviction)
+        variance = float(sizing_config.get(
+            "kelly_variance_annual", KELLY_DEFAULTS["default_annual_variance"]))
+        kelly_w = compute_kelly_target_weight(
+            edge_bps, variance, conviction, config, regime, hmm_crisis_prob)
+
         # Adjust for exit signal
         if exit_sig and exit_sig.get("exit_triggered"):
-            base_weight *= 0.0  # Full exit
+            kelly_w = 0.0  # Full exit
+
+        base_weight = kelly_w
+        kelly_reason = (
+            f"Kelly v2 edge={edge_bps:.0f}bps var={variance:.4f} "
+            f"regime_mult={_regime_multiplier(regime, hmm_crisis_prob):.2f} "
+            f"conviction={conviction} (audit-only)")
         
         target_value = available_equity * (base_weight / equity_target) if equity_target > 0 else 0
         target_shares = int(target_value / price) if price > 0 else 0
@@ -426,7 +533,7 @@ def run_sizing_rebalancing(
             target_shares=target_shares,
             target_value=target_value,
             conviction=conviction,
-            reason=f"Conviction: {conviction}, Regime: {regime}",
+            reason=kelly_reason,
         ))
     
     # Enforce constraints
@@ -555,9 +662,64 @@ def generate_orders_from_plan(
     
     return buy_orders, sell_orders
 
+def _self_test() -> bool:
+    """Regime-conditioned Kelly sizing self-test (python -m
+    Quantitative.sizing_rebalancing --test)."""
+    cfg = {"sizing_rules": {
+        "base_position_pct": 0.05, "max_single_position": 0.15,
+        "max_sector_exposure": 0.30, "conviction_multiplier": {"high": 1.5, "medium": 1.0, "low": 0.5},
+        "kelly_variance_annual": 0.1024,
+    }}
+
+    # 1. Kelly math + hard caps
+    w = compute_kelly_target_weight(300.0, 0.1024, "high", cfg, "EXPANSION")
+    assert abs(w - min((0.03 / 0.1024) * 1.0, 0.15)) < 1e-12, w
+    assert w <= 0.15
+    assert compute_kelly_target_weight(5000.0, 0.1024, "high", cfg, "EXPANSION") == 0.15  # clipped
+
+    # 2. regime conditioning
+    w_exp = compute_kelly_target_weight(100.0, 0.1024, "medium", cfg, "EXPANSION")
+    w_shock = compute_kelly_target_weight(100.0, 0.1024, "medium", cfg, "SHOCK")
+    w_crisis = compute_kelly_target_weight(100.0, 0.1024, "medium", cfg, "CRISIS")
+    assert abs(w_shock - w_exp * 0.7) < 1e-12
+    assert abs(w_crisis - w_exp * 0.5) < 1e-12
+
+    # 3. degenerate inputs -> 0 (never a negative/nan weight)
+    assert compute_kelly_target_weight(0.0, 0.1024, "low", cfg, "EXPANSION") == 0.0
+    assert compute_kelly_target_weight(-50.0, 0.1024, "low", cfg, "EXPANSION") == 0.0
+    assert compute_kelly_target_weight(100.0, 0.0, "low", cfg, "EXPANSION") == 0.0
+
+    # 4. crisis-prob fallback when regime is unknown
+    assert abs(_regime_multiplier("bogus", 0.50) - 0.5) < 1e-12
+    assert abs(_regime_multiplier("bogus", 0.30) - 0.7) < 1e-12
+    assert abs(_regime_multiplier("bogus", 0.10) - 1.0) < 1e-12
+
+    # 5. legacy wrapper still resolves (conviction-band cross-check)
+    w_legacy = compute_base_target_weight("high", cfg, "EXPANSION", 0.0)
+    assert w_legacy > 0.0 and w_legacy <= 0.15
+
+    # 6. DCF margin-of-safety edge: iv_ps 120 vs price 100 -> 2000bps; no
+    #    shares/iv -> conviction fallback
+    assert kelly_edge_bps_from_dcf(
+        {"iv_mean": 1200.0, "shares_outstanding": 10.0, "current_price": 100.0},
+        100.0, "low") == 2000.0
+    assert kelly_edge_bps_from_dcf({}, 100.0, "high") == 300.0
+    assert kelly_edge_bps_from_dcf({}, 100.0, "low") == 100.0
+    # iv below price -> floored at 0 (no positive edge)
+    assert kelly_edge_bps_from_dcf(
+        {"iv_mean": 90.0, "shares_outstanding": 1.0, "current_price": 100.0},
+        100.0, "high") == 0.0
+
+    print("sizing_rebalancing self-test: OK (6 groups)")
+    return True
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
+
+    if "--test" in sys.argv:
+        raise SystemExit(0 if _self_test() else 1)
+
     # Synthetic test
     mock_portfolio = {
         "total_value": 1_000_000,

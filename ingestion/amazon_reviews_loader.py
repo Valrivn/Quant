@@ -470,8 +470,8 @@ def write_outputs(signals: pd.DataFrame, out_path: Path, provenance_extra: Dict[
         signals["amazon_sentiment"] = signals.get("sentiment_weighted", 0.0)
     if "amazon_rating" not in signals.columns:
         signals["amazon_rating"] = signals.get("avg_rating", 0.0)
-    if "review_date" not in signals.columns:
-        signals["review_date"] = signals["date"]
+    if "source_timestamp" not in signals.columns:
+        signals["source_timestamp"] = signals["date"]
     if "retrieval_timestamp" not in signals.columns:
         signals["retrieval_timestamp"] = datetime.now(timezone.utc).isoformat()
     if "mapping_confidence" not in signals.columns:
@@ -483,7 +483,7 @@ def write_outputs(signals: pd.DataFrame, out_path: Path, provenance_extra: Dict[
     metadata = {
         "source": "AMAZON",
         "source_version": "McAuley-Lab/Amazon-Reviews-2023 (2023 snapshot)",
-        "pit_timestamp_column": "review_date",
+        "pit_timestamp_column": "source_timestamp",
         "entity_key": "brand|ticker",
         "transformations": [
             "hf_stream_jsonl",

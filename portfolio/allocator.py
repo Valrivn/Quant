@@ -311,3 +311,64 @@ def portfolio_backtest(
     if benchmark is not None and len(benchmark):
         result["excess_vs_sp500"] = excess_vs_sp500(r, benchmark)
     return result
+
+
+from typing import Dict, List
+
+
+def compute_realized_vol(returns: pd.Series, lookback: int = 63) -> float:
+    """Rolling 63-day realized vol (annualized)."""
+    if len(returns) == 0:
+        return 0.0
+    recent_returns = returns.tail(lookback)
+    if len(recent_returns) < 2:
+        return 0.0
+    return float(recent_returns.std(ddof=1) * np.sqrt(_TRADING_DAYS))
+
+
+def compute_vol_scale_factor(realized_vol: float, target_vol: float = 0.11, 
+                              vol_floor: float = 0.05, vol_ceiling: float = 0.18) -> float:
+    """Scale Factor = min(1.0, target_vol / realized_vol) with clipping."""
+    if realized_vol <= 0.0 or np.isnan(realized_vol):
+        return 1.0
+    effective_vol = float(np.clip(realized_vol, vol_floor, vol_ceiling))
+    raw_factor = target_vol / effective_vol
+    return float(np.minimum(1.0, raw_factor))
+
+
+def apply_vol_targeting(target_weights: Dict[str, float], realized_vol: float,
+                         cash_instruments: List[str] = ["BIL", "SHY"]) -> Dict[str, float]:
+    """
+    1. Compute scale factor
+    2. Scale all equity weights by factor
+    3. Allocate remainder to cash instruments (equal weight)
+    4. Return weights summing to 1.0
+    """
+    scale_factor = compute_vol_scale_factor(realized_vol)
+    
+    cash_set = set(cash_instruments)
+    equity_weights = {k: v for k, v in target_weights.items() if k not in cash_set}
+    
+    scaled_weights: Dict[str, float] = {}
+    scaled_equity_sum = 0.0
+    
+    for k, v in equity_weights.items():
+        scaled_w = v * scale_factor
+        scaled_weights[k] = scaled_w
+        scaled_equity_sum += scaled_w
+        
+    remainder = 1.0 - scaled_equity_sum
+    if remainder < 0.0:
+        remainder = 0.0
+        
+    num_cash = len(cash_instruments)
+    if num_cash > 0:
+        cash_per_inst = remainder / num_cash
+        for cash_inst in cash_instruments:
+            scaled_weights[cash_inst] = cash_per_inst
+            
+    total_w = sum(scaled_weights.values())
+    if total_w > 0:
+        scaled_weights = {k: v / total_w for k, v in scaled_weights.items()}
+        
+    return scaled_weights

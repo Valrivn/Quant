@@ -104,7 +104,7 @@ def generate_synthetic_nhtsa_data(start_date: str, end_date: str, mapping: dict)
                 "crash_count": crashes,
                 "fire_count": fires,
                 "injury_count": injuries,
-                "created_at": dt.strftime("%Y-%m-01"),
+                "source_timestamp": dt.strftime("%Y-%m-01"),
                 "mapping_confidence": confidence
             })
     return pd.DataFrame(records)
@@ -133,11 +133,11 @@ def calculate_nhtsa_signals(df: pd.DataFrame) -> pd.DataFrame:
     out_df = pd.concat(res, ignore_index=True)
     out_df["date"] = out_df["date"].dt.strftime("%Y-%m-%d")
     out_df["retrieval_timestamp"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    out_df["created_at"] = out_df["date"]
+    out_df["source_timestamp"] = out_df["date"]
     
     cols = [
         "date", "ticker", "nhtsa_complaints_90d", "nhtsa_recalls_90d", "nhtsa_severity_score",
-        "retrieval_timestamp", "mapping_confidence", "created_at"
+        "retrieval_timestamp", "mapping_confidence", "source_timestamp"
     ]
     return out_df[cols]
 
@@ -183,7 +183,7 @@ def run_nhtsa_loader(start_date: str, end_date: str, is_test: bool = False):
     factor_df = calculate_nhtsa_signals(df_raw)
     
     # PIT Validation
-    PITValidator.validate_pit(factor_df, timestamp_col="created_at", trade_date_col="date", required_cols=["date", "ticker", "nhtsa_complaints_90d"])
+    PITValidator.validate_pit(factor_df, timestamp_col="source_timestamp", trade_date_col="date", required_cols=["date", "ticker", "nhtsa_complaints_90d"])
     
     out_path = Path("data/qual/nhtsa_signals.parquet")
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -194,7 +194,7 @@ def run_nhtsa_loader(start_date: str, end_date: str, is_test: bool = False):
     metadata = {
         "source": "NHTSA",
         "source_version": "nhtsa_202609",
-        "pit_timestamp_column": "created_at",
+        "pit_timestamp_column": "source_timestamp",
         "entity_key": "make_model",
         "transformations": ["complaints_90d", "severity_score"],
         "date_range": {"min": factor_df["date"].min(), "max": factor_df["date"].max()}
