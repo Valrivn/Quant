@@ -17,6 +17,7 @@ from psychological.state_machine import PsychologicalStateMachine, create_state_
 from psychological.behavioral_feature_store import BehavioralFeatureStore, create_behavioral_feature_store
 from psychological.orchestrator import PsychologicalOrchestrator, create_psychological_orchestrator
 from psychological.data_fusion import DataFusionEngine, FusedSignal, create_data_fusion_engine
+from psychological.stocktwits_regulator import StockTwitsRegulator
 from psychological.qualitative_scoring import (
     EMAFilter,
     SubSectorConfig,
@@ -85,6 +86,7 @@ __all__ = [
     "DataFusionEngine",
     "FusedSignal",
     "create_data_fusion_engine",
+    "StockTwitsRegulator",
     "EMAFilter",
     "SubSectorConfig",
     "BranchComposite",

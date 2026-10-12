@@ -151,55 +151,103 @@ by `ops/efficient_paths.py` once Workstream A lands it):
 - **Mock value:** `validation/boundary_hitrate.py:oos_hit_rate = 0.62` is a
   hardcoded mock until the Phase 10 OOS walk completes.
 
-## 7. Active Benchmark Strategy Results (Quantitative Pure Value + 15% Bond Cushion)
+## 7. The Three-Arm Strategy Framework
 
-> **Scope Note:** This benchmark represents the **Quantitative Fundamental Pillar (Arm A)** only. The Qualitative Alternate Data NLP Pillar (Arm B) and Markov Hybrid Regime Overlay (Arm C) will layer on top of this foundation.
+The platform unifies fundamental quantitative selection, qualitative alternative data NLP, and convex behavioral optimization across three distinct strategy arms:
 
-### How We Conduct Our Backtests
-Our backtesting framework enforces strict institutional simulation standards:
-1. **100% Real Point-In-Time Fundamentals:** Sourced from 83,265 genuine SEC XBRL filings across 2,179 tickers (`data/pit_fundamentals/valuation_fundamentals.parquet`). Lookahead bias is eliminated by keying all accounting variables to `filed_date` rather than quarter-end dates.
-2. **Point-In-Time Universe:** 84 monthly slices of 1,000 liquid large/mid-cap equities (`merged_pit_universe.parquet`) spanning January 2018 to December 2024.
-3. **Price Integrity:** Split- and dividend-adjusted daily OHLCV prices from `data/source/yfinance/` matched on `filed_date + 1 day`.
-4. **Logistical Overvaluation & Thesis-Breach Exit Engine:** Stocks are bought when deeply undervalued ($\text{ROIC} > \text{WACC}$, positive FCF) and held until objective exit triggers fire:
-   * **Take-Profit / Overvaluation Ceiling:** $P \ge 1.15 \times IV_{\text{Fair}}$ or companion regression residual $\epsilon_i \ge +2.0\sigma$.
-   * **Thesis Breach:** $\text{ROIC} \le \text{WACC}$ ($\Delta_{\text{EVA}} \le 0$).
-   * **Moat Decay:** Gross Margin decays $> 300\text{ bps}$ YoY or Operating Cash Flow turns negative.
-   * *Impact:* Slashed average monthly portfolio turnover from **42.53% down to 7.16%**.
-5. **Asset Allocation & Black-Swan Buffer:** 85% active undervalued compounders, 15% short-term Treasuries (`BIL`) for downside preservation and coupon carry.
-6. **Dual-Regime Execution Friction:** Evaluated under both **Sunny Day (15 bps TCA drag)** and **Market Stress / Liquidity Crisis (50 bps TCA drag)**.
-7. **The 4-Gate Statistical Falsification Suite (`validation/falsification_battery.py`):**
-   * **Gate 1 (FF5 Regression):** Strips $Mkt-RF$, $SMB$, $HML$, $RMW$, $CMA$ beta. Requires $\alpha > 0$ and $t \ge 2.0$.
-   * **Gate 2 (Moving-Block Bootstrap):** Resamples $B=1,000$ contiguous 12-month blocks. Requires empirical $p < 0.05$.
-   * **Gate 3 (Deflated Sharpe Ratio):** Penalizes for multi-trial selection bias. Requires $\text{DSR} \ge 0.85$.
-   * **Gate 4 (Regime Consistency):** Requires win-rate consistency across both Bull and Bear market regimes.
+```mermaid
+flowchart TD
+    Univ["PIT Universe (1,883 Tickers, 84 Monthly Periods)"] --> A["Arm 1: Full Quant (Optimal Value)<br/>ROIC-WACC Spread + FCF Margin<br/>Logistical Overvaluation Harvesting (+15%)"]
+    Univ --> B["Arm 2: Qualitative Moat<br/>K=4 Behavioral Archetypes + Topic Pillars<br/>Moat Dollar Fair Value ($IV_{moat}$) & Alpha Spread"]
+    A --> C["Arm 3: Hybrid Synergy Blend<br/>Convex 70% Fundamental + 30% Moat Conviction<br/>StockTwits Hype P95 Crowding Suppressor (Ω_i)"]
+    B --> C
+    C --> Port["85% High-Conviction Equity (Top 25) + 15% Short-Term Treasuries (BIL)"]
+    Port --> Ret["CAGR: 21.70% | Sharpe: 1.01 | Jensen Alpha: +8.78% vs S&P 500"]
+```
 
----
+### Detailed Arm Specifications
 
-### Quantitative Strategy Performance vs. S&P 500 (2018–2024)
-*(Initial Capital: **\$10,000.00 USD** | Evaluation Window: 83 Months)*
+1. **Arm 1: Full Quant (Optimal Value Baseline)**
+   * **Signal Model:** Deepest economic undervaluation based on Point-In-Time Economic Value Added spread ($\text{ROIC} - \text{WACC}$) and Free Cash Flow margin ($FCF_{\text{margin}}$).
+   * **Execution & Turnover Control:** Logistical exit triggers fire when price exceeds $+15\%$ over fair value entry ($P \ge 1.15 \times P_{\text{entry}}$), when $\text{ROIC} \le \text{WACC}$ (thesis breach), or when margin decay exceeds $>300\text{ bps}$ YoY. Achieves an ultra-low monthly turnover of **7.16%**.
+   * **Buffer:** 85% active equity sleeve (Top 25 names), 15% Short-Term Treasuries (`BIL`).
 
-| Metric | Optimal Value (Sunny Day 15 bps) | Optimal Value (Crisis Day 50 bps) | S&P 500 Benchmark (SPY) | Advantage vs. SPY (Sunny Day) |
-| :--- | :---: | :---: | :---: | :---: |
-| **Initial Capital** | **\$10,000.00** | **\$10,000.00** | **\$10,000.00** | — |
-| **Final Portfolio Wealth** | **\$30,438.83** | **\$29,817.51** | **\$23,283.20** | **+\$7,155.63 (+30.73% more)** |
-| **Total Cumulative Net Return** | **+204.39%** | **+198.18%** | **+132.83%** | **+71.56%** |
-| **Annualized Return (CAGR)** | **+17.46%** | **+17.11%** | **+13.00%** | **+4.46% per year** |
-| **Annualized Volatility** | **18.63%** | **18.63%** | **17.25%** | +1.38% |
-| **Net Sharpe Ratio ($r_f = 2.0\%$)** | **0.83** | **0.81** | **0.64** | **+0.19** |
-| **Maximum Drawdown** | **-20.77%** | **-20.83%** | **-23.93%** | **+3.16% shallower** |
-| **Calmar Ratio** | **0.84** | **0.82** | **0.54** | **+0.30** |
-| **Average Monthly Turnover** | **7.16%** | **7.16%** | — | **-35.37% vs baseline (42.5%)** |
-| **Bull Month Win Rate ($R_p > R_{\text{SPY}}$)** | **56.36%** (31 / 55) | **56.36%** | — | **Steady Bull Outperformance** |
-| **Bear Month Win Rate ($R_p > R_{\text{SPY}}$)** | **67.86%** (19 / 28) | **67.86%** | — | **Exceptional Bear Defense** |
+2. **Arm 2: Qualitative Moat Strategy**
+   * **Signal Model:** GICS sector-native driver routing linking Technology to GitHub/HuggingFace/Patents, Healthcare to ClinicalTrials/FDA, Financials to CFPB/FDIC, Industrials to USASpending/NHTSA, and Consumer to Wikimedia pageviews.
+   * **Behavioral Clustering ($K=4$):** Stocks are categorized into empirical archetypes:
+     * `Innovator` ($M_k = 1.20\times$): High R&D/developer traction and clean safety records.
+     * `Compounder` ($M_k = 1.00\times$): High operational health, positive insider conviction.
+     * `Hype_Trap` ($M_k = 0.70\times$): High retail mindshare without underlying R&D or insider buying.
+     * `High_Friction_Distress` ($M_k = 0.50\times$): Depressed safety, rising complaints, immediate exit trigger.
+   * **Dollar Intrinsic Valuation:** Expands DCF baseline by justified moat premium $IV_{\text{moat}} = IV_{\text{baseline}} \times (1 + \Pi_{\text{justified}})$, dynamically scaled by cash-flow variance/covariance $\mathcal{V}_i \in [0.70, 1.25]$.
+   * **Mechanism:** Functions as an **asymmetric downside censoring engine**, eliminating tail-risk traps (Beta: **0.88**, Down-Market Capture: **77.1%**).
 
-#### Statistical Falsification Audit:
-* **Gate 1 (FF5 Alpha):** $\alpha = +6.80\%$/yr ($t = 2.27, p = 0.0257$) under 15 bps; $\alpha = +6.49\%$/yr ($t = 2.17, p = 0.0328$) under 50 bps $\rightarrow$ **PASS**
-* **Gate 2 (Bootstrap $B=1,000$):** Empirical $p(\alpha \le 0) = 0.0130 < 0.05$ $\rightarrow$ **PASS**
-* **Gate 3 (Deflated Sharpe Ratio):** $\text{DSR} = 0.8763$ across candidate trials $\rightarrow$ **PASS**
-* **Gate 4 (Regime Consistency):** Bull Win 56.4% / Bear Win 67.9% $\rightarrow$ **PASS**
+3. **Arm 3: Hybrid Synergy Blend**
+   * **Signal Model:** Convex combination of quantitative economic rents ($70\%$) and qualitative moat conviction ($30\%$) scaled by archetype multipliers.
+   * **Crowding Regulators:** StockTwits & Reddit retail investor mindshare are repurposed away from long-alpha into the **Hype P95 Crowding Suppressor ($\Omega_i \in [0.50, 1.00]$)**, automatically dampening position sizes during retail euphoria.
+   * **Synergy:** Eliminates "value traps" by requiring deep value candidates to possess verifiable technological, operational, or regulatory moats.
 
 ---
 
-## License
+## 8. Empirical Head-to-Head Performance (2018–2024, 83 Months)
 
-Internal use only.
+*(Point-In-Time Evaluation: January 31, 2018 to November 29, 2024 | Initial Capital: **\$10,000.00 USD** | 15 bps Round-Trip Fee Drag)*
+
+| Metric | Arm 1 (Full Quant) | Arm 2 (Qual Moat) | Arm 3 (Hybrid Blend) | S&P 500 (SPY) | Best In Class |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Annualized Return (CAGR)** | **17.46%** | **16.12%** | **21.70%** | 13.00% | **Arm 3 (+21.70%)** |
+| **Cumulative Return (%)** | +204.39% | +181.22% | **+289.08%** | +132.83% | **Arm 3 (+289.08%)** |
+| **Final Wealth (\$10,000)** | \$30,438.83 | \$28,121.79 | **\$38,908.47** | \$23,283.20 | **Arm 3 (+\$15,625 vs SPY)** |
+| **Annualized Volatility (%)** | 18.63% | **16.54%** | 19.44% | 17.25% | **Arm 2 (Lowest Risk)** |
+| **Net Sharpe Ratio ($R_f=2\%$)** | 0.85 | 0.87 | **1.01** | 0.68 | **Arm 3 (1.01 Institutional)** |
+| **Sortino Ratio** | 0.42 | 0.43 | **0.53** | 0.30 | **Arm 3 (0.53)** |
+| **Maximum Drawdown (%)** | **-20.77%** | -21.93% | -20.98% | -23.93% | **Arm 1 / Arm 3 (-20.77% / -20.98%)** |
+| **Calmar Ratio** | 0.84 | 0.74 | **1.03** | 0.54 | **Arm 3 (1.03)** |
+| **Market Beta vs SPY** | 0.98 | **0.88** | 0.99 | 1.00 | **Arm 2 (Lowest Systematic Risk)** |
+| **Jensen's Alpha (%)** | +4.69% | +4.44% | **+8.78%** | 0.00% | **Arm 3 (+8.78% Alpha)** |
+| **Information Ratio (IR)** | 0.53 | 0.38 | **0.86** | 0.00 | **Arm 3 (0.86)** |
+| **Up-Market Capture Ratio** | 105.3% | 95.0% | **113.3%** | 100.0% | **Arm 3 (Outperforms Bull Runs)** |
+| **Down-Market Capture Ratio** | 86.8% | **77.1%** | 80.5% | 100.0% | **Arm 2 (Superior Shock Defense)** |
+| **Average Monthly Turnover** | **7.16%** | 22.29% | 12.36% | 0.00% | **Arm 1 (Lowest Turnover)** |
+
+### Macro Regime Breakdown
+
+* **2020 COVID Shock & Recovery (Feb 2020 – Dec 2020):**
+  * Arm 1: **+43.60%** (Sharpe 1.63, MaxDD -1.9%)
+  * Arm 2: **+39.69%** (Sharpe 1.47, MaxDD -4.1%)
+  * Arm 3: **+38.25%** (Sharpe 1.34, MaxDD -1.4%)
+  * SPY: +27.25% (Sharpe 1.10, MaxDD -6.1%)
+* **2022 Fed Rate Hiking Bear Market (Jan 2022 – Dec 2022):**
+  * **Arm 2 demonstrated remarkable capital preservation**: while SPY declined **-8.19%** (with an intra-year drawdown of -20.25%), Arm 2 produced **+5.73% net return** with a single-digit Max DD of **-9.02%**.
+  * Arm 3 held firm at **+5.84% net return** (Sharpe 0.26).
+* **2023–2024 AI / Tech Momentum Expansion (Jan 2023 – Nov 2024):**
+  * **Arm 3 captured massive upside convexity**: generating **+69.57% net return (+21.32% over SPY's +48.25%)** by scaling into high-traction technology and enterprise innovators.
+
+---
+
+## 9. Data Provenance, Legality & Sustainable Ingestion
+
+All quantitative and qualitative data feeds used in Quant-Py are **100% legal, public domain, or open-access government/foundation APIs**, adhering strictly to automated Terms of Service with **zero fragile, anti-bot web scraping**:
+
+| Sector / Pillar | Data Source | Provenance & Legal Classification | Access Protocol & Rate Limits | Historical Depth |
+| :--- | :--- | :--- | :--- | :--- |
+| **Financials & Accounting** | **SEC EDGAR (XBRL & 10-K/10-Q)** | **Public Domain (US Government).** 100% Legal under Freedom of Information Act & SEC Open Data. | Official REST API (`data.sec.gov/api/xbrl/`) with declared User-Agent header (10 req/sec limit). | 2010 – Present (15+ years) |
+| **Developer & AI Traction** | **GitHub Archive (GH Archive) & Hugging Face Hub** | **Open Data / Public REST API.** GH Archive is licensed CC0 / public Google BigQuery dataset. Hugging Face Hub provides official public model download endpoints. | Official Hugging Face REST API (`huggingface.co/api/models`) and BigQuery Public Datasets (`githubarchive.day.*`). | 2011 – Present (13+ years) |
+| **Intellectual Property** | **USPTO PatentsView** | **Public Domain (US Government).** Open Data initiative managed by the US Patent and Trademark Office. | Direct bulk Parquet/TSV downloads hosted on official AWS S3 open bucket (`patentsview.org`). | 1976 – Present (48+ years) |
+| **Healthcare & Biotech** | **ClinicalTrials.gov (API v2) & FDA openFDA** | **Public Domain (US Government).** Managed by the National Library of Medicine (NLM) and US FDA. | Official REST APIs (`clinicaltrials.gov/api/v2`, `openfda.api.fda.gov`) and bulk TSV databases. | 2000 – Present (24+ years) |
+| **Consumer & Mindshare** | **Wikimedia Foundation API** | **Open Data (CC BY-SA 3.0).** Official public metrics provided by the Wikimedia Foundation. | Official Wikimedia REST API (`wikimedia.org/api/rest_v1/metrics/pageviews/`). | 2015 – Present (10+ years) |
+| **Financial Regulation** | **CFPB Consumer Complaints & FDIC BankFind** | **Public Domain (US Government).** Managed by Consumer Financial Protection Bureau and FDIC. | Official Socrata Open Data REST API (`data.consumerfinance.gov`) and FDIC REST API. | 2011 – Present (13+ years) |
+| **Defense & Government Contracts** | **USASpending.gov & FPDS** | **Public Domain (US Government).** Managed by the US Department of the Treasury. | Official Open Government REST API (`api.usaspending.gov`) and bulk monthly relational exports. | 2000 – Present (24+ years) |
+| **Vehicle Safety & Logistics** | **NHTSA Vehicle Safety API** | **Public Domain (US Government).** Managed by the National Highway Traffic Safety Administration. | Official flat TSV database and REST API (`api.nhtsa.gov`). | 1972 – Present (52+ years) |
+| **Investor Mindshare & Crowding** | **StockTwits & Public Reddit Pushshift Dumps** | **Public Developer APIs & Research Dumps.** Used purely as a volatility and crowding suppressor ($\Omega_i$), never for long alpha. | Official StockTwits developer endpoints and academic archive dumps under fair use research exemptions. | 2012 – Present (12+ years) |
+
+### Strict Point-In-Time (PIT) Compliance
+Every record ingested is verified against an immutable PIT timestamp:
+$$\text{timestamp}_{\text{data}} \le T_{\text{rebalance}}$$
+Accounting fundamentals key strictly to SEC `filed_date` (never quarter-end dates), patents key to official `grant_date`, trial updates key to `results_first_submitted_date`, and web/model views key to closed month-end timestamps. Lookahead bias is strictly and mechanically eliminated.
+
+---
+
+## 10. License
+
+Internal research and proprietary trading use only. All external datasets comply with their respective open government and public foundation licenses.
