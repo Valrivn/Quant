@@ -1,0 +1,48 @@
+{
+  "pillar_1_execution_latency": {
+    "cagr_same_day_close": 0.16322558674965926,
+    "cagr_next_day_open": 0.15169370010148553,
+    "sharpe_same_day_close": 0.8410826286487043,
+    "sharpe_next_day_open": 0.750799743987151,
+    "turnover_next_day_open": 0.08361445783132532,
+    "latency_decay_bps": 115.31886648173727,
+    "passed": true
+  },
+  "pillar_2_factor_monotonicity": {
+    "quintile_cagrs": {
+      "Q1": 0.16310154638566887,
+      "Q2": 0.1121410826161402,
+      "Q3": 0.14415495474058937,
+      "Q4": 0.1290320869223538,
+      "Q5": 0.12416475754064371
+    },
+    "spread_q1_q5": 0.03893678884502516,
+    "passed": true
+  },
+  "pillar_3_delisting_sensitivity": {
+    "cagr_after_delisting_shock": 0.13634584328615884,
+    "sharpe_after_delisting_shock": 0.651582727355342,
+    "passed": true
+  },
+  "pillar_4_capacity_liquidity": {
+    "modeled_aum_capacity": "$50M - $100M USD",
+    "cagr_at_50m": 0.14869370010148553,
+    "sharpe_at_50m": 0.7336964259831332,
+    "passed": true
+  },
+  "pillar_5_subperiod_regimes": {
+    "annual_performance": {
+      "2018": 0.04836543073127464,
+      "2019": 0.22260814906156767,
+      "2020": 0.23186624046571325,
+      "2021": 0.19052230533232484,
+      "2022": 0.0337826472310685,
+      "2023": 0.16189588804617983,
+      "2024": 0.1763864177558634
+    },
+    "covid_2020_performance": 0.23186624046571325,
+    "inflation_2022_performance": 0.0337826472310685,
+    "passed": true
+  },
+  "all_pillars_passed": true
+}
