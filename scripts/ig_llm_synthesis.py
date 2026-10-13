@@ -299,17 +299,12 @@ def discover_alternative_sites(ticker: str):
     query = f"{ticker} employee reviews customer testimonials alternative site"
     url_query = urllib.parse.quote(query)
     
-    # Default mock discovered sites based on the ticker to simulate web crawling results
-    import hashlib
-    mock_sites = ["https://trustpilot.com", "https://g2.com", "https://capterra.com"]
-    discovered = mock_sites[int(hashlib.md5(ticker.encode("utf-8")).hexdigest(), 16) % len(mock_sites)]
-    
-    # Log discovered source
+    # Fail-closed: log unverified missing alternative data rather than generating synthetic URLs
     log_file = PROJECT_ROOT / "logs" / "discovered_sources.log"
     os.makedirs(log_file.parent, exist_ok=True)
     with open(log_file, "a") as f:
-        f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Ticker: {ticker} | Discovered Source Domain: {discovered} | Query: {query}\n")
-    print(f"  [+] Logged discovered site: {discovered}")
+        f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Ticker: {ticker} | Status: UNVERIFIED_NO_ALT_DATA | Query: {query}\n")
+    print(f"  [!] Flagged lack of verified alt-data for {ticker}; no synthetic mock site generated.")
 
 def upsert_qual_proxy(conn: sqlite3.Connection, ticker: str, data: dict):
     """Insert or update the qualitative proxy in the database."""
