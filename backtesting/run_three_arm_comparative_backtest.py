@@ -350,10 +350,32 @@ def simulate_three_arms(
         else:
             spy_ret = 0.0
 
-        # Gross & Net returns
-        gross_1 = (1.0 - bond_weight) * eq_ret_1 + bond_weight * bond_ret
-        gross_2 = (1.0 - bond_weight) * eq_ret_2 + bond_weight * bond_ret
-        gross_3 = (1.0 - bond_weight) * eq_ret_3 + bond_weight * bond_ret
+        # Dynamic Drawdown Shield per Arm:
+        # Track historical cumulative returns to identify drawdown state
+        def get_dd_alloc(hist_returns: List[float], default_bond: float) -> Tuple[float, str]:
+            if len(hist_returns) < 2:
+                return default_bond, "NORMAL"
+            cum = np.cumprod(1.0 + np.array(hist_returns))
+            hwm = np.maximum.accumulate(cum)
+            dd = (cum[-1] - hwm[-1]) / hwm[-1]
+            if dd <= -0.15:
+                return 0.85, "CRISIS"   # 85% BIL cushion in crisis
+            elif dd <= -0.08:
+                return 0.50, "WARNING"  # 50% BIL cushion in warning
+            return default_bond, "NORMAL"
+
+        prev_rets_1 = [r['arm1_net_ret'] for r in monthly_records]
+        prev_rets_2 = [r['arm2_net_ret'] for r in monthly_records]
+        prev_rets_3 = [r['arm3_net_ret'] for r in monthly_records]
+
+        bond_w_1, regime_1 = get_dd_alloc(prev_rets_1, bond_weight)
+        bond_w_2, regime_2 = get_dd_alloc(prev_rets_2, bond_weight)
+        bond_w_3, regime_3 = get_dd_alloc(prev_rets_3, bond_weight)
+
+        # Gross & Net returns scaled by shielded bond weight
+        gross_1 = (1.0 - bond_w_1) * eq_ret_1 + bond_w_1 * bond_ret
+        gross_2 = (1.0 - bond_w_2) * eq_ret_2 + bond_w_2 * bond_ret
+        gross_3 = (1.0 - bond_w_3) * eq_ret_3 + bond_w_3 * bond_ret
 
         drag_1 = turnover_1 * (tcost_bps / 10000.0)
         drag_2 = turnover_2 * (tcost_bps / 10000.0)
@@ -366,6 +388,9 @@ def simulate_three_arms(
         monthly_records.append({
             'rebalance_date': cur_date,
             'next_rebalance_date': next_date,
+            'regime_arm1': regime_1,
+            'regime_arm2': regime_2,
+            'regime_arm3': regime_3,
             # Arm 1
             'arm1_holdings': len(holdings_arm1),
             'arm1_turnover': turnover_1,

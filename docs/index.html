@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quant Platform — An Audited Quantitative Value Research Retrospective</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            surface: {
+              950: '#070A0F',
+              900: '#0B0F17',
+              850: '#0F1522',
+              800: '#151D2E',
+              750: '#1B253B',
+              700: '#23304B',
+            },
+            cyanAccent: '#00F2FE',
+            emeraldAccent: '#10B981',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { background-color: #070A0F; color: #E2E8F0; }
+    .glass-card {
+      background: rgba(15, 21, 34, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-card-hover {
+      transition: all 0.25s ease;
+    }
+    .glass-card-hover:hover {
+      border-color: rgba(0, 242, 254, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0, 242, 254, 0.08);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 20px -3px rgba(0, 242, 254, 0.25);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.25);
+    }
+    .strikethrough-dim {
+      opacity: 0.45;
+      text-decoration: line-through;
+    }
+  </style>
+</head>
+<body class="selection:bg-cyan-500 selection:text-black font-sans antialiased text-slate-300">
+
+  <!-- TOP STATUS BANNER -->
+  <div class="bg-surface-950 border-b border-surface-800 text-xs py-2.5 px-4 font-mono">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-slate-400">Admissions Portfolio Supplement:</span>
+        <span class="text-slate-200 font-semibold">Audited Quantitative Research Monograph</span>
+      </div>
+      <div class="flex items-center gap-3 text-slate-400 text-[11px]">
+        <span>Universe: <strong class="text-slate-200">1,883 PIT Tickers</strong></span>
+        <span>•</span>
+        <span>Filings: <strong class="text-slate-200">83,265 SEC XBRL</strong></span>
+        <span>•</span>
+        <span class="text-emerald-400">Pre-Reg: v8.0-FROZEN</span>
+        <span>•</span>
+        <a href="https://github.com/Valrivn/Quant" target="_blank" class="text-cyan-400 hover:underline">github.com/Valrivn/Quant</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO SECTION -->
+  <header class="border-b border-surface-800 bg-gradient-to-b from-surface-900 via-surface-950 to-surface-950 py-14 px-4 relative overflow-hidden">
+    <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="max-w-5xl mx-auto relative z-10">
+      <div class="flex flex-wrap items-center gap-2.5 mb-5">
+        <span class="px-3 py-1 rounded-full text-xs font-mono font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-500/25">Quantitative Finance</span>
+        <span class="px-3 py-1 rounded-full text-xs font-mono font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/25">100% Real PIT Validated</span>
+        <span class="px-3 py-1 rounded-full text-xs font-mono font-medium bg-purple-500/10 text-purple-300 border border-purple-500/25">Parallel Autonomous Agents</span>
+        <span class="px-3 py-1 rounded-full text-xs font-mono font-medium bg-rose-500/10 text-rose-300 border border-rose-500/25">Honest Look-Ahead Falsification</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight mb-4">
+        Quant Platform
+      </h1>
+      <p class="text-lg sm:text-xl text-slate-400 max-w-3xl leading-relaxed mb-8 font-light">
+        A formal engineering post-mortem documenting a one-year journey from emotional retail trading and machine-learning look-ahead traps to an audited, first-principles systematic value investing engine.
+      </p>
+
+      <div class="flex flex-wrap items-center gap-5 pt-4 border-t border-surface-800/80 text-xs sm:text-sm">
+        <div class="flex items-center gap-2 text-slate-300">
+          <svg class="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          <span>Source Code:</span>
+          <a href="https://github.com/Valrivn/Quant" target="_blank" class="text-cyan-400 hover:text-cyan-300 font-mono font-medium underline">github.com/Valrivn/Quant</a>
+        </div>
+        <span class="text-slate-600">•</span>
+        <div class="text-slate-400">
+          Author: <span class="text-slate-200 font-medium">Lead Researcher</span> (High School Senior '27)
+        </div>
+        <span class="text-slate-600">•</span>
+        <div class="text-slate-400 font-mono">
+          Backtest Window: 2018–2024 (83–102 Rebalances)
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- STICKY NAV -->
+  <nav class="sticky top-0 bg-surface-950/90 backdrop-blur-md border-b border-surface-800 z-50 text-xs sm:text-sm font-medium">
+    <div class="max-w-5xl mx-auto px-4 flex items-center justify-between overflow-x-auto gap-6 py-3 scrollbar-none">
+      <a href="#tributes" class="text-slate-400 hover:text-cyan-400 whitespace-nowrap">0. The Books That Built Me</a>
+      <a href="#hook" class="text-slate-400 hover:text-cyan-400 whitespace-nowrap">1. The Hook (90s)</a>
+      <a href="#master-ledger" class="text-slate-400 hover:text-cyan-400 whitespace-nowrap">2. Master Backtest Registry</a>
+      <a href="#pivots" class="text-slate-400 hover:text-cyan-400 whitespace-nowrap">3. Architectural Decisions</a>
+      <a href="#failure-lab" class="text-slate-400 hover:text-cyan-400 whitespace-nowrap">4. The Failure Lab</a>
+      <a href="#legal-data" class="text-slate-400 hover:text-cyan-400 whitespace-nowrap">5. 100% Legal Public Data</a>
+      <a href="#falsification" class="text-slate-400 hover:text-cyan-400 whitespace-nowrap">6. Statistical Falsification</a>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 py-12 space-y-16">
+
+    <!-- SECTION 0: TRIBUTES TO FOUNDATIONAL BOOKS -->
+    <section id="tributes" class="glass-card rounded-2xl p-7 sm:p-8 relative">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/25 font-bold font-mono text-sm">00</span>
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white">Intellectual Foundations: The Books That Got Me Here</h2>
+          <p class="text-xs text-slate-400">The three foundational texts that shaped my philosophy from qualitative intuition to mathematical execution.</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-5">
+
+        <!-- LYNCH TRIBUTE -->
+        <div class="p-5 rounded-xl bg-surface-900/90 border border-surface-800 flex flex-col justify-between glass-card-hover">
+          <div>
+            <div class="text-[11px] font-mono text-cyan-400 font-semibold mb-1 uppercase tracking-wide">Practitioner Moats & Scuttlebutt</div>
+            <h3 class="text-base font-bold text-white mb-2">One Up On Wall Street</h3>
+            <p class="text-xs text-slate-400 font-mono mb-3">by Peter Lynch</p>
+            <p class="text-xs text-slate-300 leading-relaxed mb-3">
+              Lynch proved that real-world practitioner observation beats spreadsheet theories. His framework taught me to categorize companies into <strong>6 distinct archetypes</strong> (Slow Growers, Stalwarts, Fast Growers, Cyclicals, Turnarounds, Asset Plays)—each demanding completely different valuation multiples and holding periods.
+            </p>
+          </div>
+          <div class="mt-3 pt-3 border-t border-surface-800 text-[11px] text-cyan-300 font-mono">
+            <strong>System Implementation:</strong> Scrapes developer velocity on GitHub and enterprise lock-in to score Lynch-style competitive durability.
+          </div>
+        </div>
+
+        <!-- GRAHAM TRIBUTE -->
+        <div class="p-5 rounded-xl bg-surface-900/90 border border-surface-800 flex flex-col justify-between glass-card-hover">
+          <div>
+            <div class="text-[11px] font-mono text-emerald-400 font-semibold mb-1 uppercase tracking-wide">Emotional Discipline & Mr. Market</div>
+            <h3 class="text-base font-bold text-white mb-2">The Intelligent Investor</h3>
+            <p class="text-xs text-slate-400 font-mono mb-3">by Benjamin Graham (Chapters 8 & 13)</p>
+            <p class="text-xs text-slate-300 leading-relaxed mb-3">
+              Reading Graham's <strong>"Mr. Market" analogy</strong> was the single moment that converted me to value investing. Mr. Market is an emotional manic-depressive partner who quotes prices based on daily mood swings. Graham taught me that the stock market is not an oracle to be timed, but an emotional counterparty offering bargains during panics.
+            </p>
+          </div>
+          <div class="mt-3 pt-3 border-t border-surface-800 text-[11px] text-emerald-300 font-mono">
+            <strong>System Implementation:</strong> Enforced a mathematical <em>Margin of Safety</em> and valuation-gated emergency shields to prevent selling during panic troughs.
+          </div>
+        </div>
+
+        <!-- DAMODARAN TRIBUTE -->
+        <div class="p-5 rounded-xl bg-surface-900/90 border border-surface-800 flex flex-col justify-between glass-card-hover">
+          <div>
+            <div class="text-[11px] font-mono text-purple-400 font-semibold mb-1 uppercase tracking-wide">First-Principles Valuation Math</div>
+            <h3 class="text-base font-bold text-white mb-2">Investment Valuation</h3>
+            <p class="text-xs text-slate-400 font-mono mb-3">by Prof. Aswath Damodaran (NYU Stern)</p>
+            <p class="text-xs text-slate-300 leading-relaxed mb-3">
+              Damodaran provided the quantitative spine of the engine. He proved that growth cannot be extrapolated from the past; it must be earned endogenously through <code class="text-cyan-300 font-mono">g = Reinvestment &times; ROIC</code>. He taught me to strip away corporate accounting fictions by capitalizing R&D and converting lease commitments into debt.
+            </p>
+          </div>
+          <div class="mt-3 pt-3 border-t border-surface-800 text-[11px] text-purple-300 font-mono">
+            <strong>System Implementation:</strong> Fully integrated dynamic NYU Stern Damodaran cost of capital tables and capitalized R&D over 3–5 year amortization schedules.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 1: THE EXECUTIVE HOOK -->
+    <section id="hook" class="glass-card rounded-2xl p-7 sm:p-8">
+      <div class="flex items-center gap-3 mb-5">
+        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/25 font-bold font-mono text-sm">01</span>
+        <h2 class="text-xl sm:text-2xl font-bold text-white">The Executive Narrative: The Seduction and Defeat of Market Timing</h2>
+      </div>
+
+      <div class="space-y-4 text-slate-300 text-sm sm:text-base leading-relaxed font-light">
+        <p>
+          I started investing my personal savings into fundamental value stocks, but I quickly crashed into human psychology: <strong>emotions are not fully logical</strong>. Discretionary investing left me vulnerable to panic selling during steep drawdowns and greed during market rallies. I wondered: <em>why leave capital allocation to ambiguous emotional impulses when Graham and Damodaran's principles can be formalized into code?</em>
+        </p>
+
+        <p>
+          My first instinct was to use modern machine learning. I built models to predict price direction and adjust asset weights to time market dips. The backtest curves were astonishing—showing steep 80%+ win rates. But when I audited the data pipeline, I uncovered a humiliating truth: <strong>the backtest was a complete illusion</strong>. 
+        </p>
+
+        <div class="p-4 rounded-xl bg-rose-950/40 border border-rose-800/60 text-xs sm:text-sm text-rose-200">
+          <strong class="text-rose-400 font-mono">The Look-Ahead Bias Trap:</strong> Standard Python financial libraries download auto-adjusted historical prices and restated 10-K financial statements. The model was accessing numbers that had been restated months <em>after</em> the trade date. Worse, it was implicitly peeking into future stock splits and cash dividends before they occurred. The machine was cheating by looking into the future.
+        </div>
+
+        <p>
+          Next, I attempted an "opportunistic" model: aggressively buying deep dips while using safety buffers (hysteria/hysteresis bands) to exit during crashes. This created a new failure mode: <strong>The Recovery Penalty</strong>. The stock market's highest-return days historically occur immediately after violent sell-offs. Because my model waited for volatility to cool before re-entering, it <strong>consistently missed the recovery bounce-backs</strong>. Any attempt to tweak thresholds to capture both was just curve-fitting historical noise.
+        </p>
+
+        <p>
+          That failure forced my ultimate breakthrough: <strong>abandon market timing completely</strong>. Market fluctuations are largely erratic. Real quantitative resilience comes from holding high-ROIC compounders with audited competitive moats, buffered by a 15% short-term Treasury cushion (BIL), and rebalancing quarterly on strict Point-in-Time SEC EDGAR data.
+        </p>
+      </div>
+    </section>
+
+    <!-- SECTION 2: MASTER BACKTEST REGISTRY -->
+    <section id="master-ledger" class="glass-card rounded-2xl p-7 sm:p-8">
+      <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/25 font-bold font-mono text-sm">02</span>
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold text-white">Master Backtest Registry: Transparent Falsification</h2>
+            <p class="text-xs text-slate-400">Complete historical record from <code class="text-cyan-400 font-mono">data/backtests/BACKTEST_LEDGER.md</code>. Look-ahead and contaminated runs are greyed out.</p>
+          </div>
+        </div>
+        <span class="px-3 py-1 bg-surface-800 text-slate-300 text-xs font-mono rounded-md border border-surface-700">Audit Status: CONTAMINATION-MARKED</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-surface-850 text-slate-400 font-mono border-b border-surface-750">
+              <th class="py-3 px-3">Date</th>
+              <th class="py-3 px-3">Version / Strategy</th>
+              <th class="py-3 px-3">Data Provenance</th>
+              <th class="py-3 px-3">Ann Return / CAGR</th>
+              <th class="py-3 px-3">Sharpe</th>
+              <th class="py-3 px-3">Max DD</th>
+              <th class="py-3 px-3">Audit Verdict</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-800 font-mono">
+
+            <!-- CONTAMINATED: SYNTHETIC PHASE 9 -->
+            <tr class="bg-surface-950/40 text-slate-500 strikethrough-dim">
+              <td class="py-3 px-3">2026-09-13</td>
+              <td class="py-3 px-3 font-sans">Phase 9 Synthetic Validation</td>
+              <td class="py-3 px-3">Synthetic Toy Data</td>
+              <td class="py-3 px-3">N/A (Unreliable)</td>
+              <td class="py-3 px-3">N/A</td>
+              <td class="py-3 px-3">N/A</td>
+              <td class="py-3 px-3 no-underline"><span class="px-2 py-0.5 rounded text-[10px] bg-rose-950 text-rose-400 border border-rose-800">INVALIDATED: SYNTHETIC</span></td>
+            </tr>
+
+            <!-- CONTAMINATED: LEGACY RM-FINAL -->
+            <tr class="bg-surface-950/40 text-slate-500 strikethrough-dim">
+              <td class="py-3 px-3">Legacy RM</td>
+              <td class="py-3 px-3 font-sans">RM-FINAL (Pre-Audit Chat Run)</td>
+              <td class="py-3 px-3">yfinance Auto-Adjusted</td>
+              <td class="py-3 px-3 text-rose-400/70">+242.5% (Inflated)</td>
+              <td class="py-3 px-3">1.43</td>
+              <td class="py-3 px-3">-11.7%</td>
+              <td class="py-3 px-3 no-underline"><span class="px-2 py-0.5 rounded text-[10px] bg-rose-950 text-rose-400 border border-rose-800">INVALIDATED: LOOK-AHEAD</span></td>
+            </tr>
+
+            <!-- CONTAMINATED: 10-04 SPRINT 9 RERUN -->
+            <tr class="bg-surface-950/40 text-slate-500 strikethrough-dim">
+              <td class="py-3 px-3">2026-10-04</td>
+              <td class="py-3 px-3 font-sans">Sprint 9 (Sparse SEC Pipeline)</td>
+              <td class="py-3 px-3">Sparse 13-140 Tickers/mo</td>
+              <td class="py-3 px-3">-1.24% to +0.26%</td>
+              <td class="py-3 px-3">0.15</td>
+              <td class="py-3 px-3">-36.0%</td>
+              <td class="py-3 px-3 no-underline"><span class="px-2 py-0.5 rounded text-[10px] bg-amber-950 text-amber-400 border border-amber-800">INVALIDATED: DATA DEFECT</span></td>
+            </tr>
+
+            <!-- CONTAMINATED: 10-07 DAILY COMPOSITE CHURN -->
+            <tr class="bg-surface-950/40 text-slate-500 strikethrough-dim">
+              <td class="py-3 px-3">2026-10-07</td>
+              <td class="py-3 px-3 font-sans">Merged PIT Universe (Daily Score Bug)</td>
+              <td class="py-3 px-3">Merged PIT, 1,760 Daily Rows</td>
+              <td class="py-3 px-3">-34.0% to -47.7%</td>
+              <td class="py-3 px-3">Negative</td>
+              <td class="py-3 px-3">-52.0%</td>
+              <td class="py-3 px-3 no-underline"><span class="px-2 py-0.5 rounded text-[10px] bg-rose-950 text-rose-400 border border-rose-800">DEFECTIVE: CHURN DEFECT</span></td>
+            </tr>
+
+            <!-- HISTORICAL REAL: S7/S8 CORE DCF -->
+            <tr class="text-slate-400 bg-surface-900/50">
+              <td class="py-3 px-3">2026-09-15</td>
+              <td class="py-3 px-3 font-sans">Core DCF Screen (S7 Stage Baseline)</td>
+              <td class="py-3 px-3 text-slate-300">Documented PIT</td>
+              <td class="py-3 px-3 text-slate-200">+21.16% (S7)</td>
+              <td class="py-3 px-3">1.62</td>
+              <td class="py-3 px-3">-7.03%</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300">HONEST: HISTORICAL</span></td>
+            </tr>
+
+            <!-- ACTIVE BENCHMARK: OPTIMAL VALUE 2026-10-11 -->
+            <tr class="bg-surface-850/80 text-slate-200">
+              <td class="py-3 px-3 text-cyan-400 font-bold">2026-10-11</td>
+              <td class="py-3 px-3 font-sans font-bold text-white">Optimal Value Strategy (Real PIT)</td>
+              <td class="py-3 px-3 text-emerald-400">100% Real PIT (83k Filings)</td>
+              <td class="py-3 px-3 text-emerald-400 font-bold">+17.46% net</td>
+              <td class="py-3 px-3 font-bold">0.83</td>
+              <td class="py-3 px-3 text-emerald-400 font-bold">-20.77%</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700">VALID: 4/4 GATES PASS</span></td>
+            </tr>
+
+            <!-- VERIFIED 3-ARM RUN: 2026-10-12 LIVE RE-RUN -->
+            <tr class="bg-cyan-950/30 text-white font-semibold border-t-2 border-cyan-500/40">
+              <td class="py-3 px-3 text-cyan-300 font-bold">2026-10-12</td>
+              <td class="py-3 px-3 font-sans font-bold text-cyan-200 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span> Arm 2: Qualitative Moat (LIVE)
+              </td>
+              <td class="py-3 px-3 text-emerald-300">84,000 Records / 1,297 Tickers</td>
+              <td class="py-3 px-3 text-emerald-400 font-bold">+12.12% CAGR</td>
+              <td class="py-3 px-3 font-bold">0.75</td>
+              <td class="py-3 px-3 text-emerald-400 font-bold">-17.03% (vs SPY -23.9%)</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-500">PRODUCTION VERIFIED</span></td>
+            </tr>
+
+            <tr class="bg-cyan-950/20 text-slate-200">
+              <td class="py-3 px-3 text-cyan-400">2026-10-12</td>
+              <td class="py-3 px-3 font-sans font-medium">Arm 1: Full Quant Optimal (LIVE)</td>
+              <td class="py-3 px-3 text-emerald-300">84,000 Records / 1,297 Tickers</td>
+              <td class="py-3 px-3 text-slate-100">+11.57% CAGR</td>
+              <td class="py-3 px-3">0.72</td>
+              <td class="py-3 px-3 text-emerald-400">-17.78% (Turnover: 7.16%)</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-500">PRODUCTION VERIFIED</span></td>
+            </tr>
+
+            <!-- BENCHMARK: SPY -->
+            <tr class="bg-surface-900/60 text-slate-400">
+              <td class="py-3 px-3">2018–2024</td>
+              <td class="py-3 px-3 font-sans text-slate-300">S&P 500 (SPY ETF Benchmark)</td>
+              <td class="py-3 px-3">Official Market Closes</td>
+              <td class="py-3 px-3 text-slate-300">+13.00% CAGR</td>
+              <td class="py-3 px-3">0.68</td>
+              <td class="py-3 px-3 text-rose-400">-23.93% Max DD</td>
+              <td class="py-3 px-3"><span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300">MARKET BENCHMARK</span></td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- KEY VERIFIED FINDING CALLOUT -->
+      <div class="mt-6 p-4 rounded-xl bg-surface-850 border border-surface-750 text-xs sm:text-sm text-slate-300 space-y-2">
+        <div class="flex items-center gap-2 text-cyan-400 font-mono font-bold">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          The True Source of Edge: Downside Truncation, Not Stock Picking
+        </div>
+        <p class="leading-relaxed font-light">
+          Notice how the genuine 100% Point-in-Time backtest behaves: SPY generated a slightly higher raw CAGR (13.00% vs 12.12%), but suffered a deep <strong>-23.93% crash</strong> and 17.25% volatility. 
+          By contrast, Arm 1 and Arm 2 cut maximum drawdown to <strong>-17.03% to -17.78%</strong>, reduced Down-Market Capture to <strong>64.3% – 71.6%</strong>, and slashed portfolio beta down to <strong>0.63 – 0.71</strong>. The strategy delivers equity returns with bond-buffered downside peace of mind.
+        </p>
+      </div>
+
+      <!-- STANDARDIZED BACKTEST OUTLIER ANALYSIS -->
+      <div class="mt-6 p-5 rounded-xl bg-surface-900 border border-amber-500/30 text-xs sm:text-sm text-slate-300 space-y-3">
+        <div class="flex items-center gap-2 text-amber-400 font-mono font-bold text-sm">
+          <span>🔍 Standardized Backtest Audit: 3 Critical Statistical Outliers</span>
+        </div>
+        <p class="leading-relaxed font-light">
+          Standardizing the backtest across all 7 years reveals 3 statistical outliers that directly guided our architectural evolution:
+        </p>
+        <div class="grid sm:grid-cols-3 gap-3 pt-1 text-xs font-mono">
+          <div class="p-3 rounded bg-surface-950 border border-surface-800">
+            <div class="text-amber-400 font-bold mb-1">Outlier 1: The S7/S8 Regime Decay</div>
+            <p class="text-slate-300 font-sans text-xs">
+              In S7 (2023–2024), Core DCF delivered an outlier <strong>+21.16% return</strong> with a 1.62 Sharpe. But in S8 (2025–2026), return collapsed to <strong>-1.16%</strong> as market breadth narrowed into mega-cap momentum. This proved DCF value alone is insufficient without qualitative moat tracking.
+            </p>
+          </div>
+          <div class="p-3 rounded bg-surface-950 border border-surface-800">
+            <div class="text-rose-400 font-bold mb-1">Outlier 2: The v7 DCF Data Defect</div>
+            <p class="text-slate-300 font-sans text-xs">
+              v7 DCF produced an anomalous <strong>-36.0% drawdown</strong> and negative returns. Investigation uncovered that sparse queries loaded only 13–140 tickers, defaulting missing names to a flat 8% WACC tech basket. The backtest caught the bug and rejected v7.
+            </p>
+          </div>
+          <div class="p-3 rounded bg-surface-950 border border-surface-800">
+            <div class="text-emerald-400 font-bold mb-1">Outlier 3: The 2020 COVID Liquidity Crash</div>
+            <p class="text-slate-300 font-sans text-xs">
+              SPY experienced an extreme <strong>-31.4% crash outlier</strong> in March 2020. The production drawdown circuit breaker triggered WARNING (50% BIL allocation), capping drawdown to <strong>-17.03%</strong> and preventing emotional capitulation.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- IN-DEPTH STRATEGY BREAKDOWN: DEBUNKING MARKOV CHAINS -->
+      <div class="mt-8 pt-8 border-t border-surface-800 space-y-5">
+        <div class="flex items-center gap-2.5">
+          <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 uppercase">Architecture Deep Dive</span>
+          <h3 class="text-lg font-bold text-white">How the Current Production Strategy Actually Works (Debunking the Markov Myth)</h3>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-900 border border-surface-800 space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
+          <p>
+            <strong class="text-white">Does the production engine use Markov chains or macroeconomic regime forecasters? <span class="text-rose-400">No.</span></strong>
+          </p>
+          <p>
+            Early research (Phase 9 Sprint 6–8) heavily experimented with 2-state and 3-state Hidden Markov Models (HMM) trying to predict macroeconomic shifts from yield curves and credit spreads. However, empirical out-of-sample audits proved that <strong>Markov regime timing was fundamentally flawed</strong>:
+          </p>
+          <ul class="list-disc pl-5 space-y-1 text-slate-400">
+            <li><strong>Severe Whipsaw Lag:</strong> Statistical macro changepoints take 15–30 days of market pain to confirm, meaning Markov shields sold into cash <em>after</em> crashes had already occurred, and missed the initial sharp rebound days.</li>
+            <li><strong>External API Fragility:</strong> An unhandled timeout from Federal Reserve FRED data caused the fallback model to misdiagnose 72 out of 102 months as a "BEAR REGIME," hoarding cash during bull markets.</li>
+            <li><strong>Circular Validation:</strong> Early HMMs achieved a "fake" Adjusted Rand Index (ARI) of 1.0 because states were evaluated against labels derived from the same feature space.</li>
+          </ul>
+
+          <div class="p-3.5 bg-surface-950 rounded-lg border border-surface-750 text-slate-200 mt-3 space-y-2">
+            <strong class="text-emerald-400 font-mono text-xs uppercase tracking-wide">The Production Solution: Endogenous High-Water Mark Drawdown Circuit Breaker</strong>
+            <p class="text-xs text-slate-300 font-mono leading-relaxed">
+              Instead of guessing macro regimes with brittle Markov chains, the production engine uses a <strong>deterministic, zero-lag internal drawdown shield</strong>:
+            </p>
+            <div class="grid sm:grid-cols-3 gap-3 pt-1 text-xs font-mono">
+              <div class="p-3 rounded bg-surface-900 border border-surface-800">
+                <div class="text-emerald-400 font-bold mb-1">NORMAL (DD &gt; -8%)</div>
+                <div class="text-slate-400">Default Allocation:</div>
+                <div class="text-white font-bold">85% Equities / 15% BIL</div>
+                <div class="text-[10px] text-slate-500 mt-1">Steady-state yield buffer</div>
+              </div>
+              <div class="p-3 rounded bg-surface-900 border border-amber-800/60">
+                <div class="text-amber-400 font-bold mb-1">WARNING (DD -8% to -15%)</div>
+                <div class="text-slate-400">De-risked Allocation:</div>
+                <div class="text-white font-bold">50% Equities / 50% BIL</div>
+                <div class="text-[10px] text-slate-500 mt-1">Cuts equity volatility in half</div>
+              </div>
+              <div class="p-3 rounded bg-surface-900 border border-rose-800/60">
+                <div class="text-rose-400 font-bold mb-1">CRISIS (DD &le; -15%)</div>
+                <div class="text-slate-400">Capital Preservation:</div>
+                <div class="text-white font-bold">15% Equities / 85% BIL</div>
+                <div class="text-[10px] text-slate-500 mt-1">Insulates portfolio principal</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- THE 3 PRODUCTION ARMS BREAKDOWN -->
+        <div class="grid md:grid-cols-3 gap-4 pt-2">
+          <div class="p-4 rounded-xl bg-surface-900 border border-surface-800 text-xs font-light">
+            <div class="font-bold text-cyan-400 text-sm mb-1 font-mono">Arm 1: Full Quant (Optimal)</div>
+            <div class="text-slate-400 text-[11px] mb-2 font-mono">Fundamental Economic Spread</div>
+            <p class="text-slate-300 mb-2">
+              <strong>Entry:</strong> <code class="text-cyan-300 font-mono">ROIC &gt; WACC</code> and <code class="text-cyan-300 font-mono">FCF Margin &gt; 0</code>, 60-day vol between 15% and 40%, ranked by standardized <code class="text-cyan-300 font-mono">Z_spread + 0.5 Z_FCF</code>.<br>
+              <strong>Exit:</strong> Spread collapses (&le;0) or logistical profit harvest at +15%.<br>
+              <strong>Turnover:</strong> Lowest churn (7.16%/mo).
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-surface-900 border border-surface-800 text-xs font-light">
+            <div class="font-bold text-emerald-400 text-sm mb-1 font-mono">Arm 2: Qualitative Moat</div>
+            <div class="text-slate-400 text-[11px] mb-2 font-mono">Lynch Archetypes & IP Durability</div>
+            <p class="text-slate-300 mb-2">
+              <strong>Entry:</strong> Excludes <code class="text-rose-400 font-mono">High_Friction_Distress</code>, ranked by standardized <code class="text-emerald-300 font-mono">Alpha_Spread + Q</code> multiplied by Archetype Multiplier (Innovator 1.2x, Compounder 1.0x).<br>
+              <strong>Exit:</strong> Demoted to Distress, profit take at +25%, or stop-loss at -20%.<br>
+              <strong>Result:</strong> Highest raw CAGR (+12.12%), -17.03% Max DD.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-surface-900 border border-surface-800 text-xs font-light">
+            <div class="font-bold text-purple-400 text-sm mb-1 font-mono">Arm 3: Hybrid Blend</div>
+            <div class="text-slate-400 text-[11px] mb-2 font-mono">Convex Fundamentals + Conviction</div>
+            <p class="text-slate-300 mb-2">
+              <strong>Mechanism:</strong> Blends Arm 1 quantitative fundamentals with Arm 2 qualitative moat conviction, modulated by StockTwits P95 retail crowding dampening.<br>
+              <strong>Turnover:</strong> Moderate rebalancing (12.36%/mo).<br>
+              <strong>Result:</strong> +11.70% CAGR, -20.98% Max DD, 0.74 Beta.
+            </p>
+          </div>
+        </div>
+
+        <!-- NEW RESEARCH: SECTOR SPECTRUM, OOS VALIDATION & MULTI-YEAR HORIZONS -->
+        <div class="mt-8 pt-8 border-t border-surface-800 space-y-6">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2.5">
+              <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 uppercase">Empirical Discovery</span>
+              <h3 class="text-lg font-bold text-white">Sector-Adaptive Harvests, Out-of-Sample (OOS) Testing, & Multi-Year Horizons</h3>
+            </div>
+            <span class="text-xs font-mono text-cyan-400">84 Months &bull; In-Sample vs OOS Split &bull; 1 to 36 Month Horizons</span>
+          </div>
+
+          <!-- QUESTION CALLOUT: VALUE INVESTING OR QUANTITATIVE? -->
+          <div class="p-4 rounded-xl bg-gradient-to-r from-surface-900 via-surface-850 to-surface-900 border border-cyan-500/30 text-xs sm:text-sm text-slate-300 space-y-2">
+            <div class="flex items-center gap-2 text-cyan-300 font-mono font-bold text-sm">
+              <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Is This Value Investing or Quantitative Investing? The Systematic Synthesis
+            </div>
+            <p class="leading-relaxed font-light text-slate-300">
+              This system represents <strong>Quantitative Value Investing</strong> (the paradigm pioneered by Cliff Asness, Wesley Gray, and Prof. Aswath Damodaran):
+            </p>
+            <div class="grid sm:grid-cols-2 gap-3 pt-1 text-xs">
+              <div class="p-3 rounded-lg bg-surface-950 border border-surface-800">
+                <span class="text-emerald-400 font-bold font-mono uppercase text-[11px] block mb-1">The "Soul" is Pure Value Investing</span>
+                <p class="text-slate-300 font-light">
+                  The stock selection criteria are 100% Graham and Damodaran: positive economic spreads (<code class="text-cyan-300 font-mono">ROIC &gt; WACC</code>), free cash flow yields, capitalized R&D intangible assets, and buying strictly below intrinsic value. Selling is triggered when the margin of safety is exhausted, not by chart patterns.
+                </p>
+              </div>
+              <div class="p-3 rounded-lg bg-surface-950 border border-surface-800">
+                <span class="text-cyan-400 font-bold font-mono uppercase text-[11px] block mb-1">The "Engine" is Rigorous Quantitative Science</span>
+                <p class="text-slate-300 font-light">
+                  Discretionary value investors rely on emotional intuition to decide when a stock is "too expensive." This engine replaces human bias with algorithmic Point-in-Time discipline, sector unlevered beta scalers, dynamic high-water mark drawdown circuit breakers, and Out-of-Sample falsification.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTOR SPECTRUM TABLE -->
+          <div class="space-y-2">
+            <h4 class="text-sm font-bold text-white font-mono flex items-center gap-2">
+              <span class="text-cyan-400">1.</span> The Sector Spectrum Sensitivity Matrix (Where Does Each Sector Sit?)
+            </h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-surface-850 text-slate-400 font-mono border-b border-surface-750">
+                    <th class="py-2.5 px-3">Sector</th>
+                    <th class="py-2.5 px-3">Damodaran Unlevered &beta;</th>
+                    <th class="py-2.5 px-3">Fast Harvest (+8%)</th>
+                    <th class="py-2.5 px-3">Base Harvest (+15%)</th>
+                    <th class="py-2.5 px-3">High Run (+25%)</th>
+                    <th class="py-2.5 px-3">Behavioral Cluster & Dynamics</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-surface-800 font-mono text-[11px]">
+                  <tr class="hover:bg-surface-850/60">
+                    <td class="py-2 px-3 text-cyan-300 font-bold">Software</td>
+                    <td class="py-2 px-3 text-slate-300">1.25</td>
+                    <td class="py-2 px-3 text-emerald-400 font-bold">13.08% (Sharpe 0.78)</td>
+                    <td class="py-2 px-3 text-slate-300">11.57% (Sharpe 0.69)</td>
+                    <td class="py-2 px-3 text-rose-400">10.77% (Sharpe 0.61)</td>
+                    <td class="py-2 px-3 text-slate-400 font-sans">High Volatility: multiple re-rating pops require early profit taking.</td>
+                  </tr>
+                  <tr class="hover:bg-surface-850/60">
+                    <td class="py-2 px-3 text-cyan-300 font-bold">Hardware / Semis</td>
+                    <td class="py-2 px-3 text-slate-300">1.15</td>
+                    <td class="py-2 px-3 text-slate-400">10.65% (Sharpe 0.64)</td>
+                    <td class="py-2 px-3 text-emerald-400 font-bold">11.57% (Sharpe 0.69)</td>
+                    <td class="py-2 px-3 text-rose-400">8.87% (Sharpe 0.51)</td>
+                    <td class="py-2 px-3 text-slate-400 font-sans">Cyclical Tech: demanding +25% suffers severe -19.35% drawdown.</td>
+                  </tr>
+                  <tr class="hover:bg-surface-850/60">
+                    <td class="py-2 px-3 text-amber-300 font-bold">Energy</td>
+                    <td class="py-2 px-3 text-slate-300">1.10</td>
+                    <td class="py-2 px-3 text-rose-400">7.80% (Sharpe 0.44)</td>
+                    <td class="py-2 px-3 text-emerald-400 font-bold">11.57% (Sharpe 0.69)</td>
+                    <td class="py-2 px-3 text-rose-400">7.90% (Sharpe 0.46)</td>
+                    <td class="py-2 px-3 text-slate-400 font-sans">Commodity Boom-Bust: tightly anchored to +15% peak cycle.</td>
+                  </tr>
+                  <tr class="hover:bg-surface-850/60">
+                    <td class="py-2 px-3 text-slate-200 font-bold">Industrial</td>
+                    <td class="py-2 px-3 text-slate-300">1.05</td>
+                    <td class="py-2 px-3 text-rose-400">8.75% (Sharpe 0.52)</td>
+                    <td class="py-2 px-3 text-emerald-400 font-bold">11.57% (Sharpe 0.69)</td>
+                    <td class="py-2 px-3 text-rose-400">7.80% (Sharpe 0.43)</td>
+                    <td class="py-2 px-3 text-slate-400 font-sans">Capex Compounder: steady multi-quarter economic cycle.</td>
+                  </tr>
+                  <tr class="hover:bg-surface-850/60">
+                    <td class="py-2 px-3 text-emerald-300 font-bold">Healthcare</td>
+                    <td class="py-2 px-3 text-slate-300">0.95</td>
+                    <td class="py-2 px-3 text-cyan-300 font-bold">10.86% (DD -16.90%)</td>
+                    <td class="py-2 px-3 text-emerald-400 font-bold">11.57% (Sharpe 0.69)</td>
+                    <td class="py-2 px-3 text-rose-400">8.90% (Sharpe 0.52)</td>
+                    <td class="py-2 px-3 text-slate-400 font-sans">Defensive: fast harvest delivers lowest portfolio drawdown (-16.9%).</td>
+                  </tr>
+                  <tr class="hover:bg-surface-850/60">
+                    <td class="py-2 px-3 text-purple-300 font-bold">Financial & REITs</td>
+                    <td class="py-2 px-3 text-slate-300">0.70</td>
+                    <td class="py-2 px-3 text-slate-300">11.55% (Sharpe 0.70)</td>
+                    <td class="py-2 px-3 text-slate-300">11.57% (Sharpe 0.69)</td>
+                    <td class="py-2 px-3 text-emerald-400 font-bold">12.74% (Sharpe 0.74)</td>
+                    <td class="py-2 px-3 text-slate-400 font-sans">Balance-Sheet Value: distressed book-value re-ratings compound steadily.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- OOS SAMPLING & MULTI-YEAR HORIZONS IN 2 COLUMNS -->
+          <div class="grid lg:grid-cols-2 gap-5 pt-2">
+            <!-- COLUMN 1: OOS SAMPLING VALIDATION -->
+            <div class="p-4 rounded-xl bg-surface-900 border border-surface-800 space-y-3">
+              <h4 class="text-sm font-bold text-white font-mono flex items-center justify-between">
+                <span>2. Out-of-Sample (OOS) Validation</span>
+                <span class="text-[10px] text-cyan-400 font-mono">IS: 2018-21 | OOS: 2022-24</span>
+              </h4>
+              <p class="text-xs text-slate-300 font-light">
+                Testing parameter stability across the 2018–2021 bull market (In-Sample) and the 2022–2024 Fed rate hike bear market (Out-of-Sample):
+              </p>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-[11px] font-mono border-collapse">
+                  <thead>
+                    <tr class="bg-surface-850 text-slate-400 border-b border-surface-750">
+                      <th class="py-2 px-2">Strategy</th>
+                      <th class="py-2 px-2">IS CAGR</th>
+                      <th class="py-2 px-2">OOS CAGR</th>
+                      <th class="py-2 px-2">OOS Sharpe</th>
+                      <th class="py-2 px-2">Full 7-Yr</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-surface-800">
+                    <tr>
+                      <td class="py-1.5 px-2 text-slate-300">Uniform Baseline (+15%)</td>
+                      <td class="py-1.5 px-2">19.79%</td>
+                      <td class="py-1.5 px-2 text-slate-300">9.86%</td>
+                      <td class="py-1.5 px-2">0.51</td>
+                      <td class="py-1.5 px-2">11.57%</td>
+                    </tr>
+                    <tr class="bg-cyan-950/20 text-cyan-300 font-bold">
+                      <td class="py-1.5 px-2">Asymmetric Spectrum (Tech 15%, Def 8%)</td>
+                      <td class="py-1.5 px-2">16.56%</td>
+                      <td class="py-1.5 px-2 text-emerald-400 font-bold">12.54% (OOS Winner)</td>
+                      <td class="py-1.5 px-2 text-emerald-400 font-bold">0.67</td>
+                      <td class="py-1.5 px-2 text-cyan-300 font-bold">12.58%</td>
+                    </tr>
+                    <tr class="text-emerald-300 font-bold">
+                      <td class="py-1.5 px-2">Fast Tech / Patient Def (Tech 12%, Def 15%)</td>
+                      <td class="py-1.5 px-2 text-emerald-400 font-bold">24.00%</td>
+                      <td class="py-1.5 px-2">10.01%</td>
+                      <td class="py-1.5 px-2">0.51</td>
+                      <td class="py-1.5 px-2 text-emerald-400 font-bold">15.13% (0.89 Sharpe)</td>
+                    </tr>
+                    <tr class="text-rose-400">
+                      <td class="py-1.5 px-2">High Run Trap (Tech 25%, Def 9%)</td>
+                      <td class="py-1.5 px-2">10.43%</td>
+                      <td class="py-1.5 px-2">10.62%</td>
+                      <td class="py-1.5 px-2">0.56</td>
+                      <td class="py-1.5 px-2">10.29%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="text-[11px] text-slate-400 font-sans italic">
+                *The Asymmetric Spectrum strategy outperformed all others in the brutal 2022 bear market by taking profits early on defensive names (+8%) and recycling into Treasury yields.
+              </p>
+            </div>
+
+            <!-- COLUMN 2: MULTI-YEAR DECADAL HORIZON STUDY -->
+            <div class="p-4 rounded-xl bg-surface-900 border border-surface-800 space-y-3">
+              <h4 class="text-sm font-bold text-white font-mono flex items-center justify-between">
+                <span>3. Patient Multi-Year Holding Horizon Study</span>
+                <span class="text-[10px] text-emerald-400 font-mono">1 to 36 Month Constraints</span>
+              </h4>
+              <p class="text-xs text-slate-300 font-light">
+                Testing Graham and Buffett's decadal thesis: what happens when positions are required to be held for multi-year horizons before applying harvest gates?
+              </p>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-[11px] font-mono border-collapse">
+                  <thead>
+                    <tr class="bg-surface-850 text-slate-400 border-b border-surface-750">
+                      <th class="py-2 px-2">Holding Horizon</th>
+                      <th class="py-2 px-2">CAGR</th>
+                      <th class="py-2 px-2">Sharpe</th>
+                      <th class="py-2 px-2">Max DD</th>
+                      <th class="py-2 px-2">Trades</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-surface-800">
+                    <tr>
+                      <td class="py-1.5 px-2 text-slate-300">Monthly Rebalance (1-Mo Min)</td>
+                      <td class="py-1.5 px-2">11.57%</td>
+                      <td class="py-1.5 px-2">0.69</td>
+                      <td class="py-1.5 px-2 text-slate-300">-17.78%</td>
+                      <td class="py-1.5 px-2">297</td>
+                    </tr>
+                    <tr class="bg-emerald-950/20 text-emerald-300 font-bold border-l-2 border-emerald-400">
+                      <td class="py-1.5 px-2">Annual Patient Value (12-Mo Min)</td>
+                      <td class="py-1.5 px-2 text-emerald-400 font-bold">12.07%</td>
+                      <td class="py-1.5 px-2 text-emerald-400 font-bold">0.74</td>
+                      <td class="py-1.5 px-2 text-emerald-400 font-bold">-16.39%</td>
+                      <td class="py-1.5 px-2 text-emerald-400 font-bold">229 (-23%)</td>
+                    </tr>
+                    <tr>
+                      <td class="py-1.5 px-2 text-slate-400">Multi-Year Horizon (24-Mo Min)</td>
+                      <td class="py-1.5 px-2 text-rose-400">8.06%</td>
+                      <td class="py-1.5 px-2">0.48</td>
+                      <td class="py-1.5 px-2 text-rose-400">-20.33%</td>
+                      <td class="py-1.5 px-2">151</td>
+                    </tr>
+                    <tr>
+                      <td class="py-1.5 px-2 text-slate-400">Graham-Buffett Horizon (36-Mo Min)</td>
+                      <td class="py-1.5 px-2 text-rose-400">8.66%</td>
+                      <td class="py-1.5 px-2">0.51</td>
+                      <td class="py-1.5 px-2 text-rose-400">-19.47%</td>
+                      <td class="py-1.5 px-2">149</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="text-[11px] text-slate-400 font-sans italic">
+                *The <strong>12-month holding sweet spot</strong> validates patient compounding: it improves returns, cuts max drawdown to -16.39%, and slashes portfolio churn by 23%. Beyond 24 months, holding without harvesting causes returns to mean-revert.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIME PERIOD & MARKET REGIME INSPECTOR -->
+      <div class="mt-8 pt-8 border-t border-surface-800 space-y-4">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2.5">
+            <span class="px-2.5 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-800 uppercase">Stress Testing</span>
+            <h3 class="text-lg font-bold text-white">Backtesting Time Period: 7-Year Multi-Regime Cycle (2018–2024)</h3>
+          </div>
+          <span class="text-xs font-mono text-slate-400">83 Monthly Rebalance Dates • 1,297 Clean Tickers</span>
+        </div>
+
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
+          The walk-forward simulation runs continuously across <strong>January 31, 2018 to November 29, 2024</strong>. This 7-year testing window covers every critical macroeconomic regime of modern market history:
+        </p>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs font-mono">
+          <div class="p-3.5 rounded-lg bg-surface-900 border border-surface-800">
+            <div class="text-cyan-400 font-bold mb-1">1. 2018 Q4 Fed Tightening</div>
+            <div class="text-slate-400 text-[11px] mb-1.5">Aggressive Rate Hikes & Trade Friction</div>
+            <p class="text-slate-300 font-sans text-xs">
+              S&P 500 dropped -14.0% in Q4 2018. The strategy's 15% BIL Treasury cushion and low-beta value compounders insulated capital.
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-surface-900 border border-surface-800">
+            <div class="text-rose-400 font-bold mb-1">2. 2020 Q1 COVID Liquidity Shock</div>
+            <div class="text-slate-400 text-[11px] mb-1.5">Unprecedented Global Economic Shutdown</div>
+            <p class="text-slate-300 font-sans text-xs">
+              S&P 500 plunged -31.4% peak-to-trough. The dynamic drawdown shield shifted into WARNING (50% BIL), capping drawdown to -17.0%.
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-surface-900 border border-surface-800">
+            <div class="text-amber-400 font-bold mb-1">3. 2021 Tech & Retail Mania</div>
+            <div class="text-slate-400 text-[11px] mb-1.5">Zero Interest Rates & Meme Crowding</div>
+            <p class="text-slate-300 font-sans text-xs">
+              High-volatility unprofitable tech soared. The P95 StockTwits gate suppressed euphoric retail traps, preventing severe mean reversion losses.
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-surface-900 border border-surface-800">
+            <div class="text-purple-400 font-bold mb-1">4. 2022 Inflation Shock</div>
+            <div class="text-slate-400 text-[11px] mb-1.5">Rapid 500 bps Fed Tightening Cycle</div>
+            <p class="text-slate-300 font-sans text-xs">
+              S&P 500 fell -18.1% (Nasdaq -33%). High-ROIC companies with low debt and pricing power outperformed speculative duration assets.
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-surface-900 border border-surface-800 sm:col-span-2 lg:col-span-2">
+            <div class="text-emerald-400 font-bold mb-1">5. 2023–2024 Generative AI Era & High-Rate Plateau</div>
+            <div class="text-slate-400 text-[11px] mb-1.5">Concentrated Mega-Cap Leadership & 5.25% Cash Yields</div>
+            <p class="text-slate-300 font-sans text-xs">
+              Market returns narrowed into mega-cap AI leaders. Arm 2 qualitative moats captured upside in companies with deep developer lock-in (CUDA ecosystem) while the 15% BIL cushion earned safe 5%+ risk-free cash yields.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: ARCHITECTURAL DECISIONS & PARALLEL AUTONOMOUS AGENTS -->
+    <section id="pivots" class="glass-card rounded-2xl p-7 sm:p-8">
+      <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/25 font-bold font-mono text-sm">03</span>
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold text-white">7 Dated Architectural Decisions & Multi-Agent Engineering</h2>
+            <p class="text-xs text-slate-400">Engineering milestones across the project, including the parallel autonomous agent refactor.</p>
+          </div>
+        </div>
+        <span class="px-3 py-1 bg-purple-950/80 text-purple-300 border border-purple-800 text-xs font-mono rounded-md">Parallel Agent Harness</span>
+      </div>
+
+      <!-- PARALLEL AGENT BREAKTHROUGH CALLOUT -->
+      <div class="mb-8 p-5 rounded-xl bg-purple-950/30 border border-purple-800/60 text-xs sm:text-sm text-purple-200 space-y-2">
+        <div class="flex items-center gap-2 font-bold font-mono text-purple-300 text-sm">
+          <span>⚡ The Parallel Agent Dispatch Breakthrough (October 4, 2026)</span>
+        </div>
+        <p class="leading-relaxed text-slate-300 font-light">
+          Building 11 decoupled financial modules and 160+ unit tests sequentially was impossible for a single student developer. On October 4, I designed a multi-agent harness dispatching parallel autonomous coding workers: 
+          <strong>Workstream A</strong> (<code class="text-purple-300 font-mono">allocator.py</code>, volatility targeting, market de-risking) and 
+          <strong>Workstream B</strong> (<code class="text-purple-300 font-mono">gate_engine.py</code>, position states, pre-reg v7). 
+          When parallel branches created race conditions over cooldown timers, I stepped in as lead architect to issue binding formal rulings (e.g., deprecating redundant classes and establishing <code class="text-purple-300 font-mono">RegimeState</code> as the sole master clock).
+        </p>
+      </div>
+
+      <!-- TIMELINE ENTRIES -->
+      <div class="space-y-6">
+
+        <div class="p-5 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2 font-mono text-xs">
+            <span class="text-cyan-400 font-bold">June 30, 2026 • Decision 1</span>
+            <span class="text-slate-500">Source: Enhancing Valuation Framework with Damodaran</span>
+          </div>
+          <h3 class="text-base font-bold text-white mb-1">Decoupled Multi-Lane Worktrees & Endogenous Growth</h3>
+          <p class="text-xs text-slate-300 leading-relaxed mb-2 font-light">
+            <strong>The Problem:</strong> The legacy engine mixed intrinsic DCF cash flows with forum hype (<code class="text-cyan-300">w_hype = 0.475</code>) in a single additive formula, conflating fundamental value with price momentum.<br>
+            <strong>The Solution:</strong> Decoupled the repo into 5 isolated git worktrees. Enforced Damodaran's identity <code class="text-cyan-300">g = Reinvestment &times; ROIC</code>, capitalized R&D over 3–5 year amortization schedules, converted operating lease liabilities into debt, and deducted stock-based compensation (SBC) from FCFF.<br>
+            <strong>Human Agency:</strong> Machine learning optimizers continually favored historical price extrapolations. Human domain knowledge was required to enforce corporate finance identities.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2 font-mono text-xs">
+            <span class="text-cyan-400 font-bold">July 2, 2026 • Decision 2</span>
+            <span class="text-slate-500">Source: Investing Beyond Market Leaders</span>
+          </div>
+          <h3 class="text-base font-bold text-white mb-1">Jump-Diffusion Poisson Black Swans & TSMC Supply Chain Risk</h3>
+          <p class="text-xs text-slate-300 leading-relaxed mb-2 font-light">
+            <strong>The Problem:</strong> Traditional Gaussian models assume continuous bell curves, ignoring physical single-source choke points (e.g., NVIDIA's sole dependency on TSMC).<br>
+            <strong>The Solution:</strong> Implemented a Jump-Diffusion Model pairing continuous Brownian motion with a discrete Poisson shock arrival rate (<code class="text-cyan-300">&lambda;_stress = K_c &times; G_s</code>), scaled by credit spreads. A catastrophe draw triggers an immediate -85% revenue wipeout in simulation, adjusting NVIDIA's probability of positive EVA from an unrealistic 100% to 77.35%.<br>
+            <strong>Human Agency:</strong> AI trained on 5-year price history assigned 0% risk to TSMC because no outage had occurred. Human reasoning injected physical real-world vulnerability bounds.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2 font-mono text-xs">
+            <span class="text-cyan-400 font-bold">August 24, 2026 • Decision 3</span>
+            <span class="text-slate-500">Source: DeepSeek Harness for Quant Pipelines</span>
+          </div>
+          <h3 class="text-base font-bold text-white mb-1">Deterministic Firewalls & Fail-Closed Discovery Gates</h3>
+          <p class="text-xs text-slate-300 leading-relaxed mb-2 font-light">
+            <strong>The Problem:</strong> Unconstrained LLM agent calls admitted speculative "whisper stocks" with zero SEC filings.<br>
+            <strong>The Solution:</strong> Built a 3-gate fail-closed harness: (1) Organic Practitioner Test: mentions in technical subreddits (r/devops) vs retail hubs (r/wallstreetbets) &ge; 0.50; (2) Commit-to-Star Divergence: GitHub star spikes must have verified merged pull requests; (3) Solvency Brakes: minimum 1.5-year cash-burn runway.<br>
+            <strong>Human Agency:</strong> LLM agents repeatedly hallucinated soft pass grades when financial data was missing. Human developers had to code explicit <code class="text-rose-400 font-mono">RuntimeError</code> fail-closed exceptions.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2 font-mono text-xs">
+            <span class="text-cyan-400 font-bold">September 27, 2026 • Decision 4</span>
+            <span class="text-slate-500">Source: HMM Validation and Regime Instability Fix</span>
+          </div>
+          <h3 class="text-base font-bold text-white mb-1">2-State Latent Gaussian HMM & Event-Driven Retraining</h3>
+          <p class="text-xs text-slate-300 leading-relaxed mb-2 font-light">
+            <strong>The Problem:</strong> Early HMMs reported a fake Out-of-Sample Adjusted Rand Index (ARI) of 1.0 due to circular validation against synthetic labels. Tested against true NBER recessions, ARI collapsed to ~0.0.<br>
+            <strong>The Solution:</strong> Rebuilt into a 2-state Gaussian HMM trained on stationary rolling Z-scores (&Delta;BAA10Y velocity, 10Y-2Y slope, realized vol) clamped via tanh(z/2.0). Retraining was locked to scheduled FOMC/CPI release dates. Out-of-sample ARI recovered to 0.5175 with Crisis Recall of 98.5%.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2 font-mono text-xs">
+            <span class="text-cyan-400 font-bold">September 28, 2026 • Decision 5</span>
+            <span class="text-slate-500">Source: Bond ETF Due Diligence Beyond Ratings</span>
+          </div>
+          <h3 class="text-base font-bold text-white mb-1">SEC EDGAR Look-Through Matrix for Corporate Bond ETFs</h3>
+          <p class="text-xs text-slate-300 leading-relaxed mb-2 font-light">
+            <strong>The Problem:</strong> Corporate bond ETFs (VCSH, VCIT) freeze during credit crunches, while agency credit ratings act as lagging indicators.<br>
+            <strong>The Solution:</strong> Built an automated look-through scraper evaluating top 20 holdings to compute a portfolio-weighted Interest Coverage Ratio (Fund ICR). If credit spreads blow out (&gt;300 bps) or ETFs fail ICR gates, capital automatically routes 100% into Short-Term U.S. Treasury Bills (BIL) or Physical Gold (GLDM).
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2 font-mono text-xs">
+            <span class="text-cyan-400 font-bold">October 11, 2026 • Decision 6</span>
+            <span class="text-slate-500">Source: Reverse-Engineering Alpha Through Survival Analysis</span>
+          </div>
+          <h3 class="text-base font-bold text-white mb-1">3D Compounding Survival Surface & Duration Hazard Models</h3>
+          <p class="text-xs text-slate-300 leading-relaxed mb-2 font-light">
+            <strong>The Problem:</strong> Binary "Win vs. Lose" metrics ignored holding duration—how long a company can sustain excess returns (ROIC &gt; WACC) before competitive erosion sets in.<br>
+            <strong>The Solution:</strong> Applied Cox Proportional Hazards and Bayesian Online Changepoint Detection (BOCPD) to model time-to-breakdown as a continuous geometric surface. The peak inflection ridge sets the exact mathematical boundary for the Competitive Advantage Period (N_CAP) in the downstream DCF engine.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2 font-mono text-xs">
+            <span class="text-cyan-400 font-bold">October 12, 2026 • Decision 7</span>
+            <span class="text-slate-500">Source: Quantitative Backtest Performance Audit</span>
+          </div>
+          <h3 class="text-base font-bold text-white mb-1">Microstructure Slippage, Drift Deadbands, & Dynamic Regime Shield</h3>
+          <p class="text-xs text-slate-300 leading-relaxed mb-2 font-light">
+            <strong>The Problem:</strong> Flat 15 bps slippage understated execution drag during market stress, while daily rebalancing burned capital in fees.<br>
+            <strong>The Solution:</strong> Computed dynamic square-root market impact slippage, enforced weight drift hysteresis deadbands (&plusmn;15%), and automated a 3-stage de-risking shield: at -8% drawdown, equity caps at 50%; at -15% drawdown, equity caps at 15% (routing 85% to BIL Treasury Bills).
+          </p>
+        </div>
+
+      </div>
+
+      <!-- CRITICAL RATIONALE: WHY THESE DECISIONS WERE PUSHED OUT IN THE END -->
+      <div class="mt-8 p-6 rounded-xl bg-surface-900/90 border border-cyan-500/30 text-xs sm:text-sm text-slate-300 space-y-3">
+        <div class="flex items-center gap-2 text-cyan-400 font-mono font-bold text-sm">
+          <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+          Why These Complex Decisions Were Pushed Out of the Final Production Release
+        </div>
+        <p class="leading-relaxed font-light">
+          A fair question in any engineering audit is: <em>"If these 7 architectural designs were so mathematically sophisticated, why weren't they all pushed into the final production iteration?"</em>
+        </p>
+        <p class="leading-relaxed font-light">
+          <strong>The answer is simple: the backtest results killed them.</strong>
+        </p>
+        <p class="leading-relaxed font-light">
+          In quantitative finance, theoretical beauty is worthless if it collapses out-of-sample. When we tested the earlier <strong>v7 DCF configuration</strong>, the backtest revealed catastrophic blind spots: sparse SEC queries loaded only 13–140 tickers per month instead of 1,000, unmapped companies defaulted to a hardcoded 8% WACC, and the strategy lost heavily ($-1.24\%$ to $-4.85\%$) with severe $-36.0\%$ drawdowns. The backtest itself was the scientific falsification tool that rejected v7.
+        </p>
+        <p class="leading-relaxed font-light">
+          Similarly, complex theoretical constructs—such as 3D Cox hazard manifolds, Poisson jump-diffusion simulations, and multi-state HMM Markov switchers—sounded impressive on paper, but introduced dozens of unobservable hyper-parameters that overfit historical noise and introduced single-point-of-failure API dependencies. 
+        </p>
+        <p class="leading-relaxed font-light text-slate-200">
+          <strong>Occam's Razor triumphed over theoretical complexity:</strong> The backtest proved that a simple, deterministic system—85% high-ROIC value compounders, audited Lynch qualitative moats, a passive 15% BIL Treasury cushion, and an internal high-water mark drawdown circuit breaker—consistently outperformed hyper-complex academic models in real Point-in-Time conditions. We pushed out the unnecessary complexity and kept only what survived empirical reality.
+        </p>
+      </div>
+    </section>
+
+    <!-- SECTION 4: THE FAILURE LAB -->
+    <section id="failure-lab" class="glass-card rounded-2xl p-7 sm:p-8">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/25 font-bold font-mono text-sm">04</span>
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white">The "Failure Lab": Honest Post-Mortems</h2>
+          <p class="text-xs text-slate-400">Failures in the strategy logic and failures inside the backtest harnesses themselves.</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-5">
+
+        <!-- POST MORTEM 1 -->
+        <div class="p-5 rounded-xl bg-surface-900 border border-surface-800 flex flex-col justify-between">
+          <div>
+            <div class="text-[11px] font-mono text-rose-400 font-bold mb-1 uppercase tracking-wide">Strategy Failure 01</div>
+            <h3 class="text-base font-bold text-white mb-2">Order Routing & Fee Churn</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-3 font-light">
+              <strong>The Failure:</strong> Continuous monthly rebalancing on a $10,000 portfolio generated <strong>$14,704 in transaction fees</strong>—eating 43.8% of gross returns. The system was generating +26 bps in monthly gross alpha while paying 53 bps in execution friction!
+            </p>
+          </div>
+          <div class="mt-3 pt-3 border-t border-surface-800 text-xs text-emerald-300 bg-emerald-950/40 p-2.5 rounded-lg border border-emerald-800/50">
+            <strong>The Fix:</strong> Opportunistic Swap Gate (&Delta;z &ge; 0.60&sigma;) and &plusmn;15% drift deadbands. Fees collapsed from <strong>$14,704 to $201 (0.44% of gains)</strong>, preserving a +452% cumulative return.
+          </div>
+        </div>
+
+        <!-- POST MORTEM 2 -->
+        <div class="p-5 rounded-xl bg-surface-900 border border-surface-800 flex flex-col justify-between">
+          <div>
+            <div class="text-[11px] font-mono text-rose-400 font-bold mb-1 uppercase tracking-wide">Data Pipeline Defect 02</div>
+            <h3 class="text-base font-bold text-white mb-2">Look-Ahead Corporate Actions</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-3 font-light">
+              <strong>The Failure:</strong> Convenient consumer APIs (yfinance) auto-adjust prices backward in time. When a stock split or cash dividend occurred in 2023, the API adjusted the 2019 price downward, allowing the algorithm to implicitly "know" future capital distributions.
+            </p>
+          </div>
+          <div class="mt-3 pt-3 border-t border-surface-800 text-xs text-emerald-300 bg-emerald-950/40 p-2.5 rounded-lg border border-emerald-800/50">
+            <strong>The Fix:</strong> Scrapped consumer feeds. Ingested 83,000+ raw SEC EDGAR XBRL filings indexed strictly by public filing date timestamp (t_0), evaluating raw unadjusted transaction prices and booking cash dividends on verified historical ex-dates.
+          </div>
+        </div>
+
+        <!-- POST MORTEM 3 -->
+        <div class="p-5 rounded-xl bg-surface-900 border border-surface-800 flex flex-col justify-between">
+          <div>
+            <div class="text-[11px] font-mono text-rose-400 font-bold mb-1 uppercase tracking-wide">Harness Math Bug 03</div>
+            <h3 class="text-base font-bold text-white mb-2">Sortino Scaling Inversion</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-3 font-light">
+              <strong>The Failure:</strong> Reporting scorecards showed an inverted Sortino ratio (0.42) that was half its Sharpe ratio (0.85). In parallel, an unhandled FRED API timeout caused the fallback to misdiagnose 72 out of 102 months as a "BEAR REGIME," hoarding cash in a bull market.
+            </p>
+          </div>
+          <div class="mt-3 pt-3 border-t border-surface-800 text-xs text-emerald-300 bg-emerald-950/40 p-2.5 rounded-lg border border-emerald-800/50">
+            <strong>The Fix:</strong> Caught a bug dividing downside deviation by &radic;12 twice in reporting (Sortino restored to 1.85); added disk caching for FRED BAA10Y credit spreads, cutting false bear months from 72 down to ~25.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 5: 100% LEGAL PUBLIC DOMAIN DATA -->
+    <section id="legal-data" class="glass-card rounded-2xl p-7 sm:p-8">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-bold font-mono text-sm">05</span>
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white">100% Legal Public Domain & Open Foundation Data</h2>
+          <p class="text-xs text-slate-400">Purging web scraping grey areas (Glassdoor) in favor of official public APIs (Architectural Mandate AD-20261012-005).</p>
+        </div>
+      </div>
+
+      <div class="space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed mb-6 font-light">
+        <p>
+          Earlier research explored scraping employee sentiment from Glassdoor to measure corporate friction. However, during architectural review, <strong>Glassdoor scraping was permanently rejected</strong> due to legal terms-of-service grey areas, anti-bot fragility, and extreme unverified self-selection bias.
+        </p>
+        <p>
+          The production engine enforces a strict mandate: <strong>zero fragile scrapers</strong>. Every qualitative factor must originate from official public-domain government feeds or open foundation REST APIs with verified Point-in-Time timestamps:
+        </p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 font-mono text-xs">
+        <div class="p-4 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="text-cyan-400 font-bold text-sm mb-1 font-sans">U.S. SEC EDGAR API</div>
+          <div class="text-slate-400 text-[11px] mb-2">data.sec.gov (Public Domain)</div>
+          <p class="text-slate-300 font-sans text-xs">
+            Ingests raw 10-K, 10-Q XBRL filings and Form SD (Conflict Minerals) to measure TSMC foundry concentration and supply-chain tail risks.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="text-cyan-400 font-bold text-sm mb-1 font-sans">GitHub Archive & Hugging Face</div>
+          <div class="text-slate-400 text-[11px] mb-2">Public BigQuery + Official Hub API</div>
+          <p class="text-slate-300 font-sans text-xs">
+            Measures developer velocity, merged commit slopes, and CUDA ecosystem lock-in to parameterize the Competitive Advantage Period (N_CAP).
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="text-cyan-400 font-bold text-sm mb-1 font-sans">USPTO PatentsView</div>
+          <div class="text-slate-400 text-[11px] mb-2">U.S. Patent Office Bulk AWS S3</div>
+          <p class="text-slate-300 font-sans text-xs">
+            Extracts granted patent claims, forward citation velocity, and technological originality to score durable intellectual property moats.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="text-cyan-400 font-bold text-sm mb-1 font-sans">ClinicalTrials.gov & openFDA</div>
+          <div class="text-slate-400 text-[11px] mb-2">NIH NLM API v2 + openFDA REST</div>
+          <p class="text-slate-300 font-sans text-xs">
+            Audits drug development pipeline transition milestones (Phase I &rarr; III) and adverse event recalls for healthcare and biotech assets.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="text-cyan-400 font-bold text-sm mb-1 font-sans">CFPB & FDIC BankFind</div>
+          <div class="text-slate-400 text-[11px] mb-2">U.S. Government Socrata API</div>
+          <p class="text-slate-300 font-sans text-xs">
+            Tracks consumer regulatory enforcement actions, fines, and balance-sheet tier-1 capital ratios for financial institutions.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-900 border border-surface-800">
+          <div class="text-cyan-400 font-bold text-sm mb-1 font-sans">StockTwits P95 Crowding Gate</div>
+          <div class="text-slate-400 text-[11px] mb-2">Social Crowding Regulator</div>
+          <p class="text-slate-300 font-sans text-xs">
+            Social sentiment is <strong>never used as a buy signal</strong>. Message volume &gt;85th percentile acts strictly as a position suppressor (&Omega;_i &in; [0.5, 1.0]) to protect against retail euphoric tops.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: STATISTICAL FALSIFICATION -->
+    <section id="falsification" class="glass-card rounded-2xl p-7 sm:p-8">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 font-bold font-mono text-sm">06</span>
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white">Statistical Falsification & Anti-Overfitting Controls</h2>
+          <p class="text-xs text-slate-400">Proving the results are not a statistical illusion or p-hacked anomaly.</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="p-5 rounded-xl bg-surface-900 border border-surface-800 space-y-3 text-sm">
+          <h3 class="font-bold text-white">1. Fama-French 5-Factor Factor Neutralization</h3>
+          <p class="text-slate-300 text-xs leading-relaxed font-light">
+            When regressing production portfolio returns against the Fama-French 5-Factor model (Market, Size, Value, Profitability, Investment), the residual alpha is:
+          </p>
+          <div class="p-3 bg-surface-950 rounded-lg border border-surface-750 font-mono text-xs text-cyan-300">
+            &alpha; = +0.02% &bull; t-statistic = +0.44 &bull; p-value &gt; 0.05 (Not Statistically Significant)
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed font-light">
+            <strong>The Scientific Conclusion:</strong> This proves that the strategy does not possess "mystical stock-picking clairvoyance." The performance stems from <strong>downside risk truncation</strong>: capturing bull market upside while using credit spread indicators and short-term Treasury buffers to prevent catastrophic drawdowns.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-surface-900 border border-surface-800 space-y-3 text-sm">
+          <h3 class="font-bold text-white">2. Marcos L&oacute;pez de Prado Deflated Sharpe Ratio (DSR)</h3>
+          <p class="text-slate-300 text-xs leading-relaxed font-light">
+            In quantitative finance, testing multiple trials creates selection bias (false discoveries). The Deflated Sharpe Ratio (DSR) penalizes performance based on the total number of candidate backtest trials:
+          </p>
+          <div class="p-3 bg-surface-950 rounded-lg border border-surface-750 font-mono text-xs text-emerald-300">
+            N = 513 Candidate Trials &bull; Historical Sharpe = 1.43 &bull; DSR &ge; 0.95
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed font-light">
+            <strong>The Mathematical Proof:</strong> Even after penalizing for all 513 iterations run across development, the probability that the strategy's risk efficiency is a false discovery is under 5% (DSR &ge; 0.95), verifying out-of-sample statistical robustness.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: THE COMPLETE LEARNING CYCLE -->
+    <section class="glass-card rounded-2xl p-7 sm:p-8">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/25 font-bold font-mono text-sm">07</span>
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white">The Complete Learning Cycle: From Intuition to Empirical Truth</h2>
+          <p class="text-xs text-slate-400">A five-stage retrospective of intellectual maturity and personal development.</p>
+        </div>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 font-mono text-xs">
+        <div class="p-4 rounded-xl bg-surface-900 border border-surface-800 flex flex-col justify-between">
+          <div>
+            <div class="text-cyan-400 font-bold mb-1">Stage 1: Discretionary Fear</div>
+            <div class="text-slate-400 text-[11px] mb-2 font-sans">The Emotional Flaw</div>
+            <p class="text-slate-300 font-sans text-xs font-light">
+              Learned that human psychology is an irrational trading partner. Panic at market bottoms and euphoria at peaks compromise capital.
+            </p>
+          </div>
+          <div class="mt-3 text-[10px] text-cyan-300 font-bold uppercase">Lesson: Systematize Rules</div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-900 border border-surface-800 flex flex-col justify-between">
+          <div>
+            <div class="text-rose-400 font-bold mb-1">Stage 2: The ML Mirage</div>
+            <div class="text-slate-400 text-[11px] mb-2 font-sans">Look-Ahead Contamination</div>
+            <p class="text-slate-300 font-sans text-xs font-light">
+              Trained predictive models that produced 80%+ win rates, only to discover that restated financial filings and future splits were leaking backward into the test.
+            </p>
+          </div>
+          <div class="mt-3 text-[10px] text-rose-300 font-bold uppercase">Lesson: Point-in-Time Truth</div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-900 border border-surface-800 flex flex-col justify-between">
+          <div>
+            <div class="text-amber-400 font-bold mb-1">Stage 3: The Timing Trap</div>
+            <div class="text-slate-400 text-[11px] mb-2 font-sans">The Recovery Penalty</div>
+            <p class="text-slate-300 font-sans text-xs font-light">
+              Tried timing market dips with hysteresis bands. Discovered that waiting for volatility to cool caused the model to consistently miss the violent rebound days.
+            </p>
+          </div>
+          <div class="mt-3 text-[10px] text-amber-300 font-bold uppercase">Lesson: You Cannot Time Noise</div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-900 border border-surface-800 flex flex-col justify-between">
+          <div>
+            <div class="text-purple-400 font-bold mb-1">Stage 4: Over-Engineering</div>
+            <div class="text-slate-400 text-[11px] mb-2 font-sans">Theoretical Fragility</div>
+            <p class="text-slate-300 font-sans text-xs font-light">
+              Built complex Poisson black swans, 3D survival surfaces, and HMM Markov models. Out-of-sample backtests rejected them for severe parameter overfitting.
+            </p>
+          </div>
+          <div class="mt-3 text-[10px] text-purple-300 font-bold uppercase">Lesson: Occam's Razor Wins</div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface-900 border border-emerald-500/30 flex flex-col justify-between bg-emerald-950/10">
+          <div>
+            <div class="text-emerald-400 font-bold mb-1">Stage 5: Empirical Maturity</div>
+            <div class="text-slate-400 text-[11px] mb-2 font-sans">The Final System</div>
+            <p class="text-slate-300 font-sans text-xs font-light">
+              Anchored on high-ROIC value compounders, qualitative Lynch moats, an endogenous 15% Treasury cushion, and honest pre-registered falsification.
+            </p>
+          </div>
+          <div class="mt-3 text-[10px] text-emerald-300 font-bold uppercase">Outcome: True Resilience</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONCLUSION -->
+    <section class="bg-gradient-to-br from-surface-900 via-surface-950 to-surface-950 border border-surface-800 text-white rounded-2xl p-8 sm:p-10 relative overflow-hidden">
+      <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+      <h2 class="text-xl sm:text-2xl font-bold mb-4">Admissions Concluding Statement</h2>
+      <div class="text-slate-300 text-sm sm:text-base leading-relaxed space-y-4 max-w-3xl font-light">
+        <p>
+          The Quant Platform project demonstrates that quantitative finance is not about building an infallible "black box." It is about constructing a transparent system, holding it to rigorous statistical standards, acknowledging when machine learning models fail, and continuously refining architecture toward empirical truth.
+        </p>
+        <p>
+          By combining <strong>Benjamin Graham's emotional discipline</strong>, <strong>Peter Lynch's practitioner realism</strong>, and <strong>Aswath Damodaran's mathematical rigor</strong>, this project reflects my intellectual philosophy: that scientific honesty and resilience in the face of failure are the true prerequisites for meaningful discovery.
+        </p>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-surface-800 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-400">
+        <div>Compiled: October 2026 &bull; Verified Git Provenance</div>
+        <a href="https://github.com/Valrivn/Quant" target="_blank" class="text-cyan-400 hover:text-cyan-300 underline font-medium">Explore Full Research Codebase on GitHub &rarr;</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-surface-800 bg-surface-950 py-8 px-4 text-center text-xs text-slate-500 font-mono">
+    <div class="max-w-5xl mx-auto">
+      Quant Platform &copy; 2026 Lead Researcher &bull; <a href="https://github.com/Valrivn/Quant" target="_blank" class="text-slate-400 hover:underline">github.com/Valrivn/Quant</a> &bull; Hosted with GitHub Pages &bull; Zero External Tracking or Ads
+    </div>
+  </footer>
+
+</body>
+</html>
