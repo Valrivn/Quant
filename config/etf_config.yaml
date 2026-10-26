@@ -1,8 +1,8 @@
 # Quantitative Bond & Gold ETF Allocation Engine Configuration
-# Target environment: Simulated Paper-Trading Portfolio
+# Target environment: simulated_broker_target
 
 account:
-  type: "Simulated Paper-Trading Portfolio"
+  type: "simulated_broker_target"
   fractional_shares_decimals: 3
 
 fred:
@@ -83,7 +83,7 @@ sensitivity:
     icr: 0.35         # Credit/solvency sensitivity weight
     macro: 0.30       # Macro regime sensitivity weight
   allocation_adjustment:
-    risk_tolerance: 0.3  # 0.0 = no adjustment, 1.0 = maximum tilt (conservative for youth account)
+    risk_tolerance: 0.3  # 0.0 = no adjustment, 1.0 = maximum tilt (conservative for simulated broker target)
   risk_labels:
     insulated: "[0.00, 0.20)"           # Safe baseline, no buffer overlay
     moderate_exposure: "[0.20, 0.45)"   # Balanced, maintain tactical baseline

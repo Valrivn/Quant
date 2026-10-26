@@ -1,0 +1,91 @@
+default_erp: 0.04699
+historical_erp:
+  '1960': 0.0534
+  '1961': 0.0471
+  '1962': 0.0581
+  '1963': 0.0551
+  '1964': 0.0562
+  '1965': 0.0573
+  '1966': 0.0674
+  '1967': 0.0566
+  '1968': 0.0551
+  '1969': 0.0663
+  '1970': 0.0598
+  '1971': 0.0546
+  '1972': 0.0523
+  '1973': 0.0816
+  '1974': 0.1364
+  '1975': 0.0855
+  '1976': 0.0907
+  '1977': 0.1143
+  '1978': 0.1211
+  '1979': 0.1348
+  '1980': 0.1104
+  '1981': 0.1239
+  '1982': 0.0983
+  '1983': 0.0806
+  '1984': 0.1007
+  '1985': 0.0742
+  '1986': 0.0596
+  '1987': 0.0649
+  '1988': 0.082
+  '1989': 0.068
+  '1990': 0.0658
+  '1991': 0.0458
+  '1992': 0.0416
+  '1993': 0.0425
+  '1994': 0.0589
+  '1995': 0.0574
+  '1996': 0.0483
+  '1997': 0.040766
+  '1998': 0.031104
+  '1999': 0.030741
+  '2000': 0.039386
+  '2001': 0.038525
+  '2002': 0.052329
+  '2003': 0.0487
+  '2004': 0.055845
+  '2005': 0.0547
+  '2006': 0.061849
+  '2007': 0.056212
+  '2008': 0.072394
+  '2009': 0.053493
+  '2010': 0.066521
+  '2011': 0.077171
+  '2012': 0.071849
+  '2013': 0.058133
+  '2014': 0.054889
+  '2015': 0.052017
+  '2016': 0.048624
+  '2017': 0.046731
+  '2018': 0.059174
+  '2019': 0.050251
+  '2020': 0.037209
+  '2021': 0.043301
+  '2022': 0.057166
+  '2023': 0.046408
+  '2024': 0.041369
+  '2025': 0.039664
+period_averages: {}
+update:
+  source: https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datacurrent.html (discovered)
+    -- implied_erp / ctryprem
+  version: 2020-01-04 (file)
+  last_updated: '2026-10-06T01:41:01Z'
+  fetch_timestamp_utc: '2026-10-06T01:41:01Z'
+  refresh_cadence: every 2 months
+  source_url: https://pages.stern.nyu.edu/~adamodar/pc/datasets/histimpl.xls
+  index_page: https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datacurrent.html
+  default_erp_checksum: 913c5a84a1a886804e5b190b78fb5e32228ea19ccda90868d8009998577f95ad
+  dataset_sha256:
+    implied_erp: bb4d8da0a371a00af06172ec41dcef35a9ae30d6ab9c03d58ab5d2187e1e406f
+    country_risk_premiums: 8d7237c432bca23cd680f149395aa518a465d0b77bec1fdf788edc7a1748c60a
+  dataset_versions:
+    implied_erp: 2020-01-04 (file)
+    country_risk_premiums: July 1, 2026 (index page)
+  erp_breakdown_source_url: https://pages.stern.nyu.edu/~adamodar/pc/datasets/ctrypremJuly26.xlsx
+  staged: true
+  erp_breakdown:
+    tables: {}
+    parse_note: sheet_parse_unavailable:ImportError
+  content_sha256: 6ede74440d58006f07393dc7f68bdc7d0cc83bc6c2c4b4cab9a3539985f376f9

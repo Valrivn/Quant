@@ -6,10 +6,10 @@ This document defines the strategy, quantitative gates, and mathematical formula
 
 ## 1. Execution Context & Account Constraints
 
-- **Account Type:** Simulated Paper-Trading Portfolio
+- **Account Type:** Simulated Paper-Trading Portfolio (simulated_broker_target)
 - **Restrictions:** Physical precious metals/bullion desks are legally restricted. Execution must occur strictly via highly liquid exchange-traded funds (ETFs).
 - **Baseline Target Allocation:** 20% of the sub-portfolio allocated to Alternative Assets (Gold).
-- **Fractional Shares:** simulated broker target supports fractional trading to 3 decimal places.
+- **Fractional Shares:** Simulated broker target supports fractional trading to 3 decimal places.
 
 ---
 

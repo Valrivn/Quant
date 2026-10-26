@@ -11,7 +11,7 @@ from diversification.trading_calendar import is_trading_allowed, get_allowed_tra
 
 # Paths
 DB_PATH = "reddit_quant.db"
-DATA_DIR = Path("C:/Users/Hayden/Quant/data/nasdaq")
+DATA_DIR = Path("./data/nasdaq")
 
 def load_data():
     print("Loading historical daily closes from local CSV cache...")

@@ -26,7 +26,7 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from valuation_alpha.universe.cik_resolver import resolve_ciks
-from discovery.sec_pit_scraper import (
+from discovery.sec_pit_client import (
     SECEdgarScraper,
     DEFAULT_ROSTER,
     DATA_DIR,

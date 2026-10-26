@@ -1,6 +1,6 @@
 # BACKTEST_LEDGER.md — Master Backtest Registry
 **Generated:** 2026-10-07  (updated 2026-10-08: P0B fix + SEC-lineage reconciliation)
-**Repo root:** C:\Users\Hayden\Quant  
+**Repo root:** ./  
 **Status:** HONEST/CONTAMINATION-MARKED REGISTRY
 
 This ledger consolidates all backtest runs recorded in narrative docs (Tomorrow.md, Data_Strategy.md) and cross-checks against on-disk artifacts in `data/backtests/`, `archives/`, `data/sprint6_grid/`, `data/phase9_full/`. Marking: honest vs synthetic-contaminated based on explicit provenance.

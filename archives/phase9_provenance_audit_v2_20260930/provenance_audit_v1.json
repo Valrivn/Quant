@@ -1,0 +1,558 @@
+{
+  "backtest_chain": {
+    "consolidated_sha256": "e0b20e28e42c8b4b6009e38af7e55a4743582d3af7bb5c0072435fad3e2c51e8",
+    "fold_roots": [],
+    "folds_verified": [],
+    "name": "backtest_chain",
+    "source": "validation/provenance_audit.check_backtest_chain",
+    "status": "no_folds_discovered",
+    "valid": false,
+    "violations": [
+      "no hybrid_fractal_v1-fold{K} dirs under data\\backtests"
+    ]
+  },
+  "bias_checklist": [
+    {
+      "bias": "Survivorship",
+      "check": "Universe includes delisted names at PIT market cap",
+      "evidence": "107 delisted names; pre-delist PIT cap rows present=True; pit_correct=True; is_active=False rows=38",
+      "method": "delisting_events.parquet + monthly_reconstitution overlap",
+      "status": "WARN"
+    },
+    {
+      "bias": "Lookahead",
+      "check": "All factors use filing_date/availability anchors, not period_end",
+      "evidence": "14/15 files PIT-clean; violations=['data/universe/pit_universe_2018_2026.parquet']",
+      "method": "pit_timestamp_column scan of factor/universe/price files",
+      "status": "WARN"
+    },
+    {
+      "bias": "Forward Fill",
+      "check": "Price cache forward-fill capped at 2 trading days",
+      "evidence": "code: ffill(limit=2) + price_stale_flag>2d; file: 3528714 rows, stale=0",
+      "method": "ingestion/price_cache.py review",
+      "status": "PASS"
+    },
+    {
+      "bias": "Selection",
+      "check": "Universe construction uses PIT data only (historical indexes + delist 8-Ks)",
+      "evidence": "month-end PIT prices + delist filter OK; candidate pool = config/master_universe.yaml top-2552 by 2026 market cap (future selection); shares synthetic constant per ticker",
+      "method": "ingestion/universe_builder.py review",
+      "status": "WARN"
+    },
+    {
+      "bias": "Mapping",
+      "check": "Qualitative entity mapping confidence tracked on all outputs",
+      "evidence": "10/10 files carry mapping_confidence; distribution={'high': 9168, 'medium': 7174, 'low': 2681}",
+      "method": "mapping_confidence column/sidecar scan of data/qual",
+      "status": "PASS"
+    },
+    {
+      "bias": "Imputation",
+      "check": "No rpo_is_imputed=True rows inside the 2018-2024 primary window",
+      "evidence": "rpo_is_imputed=True rows in 2018-2024: None; phase-4 driver compute_rpo_growth must filter imputed rows",
+      "method": "rpo.parquet rpo_is_imputed scan (primary window)",
+      "status": "PASS"
+    },
+    {
+      "bias": "Gate Integrity",
+      "check": "Gates 3/4 re-registration frozen + SHA256-pinned",
+      "evidence": "frozen config SHA256 match=False (stored 0351b8591fa9\u2026 vs actual 2afb18ceaae3\u2026)",
+      "method": "config/gates_v2.yaml + .sha256 verification",
+      "status": "WARN"
+    },
+    {
+      "bias": "Data Snooping",
+      "check": "Universe built before factor computation (no post-hoc universe)",
+      "evidence": "universe@2026-09-13T05:19:35.836655+00:00 vs qual@2026-09-13T05:15:21.960126+00:00 \u2014 universe-first=False",
+      "method": "manifest retrieval_timestamp ordering",
+      "status": "WARN"
+    },
+    {
+      "bias": "Contamination",
+      "check": "ML track uses walk-forward CPCV with embargo >= horizon",
+      "evidence": "research/reverse_engineer_multibaggers.py NOT IMPLEMENTED \u2014 walk-forward CPCV track pending; phase-4 driver uses cross-window OOS only (scored_oos=false, documented)",
+      "method": "research/reverse_engineer_multibaggers.py existence check",
+      "status": "WARN"
+    },
+    {
+      "bias": "Source Timestamp",
+      "check": "Every PIT estate feature output carries a parseable source_timestamp column (canonical availability anchor)",
+      "evidence": "1/15 files carry a parseable source_timestamp; violations=['data/qual/amazon_reviews.parquet', 'data/qual/apewisdom_mentions.parquet', 'data/qual/app_store_velocity.parquet', 'data/qual/ats_mapping.parquet', 'data/qual/ats_velocity.parquet', 'data/qual/cfpb_velocity.parquet', 'data/qual/gh_velocity.parquet', 'data/qual/inst_ownership.parquet'] [+ more]",
+      "method": "estate-wide source_timestamp scan (factors/qual/universe/prices)",
+      "status": "WARN"
+    }
+  ],
+  "bias_flags": [
+    {
+      "finding": "PIT violation data/universe/pit_universe_2018_2026.parquet: [{'reason': 'future_dates_relative_to_retrieval', 'rows': 111000, 'detail': \"pit_col 'date' has 111000 rows after retrieval/run cutoff 2026-09-18\"}]",
+      "id": "LOOK-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "Universe candidate pool is ranked by 2026 market cap (master_universe.yaml), not historical point-in-time membership \u2014 selection/survivorship pool bias; shares_outstanding are synthetic (50-550M hash-derived) and PYTHONHASHSEED-dependent",
+      "id": "SEL-01",
+      "severity": "HIGH"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/qual/amazon_reviews.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/qual/apewisdom_mentions.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/qual/app_store_velocity.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/qual/ats_mapping.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/qual/ats_velocity.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/qual/cfpb_velocity.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/qual/gh_velocity.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/qual/inst_ownership.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/qual/nhtsa_signals.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/qual/patents_signals.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/universe/delisting_events.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/universe/monthly_reconstitution.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/universe/pit_universe_2018_2024.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "source_timestamp MISSING_SOURCE_TIMESTAMP in data/universe/pit_universe_2018_2026.parquet (non_null=0/0, parseable=0)",
+      "id": "STMP-01",
+      "severity": "WARN"
+    },
+    {
+      "finding": "10/2234 tracked parquets have NO manifest entry \u2014 run scripts/backfill_provenance_manifest.py --run to backfill the full \u00a78 schema (91-file estate)",
+      "id": "PROV-01",
+      "severity": "MEDIUM"
+    },
+    {
+      "finding": "10 files incomplete on the \u00a78 provenance contract (missing fields per file in provenance_schema.missing_fields)",
+      "id": "PROV-02",
+      "severity": "MEDIUM"
+    }
+  ],
+  "data_root": "./data",
+  "mapping_confidence": {
+    "distribution": {
+      "high": 9168,
+      "low": 2681,
+      "medium": 7174
+    },
+    "has_column": 10,
+    "per_file": [
+      {
+        "column_present": true,
+        "declared": "high",
+        "file": "amazon_reviews.parquet",
+        "rows": 1378
+      },
+      {
+        "column_present": true,
+        "declared": "low",
+        "file": "apewisdom_mentions.parquet",
+        "rows": 416
+      },
+      {
+        "column_present": true,
+        "declared": "medium",
+        "file": "app_store_velocity.parquet",
+        "rows": 8659
+      },
+      {
+        "column_present": true,
+        "declared": "high",
+        "file": "ats_mapping.parquet",
+        "rows": 14
+      },
+      {
+        "column_present": true,
+        "declared": "high",
+        "file": "ats_velocity.parquet",
+        "rows": 728
+      },
+      {
+        "column_present": true,
+        "declared": "high",
+        "file": "cfpb_velocity.parquet",
+        "rows": 364
+      },
+      {
+        "column_present": true,
+        "declared": "high",
+        "file": "gh_velocity.parquet",
+        "rows": 7300
+      },
+      {
+        "column_present": true,
+        "declared": "high",
+        "file": "inst_ownership.parquet",
+        "rows": 36
+      },
+      {
+        "column_present": true,
+        "declared": "high",
+        "file": "nhtsa_signals.parquet",
+        "rows": 84
+      },
+      {
+        "column_present": true,
+        "declared": "high",
+        "file": "patents_signals.parquet",
+        "rows": 44
+      }
+    ],
+    "total_qual_files": 10
+  },
+  "pit_compliance": {
+    "passed": 14,
+    "total_files": 15,
+    "violations": [
+      {
+        "file": "data/universe/pit_universe_2018_2026.parquet",
+        "period_anchor": true,
+        "pit_passed": false,
+        "pit_timestamp_column": "date",
+        "trade_column": null,
+        "violations": [
+          {
+            "detail": "pit_col 'date' has 111000 rows after retrieval/run cutoff 2026-09-18",
+            "reason": "future_dates_relative_to_retrieval",
+            "rows": 111000
+          }
+        ]
+      }
+    ]
+  },
+  "provenance_schema": {
+    "complete": 2224,
+    "missing_fields": {
+      "data/fred_cache/AAA.parquet": [
+        "source",
+        "retrieval_timestamp",
+        "source_version",
+        "pit_timestamp_column",
+        "entity_key",
+        "transformations",
+        "sha256",
+        "row_count",
+        "date_range"
+      ],
+      "data/fred_cache/BAA.parquet": [
+        "source",
+        "retrieval_timestamp",
+        "source_version",
+        "pit_timestamp_column",
+        "entity_key",
+        "transformations",
+        "sha256",
+        "row_count",
+        "date_range"
+      ],
+      "data/fred_cache/BAMLH0A0HYM2.parquet": [
+        "source",
+        "retrieval_timestamp",
+        "source_version",
+        "pit_timestamp_column",
+        "entity_key",
+        "transformations",
+        "sha256",
+        "row_count",
+        "date_range"
+      ],
+      "data/fred_cache/CPIAUCSL.parquet": [
+        "source",
+        "retrieval_timestamp",
+        "source_version",
+        "pit_timestamp_column",
+        "entity_key",
+        "transformations",
+        "sha256",
+        "row_count",
+        "date_range"
+      ],
+      "data/fred_cache/DFII10.parquet": [
+        "source",
+        "retrieval_timestamp",
+        "source_version",
+        "pit_timestamp_column",
+        "entity_key",
+        "transformations",
+        "sha256",
+        "row_count",
+        "date_range"
+      ],
+      "data/fred_cache/DGS10.parquet": [
+        "source",
+        "retrieval_timestamp",
+        "source_version",
+        "pit_timestamp_column",
+        "entity_key",
+        "transformations",
+        "sha256",
+        "row_count",
+        "date_range"
+      ],
+      "data/fred_cache/DGS2.parquet": [
+        "source",
+        "retrieval_timestamp",
+        "source_version",
+        "pit_timestamp_column",
+        "entity_key",
+        "transformations",
+        "sha256",
+        "row_count",
+        "date_range"
+      ],
+      "data/fred_cache/DTB3.parquet": [
+        "source",
+        "retrieval_timestamp",
+        "source_version",
+        "pit_timestamp_column",
+        "entity_key",
+        "transformations",
+        "sha256",
+        "row_count",
+        "date_range"
+      ],
+      "data/fred_cache/STLFSI2.parquet": [
+        "source",
+        "retrieval_timestamp",
+        "source_version",
+        "pit_timestamp_column",
+        "entity_key",
+        "transformations",
+        "sha256",
+        "row_count",
+        "date_range"
+      ],
+      "data/fred_cache/T10YIE.parquet": [
+        "source",
+        "retrieval_timestamp",
+        "source_version",
+        "pit_timestamp_column",
+        "entity_key",
+        "transformations",
+        "sha256",
+        "row_count",
+        "date_range"
+      ]
+    },
+    "total_files": 2234
+  },
+  "ran_at": "2026-10-01T01:50:09.370609+00:00",
+  "sha256_check": {
+    "failed": [],
+    "missing_manifest": [
+      "data/fred_cache/AAA.parquet",
+      "data/fred_cache/BAA.parquet",
+      "data/fred_cache/BAMLH0A0HYM2.parquet",
+      "data/fred_cache/CPIAUCSL.parquet",
+      "data/fred_cache/DFII10.parquet",
+      "data/fred_cache/DGS10.parquet",
+      "data/fred_cache/DGS2.parquet",
+      "data/fred_cache/DTB3.parquet",
+      "data/fred_cache/STLFSI2.parquet",
+      "data/fred_cache/T10YIE.parquet"
+    ],
+    "passed": 2224,
+    "total": 2234
+  },
+  "source_timestamp": {
+    "passed": 1,
+    "total_files": 15,
+    "violations": [
+      {
+        "column_present": false,
+        "file": "data/qual/amazon_reviews.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/qual/apewisdom_mentions.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/qual/app_store_velocity.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/qual/ats_mapping.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/qual/ats_velocity.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/qual/cfpb_velocity.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/qual/gh_velocity.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/qual/inst_ownership.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/qual/nhtsa_signals.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/qual/patents_signals.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/universe/delisting_events.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/universe/monthly_reconstitution.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/universe/pit_universe_2018_2024.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      },
+      {
+        "column_present": false,
+        "file": "data/universe/pit_universe_2018_2026.parquet",
+        "issue": "MISSING_SOURCE_TIMESTAMP",
+        "non_null": 0,
+        "parseable": 0,
+        "passed": false,
+        "rows": 0
+      }
+    ]
+  },
+  "status": "FAIL",
+  "summary": {
+    "bias_flag_count": 18,
+    "delisted_count": 107,
+    "mapping_has_column": 10,
+    "mapping_total": 10,
+    "pit_passed": 14,
+    "pit_total": 15,
+    "schema_complete": 2224,
+    "schema_total": 2234,
+    "sha_passed": 2224,
+    "sha_total": 2234,
+    "source_timestamp_complete": 1,
+    "source_timestamp_total": 15
+  },
+  "survivorship_bias": {
+    "delisted_count": 107,
+    "is_active_false_rows": 38,
+    "notes": [],
+    "pit_correct": true,
+    "universe_includes_delisted": true
+  }
+}

@@ -1,14 +1,8 @@
-"""Structured source fetchers for the discovery feed (D-20260806-001 P1).
+"""Structured source fetchers for the discovery feed.
 
-Wraps SEC EDGAR new-filers, Reddit, StockTwits, ApeWisdom and Instagram in the
-DEGRADED registry pattern (``deg_registry.py``): an unavailable source is
-DEGRADED-tagged with a zeroed contribution and a ledger entry, never a hard
-stop.
-
-Each source takes an injectable ``fetcher`` callable so tests use fixtures and
-never hit the network. The default fetchers reuse existing scraper/ infrastructure
-and are gated behind an explicit live flag (``DISCOVERY_LIVE=1``); without it they
-raise ``LiveFetchDisabled`` which the wrapper records as a DEGRADED status.
+Wraps official sources (such as SEC EDGAR new-filers) and compliant alternative data
+feeds in the DEGRADED registry pattern (``deg_registry.py``): an unavailable source is
+DEGRADED-tagged with a zeroed contribution and a ledger entry, never a hard stop.
 """
 
 import os
@@ -74,12 +68,7 @@ class StructuredSource:
 
 
 def _sec_edgar_default_fetcher(limit: int = 100) -> List[dict]:
-    """Live SEC EDGAR new-filers fetcher (reuses cik_resolver for CIK).
-
-    Gated behind ``DISCOVERY_LIVE=1``. Resolves CIK for a deterministic sample
-    of tickers from the SEC company_tickers map via
-    ``valuation_alpha.universe.cik_resolver``.
-    """
+    """Live SEC EDGAR new-filers fetcher (reuses cik_resolver for CIK)."""
     if not live_enabled():
         raise LiveFetchDisabled("SEC EDGAR live fetch disabled (set DISCOVERY_LIVE=1)")
     from valuation_alpha.universe.cik_resolver import get_cik_map
@@ -96,132 +85,6 @@ def _sec_edgar_default_fetcher(limit: int = 100) -> List[dict]:
     return out
 
 
-def _is_placeholder(value: str) -> bool:
-    """True if a credential is empty or an unset env placeholder."""
-    v = (value or "").strip()
-    if not v:
-        return True
-    # e.g. "${STOCKTWITS_ACCESS_TOKEN}" with the env var unset.
-    if v.startswith("${") and v.endswith("}"):
-        return True
-    return False
-
-
-def _load_reddit_creds() -> dict:
-    """Load Reddit creds from the repo-root config (git-ignored)."""
-    import yaml
-
-    path = os.path.join(os.path.dirname(__file__), "..", "config", "reddit_credentials.yaml")
-    with open(path, "r") as f:
-        return yaml.safe_load(f).get("reddit", {})
-
-
-def _reddit_default_fetcher(limit: int = 100) -> List[dict]:
-    """Live Reddit fetcher (reuses RedditUniversalScraper). Gated by live flag.
-
-    Deg-tags with a clear reason when Reddit credentials are missing/placeholder.
-    """
-    if not live_enabled():
-        raise LiveFetchDisabled("Reddit live fetch disabled (set DISCOVERY_LIVE=1)")
-    creds = _load_reddit_creds()
-    if _is_placeholder(creds.get("client_id")) or _is_placeholder(creds.get("client_secret")):
-        raise RuntimeError("Reddit credentials missing/placeholder (config/reddit_credentials.yaml)")
-
-    from Qualitative.scraper.reddit_client import RedditUniversalScraper
-
-    scraper = RedditUniversalScraper()
-    posts = scraper.fetch_subreddit_posts("wallstreetbets", sort="hot", limit=limit)
-    out: List[dict] = []
-    for p in posts:
-        out.append({
-            "entity": getattr(p, "title", "") or "",
-            "topic": "Stocks",
-            "source_confidence": 0.6,
-            "external_id": getattr(p, "id", None),
-        })
-    return out
-
-
-def _stocktwits_default_fetcher(limit: int = 100) -> List[dict]:
-    """Live StockTwits fetcher (reuses FintechClientFactory). Gated by live flag.
-
-    Deg-tags with a clear reason when the StockTwits token is missing/placeholder.
-    """
-    if not live_enabled():
-        raise LiveFetchDisabled("StockTwits live fetch disabled (set DISCOVERY_LIVE=1)")
-    from config import load_fintech_credentials
-
-    creds = load_fintech_credentials().get("stocktwits", {})
-    if _is_placeholder(creds.get("access_token")):
-        raise RuntimeError("StockTwits credentials missing/placeholder (config/fintech_credentials.yaml)")
-
-    from Qualitative.scraper.fintech_clients.factory import FintechClientFactory
-
-    factory = FintechClientFactory()
-    client = factory.get_client("stocktwits")
-    # The existing client is async; P1 sandbox census drives live ingestion via
-    # the harness. The wrapper records LIVE/DEGRADED from the health check.
-    return []
-
-
-def _apewisdom_default_fetcher(limit: int = 100) -> List[dict]:
-    """Live ApeWisdom fetcher (reuses FintechClientFactory). Gated by live flag.
-
-    Deg-tags with a clear reason when the ApeWisdom key is missing/placeholder.
-    """
-    if not live_enabled():
-        raise LiveFetchDisabled("ApeWisdom live fetch disabled (set DISCOVERY_LIVE=1)")
-    from config import load_fintech_credentials
-
-    creds = load_fintech_credentials().get("apewisdom", {})
-    if _is_placeholder(creds.get("api_key")):
-        raise RuntimeError("ApeWisdom credentials missing/placeholder (missing APEWISDOM_API_KEY)")
-
-    from Qualitative.scraper.fintech_clients.factory import FintechClientFactory
-
-    factory = FintechClientFactory()
-    client = factory.get_client("apewisdom")
-    return []
-
-
-def _instagram_default_fetcher(limit: int = 100) -> List[dict]:
-    """Live Instagram fetcher (reuses the psychological IG anti-bot scraper).
-
-    Gated behind ``DISCOVERY_LIVE=1``. The scraper is fail-closed: with no
-    cookie file it raises ``InstagramCookieMissing`` before any browser launch,
-    which the wrapper records as a DEGRADED status.
-    """
-    if not live_enabled():
-        raise LiveFetchDisabled("Instagram live fetch disabled (set DISCOVERY_LIVE=1)")
-    from Qualitative.psychological.scrapers.instagram_primary import (
-        fetch_instagram_mentions,
-        InstagramConfig,
-    )
-
-    config = InstagramConfig()
-    return fetch_instagram_mentions(limit=limit, config=config)
-
-
 class SecEdgarNewFilersSource(StructuredSource):
     def __init__(self, registry: DegradedRegistry, fetcher: Optional[Callable] = None):
         super().__init__("sec_edgar_new_filers", fetcher or _sec_edgar_default_fetcher, registry)
-
-
-class RedditSource(StructuredSource):
-    def __init__(self, registry: DegradedRegistry, fetcher: Optional[Callable] = None):
-        super().__init__("reddit", fetcher or _reddit_default_fetcher, registry)
-
-
-class StockTwitsSource(StructuredSource):
-    def __init__(self, registry: DegradedRegistry, fetcher: Optional[Callable] = None):
-        super().__init__("stocktwits", fetcher or _stocktwits_default_fetcher, registry)
-
-
-class ApeWisdomSource(StructuredSource):
-    def __init__(self, registry: DegradedRegistry, fetcher: Optional[Callable] = None):
-        super().__init__("apewisdom", fetcher or _apewisdom_default_fetcher, registry)
-
-
-class InstagramSource(StructuredSource):
-    def __init__(self, registry: DegradedRegistry, fetcher: Optional[Callable] = None):
-        super().__init__("instagram", fetcher or _instagram_default_fetcher, registry)

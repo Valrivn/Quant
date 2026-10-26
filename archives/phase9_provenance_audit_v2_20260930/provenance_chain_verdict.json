@@ -1,0 +1,75 @@
+{
+  "auditor": "validation.provenance_audit.ProvenanceAuditor (audit v2, deep)",
+  "data_estate": {
+    "missing_manifest": 10,
+    "sha256_failed": 0,
+    "sha256_passed": 2224,
+    "total_parquets": 2234
+  },
+  "failed_roots": [],
+  "gate": "gate_8_provenance_chain",
+  "prereg_sha256": "c80a47bf6ae8d1c595f3b5e607c2588478bec0c47c4f0f97eb6c374b277a1685",
+  "prereg_sha256_pinned": "c80a47bf6ae8d1c595f3b5e607c2588478bec0c47c4f0f97eb6c374b277a1685",
+  "provenance_chain": true,
+  "provenance_chain_verdict": true,
+  "ran_at": "2026-10-01T01:49:58.748338+00:00",
+  "report_type": "phase9_provenance_chain_verdict",
+  "report_version": 1,
+  "roots": {
+    "R1_prereg_root": "VERIFIED",
+    "R2_R4_trial_ledger": "PASS",
+    "R5_data_estate": "PASS",
+    "R6_unified_regime_provenance": "PASS"
+  },
+  "scope_limits": [
+    "R5 covers tracked PARQUETS only. JSON/YAML artifacts under data/ are not in the manifest and were not hashed by this run.",
+    "check_data_estate() reports PASS on hash mismatches alone; the 10 files with no manifest entry are counted but do not fail R5.",
+    "The ledger is genuine ENUMERATION, not 513 results: metric_status is UNEVALUATED and no trial carries a measured score."
+  ],
+  "trial_ledger": {
+    "chain_head_ok": true,
+    "consequence": "ledger metric_status is 'UNEVALUATED' (0/513 trials evaluated). The hash chain is intact and the trial COUNT is real, so R2-R4 pass \u2014 but no trial in this ledger carries a measured out-of-sample score. It is honest enumeration, not 513 results, and must not be cited as evidence of performance or fed to the DSR as observed returns.",
+    "metric_status": "UNEVALUATED",
+    "n_trials": 513,
+    "n_trials_evaluated": 0,
+    "n_trials_unevaluated": 513,
+    "path": "./data/phase9_full/trial_ledger_v5.json",
+    "per_trial_sha256_mismatches": 0,
+    "schema": "phase9_trial_ledger_v5",
+    "timestamp_ns_regressions": 0,
+    "uuid7_invalid": 0
+  },
+  "v1_data_estate_bias_audit": {
+    "does_not_affect_chain_verdict": true,
+    "failed": null,
+    "high_severity_flags": [
+      {
+        "finding": "Universe candidate pool is ranked by 2026 market cap (master_universe.yaml), not historical point-in-time membership \u2014 selection/survivorship pool bias; shares_outstanding are synthetic (50-550M hash-derived) and PYTHONHASHSEED-dependent",
+        "id": "SEL-01",
+        "severity": "HIGH"
+      }
+    ],
+    "n_bias_flags": 18,
+    "note": "provenance_chain is a statement about the audit trail rooted at the pre-registration. The v1 bias audit is a statement about the DATA, and it currently FAILS. Both are true; neither implies the other.",
+    "passed": null,
+    "status": "FAIL",
+    "warning_flags": [
+      "None: ",
+      "None: ",
+      "None: ",
+      "None: ",
+      "None: ",
+      "None: ",
+      "None: ",
+      "None: ",
+      "None: ",
+      "None: ",
+      "None: ",
+      "None: ",
+      "None: ",
+      "None: ",
+      "None: "
+    ]
+  },
+  "verdict": true
+}

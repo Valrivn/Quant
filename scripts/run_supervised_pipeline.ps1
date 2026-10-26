@@ -36,7 +36,7 @@ function Write-ConsensusStatus {
 }
 
 $ErrorActionPreference = "Continue"
-$root = "C:\Users\Hayden\Quant"
+$root = Split-Path -Parent $PSScriptRoot
 $notify = Join-Path $root "scripts\notify.ps1"
 
 $logDir = Split-Path -Parent $LogFile

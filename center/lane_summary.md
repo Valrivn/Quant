@@ -29,14 +29,14 @@ graph TD
 
 ### 2.1 Lane Alpha: Statistical Processing Sandbox (`lane_alpha`)
 - **Primary Focus:** Signal processing core, anomaly extraction, and sub-sector cross-sectional neutralization.
-- **Key Modules:** [qualitative_scoring.py](file:///Users/hayden/Desktop/quant-py/psychological/qualitative_scoring.py) (`EMAFilter`, `CultureComposite`, `HypeComposite`, `DoubleStandardizer`).
+- **Key Modules:** [qualitative_scoring.py](./psychological/qualitative_scoring.py) (`EMAFilter`, `CultureComposite`, `HypeComposite`, `DoubleStandardizer`).
 - **Mathematical Formulations:**
   - **Cold-Start EMA Filter:** Implements expanding-mean smoothing until N >= 5 observations, after which exponential decay applies via alpha = 1 - exp(-ln(2)/halflife).
   - **Two-Stage Double Standardizer:** Stage 1 computes expanding time-series z-scores z = (x - mu) / sigma clamped via tanh(z/2.0). Stage 2 performs daily peer-group cross-sectional z-score normalization across assigned sub-sectors (`semiconductors`, `platform_software`, `hardware_oem`).
 
 ### 2.2 Lane Beta: Scoring & Fundamental Reconstruction Sandbox (`lane_beta`)
 - **Primary Focus:** Cash flow structural reconstruction, balance sheet adjustment, and non-linear trajectory corridors.
-- **Key Modules:** [qualitative_scoring.py](file:///Users/hayden/Desktop/quant-py/psychological/qualitative_scoring.py) (`MoatComposite`, `FinancialReconstructionInterface`, `TrajectoryCorridorEngine`, `AlternativeStrategyPipeline`).
+- **Key Modules:** [qualitative_scoring.py](./psychological/qualitative_scoring.py) (`MoatComposite`, `FinancialReconstructionInterface`, `TrajectoryCorridorEngine`, `AlternativeStrategyPipeline`).
 - **Mathematical Formulations:**
   - **3-Year R&D Amortization & Capitalization:** Reconstructs GAAP R&D operating expenses into capitalized balance-sheet assets with sector-specific straight-line amortization lives (5.0 yrs for semiconductors/hardware, 4.0 yrs for software).
   - **Stock-Based Compensation (SBC) Drag Intensity:** Dilution risk and revenue intensity analysis via:
@@ -55,7 +55,7 @@ graph TD
 - **Primary Focus:** Downstream Fama-MacBeth cross-sectional panel regression on 5-year point-in-time historical baseline data (`data/historical_5y_baseline.csv`).
 - **Weight Optimization Results:** Discovered optimal branch weights (w_culture=0.0, w_moat=0.0, w_hype=0.0) maximizing forward Spearman Rank Correlation (rho = 0.0000).
 - **Spearman Grid Search:** 0 evaluations, IC = 0.000000 (p = 0.000000).
-- **Active Conviction Scoring:** Outputs actionable 0–10 asset conviction scores and narrative ratings to [conviction_scores.md](file:///Users/hayden/Desktop/quant-py/center/conviction_scores.md).
+- **Active Conviction Scoring:** Outputs actionable 0–10 asset conviction scores and narrative ratings to [conviction_scores.md](./center/conviction_scores.md).
 
 ### 2.5 Lane Epsilon: Master Synthesis & Reporting Gate (`lane_epsilon`)
 - **Primary Focus:** Dispatched downstream of Delta as the final verification checkpoint to compile this exhaustive Opus 4.6 architectural manifest and audit report.
@@ -122,7 +122,7 @@ Live telemetry audits on `reddit_quant.db` verify active network data streaming 
 1. **Unit & Integration Test Suite:** `620 passed, 18 skipped, 0 failed` across 638 test specifications (programmatically executed).
 2. **Antigravity Hardcoding Guard:** Scanned codebase via `antigravity_daemon.py`; **0 hardcoded values** detected.
 3. **Temporal Lookahead Guard:** Verified point-in-time calculation boundaries; zero 2026 data leakage detected in past historical backtest windows.
-4. **ETF Allocation Audit Matrix:** Linked verified allocation state to [etf_allocation_audit_matrix.md](file:///Users/hayden/Desktop/quant-py/etf_allocation_audit_matrix.md) (programmatically verified).
+4. **ETF Allocation Audit Matrix:** Linked verified allocation state to [etf_allocation_audit_matrix.md](./etf_allocation_audit_matrix.md) (programmatically verified).
 
 ```
 ================================================================================

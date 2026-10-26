@@ -91,8 +91,7 @@ These files intentionally remain at root; do **not** move them:
 `log_regime_v6_verification_checkpoint.py` (interdependent pair),
 `sprint1_parallel_ingest.py` (imported by 3 discovery modules),
 `etf_selection_cache.json`, `college_append.jsonl`, `pip_err.txt`,
-`psychological` / `scraper` pointer files, `8/`, `lane_results/`,
-`cookiesinstagram.txt`.
+`8/`, `lane_results/`.
 
 ## 4. Core Entrypoints
 
@@ -269,4 +268,4 @@ Accounting fundamentals key strictly to SEC `filed_date` (never quarter-end date
 
 ## 10. License
 
-Internal research and proprietary trading use only. All external datasets comply with their respective open government and public foundation licenses.
+Internal research and proprietary trading use only. All external datasets comply with their respective open government and public foundation licenses.

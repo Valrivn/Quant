@@ -1,0 +1,69 @@
+# config/quality_thresholds.yaml (FROZEN — CEO Ruling 2026-09-20)
+# SHA-256 will be computed upon freeze
+
+quality_composite:
+  quant_weight: 0.6
+  qual_weight: 0.4
+  premium_threshold_z: 2.0
+  premium_entry_allowance: 0.05  # 0.90×IV instead of 0.85
+  moat_omr_threshold: 0.5
+
+quantitative_pillar:
+  roic_wacc_spread:
+    weight: 0.25
+    winsorize_pctl: [0.01, 0.99]
+    sector_relative: true
+  fcf_margin:
+    weight: 0.25
+    benchmark: "sector_median_3yr_rolling"
+    sector_relative: true
+  icr:
+    weight: 0.20
+    cap: 10.0
+    distressed_floor: 0.5
+    sector_relative: false
+  revenue_quality:
+    weight: 0.15
+    metrics: ["accruals_ratio", "cash_conversion"]
+    sector_relative: true
+  balance_sheet_strength:
+    weight: 0.15
+    metrics: ["de_to_sector", "cash_runway_months"]
+    sector_relative: true
+
+qualitative_pillar:
+  gh_velocity_90d:
+    weight: 0.25
+    min_mapping_confidence: "medium"
+    neutral_fill: 0.0
+    sector_relative: true
+  ats_hiring_velocity_90d:
+    weight: 0.25
+    min_mapping_confidence: "medium"
+    neutral_fill: 0.0
+    sector_relative: true
+  patent_citation_accel_1y:
+    weight: 0.20
+    min_mapping_confidence: "medium"
+    neutral_fill: 0.0
+    sector_relative: true
+  rpo_growth_yoy:
+    weight: 0.15
+    min_year: 2018
+    neutral_fill: 0.0
+    sector_relative: true
+  mda_tone_score:
+    weight: 0.15
+    model: "FinBERT"
+    pit_anchor: "filing_date"
+    neutral_fill: 0.0
+    sector_relative: true
+
+peak_tracking:
+  lookback_years: 5
+  alert_pctl: 0.90
+  trim_alert_pctl: 0.95
+  min_price_history_days: 500
+  sector_blend_weight: 0.5  # for 2-5 year histories
+
+sector_qual_coverage_threshold: 0.20  # if sector qual coverage < 20%, force qual_weight=0

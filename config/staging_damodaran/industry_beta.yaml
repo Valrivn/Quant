@@ -1,0 +1,494 @@
+industries:
+  Advertising:
+    unlevered_beta: 0.9301
+    sub_area: ad_services
+  Aerospace/Defense:
+    unlevered_beta: 0.8467
+    sub_area: aero_defense
+  Air Transport:
+    unlevered_beta: 0.7041
+    sub_area: transport
+  Apparel:
+    unlevered_beta: 0.758
+    sub_area: retail
+  Auto & Truck:
+    unlevered_beta: 1.269
+    sub_area: autos
+  Auto Parts:
+    unlevered_beta: 1.0217
+    sub_area: autos
+  Bank (Money Center):
+    unlevered_beta: 0.3411
+    sub_area: financials
+  Banks (Regional):
+    unlevered_beta: 0.2865
+    sub_area: financials
+  Beverage (Alcoholic):
+    unlevered_beta: 0.6132
+    sub_area: food_beverage
+  Beverage (Soft):
+    unlevered_beta: 0.5557
+    sub_area: food_beverage
+  Broadcasting:
+    unlevered_beta: 0.2864
+    sub_area: media_content
+  Brokerage & Investment Banking:
+    unlevered_beta: 0.5808
+    sub_area: financials
+  Building Materials:
+    unlevered_beta: 0.9302
+    sub_area: construction
+  Business & Consumer Services:
+    unlevered_beta: 0.7736
+    sub_area: it_services
+  Cable TV:
+    unlevered_beta: 0.3524
+    sub_area: telecom
+  Chemical (Basic):
+    unlevered_beta: 0.58
+    sub_area: materials
+  Chemical (Diversified):
+    unlevered_beta: 0.3666
+    sub_area: materials
+  Chemical (Specialty):
+    unlevered_beta: 0.7922
+    sub_area: materials
+  Coal & Related Energy:
+    unlevered_beta: 1.0165
+    sub_area: energy
+  Computer Services:
+    unlevered_beta: 0.9155
+    sub_area: it_services
+  Computers/Peripherals:
+    unlevered_beta: 1.3051
+    sub_area: hardware_oem
+  Construction Supplies:
+    unlevered_beta: 1.0161
+    sub_area: construction
+  Diversified:
+    unlevered_beta: 0.7889
+    sub_area: diversified
+  Drugs (Biotechnology):
+    unlevered_beta: 1.0341
+    sub_area: biotech
+  Drugs (Pharmaceutical):
+    unlevered_beta: 0.8862
+    sub_area: pharma
+  Education:
+    unlevered_beta: 0.6602
+    sub_area: it_services
+  Electrical Equipment:
+    unlevered_beta: 1.1478
+    sub_area: machinery_equipment
+  Electronics (Consumer & Office):
+    unlevered_beta: 0.8299
+    sub_area: hardware_oem
+  Electronics (General):
+    unlevered_beta: 0.8974
+    sub_area: hardware_oem
+  Engineering/Construction:
+    unlevered_beta: 1.0949
+    sub_area: machinery_equipment
+  Entertainment:
+    unlevered_beta: 0.7372
+    sub_area: media_content
+  Environmental & Waste Services:
+    unlevered_beta: 0.8145
+    sub_area: environment
+  Farming/Agriculture:
+    unlevered_beta: 0.813
+    sub_area: agri
+  Financial Svcs. (Non-bank & Insurance):
+    unlevered_beta: 0.3189
+    sub_area: financials
+  Food Processing:
+    unlevered_beta: 0.4574
+    sub_area: food_beverage
+  Food Wholesalers:
+    unlevered_beta: 0.6409
+    sub_area: food_beverage
+  Furn/Home Furnishings:
+    unlevered_beta: 0.6248
+    sub_area: retail
+  Green & Renewable Energy:
+    unlevered_beta: 0.4633
+    sub_area: energy
+  Healthcare Products:
+    unlevered_beta: 0.8291
+    sub_area: healthcare
+  Healthcare Support Services:
+    unlevered_beta: 0.6889
+    sub_area: healthcare
+  Heathcare Information and Technology:
+    unlevered_beta: 0.9913
+    sub_area: application_software
+  Homebuilding:
+    unlevered_beta: 0.785
+    sub_area: construction
+  Hospitals/Healthcare Facilities:
+    unlevered_beta: 0.5517
+    sub_area: healthcare
+  Hotel/Gaming:
+    unlevered_beta: 0.8323
+    sub_area: hospitality
+  Household Products:
+    unlevered_beta: 0.7178
+    sub_area: retail
+  Information Services:
+    unlevered_beta: 0.7372
+    sub_area: data_services
+  Insurance (General):
+    unlevered_beta: 0.5636
+    sub_area: insurance
+  Insurance (Life):
+    unlevered_beta: 0.4272
+    sub_area: insurance
+  Insurance (Prop/Cas.):
+    unlevered_beta: 0.4357
+    sub_area: insurance
+  Investments & Asset Management:
+    unlevered_beta: 0.5297
+    sub_area: financials
+  Machinery:
+    unlevered_beta: 0.868
+    sub_area: machinery_equipment
+  Metals & Mining:
+    unlevered_beta: 0.9636
+    sub_area: materials
+  Office Equipment & Services:
+    unlevered_beta: 0.9806
+    sub_area: it_services
+  Oil/Gas (Integrated):
+    unlevered_beta: 0.2712
+    sub_area: energy
+  Oil/Gas (Production and Exploration):
+    unlevered_beta: 0.5628
+    sub_area: energy
+  Oil/Gas Distribution:
+    unlevered_beta: 0.4651
+    sub_area: energy
+  Oilfield Svcs/Equip.:
+    unlevered_beta: 0.743
+    sub_area: machinery_equipment
+  Packaging & Container:
+    unlevered_beta: 0.7231
+    sub_area: materials
+  Paper/Forest Products:
+    unlevered_beta: 0.7216
+    sub_area: materials
+  Power:
+    unlevered_beta: 0.31
+    sub_area: utilities
+  Precious Metals:
+    unlevered_beta: 0.7932
+    sub_area: materials
+  Publishing & Newspapers:
+    unlevered_beta: 0.4773
+    sub_area: media_content
+  R.E.I.T.:
+    unlevered_beta: 0.3929
+    sub_area: real_estate
+  Real Estate (Development):
+    unlevered_beta: 0.4783
+    sub_area: real_estate
+  Real Estate (General/Diversified):
+    unlevered_beta: 0.5779
+    sub_area: real_estate
+  Real Estate (Operations & Services):
+    unlevered_beta: 0.8149
+    sub_area: real_estate
+  Recreation:
+    unlevered_beta: 0.6951
+    sub_area: hospitality
+  Reinsurance:
+    unlevered_beta: 0.4384
+    sub_area: insurance
+  Restaurant/Dining:
+    unlevered_beta: 0.7674
+    sub_area: food_beverage
+  Retail (Automotive):
+    unlevered_beta: 0.6984
+    sub_area: retail
+  Retail (Building Supply):
+    unlevered_beta: 1.307
+    sub_area: retail
+  Retail (Distributors):
+    unlevered_beta: 0.7827
+    sub_area: retail
+  Retail (General):
+    unlevered_beta: 0.76
+    sub_area: retail
+  Retail (Grocery and Food):
+    unlevered_beta: 0.8048
+    sub_area: retail
+  Retail (REITs):
+    unlevered_beta: 0.4362
+    sub_area: real_estate
+  Retail (Special Lines):
+    unlevered_beta: 0.9488
+    sub_area: retail
+  Rubber& Tires:
+    unlevered_beta: 0.1435
+    sub_area: materials
+  Semiconductor:
+    unlevered_beta: 1.4893
+    sub_area: chip_design
+  Semiconductor Equip:
+    unlevered_beta: 1.3481
+    sub_area: chip_equipment
+  Shipbuilding & Marine:
+    unlevered_beta: 0.644
+    sub_area: transport
+  Shoe:
+    unlevered_beta: 0.9337
+    sub_area: retail
+  Software (Entertainment):
+    unlevered_beta: 1.0128
+    sub_area: application_software
+  Software (Internet):
+    unlevered_beta: 1.5461
+    sub_area: application_software
+  Software (System & Application):
+    unlevered_beta: 1.2254
+    sub_area: application_software
+  Steel:
+    unlevered_beta: 0.9035
+    sub_area: materials
+  Telecom (Wireless):
+    unlevered_beta: 0.3873
+    sub_area: telecom
+  Telecom. Equipment:
+    unlevered_beta: 0.8635
+    sub_area: hardware_oem
+  Telecom. Services:
+    unlevered_beta: 0.3654
+    sub_area: telecom
+  Tobacco:
+    unlevered_beta: 0.6776
+    sub_area: retail
+  Transportation:
+    unlevered_beta: 0.6753
+    sub_area: transport
+  Transportation (Railroads):
+    unlevered_beta: 0.8069
+    sub_area: transport
+  Trucking:
+    unlevered_beta: 0.8504
+    sub_area: transport
+  Utility (General):
+    unlevered_beta: 0.1486
+    sub_area: utilities
+  Utility (Water):
+    unlevered_beta: 0.2812
+    sub_area: utilities
+sub_area_aliases:
+  semiconductor: chip_design
+  semiconductor_equipment: chip_equipment
+  hardware_oem: hardware_oem
+  networking: telecom
+  cloud_internet: data_services
+  platform_software: application_software
+  energy: energy
+  utilities: utilities
+  software: application_software
+  computers: hardware_oem
+  semiconductors: chip_design
+  internet_media: media_content
+  ecommerce: retail
+  it_services: it_services
+  data_services: data_services
+  retail: retail
+  chips: chip_design
+  chip_equipment: chip_equipment
+industry_aliases:
+  semiconductor industry: Semiconductor
+  semiconductor equipment: Semiconductor Equip
+  electrical industry: Electrical Equipment
+  information technology: Computer Services
+  retail: Retail (General)
+  software industry: Software (System & Application)
+thread_b:
+  beta_band: 0.15
+  prefer_different_sub_area: true
+  ecosystem:
+    enabled: true
+    max_hop_depth: 2
+    max_industries_per_hop: 12
+    sub_area_chain:
+      ad_services:
+      - media_content
+      - retail
+      aero_defense:
+      - machinery_equipment
+      - transport
+      - chip_design
+      agri:
+      - food_beverage
+      - materials
+      application_software:
+      - hardware_oem
+      - it_services
+      autos:
+      - transport
+      - materials
+      - hardware_oem
+      biotech:
+      - pharma
+      - healthcare
+      - materials
+      chip_design:
+      - chip_equipment
+      - hardware_oem
+      chip_equipment:
+      - chip_design
+      - materials
+      - machinery_equipment
+      construction:
+      - materials
+      - machinery_equipment
+      - real_estate
+      data_services:
+      - application_software
+      - media_content
+      - telecom
+      diversified:
+      - financials
+      - retail
+      energy:
+      - utilities
+      - materials
+      environment:
+      - utilities
+      - materials
+      financials:
+      - insurance
+      - real_estate
+      food_beverage:
+      - agri
+      - hospitality
+      - retail
+      hardware_oem:
+      - chip_design
+      - chip_equipment
+      - telecom
+      healthcare:
+      - biotech
+      - pharma
+      hospitality:
+      - food_beverage
+      - retail
+      insurance:
+      - financials
+      - real_estate
+      it_services:
+      - application_software
+      - data_services
+      machinery_equipment:
+      - chip_equipment
+      - materials
+      - construction
+      materials:
+      - machinery_equipment
+      - energy
+      - construction
+      media_content:
+      - ad_services
+      - telecom
+      - retail
+      pharma:
+      - biotech
+      - healthcare
+      real_estate:
+      - construction
+      - financials
+      - retail
+      retail:
+      - food_beverage
+      - hospitality
+      - media_content
+      telecom:
+      - hardware_oem
+      - data_services
+      - media_content
+      transport:
+      - autos
+      - hospitality
+      - materials
+      utilities:
+      - energy
+      - telecom
+default_ratings:
+  tiers:
+  - icr_threshold: -100000.0
+    rating: D2/D
+    spread: 0.19
+  - icr_threshold: 0.2
+    rating: C2/C
+    spread: 0.16
+  - icr_threshold: 0.65
+    rating: Ca2/CC
+    spread: 0.1261
+  - icr_threshold: 0.8
+    rating: Caa/CCC
+    spread: 0.0885
+  - icr_threshold: 1.25
+    rating: B3/B-
+    spread: 0.0509
+  - icr_threshold: 1.5
+    rating: B2/B
+    spread: 0.0321
+  - icr_threshold: 1.75
+    rating: B1/B+
+    spread: 0.0275
+  - icr_threshold: 2.0
+    rating: Ba2/BB
+    spread: 0.0184
+  - icr_threshold: 2.25
+    rating: Ba1/BB+
+    spread: 0.0138
+  - icr_threshold: 2.5
+    rating: Baa2/BBB
+    spread: 0.0111
+  - icr_threshold: 3.0
+    rating: A3/A-
+    spread: 0.0089
+  - icr_threshold: 4.25
+    rating: A2/A
+    spread: 0.0078
+  - icr_threshold: 5.5
+    rating: A1/A+
+    spread: 0.007
+  - icr_threshold: 6.5
+    rating: Aa2/AA
+    spread: 0.0055
+  - icr_threshold: 8.5
+    rating: Aaa/AAA
+    spread: 0.004
+  source_url: https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ratings.htm
+  checksum: 74e19b6166442df3fa9873988fbcae3def24590a17956cf833f13c5e48e831ad
+update:
+  source: https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datacurrent.html (discovered)
+  last_updated: '2026-10-06T01:41:01Z'
+  refresh_cadence: every 2 months
+  version: '2026.10'
+  beta_checksum: ca93197fe501c63b3ff16b1449ec8317bb425cc6c1da5b4efd2f81b4a9d93f80
+  combined_checksum: 2c6585bff5bbf0da56c93c6099dd9977c6d837f66cf09d9fe663c156fec23b6d
+  fetch_timestamp_utc: '2026-10-06T01:41:01Z'
+  beta_warnings: []
+  rating_warnings: []
+  candidate_path: config/industry_beta_candidate.yaml
+  auto_replace: false
+  source_urls:
+    industry_beta: https://pages.stern.nyu.edu/~adamodar/pc/datasets/betas.xls
+    ratings: https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ratings.html
+    index: https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datacurrent.html
+  dataset_versions:
+    industry_beta: 2026-01-05 (file)
+    ratings: 2026.10 (no stamp)
+  dataset_sha256:
+    industry_beta: fa5d91af58046937e2db27a764b077dde9d5414df5f69214328f163b940e42a5
+    ratings: 71d5dba40bd0659b7d6fe6f0e2d25036442d66b3c5e309480d0c9b48b2c3ba63
+  staged: true
+  content_sha256: 8445250997f90d240df76b1bf183575502c57f631006de31ea2a43403b7388df
+staging:
+  candidate: {}

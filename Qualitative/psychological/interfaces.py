@@ -1,5 +1,20 @@
-from typing import TypedDict, Dict, List, Optional
+from abc import ABC, abstractmethod
+from typing import TypedDict, Dict, List, Optional, Any
 from datetime import datetime
+
+
+class AlternativeDataProvider(ABC):
+    """Abstract interface for compliant alternative data ingestion.
+
+    The platform utilizes an abstracted AlternativeDataProvider interface designed
+    to consume pre-compiled academic research corpora and authorized vendor feeds,
+    strictly avoiding brittle or non-compliant web scraping.
+    """
+
+    @abstractmethod
+    def fetch_records(self, ticker: str, start_date: str, end_date: str) -> List[Dict[str, Any]]:
+        """Fetch records for a given ticker within a date window from an authorized vendor/corpus."""
+        pass
 
 
 class PsychologicalFeatureVector(TypedDict):
@@ -89,6 +104,7 @@ class GitHubMetrics(TypedDict):
 
 
 __all__ = [
+    "AlternativeDataProvider",
     "PsychologicalFeatureVector",
     "VelocitySnapshot",
     "AdzunaJobSnapshot",

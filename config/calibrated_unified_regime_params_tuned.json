@@ -1,0 +1,122 @@
+{
+  "version": "v7_unified_tuned",
+  "trained_on": "2010-01-01 to 2020-12-31",
+  "bocpd": {
+    "hazard_rate": 0.015,
+    "threshold": 0.9,
+    "prior_mu_0": 0.0,
+    "prior_kappa_0": 1.0,
+    "prior_alpha_0": 2.0,
+    "prior_beta_0": 1.0,
+    "min_run_length": 5,
+    "max_run_length": 500,
+    "observation": "credit_spread_velocity_21d",
+    "alarm_action": "FORCE_CRISIS",
+    "override_weight": 0.8
+  },
+  "io_hmm": {
+    "n_states": 3,
+    "state_names": [
+      "EXPANSION",
+      "SHOCK",
+      "CRISIS"
+    ],
+    "input_features": [
+      "credit_spread_velocity",
+      "yield_curve_momentum",
+      "realized_vol_21d",
+      "credit_spread_level",
+      "yield_curve_slope",
+      "vix_level"
+    ],
+    "transition_prior_alpha": 1.5,
+    "input_weight_prior_sd": 1.0,
+    "sticky_prior": 5.0,
+    "emission_prior_kappa": 1.2,
+    "emission_prior_alpha": 2.0,
+    "emission_prior_beta": 1.0,
+    "initial_prior": [
+      0.5,
+      0.35,
+      0.15
+    ],
+    "l2_penalty": 0.001,
+    "crisis_threshold": 0.7,
+    "choppy_threshold": 0.4,
+    "choppy_vol_threshold": 0.16,
+    "choppy_credit_vel_threshold": 0.08,
+    "choppy_fin_stress_threshold": -0.1
+  },
+  "micro_states": {
+    "enabled": true,
+    "states": [
+      {
+        "name": "GOLDILOCKS",
+        "description": "Low inflation, healthy credit",
+        "conditions": {
+          "cpi_yoy_max": 2.5,
+          "real_rate_max": 1.5,
+          "hy_oas_max": 150,
+          "vix_max": 20,
+          "curve_min": 50
+        },
+        "pipeline_action": "LOWER_HURDLE_RATES",
+        "wacc_adjustment_bps": -50
+      },
+      {
+        "name": "LATE_CYCLE_DRAG",
+        "description": "Inverted curve, tightening solvency",
+        "conditions": {
+          "curve_max": 0,
+          "hy_oas_min": 200
+        },
+        "pipeline_action": "TIGHTEN_ENTRY_TRIM_CYCLICALS",
+        "wacc_adjustment_bps": 25
+      },
+      {
+        "name": "LIQUIDITY_CRUNCH",
+        "description": "High real rates, credit freeze",
+        "conditions": {
+          "real_rate_min": 2.0,
+          "hy_oas_min": 400,
+          "stl_fsi_min": 1.5
+        },
+        "pipeline_action": "DOWN_FILTER_SHIFT_TO_BIL",
+        "lambda_stress_mult": 2.0
+      },
+      {
+        "name": "STAGFLATION",
+        "description": "Hot inflation, supply disruption",
+        "conditions": {
+          "cpi_yoy_min": 3.5,
+          "real_rate_min": 1.0
+        },
+        "pipeline_action": "ROUTE_CASH_TO_GOLD"
+      }
+    ]
+  },
+  "integration": {
+    "bocpd_override_weight": 0.8,
+    "io_hmm_weight": 1.0,
+    "micro_weight": 1.0,
+    "crisis_threshold": 0.7,
+    "choppy_threshold": 0.4,
+    "choppy_vol_threshold": 0.16,
+    "choppy_credit_vel_threshold": 0.08,
+    "choppy_fin_stress_threshold": -0.1,
+    "crisis_vol_threshold": 0.35,
+    "crisis_credit_vel_threshold": 0.35,
+    "crisis_fin_stress_threshold": 1.2,
+    "min_dwell_days": 5,
+    "max_transitions_per_year": 8
+  },
+  "provenance": {
+    "source": "Quantitative.calibration.train_unified_regime",
+    "retrieval_timestamp": "2026-09-30T20:24:29.963263",
+    "sha256": "0ccdd5939bab0dd309bb02b04ce9173f043c7dd4720e50b539f9965286e4abe4",
+    "date_range": {
+      "min": "2010-01-01",
+      "max": "2020-12-31"
+    }
+  }
+}

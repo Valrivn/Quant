@@ -1,0 +1,35 @@
+{
+  "diagnostic": "phase9_regime_v6_cesi_ari_cost",
+  "date": "2026-09-28",
+  "note": "read-only; engine not mutated; synthetic CESI per regime_shield_v3.py:829-832",
+  "results": [
+    {
+      "variant": "baseline_6feat",
+      "cesi_treatment": "synthetic_noise_seed45",
+      "folds_requested": 4,
+      "fold_ari": [
+        0.0088,
+        0.0859,
+        -0.0977
+      ],
+      "concat_ari": 0.0886,
+      "passing_folds": 0,
+      "status": "FAIL",
+      "overall_pass": false
+    },
+    {
+      "variant": "cesi_neutralized",
+      "cesi_treatment": "neutralized_constant",
+      "folds_requested": 4,
+      "fold_ari": [
+        0.0902,
+        0.0859,
+        -0.0951
+      ],
+      "concat_ari": 0.1334,
+      "passing_folds": 0,
+      "status": "FAIL",
+      "overall_pass": false
+    }
+  ]
+}

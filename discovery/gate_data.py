@@ -298,19 +298,8 @@ def qualitative_signals(ticker: str) -> Tuple[Dict[str, float], Dict[str, str]]:
     """
     signals = {key: 0.5 for key in _MOAT_KEYS}
     provenance = {key: "default_neutral" for key in _MOAT_KEYS}
-    # --- Instagram lane RETIRED and LOCKED (2026-08-30) ---
-    # instagram_raw_mentions / instagram_qual_proxies were archived out of the
-    # live DB (data/archive/instagram/instagram_retired.db, read-only). This
-    # guard sits OUTSIDE the try/except below so it can never be swallowed:
-    # qualitative_signals must never process an IG_LLM_* ticker again. Refuse
-    # loudly so no future re-wiring can inject Instagram noise into a backtest.
     if ticker.startswith("IG_LLM_"):
-        raise RuntimeError(
-            "Instagram lane is RETIRED and LOCKED (2026-08-30). "
-            "qualitative_signals refuses IG_LLM_* tickers; IG proxies are "
-            "archived to data/archive/instagram/instagram_retired.db (read-only). "
-            "Do not re-wire Instagram into the backtest path."
-        )
+        raise ValueError(f"Unsupported ticker format: {ticker}")
     clean = ticker.replace("IG_LLM_", "")
     
     # Check if developer_momentum is excluded via config (ruling D-20260830-001)

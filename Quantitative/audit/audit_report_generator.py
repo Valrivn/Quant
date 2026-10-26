@@ -13,8 +13,7 @@ Generates the consolidated audit report combining all pipeline stages:
   8. Tactical Rebalancer macro adjustments
   9. Final Order Drafts
 
-This module produces the complete audit trail required for Fidelity Youth
-Account compliance, with full data provenance and sensitivity metadata.
+This module produces the complete audit trail required for simulated broker target compliance, with full data provenance and sensitivity metadata.
 """
 
 import logging

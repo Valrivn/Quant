@@ -1,0 +1,146 @@
+# Pre-Registration Config v2 — Hybrid Fractal Architecture + Exponential Barrier Swap
+# FROZEN: 2026-09-19 | SHA-256 to be computed upon approval
+# This config is IMMUTABLE once walk-forward begins. Any change requires CEO re-rule.
+
+t_hmm:
+  n_states: 2
+  state_names: ["EXPANSION", "CRISIS"]
+  observables: ["BAA10Y_spread", "VIX"]
+  distribution: "t_distribution"
+  df: 6                          # fixed, not estimated
+  sticky_kappa: 50               # Dirichlet concentration for self-transitions
+  labeling_rule: "VIX_mean_ascending"  # CRISIS = higher VIX mean
+  reestimate_freq: "monthly"     # full MLE re-estimation at month-end
+  nowcast_daily: true            # daily filter step with fixed params
+  min_obs_per_state: 12          # minimum monthly obs per state for re-estimation
+
+multifractal:
+  estimator: "HAR_abs_returns"
+  lags: [1, 5, 22]              # daily, weekly, monthly
+  sigma_tau: [5, 10, 20]        # horizons in trading days
+  sector_overrides:
+    Tech: {tau: 10, k: 2.2}
+    Energy: {tau: 20, k: 1.5}
+    Financial: {tau: 20, k: 1.6}
+    Consumer: {tau: 20, k: 1.8}
+    Healthcare: {tau: 20, k: 1.8}
+    Industrial: {tau: 20, k: 1.8}
+    default: {tau: 20, k: 1.8}
+  nested_cv:
+    outer: "walk_forward"
+    inner: "time_series"
+    folds: 4
+    embargo_months: 3
+
+exit:
+  floor_iv_mult: 1.15            # absolute floor, regime-invariant
+  regime_targets:
+    EXPANSION: 1.20
+    CRISIS: 1.05
+  fractal_trailing: true
+  peak_detection: false          # DISABLED — statistically undefined
+  new_structure_hold: false      # DISABLED — research track only
+
+swap_barrier:
+  C_bps: 150                     # baseline round-trip cost
+  t_target_months: 24            # value convergence horizon
+  gamma: 0.5                     # decay steepness
+  epsilon: 1e-6                  # numerical stability
+  moat_penalty_bps: 100
+  moat_condition: "ROIC_cap_rd > WACC + 0.02 AND OMR > 0.5"
+  # applied to CURRENT holding (i) only
+
+execution:
+  staggered_exits:
+    max_daily_portfolio_pct: 0.05
+    twap_days: 3
+    correlation_clustering: true
+    cluster_method: "hierarchical"
+    cluster_threshold: 0.7
+  iv_nowcast:
+    model: "GARCH_11"
+    distribution: "normal"
+    update_freq: "daily"
+  tca_budget_bps: 150            # hard cap round-trip
+  slippage_model: "almgren_chriss_regime"
+  regime_impact_multipliers:
+    EXPANSION: 1.0
+    CRISIS: 3.0
+  min_adv_usd: 5_000_000         # minimum ADV for CRISIS entries
+
+position_sizing:
+  base_weight: 0.02              # 2% base per position
+  edge_scaling: 0.5              # (edge/0.15)^0.5
+  vol_targeting: true
+  sigma_target_daily: 0.015      # 1.5% daily portfolio vol target
+  regime_multipliers:
+    EXPANSION: 1.0
+    CRISIS: 0.5
+
+walk_forward:
+  window_type: "expanding"
+  initial_train_months: 36
+  test_months: 12
+  embargo_months: 3
+  folds: 4
+  # Fold 1: Train 2018-01 to 2020-12, Embargo 2021-01 to 2021-03, Test 2021-04 to 2021-12
+  # Fold 2: Train 2018-01 to 2021-12, Embargo 2022-01 to 2022-03, Test 2022-04 to 2022-12
+  # Fold 3: Train 2018-01 to 2022-12, Embargo 2023-01 to 2023-03, Test 2023-04 to 2023-12
+  # Fold 4: Train 2018-01 to 2023-12, Embargo 2024-01 to 2024-03, Test 2024-04 to 2024-12
+
+gates:
+  # Statistical gates (Bonferroni α=0.0071 across 7 primary gates)
+  trailing_beats_fixed:
+    test: "paired_clustered_bootstrap"
+    clusters: "sector"
+    alpha: 0.0071
+    per_sector: true
+  
+  crisis_precision_recall:
+    crisis_label: "BAA10Y_spread > 300"
+    precision_threshold: 0.80
+    recall_threshold: 0.70
+    windows: ["primary", "S4", "S5", "S6"]
+  
+  hmm_state_stability:
+    metric: "ARI"
+    threshold: 0.80
+    across_folds: true
+  
+  multifractal_consistency:
+    methods: ["HAR_abs", "HAR_sq", "Wavelet_db4"]
+    min_correlation: 0.70
+  
+  swap_barrier_churn:
+    max_annual_turnover: 0.30
+    max_swaps_per_year: 5
+    moat_protection_efficacy: true
+  
+  tca_budget:
+    max_round_trip_bps: 150
+    simulation: "LOB"
+  
+  # Performance gates
+  oos_sharpe:
+    threshold: 1.0
+    arm: "C"
+  
+  max_drawdown:
+    threshold: -0.20
+    arm: "C"
+  
+  probabilistic_sharpe:
+    threshold: 0.95
+    arm: "C"
+  
+  calmar:
+    threshold: 2.0
+    arm: "C"
+
+# Version control
+version: "2.0"
+created: "2026-09-19"
+author: "Central Commander (Nemotron)"
+ruling_ref: "ceo-ruling-B-20260919-001"
+status: "FROZEN"
+sha256: "A751E9909166F14BE831D2D10EC1BB02FD8FC179E4949971FCE53B170F31CFD7"

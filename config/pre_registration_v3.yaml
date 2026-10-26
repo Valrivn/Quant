@@ -1,0 +1,195 @@
+# Pre-Registration Config v3 — Structural Fixes for Walk-Forward Failures
+# FROZEN: 2026-09-20 | SHA-256 to be computed upon approval
+# This config is IMMUTABLE once walk-forward begins. Any change requires CEO re-rule.
+
+t_hmm:
+  n_states: 3
+  state_names: ["EXPANSION", "SHOCK", "CRISIS"]
+  observables: ["BAA10Y_spread", "VIX", "DGS10_10Y2Y_slope"]
+  distribution: "t_distribution"
+  df: 6                          # fixed, not estimated
+  sticky_kappa: 100              # Dirichlet concentration for self-transitions (Fox et al.)
+  labeling_rule: "VIX_mean_ascending"  # CRISIS = higher VIX mean
+  reestimate_freq: "monthly"     # full MLE re-estimation at month-end
+  nowcast_daily: true            # daily filter step with frozen params
+  min_obs_per_state: 12
+  dwell_filter:
+    enabled: true
+    tau_base: 10
+    gamma: 2.0
+    tau_min: 3
+    tau_max: 15
+    epsilon: 1e-6
+
+multifractal:
+  estimator: "HAR_abs_returns"
+  lags: [1, 5, 22]
+  sigma_tau: [5, 10, 20]
+  sector_overrides:
+    Tech: {tau: 10, k: 2.2}
+    Energy: {tau: 20, k: 1.5}
+    Financial: {tau: 20, k: 1.6}
+    Consumer: {tau: 20, k: 1.8}
+    Healthcare: {tau: 20, k: 1.8}
+    Industrial: {tau: 20, k: 1.8}
+    default: {tau: 20, k: 1.8}
+  regime_k_multiplier:
+    EXPANSION: 1.0
+    SHOCK: 0.8
+    CRISIS: 0.5
+  nested_cv:
+    outer: "walk_forward"
+    inner: "time_series"
+    folds: 4
+    embargo_months: 12
+
+dcf_nowcaster:
+  fcf_matrix:
+    update_trigger: "sec_filing"
+    capitalized_rd_years: 3
+    sbc_drag: true
+    omr: true
+  wacc_engine:
+    update_freq: "daily"
+    rf_source: "FRED_DGS10"
+    beta_window: "60M"
+    erp_source: "damodaran_implied"
+    cost_of_debt: "trailing_4q_spread"
+    tax_rate: "effective_bounded"
+  duration_nowcast: true
+  analytical_derivative: true
+
+swap_barrier:
+  C_bps: 150
+  t_target_months: 24
+  gamma: 0.5
+  epsilon: 1e-6
+  moat_penalty_bps: 100
+  moat_condition: "ROIC_cap_rd > WACC + 0.02 AND OMR > 0.5"
+  bidirectional: true
+  cash_aware_reentry: true
+  stop_loss_reentry_bypass: true
+  stop_loss_lookback_days: 20
+
+probationary_queue:
+  enabled: true
+  min_days: 10
+  max_days: 20
+  checks:
+    revisions_slope: {window_days: 30, threshold: 0.0}
+    omr: {threshold: 0.50}
+    vol_contraction: {consecutive_days: 3, compare_to: "trailing_5d_avg"}
+
+exit:
+  floor_iv_mult: 1.15
+  regime_targets:
+    EXPANSION: 1.20
+    SHOCK: 1.10
+    CRISIS: 1.05
+  fractal_trailing: true
+  regime_k_multiplier:
+    EXPANSION: 1.0
+    SHOCK: 0.8
+    CRISIS: 0.5
+
+execution:
+  staggered_exits:
+    max_daily_portfolio_pct: 0.05
+    twap_days: 3
+    correlation_clustering: true
+    cluster_method: "hierarchical"
+    cluster_threshold: 0.7
+  tca_budget_bps: 150
+  slippage_model: "piecewise_almgren_chriss"
+  participation_thresholds:
+    sqrt_region: 0.05
+    linear_region: 0.20
+    quadratic_region: 0.20
+  regime_impact_multipliers:
+    EXPANSION: 1.0
+    SHOCK: 2.0
+    CRISIS: 3.0
+  min_adv_usd: 5_000_000
+
+position_sizing:
+  base_weight: 0.02
+  edge_scaling: 0.5
+  vol_targeting: true
+  sigma_target_daily: 0.015
+  regime_multipliers:
+    EXPANSION: 1.0
+    SHOCK: 0.7
+    CRISIS: 0.5
+
+walk_forward:
+  window_type: "expanding"
+  initial_train_months: 36
+  test_months: 12
+  embargo_months: 12
+  purge_window_months: 6
+  purged: true
+  folds: 4
+
+gates:
+  statistical_correction: "holm_bonferroni"
+  alpha_family: 0.05
+  
+  trailing_beats_fixed:
+    test: "paired_clustered_bootstrap"
+    clusters: "sector"
+    alpha: 0.003125
+    per_sector: true
+  
+  crisis_precision_recall:
+    crisis_label: "BAA10Y_spread > 300"
+    precision_threshold: 0.80
+    recall_threshold: 0.70
+    windows: ["primary", "S4", "S5", "S6"]
+    exclude_zero_crisis_folds: true
+  
+  hmm_state_stability:
+    metric: "ARI"
+    threshold: 0.80
+    across_folds: true
+  
+  multifractal_consistency:
+    methods: ["HAR_abs", "HAR_sq", "Wavelet_db4"]
+    min_correlation: 0.70
+  
+  swap_barrier_churn:
+    max_annual_turnover: 0.30
+    max_swaps_per_year: 5
+    moat_protection_efficacy: true
+    logic: "passed = (value < threshold)"
+  
+  tca_budget:
+    max_round_trip_bps: 150
+    simulation: "LOB_piecewise"
+  
+  oos_sharpe:
+    threshold: 1.0
+    arm: "C"
+  
+  max_drawdown:
+    threshold: -0.20
+    arm: "C"
+  
+  probabilistic_sharpe:
+    threshold: 0.95
+    arm: "C"
+  
+  calmar:
+    threshold: 2.0
+    arm: "C"
+  
+  probationary_pass_rate:
+    threshold: 0.40
+    min_triggers: 50
+
+# Version control
+version: "3.0"
+created: "2026-09-20"
+author: "Central Commander (Nemotron)"
+ruling_ref: "ceo-ruling-B-20260920-001"
+status: "FROZEN"
+sha256: "663939C38D520C7D9FA62BC6F2436E5F2CB3A7A63A5908793C0CF46D25F954D1"

@@ -1,0 +1,844 @@
+# Phase 9 Sprint 7 Pre-Registration Configuration — FROZEN BEFORE EXECUTION
+# UNIFIED REGIME ARCHITECTURE: BOCPD + IO-HMM + MICRO-STATES
+#
+# v7 CHANGELOG — the only substantive delta from v6 is the HMM Layer 1 feature
+# list. See `hmm.layer1_features` below and the `changelog` block at the end.
+#
+#   REMOVED: CESI (Citi Economic Surprise Index)
+#     - Proprietary, licensed index. NOT published on FRED.
+#     - regime_shield_v3.build_layer1_features filled it with
+#       `np.random.seed(45); pd.Series(np.random.normal(0, 20, len(dates)))`,
+#       commented "NOT AVAILABLE IN FRED CACHE; synthetic placeholder".
+#     - hmm_regime.build_macro_features filled it with 21-day market momentum
+#       while labelling it "CESI" — a fabricated proxy for the same name.
+#     - Both were pre-registered inputs to a 6-feature HMM. This violated the
+#       standing zero-synthetic constraint AND v6's own
+#       optimization.synthetic_fallback: "disabled".
+#     - Measured ARI cost: +0.0448 concat (0.0886 -> 0.1334 when neutralised).
+#       A real defect; NOT the primary cause of the ARI gate failure.
+#     - `hmm_regime` ALSO had a contract drift: FEATURE_NAMES declared 12
+#       features with _F_CREDIT=3, while build_macro_features returned 6 — so
+#       state labelling was ordered by REALIZED_VOLATILITY, not credit.
+#       v7 fixes this: FEATURE_NAMES is now the canonical 6 and _F_CREDIT=0.
+#
+#   ADDED: UNANTICIPATED_INFLATION = CPIAUCSL YoY - T10YIE
+#     - Occupies CESI's economic slot: the inflation the market has not priced.
+#     - Real FRED series, 45-day publication lag for PIT compliance.
+#
+#   NOT CHANGED: ari_threshold stays 0.45, folds_required stays 3, the 513-trial
+#     DSR accounting, the 4-fold windows, and the success criteria are
+#     untouched. Removing a defective feature is a provenance fix; it is not
+#     grounds to relax the gate that the defect did not cause.
+#
+#   CAVEAT (blocking, recorded in changelog.open_data_blocker): as of
+#     2026-09-28 the FRED cache has NO common date range across the mandatory
+#     series, so this contract cannot currently be built. The engine now aborts
+#     loudly instead of synthesising. See changelog.open_data_blocker.
+
+phase: 9
+version: "7.0"
+date: "2026-09-28"
+status: "APPROVED"
+supersedes: "6.0"
+
+# ============================================================
+# UNIFIED REGIME ARCHITECTURE
+# ============================================================
+# Three-layer regime detection system:
+# 1. BOCPD (Seismic Shock Alarm): Instant structural break detection (r_t = 0)
+# 2. IO-HMM (Wind-Vane): Tier 1 macro states using continuous market velocity
+#    - EXPANSION, CHOPPY/STRESS, CRISIS (3 states)
+# 3. Micro-States (Economic Engines): Tier 2 specific threat identification
+#    - GOLDILOCKS, LATE_CYCLE_DRAG, LIQUIDITY_CRUNCH, STAGFLATION
+
+# Decision Logic:
+# - BOCPD Alarm (r_t = 0) → FORCE CRISIS (circuit breaker)
+# - IO-HMM (Wind-Vane): Tier 1 macro states using continuous market velocity
+# - Micro-States: Tier 2 specific threat identification within macro context
+# - BOCPD Override: If P(r_t=0) > 0.95 → FORCE CRISIS (circuit breaker)
+
+# ============================================================
+# SIMPLIFIED STATISTICAL DESIGN
+# ============================================================
+# Single unified metric: COMPOSITE_SCORE = f(Sharpe, DD, Turnover, ARI, Swap, TCA, Probation, WACC)
+# Evaluation: DSR (Deflated Sharpe Ratio) on COMPOSITE_SCORE across concatenated 4-fold OOS returns
+# Multiplicity: Honest trial accounting N=513 (13 base + 500 LHS) via DSR — NO per-gate corrections
+# Track record: Full walk-forward period (84 months = 2520 trading days), NOT per-fold
+# Falsification: Parameter set FAILS if DSR(composite) < 0.95 on Fold 4 (2024 TRUE OOS)
+
+statistical_design:
+  metric: "composite_dsr"
+  composite_components:
+    - name: "sharpe"
+      weight: 0.25
+      target: "> 1.0"
+    - name: "max_drawdown"
+      weight: 0.20
+      target: ">= -0.20"
+    - name: "turnover"
+      weight: 0.15
+      target: "<= 0.30"
+    - name: "hmm_ari"
+      weight: 0.15
+      target: ">= 0.70 (on concatenated 4-fold)"
+    - name: "swap_churn"
+      weight: 0.10
+      target: "< 5.0 swaps/yr"
+    - name: "tca_bps"
+      weight: 0.10
+      target: "<= 150"
+    - name: "probation_pass_rate"
+      weight: 0.05
+      target: "in [0.35, 0.65]"
+  dsr:
+    method: "deflated_sharpe_ratio"
+    n_trials: 513
+    base_n: 13
+    lhs_n: 500
+    track_record_days: 2520  # Full 4-fold concatenated (84 months), NOT per-fold
+    threshold: 0.95
+  fold_evaluation:
+    mode: "concatenated"  # All 4 folds combined for DSR
+    fold_4_true_oos: true  # Fold 4 (2024) must independently satisfy DSR >= 0.95
+  no_gate_hierarchy: true  # REMOVED: 8-gate Holm-Bonferroni structure
+
+# ============================================================
+# UNIFIED REGIME ARCHITECTURE
+# ============================================================
+# Three-layer regime detection system:
+# 1. BOCPD (Seismic Shock Alarm): Instant structural break detection (r_t = 0)
+# 2. IO-HMM (Wind-Vane): Tier 1 macro states using continuous market velocity
+#    - EXPANSION, CHOPPY/STRESS, CRISIS (3 states)
+# 3. Micro-States (Economic Engines): Tier 2 specific threat identification
+#    - GOLDILOCKS, LATE_CYCLE_DRAG, LIQUIDITY_CRUNCH, STAGFLATION
+
+# Decision Logic:
+# - BOCPD Alarm (r_t = 0) → FORCE CRISIS (circuit breaker)
+# - IO-HMM (Wind-Vane): Tier 1 macro states using continuous market velocity
+# - Micro-States: Tier 2 specific threat identification within macro context
+# - BOCPD Override: If P(r_t=0) > 0.95 → FORCE CRISIS (circuit breaker)
+
+# ============================================================
+# SIMPLIFIED STATISTICAL DESIGN
+# ============================================================
+# Single unified metric: COMPOSITE_SCORE = f(Sharpe, DD, Turnover, ARI, Swap, TCA, Probation, WACC)
+# Evaluation: DSR (Deflated Sharpe Ratio) on COMPOSITE_SCORE across concatenated 4-fold OOS returns
+# Multiplicity: Honest trial accounting N=513 (13 base + 500 LHS) via DSR — NO per-gate corrections
+# Track record: Full walk-forward period (84 months = 2520 trading days), NOT per-fold
+# Falsification: Parameter set FAILS if DSR(composite) < 0.95 on Fold 4 (2024 TRUE OOS)
+
+statistical_design:
+  metric: "composite_dsr"
+  composite_components:
+    - name: "sharpe"
+      weight: 0.25
+      target: "> 1.0"
+    - name: "max_drawdown"
+      weight: 0.20
+      target: ">= -0.20"
+    - name: "turnover"
+      weight: 0.15
+      target: "<= 0.30"
+    - name: "hmm_ari"
+      weight: 0.15
+      target: ">= 0.70 (on concatenated 4-fold)"
+    - name: "swap_churn"
+      weight: 0.10
+      target: "< 5.0 swaps/yr"
+    - name: "tca_bps"
+      weight: 0.10
+      target: "<= 150"
+    - name: "probation_pass_rate"
+      weight: 0.05
+      target: "in [0.35, 0.65]"
+  dsr:
+    method: "deflated_sharpe_ratio"
+    n_trials: 513
+    base_n: 13
+    lhs_n: 500
+    track_record_days: 2520  # Full 4-fold concatenated (84 months), NOT per-fold
+    threshold: 0.95
+  fold_evaluation:
+    mode: "concatenated"  # All 4 folds combined for DSR
+    fold_4_true_oos: true  # Fold 4 (2024) must independently satisfy DSR >= 0.95
+  no_gate_hierarchy: true  # REMOVED: 8-gate Holm-Bonferroni structure
+
+# ============================================================
+# UNIFIED REGIME ARCHITECTURE
+# ============================================================
+# Three-layer regime detection system:
+# 1. BOCPD (Seismic Shock Alarm): Instant structural break detection (r_t = 0)
+# 2. IO-HMM (Wind-Vane): Tier 1 macro states using continuous market velocity
+#    - EXPANSION, CHOPPY/STRESS, CRISIS (3 states)
+# 3. Micro-States (Economic Engines): Tier 2 specific threat identification
+#    - GOLDILOCKS, LATE_CYCLE_DRAG, LIQUIDITY_CRUNCH, STAGFLATION
+
+# Decision Logic:
+# - BOCPD Alarm (r_t = 0) → FORCE CRISIS (circuit breaker)
+# - IO-HMM (Wind-Vane): Tier 1 macro states using continuous market velocity
+# - Micro-States: Tier 2 specific threat identification within macro context
+# - BOCPD Override: If P(r_t=0) > 0.95 → FORCE CRISIS (circuit breaker)
+
+# ============================================================
+# SIMPLIFIED STATISTICAL DESIGN
+# ============================================================
+# Single unified metric: COMPOSITE_SCORE = f(Sharpe, DD, Turnover, ARI, Swap, TCA, Probation, WACC)
+# Evaluation: DSR (Deflated Sharpe Ratio) on COMPOSITE_SCORE across concatenated 4-fold OOS returns
+# Multiplicity: Honest trial accounting N=513 (13 base + 500 LHS) via DSR — NO per-gate corrections
+# Track record: Full walk-forward period (84 months = 2520 trading days), NOT per-fold
+# Falsification: Parameter set FAILS if DSR(composite) < 0.95 on Fold 4 (2024 TRUE OOS)
+
+statistical_design:
+  metric: "composite_dsr"
+  composite_components:
+    - name: "sharpe"
+      weight: 0.25
+      target: "> 1.0"
+    - name: "max_drawdown"
+      weight: 0.20
+      target: ">= -0.20"
+    - name: "turnover"
+      weight: 0.15
+      target: "<= 0.30"
+    - name: "hmm_ari"
+      weight: 0.15
+      target: ">= 0.70 (on concatenated 4-fold)"
+    - name: "swap_churn"
+      weight: 0.10
+      target: "< 5.0 swaps/yr"
+    - name: "tca_bps"
+      weight: 0.10
+      target: "<= 150"
+    - name: "probation_pass_rate"
+      weight: 0.05
+      target: "in [0.35, 0.65]"
+  dsr:
+    method: "deflated_sharpe_ratio"
+    n_trials: 513
+    base_n: 13
+    lhs_n: 500
+    track_record_days: 2520  # Full 4-fold concatenated (84 months), NOT per-fold
+    threshold: 0.95
+  fold_evaluation:
+    mode: "concatenated"  # All 4 folds combined for DSR
+    fold_4_true_oos: true  # Fold 4 (2024) must independently satisfy DSR >= 0.95
+  no_gate_hierarchy: true  # REMOVED: 8-gate Holm-Bonferroni structure
+
+# ============================================================
+# UNIFIED REGIME ARCHITECTURE
+# ============================================================
+# Three-layer regime detection system:
+# 1. BOCPD (Seismic Shock Alarm): Instant structural break detection (r_t = 0)
+# 2. IO-HMM (Wind-Vane): Tier 1 macro states using continuous market velocity
+#    - EXPANSION, CHOPPY/STRESS, CRISIS (3 states)
+# 3. Micro-States (Economic Engines): Tier 2 specific threat identification
+#    - GOLDILOCKS, LATE_CYCLE_DRAG, LIQUIDITY_CRUNCH, STAGFLATION
+
+# Decision Logic:
+# - BOCPD Alarm (r_t = 0) → FORCE CRISIS (circuit breaker)
+# - IO-HMM (Wind-Vane): Tier 1 macro states using continuous market velocity
+# - Micro-States: Tier 2 specific threat identification within macro context
+# - BOCPD Override: If P(r_t=0) > 0.95 → FORCE CRISIS (circuit breaker)
+
+# ============================================================
+# SIMPLIFIED STATISTICAL DESIGN
+# ============================================================
+# Single unified metric: COMPOSITE_SCORE = f(Sharpe, DD, Turnover, ARI, Swap, TCA, Probation, WACC)
+# Evaluation: DSR (Deflated Sharpe Ratio) on COMPOSITE_SCORE across concatenated 4-fold OOS returns
+# Multiplicity: Honest trial accounting N=513 (13 base + 500 LHS) via DSR — NO per-gate corrections
+# Track record: Full walk-forward period (84 months = 2520 trading days), NOT per-fold
+# Falsification: Parameter set FAILS if DSR(composite) < 0.95 on Fold 4 (2024 TRUE OOS)
+
+statistical_design:
+  metric: "composite_dsr"
+  composite_components:
+    - name: "sharpe"
+      weight: 0.25
+      target: "> 1.0"
+    - name: "max_drawdown"
+      weight: 0.20
+      target: ">= -0.20"
+    - name: "turnover"
+      weight: 0.15
+      target: "<= 0.30"
+    - name: "hmm_ari"
+      weight: 0.15
+      target: ">= 0.70 (on concatenated 4-fold)"
+    - name: "swap_churn"
+      weight: 0.10
+      target: "< 5.0 swaps/yr"
+    - name: "tca_bps"
+      weight: 0.10
+      target: "<= 150"
+    - name: "probation_pass_rate"
+      weight: 0.05
+      target: "in [0.35, 0.65]"
+  dsr:
+    method: "deflated_sharpe_ratio"
+    n_trials: 513
+    base_n: 13
+    lhs_n: 500
+    track_record_days: 2520  # Full 4-fold concatenated (84 months), NOT per-fold
+    threshold: 0.95
+  fold_evaluation:
+    mode: "concatenated"  # All 4 folds combined for DSR
+    fold_4_true_oos: true  # Fold 4 (2024) must independently satisfy DSR >= 0.95
+  no_gate_hierarchy: true  # REMOVED: 8-gate Holm-Bonferroni structure
+
+# ============================================================
+# UNIFIED REGIME ARCHITECTURE
+# ============================================================
+# Three-layer regime detection system:
+# 1. BOCPD (Seismic Shock Alarm): Instant structural break detection (r_t = 0)
+# 2. IO-HMM (Wind-Vane): Tier 1 macro states using continuous market velocity
+#    - EXPANSION, CHOPPY/STRESS, CRISIS (3 states)
+# 3. Micro-States (Economic Engines): Tier 2 specific threat identification
+#    - GOLDILOCKS, LATE_CYCLE_DRAG, LIQUIDITY_CRUNCH, STAGFLATION
+
+# Decision Logic:
+# - BOCPD Alarm (r_t = 0) → FORCE CRISIS (circuit breaker)
+# - IO-HMM (Wind-Vane): Tier 1 macro states using continuous market velocity
+# - Micro-States: Tier 2 specific threat identification within macro context
+# - BOCPD Override: If P(r_t=0) > 0.95 → FORCE CRISIS (circuit breaker)
+
+# ============================================================
+# SIMPLIFIED STATISTICAL DESIGN
+# ============================================================
+# Single unified metric: COMPOSITE_SCORE = f(Sharpe, DD, Turnover, ARI, Swap, TCA, Probation, WACC)
+# Evaluation: DSR (Deflated Sharpe Ratio) on COMPOSITE_SCORE across concatenated 4-fold OOS returns
+# Multiplicity: Honest trial accounting N=513 (13 base + 500 LHS) via DSR — NO per-gate corrections
+# Track record: Full walk-forward period (84 months = 2520 trading days), NOT per-fold
+# Falsification: Parameter set FAILS if DSR(composite) < 0.95 on Fold 4 (2024 TRUE OOS)
+
+statistical_design:
+  metric: "composite_dsr"
+  composite_components:
+    - name: "sharpe"
+      weight: 0.25
+      target: "> 1.0"
+    - name: "max_drawdown"
+      weight: 0.20
+      target: ">= -0.20"
+    - name: "turnover"
+      weight: 0.15
+      target: "<= 0.30"
+    - name: "hmm_ari"
+      weight: 0.15
+      target: ">= 0.70 (on concatenated 4-fold)"
+    - name: "swap_churn"
+      weight: 0.10
+      target: "< 5.0 swaps/yr"
+    - name: "tca_bps"
+      weight: 0.10
+      target: "<= 150"
+    - name: "probation_pass_rate"
+      weight: 0.05
+      target: "in [0.35, 0.65]"
+  dsr:
+    method: "deflated_sharpe_ratio"
+    n_trials: 513
+    base_n: 13
+    lhs_n: 500
+    track_record_days: 2520  # Full 4-fold concatenated (84 months), NOT per-fold
+    threshold: 0.95
+  fold_evaluation:
+    mode: "concatenated"  # All 4 folds combined for DSR
+    fold_4_true_oos: true  # Fold 4 (2024) must independently satisfy DSR >= 0.95
+  no_gate_hierarchy: true  # REMOVED: 8-gate Holm-Bonferroni structure
+
+# ============================================================
+# UNIFIED REGIME ARCHITECTURE
+# ============================================================
+# Three-layer regime detection system:
+# 1. BOCPD (Seismic Shock Alarm): Instant structural break detection (r_t = 0)
+# 2. IO-HMM (Wind-Vane): Tier 1 macro states using continuous market velocity
+#    - EXPANSION, CHOPPY/STRESS, CRISIS (3 states)
+# 3. Micro-States (Economic Engines): Tier 2 specific threat identification
+#    - GOLDILOCKS, LATE_CYCLE_DRAG, LIQUIDITY_CRUNCH, STAGFLATION
+
+# Decision Logic:
+# - BOCPD Alarm (r_t = 0) → FORCE CRISIS (circuit breaker)
+# - IO-HMM (Wind-Vane): Tier 1 macro states using continuous market velocity
+# - Micro-States: Tier 2 specific threat identification within macro context
+# - BOCPD Override: If P(r_t=0) > 0.95 → FORCE CRISIS (circuit breaker)
+
+# ============================================================
+# UNIFIED REGIME ARCHITECTURE
+# ============================================================
+unified_regime:
+  # BOCPD (Seismic Shock Alarm) — Instant structural break detection
+  bocpd:
+    hazard_rate: 0.01
+    threshold: 0.95              # P(r_t = 0) threshold for alarm
+    min_run_length: 5            # Minimum run length before alarm
+    max_run_length: 500          # Maximum run length to track
+    observation: "credit_spread_velocity_21d"  # BAA10Y 21-day velocity
+    alarm_action: "FORCE_CRISIS" # Circuit breaker: forces CRISIS regime
+    override_weight: 0.8         # Weight for BOCPD alarm override
+    
+    # Gaussian-Gamma prior (conjugate prior for unknown mean/variance)
+    prior_mu_0: 0.0
+    prior_kappa_0: 1.0
+    prior_alpha_0: 2.0
+    prior_beta_0: 1.0
+  
+  # IO-HMM (Wind-Vane) — Tier 1 Macro States
+  io_hmm:
+    n_states: 3
+    state_names: ["EXPANSION", "CHOPPY", "CRISIS"]
+    state_names_short: ["EXP", "CHOPPY", "CRISIS"]
+    
+    # Input features (exogenous market velocity)
+    input_features:
+      - "credit_spread_velocity"   # ΔSpread_21d (bps/day)
+      - "yield_curve_momentum"     # Δ(10Y-2Y)_21d (bps/day)
+      - "realized_vol_21d"         # 21-day realized vol (annualized)
+      - "credit_spread_level"      # Level of credit spread (bps)
+      - "yield_curve_slope"        # 10Y-2Y slope (bps)
+      - "vix_level"                # VIX level
+    
+    # Transition dynamics: p(s_t | s_{t-1}, u_t)
+    # log p(s_t=j | s_{t-1}=i, u_t) = θ_{i→j} + β_{i→j} @ u_t
+    transition_prior_alpha: 1.0
+    input_weight_prior_sd: 1.0
+    sticky_prior: 10.0
+    
+    # Emission model
+    emission_prior_kappa: 1.0
+    emission_prior_alpha: 2.0
+    emission_prior_beta: 1.0
+    
+    # Initial state prior
+    initial_prior: [0.6, 0.3, 0.1]
+    
+    # Regularization
+    l2_penalty: 1e-3
+    sticky_prior: 10.0
+    
+    # Decision thresholds
+    crisis_threshold: 0.7
+    choppy_threshold: 0.4
+  
+  # Micro-States (Economic Engines) — Tier 2 Specific Threats
+  micro_states:
+    enabled: true
+    states:
+      - name: "GOLDILOCKS"
+        description: "Low inflation, healthy credit"
+        conditions:
+          cpi_yoy_max: 2.5
+          real_rate_max: 1.5
+          hy_oas_max: 150
+          vix_max: 20
+          curve_min: 50
+        pipeline_action: "LOWER_HURDLE_RATES"
+        wacc_adjustment_bps: -50
+      
+      - name: "LATE_CYCLE_DRAG"
+        description: "Inverted curve, tightening solvency"
+        conditions:
+          curve_max: 0
+          hy_oas_min: 200
+        pipeline_action: "TIGHTEN_ENTRY_TRIM_CYCLICALS"
+        wacc_adjustment_bps: 25
+      
+      - name: "LIQUIDITY_CRUNCH"
+        description: "High real rates, credit freeze"
+        conditions:
+          real_rate_min: 2.0
+          hy_oas_min: 400
+          stl_fsi_min: 1.5
+        pipeline_action: "DOWN_FILTER_SHIFT_TO_BIL"
+        lambda_stress_mult: 2.0
+      
+      - name: "STAGFLATION"
+        description: "Hot inflation, supply disruption"
+        conditions:
+          cpi_yoy_min: 3.5
+          real_rate_min: 1.0
+        pipeline_action: "ROUTE_CASH_TO_GOLD"
+    
+    # Micro-state decision thresholds
+    goldilocks_inflation_max: 2.5
+    goldilocks_real_rate_max: 1.5
+    goldilocks_spread_max: 150
+    goldilocks_vix_max: 20
+    goldilocks_curve_min: 50
+    
+    late_cycle_curve_max: 0
+    late_cycle_spread_min: 200
+    
+    crunch_real_rate_min: 2.0
+    crunch_spread_min: 400
+    crunch_stl_fsi_min: 1.5
+    
+    stagflation_cpi_min: 3.5
+    stagflation_real_rate_min: 1.0
+  
+  # Integration weights
+  integration:
+    bocpd_override_weight: 0.8
+    io_hmm_weight: 1.0
+    micro_weight: 1.0
+    crisis_threshold: 0.7
+    choppy_threshold: 0.4
+    min_dwell_days: 10
+    max_transitions_per_year: 6
+
+# ============================================================
+# HMM SPECIFICATION (Legacy - kept for compatibility)
+# ============================================================
+hmm:
+  n_states: 3
+  state_names: ["EXPANSION", "CHOPPY", "CRISIS"]
+  # CANONICAL 6-FEATURE CONTRACT (Quantitative/contracts/feature_contract.py)
+  # Index order is FROZEN and load-bearing: index 0 is the state-label sort key.
+  # CESI is REMOVED — it is a proprietary, non-FRED index that was being filled
+  # with np.random.normal(0, 20, n) under seed 45, violating this document's own
+  # optimization.synthetic_fallback: "disabled". Its macro-surprise slot is now
+  # UNANTICIPATED_INFLATION (CPIAUCSL YoY minus T10YIE 10Y breakeven), real FRED.
+  feature_contract_source: "Quantitative/contracts/feature_contract.py"
+  layer1_features:
+    - "CREDIT_SPREAD_VELOCITY_21D"   # index 0 — d(HY OAS)_21d, PRIMARY SORT KEY
+    - "YIELD_CURVE_10Y2Y"            # index 1 — DGS10 - DGS2
+    - "REALIZED_VOLATILITY_21D"      # index 2 — 21d realized vol, FF5 gross market return
+    - "FINANCIAL_STRESS_INDEX"       # index 3 — STLFSI2
+    - "REAL_RATE_10Y"                # index 4 — DFII10
+    - "UNANTICIPATED_INFLATION"      # index 5 — CPIAUCSL YoY - T10YIE
+  layer1_fred_series:
+    CREDIT_SPREAD_VELOCITY_21D: ["BAMLH0A0HYM2"]
+    YIELD_CURVE_10Y2Y: ["DGS10", "DGS2"]
+    REALIZED_VOLATILITY_21D: ["FF5_Mkt_RF"]
+    FINANCIAL_STRESS_INDEX: ["STLFSI2"]
+    REAL_RATE_10Y: ["DFII10"]
+    UNANTICIPATED_INFLATION: ["CPIAUCSL", "T10YIE"]
+  forbidden_series: ["CESI", "CESI_MACRO_SURPRISE", "CITI_ECONOMIC_SURPRISE"]
+  train_window_years: 3
+  retrain_frequency: "quarterly"
+  emission_covariance: "diagonal"
+  covariance_floor: 1e-4
+  state_ordering: "credit_spread_mean"
+  transition_prior: "dirichlet"
+  dirichlet_lambda: 0.10
+  sticky_kappa: 500
+  class_weights:
+    EXPANSION: 1.0
+    SHOCK: 1.0
+    CRISIS: 2.0
+  validation:
+    method: "expanding_window_oos_market_labels"
+    label_definition: "NBER recession (6m lag) + Sahm Rule (1m lag) -> 3-state: EXP/SHOCK/CRISIS"
+    folds_required: 3
+    ari_threshold: 0.45
+    action_on_fail: "abort_pipeline"
+    # Diagnostic metrics (not gates):
+    precision_crisis_target: 0.50
+    recall_crisis_target: 0.40
+    f1_crisis_target: 0.44
+    false_alarm_rate_max: 0.15
+    mean_dwell_days_min: 63
+    transitions_per_year_max: 6
+
+# ============================================================
+# PARAMETER CLUSTERS (Joint Optimization, 500 LHS)
+# ============================================================
+parameter_clusters:
+  A_wacc_regime:
+    description: "WACC & Regime Engine (high correlation ρ>0.7)"
+    params:
+      - name: "ke_var_threshold"
+        type: "float"
+        values: [0.0075, 0.0085, 0.0100]
+        description: "ke dispersion threshold (data-derived floor 77bps)"
+      - name: "hmm_n_states"
+        type: "int"
+        values: [3]
+        description: "FROZEN - not optimized"
+      - name: "omega_stress_multiplier"
+        type: "float"
+        values: [1.5, 2.0, 2.5]
+        description: "Ω_stress multiplier for CRISIS regime"
+    correlation: "high"
+    correction: "none"
+
+  B_swap_exit:
+    description: "Swap Barrier & Exit Scheduler (high correlation ρ>0.6)"
+    params:
+      - name: "swap_barrier_gamma"
+        type: "float"
+        values: [0.15, 0.18, 0.20]
+        description: "Exponential decay rate (reduced sensitivity)"
+      - name: "swap_barrier_C"
+        type: "float"
+        values: [0.028, 0.032, 0.035]
+        description: "Initial barrier height (raised from 0.015)"
+      - name: "trailing_pct"
+        type: "float"
+        values: [0.14, 0.16, 0.18]
+        description: "Trailing-stop distance from high-watermark (raised from 0.10)"
+      - name: "min_hold_days"
+        type: "int"
+        values: [30, 35, 40]
+        description: "Minimum holding period before stop can trigger"
+      - name: "cooldown_days"
+        type: "int"
+        values: [45, 60, 90]
+        description: "Cooldown after stop-out before re-entry"
+      - name: "hmm_min_dwell_days"
+        type: "int"
+        values: [15, 20]
+        description: "Minimum consecutive days in regime before transition"
+      - name: "wacc_regime_adjustment"
+        type: "bool"
+        values: [true]
+        description: "FROZEN at true (regime adjusts discount rate)"
+    correlation: "high"
+    correction: "none"
+
+  C_entry_thresholds:
+    description: "Regime-Conditional Entry Thresholds (moderate correlation ρ~0.4)"
+    params:
+      - name: "entry_exp"
+        type: "float"
+        values: [0.85, 0.90, 0.95]
+        description: "EXPANSION: ×IV_P25"
+      - name: "entry_shock"
+        type: "float"
+        values: [0.85, 0.90, 0.95]
+        description: "CHOPPY: ×IV_P25"
+      - name: "entry_crisis"
+        type: "float"
+        values: [0.70, 0.75, 0.80]
+        description: "CRISIS: ×IV_P25 (Black Swan opportunism)"
+    correlation: "moderate"
+    correction: "none"
+
+  D_probation_qual:
+    description: "Probation & Qual Gates (low correlation ρ<0.3)"
+    params:
+      - name: "probation_band_low"
+        type: "float"
+        values: [0.35, 0.38]
+        description: "Test widened band vs narrowed"
+      - name: "probation_band_high"
+        type: "float"
+        values: [0.62, 0.65]
+        description: "Test widened band vs narrowed"
+      - name: "qual_weight"
+        type: "float"
+        values: [0.0]
+        description: "FROZEN at 0.0 — Arm B/C retired per CEO ruling 2026-09-27"
+      - name: "mapping_conf_threshold"
+        type: "string"
+        values: ["high"]
+        description: "Only high-confidence qual mappings (unused, Arm B retired)"
+    correlation: "low"
+    correction: "none"
+
+# ============================================================
+# OPTIMIZATION PROTOCOL
+# ============================================================
+optimization:
+  method: "lhs_sobol"
+  n_samples: 500
+  clusters: ["A_wacc_regime", "B_swap_exit", "C_entry_thresholds", "D_probation_qual"]
+  cv:
+    type: "purged_embargoed"
+    purge_formula: "trailing_tau * 5"
+    embargo_months: 12
+    walkforward_folds: 4
+    inner_cv: "timeseries_split"
+    inner_splits: 3
+  metric: "composite_dsr"
+  dsr_tracking:
+    base_n: 13
+    lhs_n: 500
+    total_n: 513
+    track_record_days: 2520
+  tca_in_loop: true
+  # NOTE: this value is the STRING "disabled", not the boolean False.
+  # The guard pattern `if config.get("synthetic_fallback", False) is False:`
+  # evaluates `"disabled" is False` -> False and therefore SKIPS the guard
+  # entirely. Runtime enforcement goes through
+  # Quantitative.data.fred_feed.synthetic_fallback_enabled(), which parses by
+  # value and fails closed. Do not "simplify" that call site back to an
+  # identity test.
+  synthetic_fallback: "disabled"
+  zero_synthetic_enforcement:
+    module: "Quantitative/data/fred_feed.py"
+    guard: "assert_authentic_pit"
+    gate: "ingestion/harness/feature_gate.py"
+    fail_mode: "raise"
+    error_type: "SyntheticDataViolation(RuntimeError)"
+    on_missing_series: "abort"
+    on_partial_coverage: "abort"
+    on_all_zero_column: "abort"
+    on_constant_column: "abort"
+    on_nan_after_alignment: "abort"
+    forbidden_series: ["CESI", "CESI_MACRO_SURPRISE", "CITI_ECONOMIC_SURPRISE"]
+  trial_tracker:
+    class: "TrialTracker"
+    log_every_param_set: true
+    sha256_ledger: true
+
+# ============================================================
+# WALK-FORWARD WINDOWS (Fixed, No Window Shopping)
+# ============================================================
+windows:
+  primary:
+    start: "2018-01-01"
+    end: "2024-12-31"
+    description: "7-year RPO-clean core window"
+    folds:
+      fold_1:
+        train_start: "2018-01-01"
+        train_end: "2020-12-31"
+        test_start: "2021-01-01"
+        test_end: "2021-12-31"
+        embargo_months: 12
+        purge_months: 6
+      fold_2:
+        train_start: "2018-01-01"
+        train_end: "2021-12-31"
+        test_start: "2022-01-01"
+        test_end: "2022-12-31"
+        embargo_months: 12
+        purge_months: 6
+      fold_3:
+        train_start: "2018-01-01"
+        train_end: "2022-12-31"
+        test_start: "2023-01-01"
+        test_end: "2023-12-31"
+        embargo_months: 12
+        purge_months: 6
+      fold_4:
+        train_start: "2018-01-01"
+        train_end: "2023-12-31"
+        test_start: "2024-01-01"
+        test_end: "2024-12-31"
+        embargo_months: 12
+        purge_months: 6
+    regimes_covered: ["2020_COVID", "2022_INFLATION"]
+
+  extended:
+    start: "2020-01-01"
+    end: "2026-12-31"
+    description: "Full qual coverage validation (separate report, no gate claims)"
+    purpose: "qual_coverage_validation_only"
+    regimes_covered: ["2022_INFLATION", "2023-24_NORMALIZATION", "2025-26_EMERGING"]
+
+  strata:
+    S4: {start: "2018-01-01", end: "2019-12-31", label: "PRE_COVID"}
+    S5: {start: "2020-01-01", end: "2020-12-31", label: "COVID"}
+    S6: {start: "2021-01-01", end: "2021-12-31", label: "RECOVERY"}
+    S7: {start: "2022-01-01", end: "2023-12-31", label: "AI_BOOM"}
+    S8: {start: "2024-01-01", end: "2026-12-31", label: "CURRENT"}
+
+# ============================================================
+# COST MODEL
+# ============================================================
+costs:
+  commission_bps_per_side: 10
+  slippage_base_bps: 50
+  slippage_regime_multiplier:
+    EXPANSION: 1.0
+    CHOPPY: 1.5
+    CRISIS: 2.0
+  market_impact_model: "almgren_chriss_lob"
+  max_annual_tca_bps: 150
+  concurrent_exit_stress_test: true
+
+# ============================================================
+# SUCCESS CRITERIA — SINGLE UNIFIED METRIC
+# ============================================================
+success_criteria:
+  description: "Parameter set PASSES if DSR(composite) >= 0.95 on Fold 4 (2024 TRUE OOS)"
+  fold_4_test:
+    composite_dsr: ">= 0.95"
+    oos_sharpe_arm_a: "> 1.0"
+    max_drawdown_arm_a: "< -0.20"
+    ir_vs_spy_arm_a: "> 0.30"
+    hmm_ari_concatenated: ">= 0.45"
+    swap_churn: "< 5.0 swaps/yr"
+    tca_bps: "<= 150"
+    probation_pass_rate: "in [0.35, 0.65]"
+    wacc_coverage: "== 1.0"
+    provenance_chain: "valid"
+
+# ============================================================
+# EXECUTION CONSTRAINTS
+# ============================================================
+execution:
+  rebalance_frequency: "monthly"
+  fill_date: "first_trading_day_of_month_T_plus_1"
+  signal_date: "month_end_T"
+  max_turnover_per_rebalance: 0.30
+  universe_size_target: 1500
+  price_stale_max_days: 2
+  illiquid_threshold_dollar_vol: 100000
+  provenance_required: true
+  sha256_all_artifacts: true
+
+# ============================================================
+# CEO APPROVAL BLOCK
+# ============================================================
+ceo_approval:
+  required: true
+  ruling: "APPROVE (v7: canonical 6-feature contract, CESI removed as synthetic)"
+  date: "2026-09-28"
+  notes: "Unified three-layer regime architecture: BOCPD (Seismic Alarm) + IO-HMM (Wind-Vane) + Micro-States (Economic Engines). BOCPD circuit breaker forces CRISIS on r_t=0. IO-HMM uses market velocity for 3 macro states. Micro-states provide Tier 2 economic context. All infrastructure fixes applied: BOCPD, IO-HMM, Micro-states, RegimeDetector integration. Pre-registration v6.0 frozen."
+
+
+# ============================================================
+# CHANGELOG v6.0 -> v7.0
+# ============================================================
+changelog:
+  from_version: "6.0"
+  to_version: "7.0"
+  date: "2026-09-28"
+  trigger: "Eliminate all synthetic CESI data from the codebase"
+  changes:
+    - path: "hmm.layer1_features"
+      from: ["BAA10Y", "10Y2Y", "CP_TBill", "RealizedVol21d", "HY_OAS", "CESI"]
+      to: ["CREDIT_SPREAD_VELOCITY_21D", "YIELD_CURVE_10Y2Y", "REALIZED_VOLATILITY_21D",
+           "FINANCIAL_STRESS_INDEX", "REAL_RATE_10Y", "UNANTICIPATED_INFLATION"]
+      reason: "CESI was synthetic (np.random.normal, seed 45). 4 of the 6 names also changed unit/definition."
+    - path: "optimization.zero_synthetic_enforcement"
+      change: "added"
+      reason: "synthetic_fallback: disabled was never consulted at runtime by the code that needed it."
+  code_changes:
+    - "Quantitative/data/fred_feed.py: NEW — authoritative FRED reader + zero-synthetic guards."
+    - "Quantitative/canonical_features.py: NEW — sole sanctioned builder of the canonical 6."
+    - "Quantitative/contracts/feature_contract.py: added FORBIDDEN_SERIES + assert_no_forbidden_series + assert_canonical_names."
+    - "Quantitative/hmm_regime.py: FEATURE_NAMES := CANONICAL_FEATURES; _F_CREDIT 3 -> 0; CESI and the CP_TBill noise proxy removed."
+    - "Quantitative/regime_shield_v3.py: np.random CESI placeholder deleted; build_layer1_features delegates to the canonical builder."
+    - "Quantitative/macro_pca.py: CESI removed from MACRO_INDICATORS; silent synthetic fill now requires allow_synthetic=True."
+    - "Quantitative/backtest_harness.py: load_macro_features_history no longer swallows the zero-synthetic abort."
+    - "Quantitative/portfolio_orchestrator.py: SyntheticDataViolation re-raised instead of defaulting to EXPANSION."
+    - "ingestion/harness/feature_gate.py: NEW — pre-registration-gated feature admission."
+  measurements:
+    cesi_ari_cost_concat: 0.0448
+    cesi_ari_baseline: 0.0886
+    cesi_ari_neutralized: 0.1334
+    ari_threshold_unchanged: 0.45
+    note: "v6 FAILED the ARI gate honestly (0.0886 vs 0.45). v7 does not re-run or reinterpret that number."
+  open_data_blocker:
+    status: "OPEN — BLOCKING"
+    finding: >-
+      The FRED cache has no common date range across the mandatory series, so the
+      canonical 6-feature contract cannot be built from data on disk as of
+      2026-09-28. STLFSI2 ends 2022-01-07 while BAMLH0A0HYM2 begins 2023-09-26,
+      leaving a 597-day gap. DGS10 additionally only covers 2021-09-15 onward.
+    consequence: >-
+      Every canonical build path (build_canonical_features, build_macro_features,
+      build_layer1_features) now raises SyntheticDataViolation. This is the
+      intended, honest behaviour: the engine aborts instead of fabricating a
+      column. No v7 ARI measurement is possible until the cache is backfilled.
+    remediation:
+      - "Backfill STLFSI2 forward from 2022-01-07 (or restart the cache window post-2023-09-26)."
+      - "Backfill DGS10 to match."
+      - "Re-run `python -m Quantitative.regime_shield_v3 --coverage` to confirm a non-empty common window."
+    prohibition: >-
+      Do NOT resolve this by dropping a feature, shortening the feature list,
+      zero-filling, or substituting a proxy. Any of those re-creates the exact
+      defect this version exists to remove.

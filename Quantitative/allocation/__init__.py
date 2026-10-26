@@ -1,5 +1,5 @@
 # Quantitative Tactical Allocation Engine
-# Macro-regime classification, tactical rebalancing, and Fidelity order generation.
+# Macro-regime classification, tactical rebalancing, and simulated order generation.
 
 try:
     from Quantitative.allocation.tactical_rebalancer import TacticalRebalancer

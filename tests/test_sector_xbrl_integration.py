@@ -395,8 +395,8 @@ class TestParserScreenWorkerCompatibility:
             assert all(isinstance(t, str) for t in chain), f"{field} has non-str tag"
 
     def test_companyfacts_shape_sampled(self):
-        """Sample companyfacts matches what sec_pit_scraper passes in."""
-        from discovery.sec_pit_scraper import COMPANYFACTS_URL  # noqa: F401  (import smoke)
+        """Sample companyfacts matches what sec_pit_client passes in."""
+        from discovery.sec_pit_client import COMPANYFACTS_URL  # noqa: F401  (import smoke)
         # The scraper loads companyfacts and calls extract_all_filings_from_companyfacts;
         # the shape here mirrors data.sec.gov/api/xbrl/companyfacts.
         cf = make_companyfacts(PHARMA_TAGS)

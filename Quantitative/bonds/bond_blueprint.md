@@ -6,10 +6,10 @@ This document defines the strategy, quantitative gates, and mathematical formula
 
 ## 1. Execution Context & Account Constraints
 
-- **Account Type:** Simulated Paper-Trading Portfolio
+- **Account Type:** Simulated Paper-Trading Portfolio (simulated_broker_target)
 - **Restrictions:** Individual corporate/municipal bonds are legally restricted. Execution must occur strictly via highly liquid exchange-traded funds (ETFs).
 - **Baseline Target Allocation:** 30% of the sub-portfolio allocated to Fixed Income.
-- **Fractional Shares:** simulated broker target supports fractional trading to 3 decimal places. All order drafts output exact fractional share quantities.
+- **Fractional Shares:** Simulated broker target supports fractional trading to 3 decimal places. All order drafts output exact fractional share quantities.
 
 ---
 

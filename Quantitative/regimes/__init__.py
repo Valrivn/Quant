@@ -1,0 +1,1 @@
+"""Quantitative Regimes Package — Gaussian HMM, Viterbi, Bayesian Fusion"""

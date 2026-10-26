@@ -1,0 +1,82 @@
+{
+  "failed_roots": [],
+  "logic": "AND over roots R1 (prereg) AND R2-R4 (ledger) AND R5 (estate) AND R6 (unified regime provenance)",
+  "provenance_chain": true,
+  "ran_at": "2026-10-01T01:49:58.748338+00:00",
+  "report_type": "provenance_audit_v2",
+  "roots": {
+    "R1_prereg_root": {
+      "actual_sha256": "c80a47bf6ae8d1c595f3b5e607c2588478bec0c47c4f0f97eb6c374b277a1685",
+      "detail": "sha256 matches the frozen digest",
+      "expected_sha256": "c80a47bf6ae8d1c595f3b5e607c2588478bec0c47c4f0f97eb6c374b277a1685",
+      "ok": true,
+      "path": "./config\\pre_registration_v7.yaml",
+      "phase": 9,
+      "status": "VERIFIED",
+      "version": "7.0"
+    },
+    "R2_R4_trial_ledger": {
+      "actual_sha256": "fe0ae57bf858a10c9fc4e1aaa2d045a3bf6c68dbd96a31b472580c338acea211",
+      "chain_breaks": [],
+      "chain_head_ok": true,
+      "consequence": "ledger metric_status is 'UNEVALUATED' (0/513 trials evaluated). The hash chain is intact and the trial COUNT is real, so R2-R4 pass \u2014 but no trial in this ledger carries a measured out-of-sample score. It is honest enumeration, not 513 results, and must not be cited as evidence of performance or fed to the DSR as observed returns.",
+      "declared_chain_head": "8519d15696ffa4fb973694453674d7268c6ff9c53f60a770511b0d3fa582f29e",
+      "declared_target_n": 513,
+      "declared_target_ok": true,
+      "duplicate_param_groups": [],
+      "duplicate_trial_ids": [],
+      "metric_status": "UNEVALUATED",
+      "n_trials": 513,
+      "n_trials_evaluated": 0,
+      "n_trials_unevaluated": 513,
+      "n_unique_param_sets": 513,
+      "ok": true,
+      "path": "./data/phase9_full/trial_ledger_v5.json",
+      "per_trial_sha256_checked": 513,
+      "per_trial_sha256_mismatches": [],
+      "recomputed_chain_head": "8519d15696ffa4fb973694453674d7268c6ff9c53f60a770511b0d3fa582f29e",
+      "required_n_trials": 513,
+      "schema": "phase9_trial_ledger_v5",
+      "schema_expected": "phase9_trial_ledger_v5",
+      "sidecar_matches": true,
+      "sidecar_present": true,
+      "sidecar_sha256": "fe0ae57bf858a10c9fc4e1aaa2d045a3bf6c68dbd96a31b472580c338acea211",
+      "status": "PASS",
+      "timestamp_ns_missing": [],
+      "timestamp_ns_regressions": [],
+      "tracker_contract_ok": true,
+      "trial_count_ok": true,
+      "trial_count_shortfall": 0,
+      "uuid7_invalid": []
+    },
+    "R5_data_estate": {
+      "failed": [],
+      "missing_manifest": 10,
+      "passed": 2224,
+      "status": "PASS",
+      "total": 2234
+    },
+    "R6_unified_regime_provenance": {
+      "checks": {
+        "engine_imports_ok": true,
+        "forbidden_series_scan": "clean",
+        "params_date_range": {
+          "max": "2020-12-31",
+          "min": "2010-01-01"
+        },
+        "params_sha256_ok": true,
+        "params_source": "Quantitative.calibration.train_unified_regime",
+        "params_version": "v7_unified",
+        "prereg_sha256_ok": true
+      },
+      "issues": [],
+      "ok": true,
+      "params_path": "./config\\calibrated_unified_regime_params.json",
+      "prereg_path": "./config\\pre_registration_v7.yaml",
+      "status": "PASS"
+    }
+  },
+  "status": "PASS",
+  "valid": true,
+  "version": 2
+}

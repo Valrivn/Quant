@@ -1,0 +1,63 @@
+{
+  "archive_dir": "archives/phase9_provenance_audit_v2_20260930",
+  "artifact_chain_heads": [
+    "75848228051c440b8a1a880bbf1a2e85a9fe4f3559127c5d9cb79bd5307aac71",
+    "48888b3c9c345881b283eeb4e0326f87e883b673c2a94a022301eeed691e609d",
+    "551d52103e0a59e45b25d117dc866b20e883a2b34638cc5234c716d9ef083f57"
+  ],
+  "artifacts": [
+    {
+      "artifact_id": "01a0f527-9df0-74fc-b022-f5a75851d178",
+      "bytes": 3362,
+      "name": "provenance_audit_v2.json",
+      "path": "archives/phase9_provenance_audit_v2_20260930/provenance_audit_v2.json",
+      "sha256": "4a931ea19f83865217630342a73919dbb0249d59415e2e8b0a1e10886be035fd",
+      "timestamp_ns": 1790819409392326700
+    },
+    {
+      "artifact_id": "01a0f527-9df0-770d-86c5-1b523e7e3fd8",
+      "bytes": 17945,
+      "name": "provenance_audit_v1.json",
+      "path": "archives/phase9_provenance_audit_v2_20260930/provenance_audit_v1.json",
+      "sha256": "f735d77a57bf60fa7b188c29f804167517c1271d140de0e65a63161b72c46378",
+      "timestamp_ns": 1790819409392462200
+    },
+    {
+      "artifact_id": "01a0f527-9df0-77d5-99d3-2ecb1b7535c1",
+      "bytes": 3065,
+      "name": "provenance_chain_verdict.json",
+      "path": "archives/phase9_provenance_audit_v2_20260930/provenance_chain_verdict.json",
+      "sha256": "2c8cd7419227ce6723a12a6e4c693618f663ab2f3cb9ca2ba6d455830a20e918",
+      "timestamp_ns": 1790819409392513500
+    }
+  ],
+  "canonical_json": "json.dumps(sort_keys=True, separators=(',',':'))",
+  "chain_head": "551d52103e0a59e45b25d117dc866b20e883a2b34638cc5234c716d9ef083f57",
+  "envelope_id": "01a0f527-9df0-7872-9fdf-987e2f15c251",
+  "genesis_hash": "c80a47bf6ae8d1c595f3b5e607c2588478bec0c47c4f0f97eb6c374b277a1685",
+  "hash_formula": "sha256(previous_chain_sha256 | canonical_json(entry))",
+  "n_artifacts": 3,
+  "name": "Phase 9D Full Provenance Audit v2 (deep)",
+  "prereg": {
+    "path": "config/pre_registration_v7.yaml",
+    "sha256": "c80a47bf6ae8d1c595f3b5e607c2588478bec0c47c4f0f97eb6c374b277a1685",
+    "sha256_pinned": "c80a47bf6ae8d1c595f3b5e607c2588478bec0c47c4f0f97eb6c374b277a1685",
+    "verified": true
+  },
+  "ran_at_utc": "2026-10-01T01:50:09Z",
+  "report_type": "phase9d_artifact_envelope",
+  "report_version": 1,
+  "summary": {
+    "failed_roots": [],
+    "ledger_metric_status": "UNEVALUATED",
+    "ledger_n_trials": 513,
+    "ledger_schema": "phase9_trial_ledger_v5",
+    "provenance_chain": true,
+    "r5_missing_manifest": 10,
+    "r5_sha256": "2224/2234",
+    "status": "PASS",
+    "v1_bias_audit_status": "FAIL",
+    "v1_high_severity": 1
+  },
+  "timestamp_ns": 1790819409392553700
+}

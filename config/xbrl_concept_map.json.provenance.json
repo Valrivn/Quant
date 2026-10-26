@@ -1,0 +1,22 @@
+{
+  "source": "SEC_EDGAR",
+  "retrieval_timestamp": "2026-10-11T02:37:39.777626+00:00",
+  "source_version": "companyfacts_20261010",
+  "pit_timestamp_column": "filed",
+  "entity_key": "cik",
+  "transformations": [
+    "concept_map_usgaap2024",
+    "synonym_reconciliation"
+  ],
+  "row_count": 10753,
+  "date_range": {
+    "min": null,
+    "max": null
+  },
+  "mapping_confidence": "high",
+  "sha256": "97158710deee2387b75729456f3e27401dcc7bf919bd43fe54ed9819ef06bfbd",
+  "raw_input": "./data/pit_fundamentals/xbrl_full/raw_xbrl_facts_full.parquet",
+  "canonical_concepts": 144,
+  "taxonomy_version": "us-gaap-2024",
+  "taxonomy_elements": 17388
+}

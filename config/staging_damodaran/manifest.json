@@ -1,0 +1,69 @@
+{
+  "datasets": [
+    {
+      "changed": true,
+      "key": "industry_beta",
+      "label": "Levered and Unlevered Betas by Industry (US)",
+      "note": "checksum differs from config\\industry_beta.yaml",
+      "sha256": "fa5d91af58046937e2db27a764b077dde9d5414df5f69214328f163b940e42a5",
+      "status": "CHANGED",
+      "target_config": "config\\industry_beta.yaml",
+      "url": "https://pages.stern.nyu.edu/~adamodar/pc/datasets/betas.xls",
+      "version": "2026-01-05 (file)"
+    },
+    {
+      "changed": true,
+      "key": "ratings",
+      "label": "Ratings, Spreads and Interest Coverage Ratios",
+      "note": "checksum differs from config\\industry_beta.yaml",
+      "sha256": "71d5dba40bd0659b7d6fe6f0e2d25036442d66b3c5e309480d0c9b48b2c3ba63",
+      "status": "CHANGED",
+      "target_config": "config\\industry_beta.yaml",
+      "url": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ratings.html",
+      "version": "2026.10 (no stamp)"
+    },
+    {
+      "changed": true,
+      "key": "implied_erp",
+      "label": "Implied Equity Risk Premiums - United States",
+      "note": "no update: block recorded yet (first refresh)",
+      "sha256": "bb4d8da0a371a00af06172ec41dcef35a9ae30d6ab9c03d58ab5d2187e1e406f",
+      "status": "CHANGED",
+      "target_config": "config\\damodaran_erp.yaml",
+      "url": "https://pages.stern.nyu.edu/~adamodar/pc/datasets/histimpl.xls",
+      "version": "2020-01-04 (file)"
+    },
+    {
+      "changed": true,
+      "key": "country_risk_premiums",
+      "label": "Risk Premiums for Other Markets (ERP breakdowns, current year)",
+      "note": "no update: block recorded yet (first refresh)",
+      "sha256": "8d7237c432bca23cd680f149395aa518a465d0b77bec1fdf788edc7a1748c60a",
+      "status": "CHANGED",
+      "target_config": "config\\damodaran_erp.yaml",
+      "url": "https://pages.stern.nyu.edu/~adamodar/pc/datasets/ctrypremJuly26.xlsx",
+      "version": "July 1, 2026 (index page)"
+    }
+  ],
+  "errors": [],
+  "generated_by": "scripts/refresh_damodaran.py --apply",
+  "generated_utc": "2026-10-06T01:41:01Z",
+  "index_page": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datacurrent.html",
+  "live_configs_overwritten": [],
+  "manifest_sha256": "051a16d93f0061da9305043c10fe5e819d5c1229a9e9ba8e6ae66bf45b1ae410",
+  "refresh_cadence": "every 2 months",
+  "schema_version": "1.0",
+  "staging_dir": "config\\staging_damodaran",
+  "written": [
+    {
+      "dataset": "industry_beta",
+      "path": "config\\staging_damodaran\\industry_beta.yaml",
+      "sha256": "8445250997f90d240df76b1bf183575502c57f631006de31ea2a43403b7388df"
+    },
+    {
+      "dataset": "damodaran_erp",
+      "path": "config\\staging_damodaran\\damodaran_erp.yaml",
+      "sha256": "6ede74440d58006f07393dc7f68bdc7d0cc83bc6c2c4b4cab9a3539985f376f9"
+    }
+  ]
+}

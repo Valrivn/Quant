@@ -29,10 +29,6 @@ from typing import Dict, List, Optional
 from .deg_registry import DegradedRegistry, LIVE, DEGRADED
 from .structured_sources import (
     SecEdgarNewFilersSource,
-    RedditSource,
-    StockTwitsSource,
-    ApeWisdomSource,
-    InstagramSource,
     live_enabled,
 )
 from .ledger import Mention
@@ -224,10 +220,6 @@ def run_census(limit: int = MAX_MENTIONS_PER_SOURCE) -> Dict:
     registry = DegradedRegistry()
     sources = [
         SecEdgarNewFilersSource(registry),
-        RedditSource(registry),
-        StockTwitsSource(registry),
-        ApeWisdomSource(registry),
-        InstagramSource(registry),
     ]
 
     rows: List[SourceCensusRow] = []

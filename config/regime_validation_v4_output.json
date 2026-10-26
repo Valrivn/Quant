@@ -1,0 +1,106 @@
+{
+  "concatenated_ari": 0.665,
+  "passing_folds": 4,
+  "fold_aris": [
+    0.6172,
+    0.6958,
+    0.5798,
+    0.7985
+  ],
+  "regime_quality": {
+    "fold_1": {
+      "dominant_state": "EXPANSION",
+      "occupancy": 0.562,
+      "mean_emission_confidence": 0.72,
+      "transition_count": 18,
+      "sojourn_distribution": [
+        35,
+        95,
+        21,
+        7,
+        21,
+        7,
+        102,
+        111,
+        120,
+        8,
+        57,
+        36,
+        14,
+        21,
+        14,
+        28,
+        7,
+        7,
+        19
+      ],
+      "assessment": "TRANSITIONAL"
+    },
+    "fold_2": {
+      "dominant_state": "EXPANSION",
+      "occupancy": 0.518,
+      "mean_emission_confidence": 0.74,
+      "transition_count": 17,
+      "sojourn_distribution": [
+        54,
+        11,
+        63,
+        81,
+        3,
+        7,
+        14,
+        7,
+        6,
+        89,
+        59,
+        21,
+        3,
+        43,
+        191,
+        5,
+        49,
+        25
+      ],
+      "assessment": "TRANSITIONAL"
+    },
+    "fold_3": {
+      "dominant_state": "CHOPPY",
+      "occupancy": 0.627,
+      "mean_emission_confidence": 0.82,
+      "transition_count": 17,
+      "sojourn_distribution": [
+        13,
+        4,
+        8,
+        2,
+        110,
+        7,
+        1,
+        5,
+        275,
+        1,
+        3,
+        4,
+        35,
+        203,
+        3,
+        4,
+        10,
+        42
+      ],
+      "assessment": "TRANSITIONAL"
+    },
+    "fold_4": {
+      "dominant_state": "EXPANSION",
+      "occupancy": 0.888,
+      "mean_emission_confidence": 0.56,
+      "transition_count": 2,
+      "sojourn_distribution": [
+        214,
+        41,
+        111
+      ],
+      "assessment": "VALID_BULL_MARKET"
+    }
+  }
+}

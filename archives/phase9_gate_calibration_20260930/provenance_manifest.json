@@ -1,0 +1,63 @@
+{
+  "archive_dir": "archives/phase9_gate_calibration_20260930",
+  "artifact_chain_heads": [
+    "bf2d4fea65a0e64f9e8bc37bd21d2fe073769c6f4a0e6054b7c3fac8537ab275",
+    "0339efbd4293128b9c5d72198a3c79064df4f715336bf88377cdadde21ffe0d1"
+  ],
+  "artifacts": [
+    {
+      "artifact_id": "01a0f527-69c5-77c5-8278-560b4e35b632",
+      "bytes": 123227,
+      "name": "gate_calibration_phase9_v7.json",
+      "path": "archives/phase9_gate_calibration_20260930/gate_calibration_phase9_v7.json",
+      "sha256": "4adfecbe365e00d24fec93c57ec474c9ddc3f9e8ef79a31b684bcb31e8400701",
+      "timestamp_ns": 1790819396037509300
+    },
+    {
+      "artifact_id": "01a0f527-69c5-7974-b75e-83a8c50848f3",
+      "bytes": 66,
+      "name": "gate_calibration_phase9_v7.json.sha256",
+      "path": "archives/phase9_gate_calibration_20260930/gate_calibration_phase9_v7.json.sha256",
+      "sha256": "76526f27ca85d87381257167347f4e60c8508ac71393960754b2da1a5098f76d",
+      "timestamp_ns": 1790819396037619700
+    }
+  ],
+  "canonical_json": "json.dumps(sort_keys=True, separators=(',',':'))",
+  "chain_head": "0339efbd4293128b9c5d72198a3c79064df4f715336bf88377cdadde21ffe0d1",
+  "envelope_id": "01a0f527-69c5-7a38-958b-61381812d1c3",
+  "genesis_hash": "c80a47bf6ae8d1c595f3b5e607c2588478bec0c47c4f0f97eb6c374b277a1685",
+  "hash_formula": "sha256(previous_chain_sha256 | canonical_json(entry))",
+  "n_artifacts": 2,
+  "name": "Phase 9D Gate Calibration on 10,000 Null Portfolios (v7)",
+  "prereg": {
+    "path": "config/pre_registration_v7.yaml",
+    "sha256": "c80a47bf6ae8d1c595f3b5e607c2588478bec0c47c4f0f97eb6c374b277a1685",
+    "sha256_pinned": "c80a47bf6ae8d1c595f3b5e607c2588478bec0c47c4f0f97eb6c374b277a1685",
+    "verified": true
+  },
+  "ran_at_utc": "2026-10-01T01:49:56Z",
+  "report_type": "phase9d_artifact_envelope",
+  "report_version": 1,
+  "summary": {
+    "ceiling_detected": null,
+    "fold_4_power_ceiling": null,
+    "gates_calibrated": 0,
+    "mde_annualized_sharpe_power_0.80": 2.521,
+    "mde_fold_4": null,
+    "metric": "composite_dsr",
+    "n_null_portfolios": 10000,
+    "nominal_fwer_claimed": 0.00194932,
+    "null_pass_rate": 0.0,
+    "prereg_integrity_verified": true,
+    "prereg_sha256": "c80a47bf6ae8d1c595f3b5e607c2588478bec0c47c4f0f97eb6c374b277a1685",
+    "seed": 20260909,
+    "verdict_vs_nominal": "controlled",
+    "wilson_95": {
+      "hi": 0.00038401,
+      "k": 0,
+      "lo": 0.0,
+      "n": 10000
+    }
+  },
+  "timestamp_ns": 1790819396037669700
+}

@@ -1,0 +1,359 @@
+# Phase 9 Sprint 6 Pre-Registration Configuration — FROZEN BEFORE EXECUTION
+# SIMPLIFIED: Unified DSR Metric (Decision 3) — No 8-Gate Hierarchy
+
+phase: 9
+version: "5.1"
+date: "2026-09-27"
+status: "APPROVED"
+
+# ============================================================
+# SIMPLIFIED STATISTICAL DESIGN
+# ============================================================
+# Single unified metric: COMPOSITE_SCORE = f(Sharpe, DD, Turnover, ARI, Swap, TCA, Probation, WACC)
+# Evaluation: DSR (Deflated Sharpe Ratio) on COMPOSITE_SCORE across concatenated 4-fold OOS returns
+# Multiplicity: Honest trial accounting N=513 (13 base + 500 LHS) via DSR — NO per-gate corrections
+# Track record: Full walk-forward period (84 months = 2520 trading days), NOT per-fold
+# Falsification: Parameter set FAILS if DSR(composite) < 0.95 on Fold 4 (2024 TRUE OOS)
+
+statistical_design:
+  metric: "composite_dsr"
+  composite_components:
+    - name: "sharpe"
+      weight: 0.25
+      target: "> 1.0"
+    - name: "max_drawdown"
+      weight: 0.20
+      target: ">= -0.20"
+    - name: "turnover"
+      weight: 0.15
+      target: "<= 0.30"
+    - name: "hmm_ari"
+      weight: 0.15
+      target: ">= 0.70 (on concatenated 4-fold)"
+    - name: "swap_churn"
+      weight: 0.10
+      target: "< 5.0 swaps/yr"
+    - name: "tca_bps"
+      weight: 0.10
+      target: "<= 150"
+    - name: "probation_pass_rate"
+      weight: 0.05
+      target: "in [0.35, 0.65]"
+  dsr:
+    method: "deflated_sharpe_ratio"
+    n_trials: 513
+    base_n: 13
+    lhs_n: 500
+    track_record_days: 2520  # Full 4-fold concatenated (84 months), NOT per-fold
+    threshold: 0.95
+  fold_evaluation:
+    mode: "concatenated"  # All 4 folds combined for DSR
+    fold_4_true_oos: true  # Fold 4 (2024) must independently satisfy DSR >= 0.95
+  no_gate_hierarchy: true  # REMOVED: 8-gate Holm-Bonferroni structure
+
+# ============================================================
+# HMM SPECIFICATION (Two-Layer: Daily 2-State Class-Weighted GaussianHMM + Monthly Macro Gates)
+# ============================================================
+hmm:
+  # Layer 1: Daily Class-Weighted GaussianHMM (Baum-Welch EM) on 6 macro indicators
+  n_states: 2
+  state_names: ["NORMAL", "CRISIS"]
+  layer1_features:
+    - "BAA10Y"          # Moody's Baa Corporate Bond Yield Spread (bps)
+    - "10Y2Y"           # 10Y-2Y Treasury Yield Spread (bps)
+    - "CP_TBill"        # Commercial Paper vs T-Bill Spread (bps)
+    - "RealizedVol21d"  # 21-day Realized Volatility (SPY, annualized)
+    - "HY_OAS"          # High Yield Option-Adjusted Spread (bps)
+    - "CESI"            # Citi Economic Surprise Index (index points)
+  # Features standardized against trailing 3-year window ONLY (no lookahead)
+  train_window_years: 3
+  retrain_frequency: "event_driven"  # quarterly + macro releases
+  emission_covariance: "diagonal"
+  covariance_floor: 1e-4
+  state_ordering: "credit_spread_mean"  # sort by HY_OAS/BAA10Y mean: low=NORMAL, high=CRISIS
+  
+  # Class-weighted EM for imbalanced CRISIS state (~17% with market labels)
+  class_weights:
+    NORMAL: 1.0
+    CRISIS: 5.0
+  
+  # Dirichlet transition prior (sticky states)
+  transition_prior: "dirichlet"
+  dirichlet_lambda: 0.10
+  sticky_kappa: 100
+  
+  # Layer 2: Monthly Macro Gates (Bayesian log-odds fusion)
+  layer2_gates:
+    - name: "unanticipated_inflation"
+      signal: "CPI_YoY - Breakeven10Y"
+      lag_days: 45  # PIT: CPI released ~15th, available for next month
+      weight: 0.3
+    - name: "real_rate"
+      signal: "DFII10"  # 10Y TIPS real yield
+      lag_days: 1
+      weight: 0.3
+    - name: "sahm_signal"
+      signal: "UNRATE_3mMA - UNRATE_12mLow > 0.5"
+      lag_days: 45  # PIT: Unemployment released ~1st, available next month
+      weight: 0.4
+  bayesian_fusion:
+    lambda: 0.3  # shrinkage factor for macro prior
+    hard_overrides:
+      - condition: "sahm_signal == 1 and real_rate > 2.0"
+        min_crisis_prob: 0.70
+      - condition: "cpi_surprise > 1.0 and p_daily_crisis < 0.3"
+        min_crisis_prob: 0.40
+  
+  # VALIDATION: Market-based labels (independent, real-time, no survey lag)
+  validation:
+    method: "expanding_window_oos_market_labels"
+    label_definition: "STLFSI2 > 1.5 (no ffill) OR VIX > 30 OR HY_OAS > 500bps"
+    # STLFSI2: St. Louis Fed Financial Stress Index (weekly, 1-week lag, NO forward-fill)
+    # VIX: CBOE Volatility Index (daily, 0-day lag)
+    # HY_OAS: ICE BofA High Yield OAS (daily, 1-day lag)
+    folds_required: 3
+    ari_threshold: 0.45  # target for 2-state with market labels (NOT YET ACHIEVED - best 0.2045)
+    action_on_fail: "abort_pipeline"
+    # Diagnostic metrics (not gates):
+    precision_crisis_target: 0.50
+    recall_crisis_target: 0.40
+    f1_crisis_target: 0.44
+    false_alarm_rate_max: 0.15
+    mean_dwell_days_min: 63
+    transitions_per_year_max: 6
+    # NOTE: Best achieved ARI = 0.2045 (Fold 1, with previous label generation)
+    # Static GMM benchmark on same 6 real indicators: ARI = 0.48
+    # Gap attributed to: temporal HMM dynamics, label quality, class-weighted EM stability
+
+# ============================================================
+# PARAMETER CLUSTERS (Joint Optimization, 500 LHS)
+# ============================================================
+parameter_clusters:
+
+  A_wacc_regime:
+    description: "WACC & Regime Engine (high correlation ρ>0.7)"
+    params:
+      - name: "ke_var_threshold"
+        type: "float"
+        values: [0.0075, 0.0085, 0.0100]
+        description: "ke dispersion threshold (data-derived floor 77bps)"
+      - name: "hmm_n_states"
+        type: "int"
+        values: [3]
+        description: "FROZEN - not optimized"
+      - name: "omega_stress_multiplier"
+        type: "float"
+        values: [1.5, 2.0, 2.5]
+        description: "Ω_stress multiplier for CRISIS regime"
+    correlation: "high"
+    correction: "none"  # DSR handles trial-level multiplicity
+
+  B_swap_exit:
+    description: "Swap Barrier & Exit Scheduler (high correlation ρ>0.6)"
+    params:
+      - name: "swap_barrier_gamma"
+        type: "float"
+        values: [0.15, 0.18, 0.20]
+        description: "Exponential decay rate (reduced sensitivity)"
+      - name: "swap_barrier_C"
+        type: "float"
+        values: [0.028, 0.032, 0.035]
+        description: "Initial barrier height (raised from 0.015)"
+      - name: "trailing_pct"
+        type: "float"
+        values: [0.14, 0.16, 0.18]
+        description: "Trailing-stop distance from high-watermark (raised from 0.10)"
+      - name: "min_hold_days"
+        type: "int"
+        values: [30, 35, 40]
+        description: "Minimum holding period before stop can trigger"
+      - name: "cooldown_days"
+        type: "int"
+        values: [45, 60, 90]
+        description: "Cooldown after stop-out before re-entry"
+      - name: "hmm_min_dwell_days"
+        type: "int"
+        values: [15, 20]
+        description: "Minimum consecutive days in regime before transition"
+      - name: "wacc_regime_adjustment"
+        type: "bool"
+        values: [true]
+        description: "FROZEN at true (regime adjusts discount rate)"
+    correlation: "high"
+    correction: "none"
+
+  C_entry_thresholds:
+    description: "Regime-Conditional Entry Thresholds (moderate correlation ρ~0.4)"
+    params:
+      - name: "entry_exp"
+        type: "float"
+        values: [0.85, 0.90, 0.95]
+        description: "EXPANSION: ×IV_P25"
+      - name: "entry_shock"
+        type: "float"
+        values: [0.85, 0.90, 0.95]
+        description: "SHOCK: ×IV_P25"
+      - name: "entry_crisis"
+        type: "float"
+        values: [0.70, 0.75, 0.80]
+        description: "CRISIS: ×IV_P25 (Black Swan opportunism)"
+    correlation: "moderate"
+    correction: "none"
+
+  D_probation_qual:
+    description: "Probation & Qual Gates (low correlation ρ<0.3)"
+    params:
+      - name: "probation_band_low"
+        type: "float"
+        values: [0.35, 0.38]
+        description: "Test widened band vs narrowed"
+      - name: "probation_band_high"
+        type: "float"
+        values: [0.62, 0.65]
+        description: "Test widened band vs narrowed"
+      - name: "qual_weight"
+        type: "float"
+        values: [0.0]
+        description: "FROZEN at 0.0 — Arm B/C retired per CEO ruling 2026-09-27"
+      - name: "mapping_conf_threshold"
+        type: "string"
+        values: ["high"]
+        description: "Only high-confidence qual mappings (unused, Arm B retired)"
+    correlation: "low"
+    correction: "none"
+
+# ============================================================
+# OPTIMIZATION PROTOCOL
+# ============================================================
+optimization:
+  method: "lhs_sobol"
+  n_samples: 500
+  clusters: ["A_wacc_regime", "B_swap_exit", "C_entry_thresholds", "D_probation_qual"]
+  cv:
+    type: "purged_embargoed"
+    purge_formula: "trailing_tau * 5"
+    embargo_months: 12
+    walkforward_folds: 4
+    inner_cv: "timeseries_split"
+    inner_splits: 3
+  metric: "composite_dsr"  # Unified metric
+  dsr_tracking:
+    base_n: 13
+    lhs_n: 500
+    total_n: 513
+    track_record_days: 2520  # Full concatenated walk-forward
+  tca_in_loop: true
+  synthetic_fallback: "disabled"
+  trial_tracker:
+    class: "TrialTracker"
+    log_every_param_set: true
+    sha256_ledger: true
+
+# ============================================================
+# WALK-FORWARD WINDOWS (Fixed, No Window Shopping)
+# ============================================================
+windows:
+  primary:
+    start: "2018-01-01"
+    end: "2024-12-31"
+    description: "7-year RPO-clean core window"
+    folds:
+      fold_1:
+        train_start: "2018-01-01"
+        train_end: "2020-12-31"
+        test_start: "2021-01-01"
+        test_end: "2021-12-31"
+        embargo_months: 12
+        purge_months: 6
+      fold_2:
+        train_start: "2018-01-01"
+        train_end: "2021-12-31"
+        test_start: "2022-01-01"
+        test_end: "2022-12-31"
+        embargo_months: 12
+        purge_months: 6
+      fold_3:
+        train_start: "2018-01-01"
+        train_end: "2022-12-31"
+        test_start: "2023-01-01"
+        test_end: "2023-12-31"
+        embargo_months: 12
+        purge_months: 6
+      fold_4:
+        train_start: "2018-01-01"
+        train_end: "2023-12-31"
+        test_start: "2024-01-01"
+        test_end: "2024-12-31"
+        embargo_months: 12
+        purge_months: 6
+    regimes_covered: ["2020_COVID", "2022_INFLATION"]
+
+  extended:
+    start: "2020-01-01"
+    end: "2026-12-31"
+    description: "Full qual coverage validation (separate report, no gate claims)"
+    purpose: "qual_coverage_validation_only"
+    regimes_covered: ["2022_INFLATION", "2023-24_NORMALIZATION", "2025-26_EMERGING"]
+
+  strata:
+    S4: {start: "2018-01-01", end: "2019-12-31", label: "PRE_COVID"}
+    S5: {start: "2020-01-01", end: "2020-12-31", label: "COVID"}
+    S6: {start: "2021-01-01", end: "2021-12-31", label: "RECOVERY"}
+    S7: {start: "2022-01-01", end: "2023-12-31", label: "AI_BOOM"}
+    S8: {start: "2024-01-01", end: "2026-12-31", label: "CURRENT"}
+
+# ============================================================
+# COST MODEL
+# ============================================================
+costs:
+  commission_bps_per_side: 10
+  slippage_base_bps: 50
+  slippage_regime_multiplier:
+    EXPANSION: 1.0
+    SHOCK: 1.5
+    CRISIS: 2.0
+  market_impact_model: "almgren_chriss_lob"
+  max_annual_tca_bps: 150
+  concurrent_exit_stress_test: true
+
+# ============================================================
+# SUCCESS CRITERIA — SINGLE UNIFIED METRIC
+# ============================================================
+success_criteria:
+  description: "Parameter set PASSES if DSR(composite) >= 0.95 on Fold 4 (2024 TRUE OOS)"
+  fold_4_test:
+    composite_dsr: ">= 0.95"
+    # Component visibility (not gates, for diagnostics):
+    oos_sharpe_arm_a: "> 1.0"
+    max_drawdown_arm_a: "< -0.20"
+    ir_vs_spy_arm_a: "> 0.30"
+    # HMM ARI target with market-based labels (2-state, STLFSI2/VIX/HY_OAS)
+    hmm_ari_concatenated: ">= 0.45"
+    swap_churn: "< 5.0 swaps/yr"
+    tca_bps: "<= 150"
+    probation_pass_rate: "in [0.35, 0.65]"
+    wacc_coverage: "== 1.0"
+    provenance_chain: "valid"
+
+# ============================================================
+# EXECUTION CONSTRAINTS
+# ============================================================
+execution:
+  rebalance_frequency: "monthly"
+  fill_date: "first_trading_day_of_month_T_plus_1"
+  signal_date: "month_end_T"
+  max_turnover_per_rebalance: 0.30
+  universe_size_target: 1500
+  price_stale_max_days: 2
+  illiquid_threshold_dollar_vol: 100000
+  provenance_required: true
+  sha256_all_artifacts: true
+
+# ============================================================
+# CEO APPROVAL BLOCK
+# ============================================================
+ceo_approval:
+  required: true
+  ruling: "APPROVE (Decision 3 — Unified DSR, Decision 1 — Statistical Fixes First, HMM Architecture Rewrite)"
+  date: "2026-09-27"
+  notes: "Simplified to single composite DSR metric with honest N=513. Removed 8-gate hierarchy, per-fold gates, and 1008-day contradiction. Track record = full concatenated 4-fold (2520 days). Fold 4 (2024) must independently satisfy DSR >= 0.95. Arm B/C retired per 2026-09-27 ruling. Parameter grids updated per alpha-worker recommendations. HMM REWRITE: Replaced broken FactorHMMv3 (percentile heuristic) with ClassWeightedGaussianHMM (Baum-Welch EM). 2-state (NORMAL/CRISIS) with event-driven retraining (quarterly). Market-based validation labels (STLFSI2>1.5 no-ffill, VIX>30, HY_OAS>500bps). Monthly Bayesian log-odds fusion. ARI target 0.45 (NOT YET ACHIEVED - best 0.2045). Class-weighted EM (CRISIS weight=1.5). ALL CODE FIXES APPLIED: 6→12 padding removed, synthetic data removed, FRED cache populated, EM stability improved. Gap to 0.45 target attributed to temporal HMM dynamics vs static GMM benchmark (0.48)."

@@ -96,7 +96,7 @@ INITIAL = 10000.0
 FEE_RATE = 0.005
 MIN_TURNOVER = 0.05
 ANNUALIZE = 252.0
-OUT = r"C:\Users\Hayden\AppData\Local\Temp\opencode"
+OUT = r"tempfile.gettempdir()\opencode"
 MACRO_TICKERS = ["HYG", "LQD"]
 FRED_PROBE_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10"
 NASDAQ_CROSSCHECK = ["SPY", "VCSH", "VCIT", "BIL", "SHY", "SGOV", "GLD", "IAU"]

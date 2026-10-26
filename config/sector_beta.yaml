@@ -1,0 +1,351 @@
+sector_beta:
+  version: '2026.09'
+  retrieval_timestamp: '2026-09-04T00:00:00Z'
+  mapping_version: '2026.09'
+  sha256: 0aeb85d603906264dfcd2893b606a363119b0abc532c7fef069425f0c859dbb0
+  schema: config/sector_beta.yaml (v1) — GICS L2 -> Damodaran 94-industry
+  industries:
+    '101010':
+      gics_l2_name: Energy 10
+      damodaran_industry: Oil/Gas (Production and Exploration)
+      beta_unlevered: 0.5628
+    '101020':
+      gics_l2_name: Energy 10
+      damodaran_industry: Oil/Gas Distribution
+      beta_unlevered: 0.4651
+    '151010':
+      gics_l2_name: Materials 10
+      damodaran_industry: Chemical (Diversified)
+      beta_unlevered: 0.3666
+    '151020':
+      gics_l2_name: Materials 10
+      damodaran_industry: Building Materials
+      beta_unlevered: 0.9302
+    '151030':
+      gics_l2_name: Materials 10
+      damodaran_industry: Packaging & Container
+      beta_unlevered: 0.7231
+    '151040':
+      gics_l2_name: Materials 10
+      damodaran_industry: Metals & Mining
+      beta_unlevered: 0.9636
+    '151050':
+      gics_l2_name: Materials 10
+      damodaran_industry: Paper/Forest Products
+      beta_unlevered: 0.7216
+    '201010':
+      gics_l2_name: Industrials 10
+      damodaran_industry: Aerospace/Defense
+      beta_unlevered: 0.8467
+    '201020':
+      gics_l2_name: Industrials 10
+      damodaran_industry: Building Materials
+      beta_unlevered: 0.9302
+    '201030':
+      gics_l2_name: Industrials 10
+      damodaran_industry: Engineering/Construction
+      beta_unlevered: 1.0949
+    '201040':
+      gics_l2_name: Industrials 10
+      damodaran_industry: Electrical Equipment
+      beta_unlevered: 1.1478
+    '201050':
+      gics_l2_name: Industrials 10
+      damodaran_industry: Machinery
+      beta_unlevered: 0.868
+    '201060':
+      gics_l2_name: Industrials 10
+      damodaran_industry: Trucking
+      beta_unlevered: 0.8504
+    '202010':
+      gics_l2_name: Industrials 20
+      damodaran_industry: Business & Consumer Services
+      beta_unlevered: 0.7736
+    '202020':
+      gics_l2_name: Industrials 20
+      damodaran_industry: Environmental & Waste Services
+      beta_unlevered: 0.8145
+    '203010':
+      gics_l2_name: Industrials 30
+      damodaran_industry: Air Transport
+      beta_unlevered: 0.7041
+    '203020':
+      gics_l2_name: Industrials 30
+      damodaran_industry: Transportation
+      beta_unlevered: 0.6753
+    '203030':
+      gics_l2_name: Industrials 30
+      damodaran_industry: Transportation (Railroads)
+      beta_unlevered: 0.8069
+    '251010':
+      gics_l2_name: Consumer Discretionary 10
+      damodaran_industry: Auto & Truck
+      beta_unlevered: 1.269
+    '251020':
+      gics_l2_name: Consumer Discretionary 10
+      damodaran_industry: Auto Parts
+      beta_unlevered: 1.0217
+    '252010':
+      gics_l2_name: Consumer Discretionary 20
+      damodaran_industry: Apparel
+      beta_unlevered: 0.758
+    '252020':
+      gics_l2_name: Consumer Discretionary 20
+      damodaran_industry: Furn/Home Furnishings
+      beta_unlevered: 0.6248
+    '252030':
+      gics_l2_name: Consumer Discretionary 20
+      damodaran_industry: Recreation
+      beta_unlevered: 0.6951
+    '253010':
+      gics_l2_name: Consumer Discretionary 30
+      damodaran_industry: Hotel/Gaming
+      beta_unlevered: 0.8323
+    '253020':
+      gics_l2_name: Consumer Discretionary 30
+      damodaran_industry: Restaurant/Dining
+      beta_unlevered: 0.7674
+    '254010':
+      gics_l2_name: Consumer Discretionary 40
+      damodaran_industry: Entertainment
+      beta_unlevered: 0.7372
+    '255010':
+      gics_l2_name: Consumer Discretionary 50
+      damodaran_industry: Retail (General)
+      beta_unlevered: 0.76
+    '255020':
+      gics_l2_name: Consumer Discretionary 50
+      damodaran_industry: Retail (Automotive)
+      beta_unlevered: 0.6984
+    '255030':
+      gics_l2_name: Consumer Discretionary 50
+      damodaran_industry: Retail (Building Supply)
+      beta_unlevered: 1.307
+    '255040':
+      gics_l2_name: Consumer Discretionary 50
+      damodaran_industry: Retail (Distributors)
+      beta_unlevered: 0.7827
+    '255050':
+      gics_l2_name: Consumer Discretionary 50
+      damodaran_industry: Retail (Special Lines)
+      beta_unlevered: 0.9488
+    '301010':
+      gics_l2_name: Consumer Staples 10
+      damodaran_industry: Food Wholesalers
+      beta_unlevered: 0.6409
+    '301020':
+      gics_l2_name: Consumer Staples 10
+      damodaran_industry: Retail (Grocery and Food)
+      beta_unlevered: 0.8048
+    '302010':
+      gics_l2_name: Consumer Staples 20
+      damodaran_industry: Beverage (Alcoholic)
+      beta_unlevered: 0.6132
+    '302020':
+      gics_l2_name: Consumer Staples 20
+      damodaran_industry: Beverage (Soft)
+      beta_unlevered: 0.5557
+    '302030':
+      gics_l2_name: Consumer Staples 20
+      damodaran_industry: Food Processing
+      beta_unlevered: 0.4574
+    '303010':
+      gics_l2_name: Consumer Staples 30
+      damodaran_industry: Household Products
+      beta_unlevered: 0.7178
+    '303020':
+      gics_l2_name: Consumer Staples 30
+      damodaran_industry: Tobacco
+      beta_unlevered: 0.6776
+    '351010':
+      gics_l2_name: Health Care 10
+      damodaran_industry: Healthcare Products
+      beta_unlevered: 0.8291
+    '351020':
+      gics_l2_name: Health Care 10
+      damodaran_industry: Healthcare Support Services
+      beta_unlevered: 0.6889
+    '351030':
+      gics_l2_name: Health Care 10
+      damodaran_industry: Hospitals/Healthcare Facilities
+      beta_unlevered: 0.5517
+    '352010':
+      gics_l2_name: Health Care 20
+      damodaran_industry: Drugs (Biotechnology)
+      beta_unlevered: 1.0341
+    '352020':
+      gics_l2_name: Health Care 20
+      damodaran_industry: Drugs (Pharmaceutical)
+      beta_unlevered: 0.8862
+    '401010':
+      gics_l2_name: Financials 10
+      damodaran_industry: Banks (Regional)
+      beta_unlevered: 0.2865
+    '401020':
+      gics_l2_name: Financials 10
+      damodaran_industry: Bank (Money Center)
+      beta_unlevered: 0.3411
+    '402010':
+      gics_l2_name: Financials 20
+      damodaran_industry: Brokerage & Investment Banking
+      beta_unlevered: 0.5808
+    '402020':
+      gics_l2_name: Financials 20
+      damodaran_industry: Investments & Asset Management
+      beta_unlevered: 0.5297
+    '402030':
+      gics_l2_name: Financials 20
+      damodaran_industry: Financial Svcs. (Non-bank & Insurance)
+      beta_unlevered: 0.3189
+    '403010':
+      gics_l2_name: Financials 30
+      damodaran_industry: Insurance (General)
+      beta_unlevered: 0.5636
+    '403020':
+      gics_l2_name: Financials 30
+      damodaran_industry: Insurance (Life)
+      beta_unlevered: 0.4272
+    '403030':
+      gics_l2_name: Financials 30
+      damodaran_industry: Insurance (Prop/Cas.)
+      beta_unlevered: 0.4357
+    '451010':
+      gics_l2_name: Information Technology 10
+      damodaran_industry: Software (System & Application)
+      beta_unlevered: 1.2254
+    '451020':
+      gics_l2_name: Information Technology 10
+      damodaran_industry: Software (Internet)
+      beta_unlevered: 1.5461
+    '451030':
+      gics_l2_name: Information Technology 10
+      damodaran_industry: Software (Entertainment)
+      beta_unlevered: 1.0128
+    '452010':
+      gics_l2_name: Information Technology 20
+      damodaran_industry: Computers/Peripherals
+      beta_unlevered: 1.3051
+    '452020':
+      gics_l2_name: Information Technology 20
+      damodaran_industry: Telecom. Equipment
+      beta_unlevered: 0.8635
+    '452030':
+      gics_l2_name: Information Technology 20
+      damodaran_industry: Electronics (General)
+      beta_unlevered: 0.8974
+    '452040':
+      gics_l2_name: Information Technology 20
+      damodaran_industry: Electronics (Consumer & Office)
+      beta_unlevered: 0.8299
+    '452050':
+      gics_l2_name: Information Technology 20
+      damodaran_industry: Office Equipment & Services
+      beta_unlevered: 0.9806
+    '453010':
+      gics_l2_name: Information Technology 30
+      damodaran_industry: Semiconductor
+      beta_unlevered: 1.4893
+    '453020':
+      gics_l2_name: Information Technology 30
+      damodaran_industry: Semiconductor Equip
+      beta_unlevered: 1.3481
+    '501010':
+      gics_l2_name: Communication Services 10
+      damodaran_industry: Telecom. Services
+      beta_unlevered: 0.3654
+    '501020':
+      gics_l2_name: Communication Services 10
+      damodaran_industry: Telecom (Wireless)
+      beta_unlevered: 0.3873
+    '502010':
+      gics_l2_name: Communication Services 20
+      damodaran_industry: Advertising
+      beta_unlevered: 0.9301
+    '502020':
+      gics_l2_name: Communication Services 20
+      damodaran_industry: Broadcasting
+      beta_unlevered: 0.2864
+    '502030':
+      gics_l2_name: Communication Services 20
+      damodaran_industry: Entertainment
+      beta_unlevered: 0.7372
+    '502040':
+      gics_l2_name: Communication Services 20
+      damodaran_industry: Cable TV
+      beta_unlevered: 0.3524
+    '502050':
+      gics_l2_name: Communication Services 20
+      damodaran_industry: Publishing & Newspapers
+      beta_unlevered: 0.4773
+    '551010':
+      gics_l2_name: Utilities 10
+      damodaran_industry: Power
+      beta_unlevered: 0.31
+    '551020':
+      gics_l2_name: Utilities 10
+      damodaran_industry: Utility (General)
+      beta_unlevered: 0.1486
+    '551030':
+      gics_l2_name: Utilities 10
+      damodaran_industry: Utility (Water)
+      beta_unlevered: 0.2812
+    '601010':
+      gics_l2_name: Real Estate 10
+      damodaran_industry: R.E.I.T.
+      beta_unlevered: 0.3929
+    '601020':
+      gics_l2_name: Real Estate 10
+      damodaran_industry: Retail (REITs)
+      beta_unlevered: 0.4362
+    '601030':
+      gics_l2_name: Real Estate 10
+      damodaran_industry: Real Estate (Development)
+      beta_unlevered: 0.4783
+    '601040':
+      gics_l2_name: Real Estate 10
+      damodaran_industry: Real Estate (General/Diversified)
+      beta_unlevered: 0.5779
+    '601050':
+      gics_l2_name: Real Estate 10
+      damodaran_industry: Real Estate (Operations & Services)
+      beta_unlevered: 0.8149
+  fallback:
+    custom_sector_medians:
+      Hardware: 1.15
+      Software: 1.25
+      Consumer: 0.85
+      Industrial: 1.05
+      Healthcare: 0.95
+      Energy: 1.1
+      Financial: 0.9
+    universe_median: 0.743
+    sub_area_to_custom_sector:
+      chip_design: Hardware
+      chip_equipment: Hardware
+      hardware_oem: Hardware
+      telecom: Hardware
+      application_software: Software
+      it_services: Software
+      data_services: Software
+      retail: Consumer
+      food_beverage: Consumer
+      hospitality: Consumer
+      autos: Consumer
+      media_content: Consumer
+      aero_defense: Industrial
+      construction: Industrial
+      machinery_equipment: Industrial
+      transport: Industrial
+      environment: Industrial
+      diversified: Industrial
+      materials: Industrial
+      agri: Industrial
+      pharma: Healthcare
+      biotech: Healthcare
+      healthcare: Healthcare
+      energy: Energy
+      financials: Financial
+      insurance: Financial
+      utilities: Energy
+      real_estate: Financial
+      ad_services: Software

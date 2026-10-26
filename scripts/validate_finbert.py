@@ -86,7 +86,7 @@ def main():
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument(
         "--cache",
-        default=r"C:\Users\Hayden\AppData\Local\Temp\opencode\fpb.zip",
+        default=os.path.join(tempfile.gettempdir(), "opencode", "fpb.zip"),
     )
     args = parser.parse_args()
 

@@ -1,0 +1,344 @@
+# Phase 9 Pre-Registration Configuration — FROZEN BEFORE EXECUTION
+# CEO APPROVAL REQUIRED BEFORE SPRINT 1 DISPATCH
+# SHA-256 will be computed and logged upon approval
+
+phase: 9
+version: "4.1"
+date: "2026-09-27"
+status: "APPROVED"
+
+# ============================================================
+# HMM SPECIFICATION (Factor-Model, 3-State, Hard Constraints)
+# ============================================================
+hmm:
+  n_states: 3
+  state_names: ["EXPANSION", "SHOCK", "CRISIS"]
+  factor_model:
+    n_macro_indicators: 8
+    indicators:
+      - "BAA10Y"          # Moody's Baa Corporate Bond Yield
+      - "10Y2Y"           # 10Y-2Y Treasury Spread
+      - "CP_TBill"        # Commercial Paper - T-Bill Spread
+      - "VIX_VVIX"        # VIX / VVIX Ratio
+      - "RealizedVol21d"  # 21-day Realized Volatility (SPY)
+      - "HY_OAS"          # High Yield OAS
+      - "CESI"            # Citi Economic Surprise Index
+      - "SkewIndex"       # CBOE SKEW Index
+    pca_components: 3
+    pca_lookback: 252
+    pca_method: "rolling_pit"  # Point-in-time, no lookahead
+    variance_explained_min: 0.80
+  monotonicity_ke: "hard_rejection"
+  ke_ordering: ["EXPANSION", "SHOCK", "CRISIS"]  # ke_EXP < ke_SHOCK < ke_CRISIS
+  occupancy_caps:
+    max_any_state: 0.60
+    max_crisis: 0.20
+  min_sojourn_days: 5
+  transition_prior: "dirichlet"
+  dirichlet_lambda: 0.05
+  vix_labels: "rolling_pit_quantiles"
+  vix_quantile_window: 252
+  internal_gate:
+    ari_threshold: 0.70
+    folds_required: 3
+    action_on_fail: "abort_pipeline"
+
+# ============================================================
+# PARAMETER CLUSTERS (Joint Optimization, 500 LHS)
+# ============================================================
+parameter_clusters:
+  A_wacc_regime:
+    description: "WACC & Regime Engine (high correlation ρ>0.7)"
+    params:
+      - name: "ke_var_threshold"
+        type: "float"
+        values: [0.0075, 0.0085, 0.0100]  # 75, 85, 100 bps
+        description: "ke dispersion threshold (data-derived floor 77bps)"
+      - name: "hmm_n_states"
+        type: "int"
+        values: [3]  # FROZEN - not optimized
+        description: "Fixed at 3 for optimization; 2-state ablation post-hoc"
+      - name: "omega_stress_multiplier"
+        type: "float"
+        values: [1.5, 2.0, 2.5]
+        description: "Ω_stress multiplier for CRISIS regime"
+    correlation: "high"
+    correction: "bonferroni"
+    alpha: 0.0167
+
+  B_swap_exit:
+    description: "Swap Barrier & Exit Scheduler (high correlation ρ>0.6)"
+    params:
+      - name: "swap_barrier_gamma"
+        type: "float"
+        values: [0.25, 0.35, 0.50]
+        description: "Exponential decay rate"
+      - name: "swap_barrier_C"
+        type: "float"
+        values: [0.0200, 0.0250, 0.0300]  # 200, 250, 300 bps
+        description: "Initial barrier height"
+      - name: "trailing_k"
+        type: "string"
+        values: ["sector_nested_cv"]
+        description: "Per-sector via nested CV (not optimized directly)"
+      - name: "trailing_tau"
+        type: "int"
+        values: [5, 10, 20]
+        description: "Trailing window in days"
+      # --- Sprint 4 / Arm A pure-quant exit logic (added post-implementation) ---
+      # NOTE: trailing_pct is the trailing-STOP distance from the high-watermark
+      # and is NOT a restatement of trailing_tau (the lookback window length).
+      # Both move the stop; they are distinct parameters and are tuned
+      # independently. The dispatch fixes trailing_pct; it does not re-open
+      # trailing_tau.
+      - name: "trailing_pct"
+        type: "float"
+        values: [0.10, 0.15, 0.20]  # 10%, 15%, 20% from the high-watermark
+        description: "Trailing-stop distance below the high-watermark; stop is inclusive at the boundary and the watermark ratchets, never decays"
+      - name: "hmm_min_dwell_days"
+        type: "int"
+        values: [5, 10, 15]
+        description: "Minimum consecutive days in a state before a transition is accepted; 10 is the shipped default and the operating point"
+      - name: "wacc_regime_adjustment"
+        type: "bool"
+        values: [true]
+        description: "FROZEN at true (not optimized). When false the regime does not touch the discount rate, and EXPANSION is no longer a no-op on the base WACC"
+    correlation: "high"
+    correction: "bonferroni"
+    alpha: 0.0125
+
+  C_entry_thresholds:
+    description: "Regime-Conditional Entry Thresholds (moderate correlation ρ~0.4)"
+    params:
+      - name: "entry_exp"
+        type: "float"
+        values: [0.85, 0.90, 0.95]
+        description: "EXPANSION: ×IV_P25"
+      - name: "entry_shock"
+        type: "float"
+        values: [0.85, 0.90, 0.95]
+        description: "SHOCK: ×IV_P25"
+      - name: "entry_crisis"
+        type: "float"
+        values: [0.70, 0.75, 0.80]
+        description: "CRISIS: ×IV_P25 (Black Swan opportunism)"
+    correlation: "moderate"
+    correction: "holm_bonferroni"
+    alpha: "step_down"
+
+  D_probation_qual:
+    description: "Probation & Qual Gates (low correlation ρ<0.3)"
+    params:
+      - name: "probation_band_low"
+        type: "float"
+        values: [0.38]
+        description: "Narrowed per CEO ruling Option A (was [0.35, 0.65])"
+      - name: "probation_band_high"
+        type: "float"
+        values: [0.62]
+        description: "Narrowed per CEO ruling Option A (was [0.35, 0.65])"
+      - name: "qual_weight"
+        type: "float"
+        values: [0.4]
+        description: "FROZEN at 0.4 per CEO ruling Option A (inverted as strictness dial)"
+      - name: "mapping_conf_threshold"
+        type: "string"
+        values: ["medium", "high"]
+        description: "Minimum mapping confidence for qual inclusion"
+    correlation: "low"
+    correction: "bonferroni"
+    alpha: 0.0167
+
+# ============================================================
+# OPTIMIZATION PROTOCOL
+# ============================================================
+optimization:
+  method: "lhs_sobol"
+  n_samples: 500
+  clusters: ["A_wacc_regime", "B_swap_exit", "C_entry_thresholds", "D_probation_qual"]
+  cv:
+    type: "purged_embargoed"
+    purge_formula: "trailing_tau * 5"
+    embargo_months: 12
+    walkforward_folds: 4
+    inner_cv: "timeseries_split"
+    inner_splits: 3
+  metric: "paired_sharpe_vs_spy"
+  metric_alpha: 0.0071
+  bootstrap: "clustered"
+  dsr_tracking:
+    base_n: 13
+    lhs_n: 500
+    total_n: 513
+    track_record_days: 1008
+  tca_in_loop: true
+  synthetic_fallback: "disabled"
+  trial_tracker:
+    class: "TrialTracker"
+    log_every_param_set: true
+    sha256_ledger: true
+
+# ============================================================
+# GATE ARCHITECTURE (8 Effective Gates, FWER α/8)
+# ============================================================
+gates:
+  effective_count: 8
+  fwer_alpha: 0.00625
+  gate_1_arm_superiority:
+    name: "Arm Superiority"
+    type: "anova_3arm_plus_welch"
+    components:
+      - "anova_3arm_means"
+      - "welch_c_vs_a"
+      - "welch_c_vs_b"
+    fwer_control: "holm"
+    alpha_per_component: 0.00625
+    description: "Collapses Gates 1-4; requires genuine Arm A/B/C data"
+  gate_2_oos_sharpe:
+    name: "OOS Sharpe (Arm C)"
+    threshold: 1.0
+  gate_3_max_drawdown:
+    name: "Max Drawdown (Arm C)"
+    threshold: -0.20
+  gate_4_ir_vs_spy:
+    name: "Information Ratio vs SPY"
+    threshold: 0.30
+  gate_5_dsr_psr:
+    name: "DSR / PSR (Bailey et al. 2014)"
+    threshold: 0.95
+    method: "deflated_sharpe_ratio"
+    n_trials: 513
+    track_record_days: 1008
+  gate_6_calmar:
+    name: "Calmar Ratio"
+    threshold: 2.0
+  gate_7_hmm_ari:
+    name: "HMM State Stability (ARI)"
+    threshold: 0.70
+    folds_required: 3
+    description: "Also enforced as HMM internal gate (abort if fails)"
+  gate_8_structural_integrity:
+    name: "Structural Integrity Composite"
+    logic: "AND"
+    components:
+      - name: "wacc_coverage"
+        threshold: 1.0
+      - name: "probation_pass_rate"
+        threshold_low: 0.38
+        threshold_high: 0.62
+      - name: "swap_churn"
+        threshold: 5.0
+        unit: "swaps_per_year"
+      - name: "tca_budget"
+        threshold: 150.0
+        unit: "bps"
+      - name: "provenance_chain"
+        threshold: true
+
+# ============================================================
+# WALK-FORWARD WINDOWS (Fixed, No Window Shopping)
+# ============================================================
+windows:
+  primary:
+    start: "2018-01-01"
+    end: "2024-12-31"
+    description: "7-year RPO-clean core window"
+    folds:
+      fold_1:
+        train_start: "2018-01-01"
+        train_end: "2020-12-31"
+        test_start: "2021-01-01"
+        test_end: "2021-12-31"
+        embargo_months: 12
+        purge_months: 6
+      fold_2:
+        train_start: "2018-01-01"
+        train_end: "2021-12-31"
+        test_start: "2022-01-01"
+        test_end: "2022-12-31"
+        embargo_months: 12
+        purge_months: 6
+      fold_3:
+        train_start: "2018-01-01"
+        train_end: "2022-12-31"
+        test_start: "2023-01-01"
+        test_end: "2023-12-31"
+        embargo_months: 12
+        purge_months: 6
+      fold_4:
+        train_start: "2018-01-01"
+        train_end: "2023-12-31"
+        test_start: "2024-01-01"
+        test_end: "2024-12-31"
+        embargo_months: 12
+        purge_months: 6
+    regimes_covered: ["2020_COVID", "2022_INFLATION"]
+
+  extended:
+    start: "2020-01-01"
+    end: "2026-12-31"
+    description: "Full qual coverage validation (separate report, no gate claims)"
+    purpose: "qual_coverage_validation_only"
+    regimes_covered: ["2022_INFLATION", "2023-24_NORMALIZATION", "2025-26_EMERGING"]
+
+  strata:
+    S4: {start: "2018-01-01", end: "2019-12-31", label: "PRE_COVID"}
+    S5: {start: "2020-01-01", end: "2020-12-31", label: "COVID"}
+    S6: {start: "2021-01-01", end: "2021-12-31", label: "RECOVERY"}
+    S7: {start: "2022-01-01", end: "2023-12-31", label: "AI_BOOM"}
+    S8: {start: "2024-01-01", end: "2026-12-31", label: "CURRENT"}
+
+# ============================================================
+# COST MODEL
+# ============================================================
+costs:
+  commission_bps_per_side: 10
+  slippage_base_bps: 50
+  slippage_regime_multiplier:
+    EXPANSION: 1.0
+    SHOCK: 1.5
+    CRISIS: 2.0
+  market_impact_model: "almgren_chriss_lob"
+  max_annual_tca_bps: 150
+  concurrent_exit_stress_test: true
+
+# ============================================================
+# SUCCESS CRITERIA (Pre-Registered, Falsification-First) — ARM A ONLY
+# ============================================================
+success_criteria:
+  description: "ALL must pass on Fold 4 (2024 TRUE OOS) for Phase 9 Arm A to PASS"
+  fold_4_test:
+    dsr_psr: "> 0.95"
+    oos_sharpe_arm_a: "> 1.0"
+    max_drawdown_arm_a: "< -0.20"
+    ir_vs_spy_arm_a: "> 0.30"
+    hmm_ari: ">= 0.70 on >= 3 of 4 folds"
+    swap_churn: "< 5.0 swaps/yr"
+    tca_bps: "<= 150"
+    probation_pass_rate: "in [0.38, 0.62]"
+    wacc_coverage: "== 1.0"
+    provenance_chain: "valid"
+    gates_1_4_not_skip: true
+
+# ============================================================
+# EXECUTION CONSTRAINTS
+# ============================================================
+execution:
+  rebalance_frequency: "monthly"
+  fill_date: "first_trading_day_of_month_T_plus_1"
+  signal_date: "month_end_T"
+  max_turnover_per_rebalance: 0.30
+  universe_size_target: 1500
+  price_stale_max_days: 2
+  illiquid_threshold_dollar_vol: 100000
+  provenance_required: true
+  sha256_all_artifacts: true
+
+# ============================================================
+# CEO APPROVAL BLOCK
+# ============================================================
+ceo_approval:
+  required: true
+  ruling: "APPROVE (Path A — Pure Quant Arm A Rebuild with Three Fixes)"
+  date: "2026-09-27"
+  notes: "CEO Ruling 2026-09-27: Path A selected. Permanently retire Arm B (Pure Qual) and Arm C (Hybrid). Focus 100% on Arm A (Pure Quantitative Valuation). Three Fixes implemented: (1) Trailing Stops — 15% from high watermark, 30-day min hold, 60-day cooldown, priority Structural > Hysteria > Trailing > Take Profit; (2) HMM Dwell Filters — 10-day minimum dwell, prevents whipsaw; (3) Dynamic WACC — Regime-adjusted, anchored on base_wacc (EXPANSION neutral). Arm B/C permanently retired. Pre-registration frozen for Arm A production run."

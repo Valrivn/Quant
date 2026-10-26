@@ -1,0 +1,1 @@
+"""Quantitative Tests Package — Contract Tests, Fold Geometry, Math Audits"""
