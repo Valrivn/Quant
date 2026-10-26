@@ -119,10 +119,13 @@ def init_logging(level: str = "INFO", log_dir: str = "logs", inject_experiment: 
     setup_logging(level=numeric_level, log_file=str(log_file), console=True)
 
 
-def college_event(event: str, **kwargs) -> None:
-    """College-audited event logging - emits structured event for audit trail."""
+def audit_event(event: str, **kwargs) -> None:
+    """Structured event logging for pipeline audit trail."""
     logger = get_logger("quant_audit")
     logger.info(f"AUDIT_EVENT: {event} | {kwargs}")
+
+# Backward-compatibility alias
+college_event = audit_event
 
 
 def get_experiment_context() -> Dict[str, Any]:

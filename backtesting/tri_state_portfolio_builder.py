@@ -2,7 +2,7 @@
 backtesting/tri_state_portfolio_builder.py
 
 Tri-State Static Hedged Portfolio Pillar Return Builder
-House of Quant — Quant Platform Production Engine
+House of Quant — Audit Ledger Production Engine
 
 Constructs monthly return series for the three structural pillars:
 1. Pillar 1: Growth & Innovation Engine (The Alpha Engine)

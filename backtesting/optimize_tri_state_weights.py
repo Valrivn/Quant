@@ -2,7 +2,7 @@
 backtesting/optimize_tri_state_weights.py
 
 Tri-State Static Hedged Portfolio Optimizer & Cross-Validation Engine
-House of Quant — Quant Platform Production Specification
+House of Quant — Quantitative Production Specification
 
 Discovers the optimal static weighting across the three structural pillars:
   - Growth (w_g): 30% Quant / 70% Qualitative Moat Equities

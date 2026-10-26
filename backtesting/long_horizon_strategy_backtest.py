@@ -2,7 +2,7 @@
 backtesting/long_horizon_strategy_backtest.py
 
 17.2-Year Comprehensive Long-Horizon Strategy Backtest (2009-2026)
-House of Quant — Quant Platform Production Engine
+House of Quant — Audit Ledger Production Engine
 
 Evaluates the strategy as far back as SEC Point-In-Time fundamental filings go:
   - Evaluation Window: 2009-06-30 to 2026-08-31 (206 monthly rebalance cycles, 17.2 years)
@@ -295,7 +295,7 @@ def run_long_horizon_simulation():
 def main():
     print("=" * 95)
     print("   17.2-YEAR LONG-HORIZON PRODUCTION BACKTEST: OUR STRATEGY vs. S&P 500 (SPY)")
-    print("   House of Quant — Quant Platform Engine")
+    print("   House of Quant — Quantitative Production Engine")
     print("   Data Span: June 30, 2009 to August 31, 2026 (206 Monthly Cycles)")
     print("=" * 95)
 

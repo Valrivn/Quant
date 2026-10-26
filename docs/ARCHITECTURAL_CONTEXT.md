@@ -130,7 +130,7 @@ def can_asset_reenter(ticker: str, asset_data: Dict) -> bool:
 ├── data/                            # Runtime data (gitignored)
 ├── validation/                      # Audits
 ├── commands/                        # CLI commands
-│   └── sleep.py                     # College logger snapshot
+│   └── sleep.py                     # Audit Ledger snapshot
 ├── logs/college/                    # College audit trail (JSONL)
 ├── .agents/project/org/             # Project org
 │   ├── blueprint.md                 # Frozen architecture
@@ -187,7 +187,7 @@ def can_asset_reenter(ticker: str, asset_data: Dict) -> bool:
 
 ---
 
-## 📋 DECISION LOG FORMAT (for audit ledger)
+## 📋 DECISION LOG FORMAT (for Audit Ledger)
 
 Each ruling should be logged as:
 ```json
@@ -210,7 +210,7 @@ Per `opencode.json:architectural_decision_rules`:
 | ❌ Modify pre-registration configs without user approval | ✅ Present options with trade-offs |
 | ❌ Change component authority | ✅ Document recommendation |
 | ❌ Add/remove data sources | ✅ Wait for explicit user ruling |
-| ❌ Modify override gate conditions | ✅ Log ruling in audit ledger |
+| ❌ Modify override gate conditions | ✅ Log ruling in Audit Ledger |
 | ❌ Restructure folders/blueprints | ✅ Dispatch implementation after ruling |
 | ❌ Assume defaults for unresolved questions | ✅ Never proceed without approval |
 
@@ -263,7 +263,7 @@ Per `opencode.json:architectural_decision_rules`:
 Before parallel dispatch, verify:
 
 - [ ] All 7 decisions ruled by user
-- [ ] Rulings logged in audit ledger with timestamps
+- [ ] Rulings logged in Audit Ledger with timestamps
 - [ ] `opencode.json` architectural_decision_rules enforced
 - [ ] Implementation plan phases assigned to workstreams
 - [ ] Dead code locations confirmed for deletion

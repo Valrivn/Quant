@@ -12,7 +12,7 @@
 | `config/pre_registration_v7.yaml` (844 lines) | **FROZEN & APPROVED** — Contains the canonical Phase 9 v7 contract. SHA-256 `c80a47bf6ae8d1c595f3b5e607c2588478bec0c47c4f0f97eb6c374b277a1685`. Pinned at `ingestion/harness/prereg.py:128`. **844 lines with massive duplication** — the `statistical_design` and `UNIFIED REGIME ARCHITECTURE` blocks are copy-pasted **3 times** (lines 69-128, 130-164, 191-225), likely from a bad merge. |
 | `config/arm_a_refactor_prereg.yaml` (238 lines) | **DRAFT_AWAITING_CEO_APPROVAL** — Contains vol targeting, composite reweight, turnover controls, graded de-risking, tail hedge, cost model, and `factor_data_contracts` with explicit gap analysis. Explicitly states: "This file ADDS the Arm A refactor parameter set... It does NOT supersede, modify, re-pin or replace v7." |
 | `ingestion/harness/prereg.py` | The pin verification reads `pre_registration_v7.yaml` by path. Any namespaced change to v7 must update the pin hash. |
-| CEO Decision 2026-10-04 (audit ledger) | Recommendation was: **"extend_v7"** — extend v7 with arm_a namespace. |
+| CEO Decision 2026-10-04 (Audit Ledger) | Recommendation was: **"extend_v7"** — extend v7 with arm_a namespace. |
 
 ### Trade-offs
 
@@ -185,6 +185,6 @@
 | 6 | GLDM | **Add GLDM; source daily adj closes mid-2018→present via Yahoo/AlphaVantage to `data/master_prices/GLDM.parquet`; pre-2018 splice from GOLDPMGBD228NLBM or IAU net of 0.10% ER.** |
 | 7 | Rebalance | **Quarterly structural; emergency override FIRED BY hybrid RegimeState (BOCPD P(r_t=0)>0.85 OR spread blowout >0.5bps/day), GATED by valuation agreement check — suppressed when portfolio in deep-discount moats (Z_val≤-1.0 AND ICR≥5.0), proceeds when rich (Z_val>0 or ICR<3.0).** |
 
-**All rulings logged to audit ledger (2026-10-06). Ready to execute parallel build.**
+**All rulings logged to Audit Ledger (2026-10-06). Ready to execute parallel build.**
 
 **Please rule on each (A/B/C), and I will log your decision, dispatch parallel implementation, and run `/sleep` to snapshot.**

@@ -154,7 +154,7 @@ def generate_clean_slate_recipe() -> pd.DataFrame:
 def main():
     print("=" * 95)
     print("CLEAN-SLATE UNCONSTRAINED TRI-STATE PORTFOLIO SIMULATION")
-    print("House of Quant — Quant Platform Engine")
+    print("House of Quant — Quantitative Production Engine")
     print(f"Total Equity Capital: ${TOTAL_WEALTH:,.2f}")
     print("=" * 95)
 

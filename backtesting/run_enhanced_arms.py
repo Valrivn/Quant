@@ -2,7 +2,7 @@
 backtesting/run_enhanced_arms.py
 
 Unified 3-Arm Comparative Simulation Engine & 15-Metric Dashboard Computer
-Matches the exact 15 metrics from the Quant Platform Production Specification.
+Matches the exact 15 metrics from the Quantitative Production Specification.
 
 Supports:
 - Arm 1: Full Quant (Baseline +15% vs Enhanced Sector-Adaptive + 12-Mo Patient Horizon)

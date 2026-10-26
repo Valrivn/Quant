@@ -32,8 +32,10 @@ venv/
 *.egg-info/
 dist/
 build/
+.coverage
+.pytest_cache/
 
-# IDE
+# IDE & Editor
 .vscode/
 .idea/
 *.swp
@@ -46,7 +48,23 @@ Thumbs.db
 # Logs
 *.log
 pip_err.txt
+logs/college/
 
 # Temporary
 *.tmp
 *.temp
+
+# Private & Personal Working Files
+Tommorow.md
+Tomorrow.md
+*.patch
+college_append.jsonl
+opencode.json
+.opencode/
+opencode_scripts/
+commands/
+startup/
+.agents/
+agent_orchestrator.py
+startup.py
+Quant_private/

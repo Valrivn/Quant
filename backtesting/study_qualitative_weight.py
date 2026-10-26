@@ -2,7 +2,7 @@
 backtesting/study_qualitative_weight.py
 
 Empirical Study: Evaluating Qualitative vs. Quantitative Weights in the Hybrid Strategy
-House of Quant — Quant Platform Production Engine
+House of Quant — Audit Ledger Production Engine
 
 Tests qualitative weight w_qual in [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
 1. Portfolio-level blending: (1 - w_qual) * Arm1_return + w_qual * Arm2_return
