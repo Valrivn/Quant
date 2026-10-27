@@ -205,6 +205,7 @@ class OOSEvaluationEngine:
         self,
         fold_returns: List[pd.Series],
         n_trials: int = 513,
+        periods_per_year: int = 12,
     ) -> Dict[str, Any]:
         """
         Computes Probability of Backtest Overfitting (PBO) across CV folds
@@ -215,8 +216,8 @@ class OOSEvaluationEngine:
 
         fold_sharpes = []
         for r in fold_returns:
-            if len(r) > 5 and r.std() > 1e-12:
-                fold_sharpes.append(float((r.mean() / r.std()) * np.sqrt(252)))
+            if len(r) > 2 and r.std() > 1e-12:
+                fold_sharpes.append(float((r.mean() / r.std()) * np.sqrt(periods_per_year)))
             else:
                 fold_sharpes.append(0.0)
 
@@ -235,8 +236,8 @@ class OOSEvaluationEngine:
             + gamma_const * stats.norm.ppf(1.0 - 1.0 / (n_trials * np.e))
         )
         
-        t_days = sum(len(r) for r in fold_returns)
-        se_sr = np.sqrt(1.0 / max(1, t_days - 1))
+        t_periods = sum(len(r) for r in fold_returns)
+        se_sr = np.sqrt(1.0 / max(1, t_periods - 1))
         z_stat = (mean_sr - e_max_sr) / max(1e-12, se_sr)
         dsr = float(stats.norm.cdf(z_stat))
 
@@ -334,4 +335,141 @@ class OOSEvaluationEngine:
         }, index=portfolio_returns.index)
 
         return shielded_series, state_df
+
+
+def run_oos_backtest_cli(embargo_days: int = 90, n_trials: int = 513) -> None:
+    import argparse
+    from pathlib import Path
+    
+    print("=" * 80)
+    print("PURGED OUT-OF-SAMPLE (OOS) WALK-FORWARD EVALUATION & AUDIT")
+    print(f"Embargo Window: {embargo_days} days | Deflated Sharpe Trials: N={n_trials}")
+    print("=" * 80)
+    
+    repo_root = Path(__file__).resolve().parent.parent
+    perf_path = repo_root / "data" / "backtests" / "three_arm_comparison" / "three_arm_monthly_performance.csv"
+    
+    if not perf_path.exists():
+        print(f"Monthly performance data not found at {perf_path}.")
+        print("Running full three-arm comparative backtest first...")
+        from backtesting.run_three_arm_comparative_backtest import main as run_comparative
+        run_comparative()
+        
+    df = pd.read_csv(perf_path)
+    df["rebalance_date"] = pd.to_datetime(df["rebalance_date"])
+    df = df.sort_values("rebalance_date").reset_index(drop=True)
+    
+    embargo_months = max(1, int(round(embargo_days / 30.0)))
+    engine = OOSEvaluationEngine(
+        partition_config=OOSPartitionConfig(embargo_months=embargo_months)
+    )
+    
+    partitions = engine.partition_time_series(df, date_column="rebalance_date")
+    
+    print(f"\n[1/4] Temporal Partition Audit:")
+    for part_name, part_df in partitions.items():
+        if len(part_df) > 0:
+            p_start = part_df["rebalance_date"].min().strftime("%Y-%m-%d")
+            p_end = part_df["rebalance_date"].max().strftime("%Y-%m-%d")
+            print(f"  - {part_name.upper():<15}: {len(part_df):>2} months ({p_start} to {p_end})")
+        else:
+            print(f"  - {part_name.upper():<15}:  0 months")
+
+    # Metrics evaluation helper matching canonical compute_arm_analytics
+    def calc_metrics(series: pd.Series, spy: pd.Series, rf_annual: float = 0.02) -> Dict[str, float]:
+        n = len(series)
+        if n == 0:
+            return {}
+        rf_m = (1.0 + rf_annual) ** (1.0 / 12.0) - 1.0
+        cum_ret = float(np.prod(1.0 + series) - 1.0)
+        cagr = float((1.0 + cum_ret) ** (12.0 / n) - 1.0)
+        vol = float(np.std(series, ddof=1) * np.sqrt(12.0))
+        excess = series - rf_m
+        sr = float((np.mean(excess) / np.std(series, ddof=1)) * np.sqrt(12.0)) if vol > 1e-8 else 0.0
+        downside_diff = np.where(excess < 0, excess, 0.0)
+        downside_dev = float(np.sqrt(np.mean(downside_diff ** 2)) * np.sqrt(12.0))
+        sortino = float((np.mean(excess) * 12.0) / downside_dev) if downside_dev > 1e-8 else 0.0
+        wealth = np.cumprod(1.0 + series)
+        peak = np.maximum.accumulate(wealth)
+        dd = float(np.min((wealth - peak) / peak))
+        calmar = float(cagr / abs(dd)) if abs(dd) > 1e-8 else 0.0
+        cov = np.cov(series, spy)[0][1] if len(spy) == n else 0.0
+        var_spy = np.var(spy, ddof=1) if len(spy) == n else 1.0
+        beta = float(cov / var_spy) if var_spy > 1e-8 else 1.0
+        bench_cagr = float((np.prod(1.0 + spy)) ** (12.0 / n) - 1.0) if len(spy) == n else 0.0
+        alpha = float((cagr - rf_annual) - beta * (bench_cagr - rf_annual))
+        down_mask = spy < 0
+        down_cap = float(series[down_mask].mean() / spy[down_mask].mean()) if down_mask.sum() > 0 else 1.0
+        return {
+            "cagr": cagr,
+            "cum_ret": cum_ret,
+            "vol": vol,
+            "sharpe": sr,
+            "sortino": sortino,
+            "max_dd": dd,
+            "calmar": calmar,
+            "beta": beta,
+            "alpha": alpha,
+            "down_capture": down_cap,
+        }
+
+    print(f"\n[2/4] Full Walk-Forward Performance (2018 - 2024, 83 Months Net of Slippage):")
+    m_arm1 = calc_metrics(df["arm1_net_ret"], df["spy_ret"])
+    m_arm2 = calc_metrics(df["arm2_net_ret"], df["spy_ret"])
+    m_arm3 = calc_metrics(df["arm3_net_ret"], df["spy_ret"])
+    m_spy = calc_metrics(df["spy_ret"], df["spy_ret"])
+
+    summary_rows = [
+        ("CAGR (%)", f"{m_arm1['cagr']*100:.2f}%", f"{m_arm2['cagr']*100:.2f}%", f"{m_arm3['cagr']*100:.2f}%", f"{m_spy['cagr']*100:.2f}%"),
+        ("Cumulative Return (%)", f"{m_arm1['cum_ret']*100:.2f}%", f"{m_arm2['cum_ret']*100:.2f}%", f"{m_arm3['cum_ret']*100:.2f}%", f"{m_spy['cum_ret']*100:.2f}%"),
+        ("Annualized Volatility (%)", f"{m_arm1['vol']*100:.2f}%", f"{m_arm2['vol']*100:.2f}%", f"{m_arm3['vol']*100:.2f}%", f"{m_spy['vol']*100:.2f}%"),
+        ("Sharpe Ratio (Rf=2%)", f"{m_arm1['sharpe']:.2f}", f"{m_arm2['sharpe']:.2f}", f"{m_arm3['sharpe']:.2f}", f"{m_spy['sharpe']:.2f}"),
+        ("Sortino Ratio", f"{m_arm1['sortino']:.2f}", f"{m_arm2['sortino']:.2f}", f"{m_arm3['sortino']:.2f}", f"{m_spy['sortino']:.2f}"),
+        ("Maximum Drawdown (%)", f"{m_arm1['max_dd']*100:.2f}%", f"{m_arm2['max_dd']*100:.2f}%", f"{m_arm3['max_dd']*100:.2f}%", f"{m_spy['max_dd']*100:.2f}%"),
+        ("Beta vs SPY", f"{m_arm1['beta']:.2f}", f"{m_arm2['beta']:.2f}", f"{m_arm3['beta']:.2f}", f"{m_spy['beta']:.2f}"),
+        ("Down-Market Capture", f"{m_arm1['down_capture']*100:.1f}%", f"{m_arm2['down_capture']*100:.1f}%", f"{m_arm3['down_capture']*100:.1f}%", f"{m_spy['down_capture']*100:.1f}%"),
+        ("Avg Monthly Turnover (%)", f"{df['arm1_turnover'].mean()*100:.2f}%", f"{df['arm2_turnover'].mean()*100:.2f}%", f"{df['arm3_turnover'].mean()*100:.2f}%", "0.00%"),
+    ]
+    
+    col_w = [26, 18, 18, 18, 16]
+    hdr = f"{'Metric':<26}{'Arm 1 (Full Quant)':<18}{'Arm 2 (Qual Moat)':<18}{'Arm 3 (Hybrid)':<18}{'S&P 500 (SPY)':<16}"
+    print("-" * len(hdr))
+    print(hdr)
+    print("-" * len(hdr))
+    for r in summary_rows:
+        print(f"{r[0]:<26}{r[1]:<18}{r[2]:<18}{r[3]:<18}{r[4]:<16}")
+    print("-" * len(hdr))
+
+    print(f"\n[3/4] Purged Holdout (Phase 10: 2023 - 2024) Performance:")
+    holdout_df = partitions["holdout"]
+    if len(holdout_df) > 0:
+        h_arm1 = calc_metrics(holdout_df["arm1_net_ret"], holdout_df["spy_ret"])
+        h_spy = calc_metrics(holdout_df["spy_ret"], holdout_df["spy_ret"])
+        print(f"  - Arm 1 Holdout CAGR: {h_arm1['cagr']*100:.2f}% (Vol: {h_arm1['vol']*100:.2f}%, Sharpe: {h_arm1['sharpe']:.2f}, MaxDD: {h_arm1['max_dd']*100:.2f}%)")
+        print(f"  - SPY Holdout CAGR:   {h_spy['cagr']*100:.2f}% (Vol: {h_spy['vol']*100:.2f}%, Sharpe: {h_spy['sharpe']:.2f}, MaxDD: {h_spy['max_dd']*100:.2f}%)")
+
+    print(f"\n[4/4] Multiple-Testing Falsification (Deflated Sharpe Ratio, N={n_trials}):")
+    # 4-fold cross validation paths
+    fold_size = len(df) // 4
+    folds = [df["arm1_net_ret"].iloc[i * fold_size:(i + 1) * fold_size] for i in range(4)]
+    dsr_result = engine.compute_pbo_and_dsr(folds, n_trials=n_trials)
+    print(f"  - Cross-Validation Mean Sharpe: {dsr_result['mean_sharpe']:.2f}")
+    print(f"  - Expected Max Null Sharpe:     {dsr_result['expected_max_null_sharpe']:.2f}")
+    print(f"  - Deflated Sharpe Ratio (DSR):  {dsr_result['dsr']:.4f}")
+    print(f"  - Overfitting Falsification:    {'PASSED (DSR >= 0.95)' if dsr_result['dsr_pass'] else 'FAILED (Multiple-testing hazard)'}")
+    print("=" * 80)
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Purged OOS Walk-Forward Backtest & Evaluation Engine")
+    parser.add_argument("--run", action="store_true", help="Execute out-of-sample backtest & audit")
+    parser.add_argument("--embargo", type=int, default=90, help="Embargo window in days (default: 90)")
+    parser.add_argument("--trials", type=int, default=513, help="Number of trials in search space (default: 513)")
+    args = parser.parse_args()
+    
+    if args.run:
+        run_oos_backtest_cli(embargo_days=args.embargo, n_trials=args.trials)
+    else:
+        parser.print_help()
 
