@@ -468,10 +468,10 @@
         <div class="card p-5 rounded-lg space-y-2">
           <div class="text-xs font-mono text-slate-400 font-semibold uppercase">1. Discounted Cash Flow &amp; Reinvestment Growth (Damodaran)</div>
           <div class="py-2 text-center text-slate-200 font-mono text-sm sm:text-base overflow-x-auto">
-            $$\text{Value}_0 = \sum_{t=1}^{T} \frac{\text{Cash Flow}_t}{(1 + \text{Discount Rate})^t} + \frac{\text{Terminal Value}}{(1 + \text{Discount Rate})^T}$$
+            $$\text{Intrinsic Value} = \sum_{t=1}^{T} \text{Cash Flow}_t / (1 + r)^t + \text{Terminal Value} / (1 + r)^T$$
           </div>
           <p class="text-xs text-slate-300 pt-2 border-t border-slate-800 leading-relaxed font-sans">
-            <strong>Plain English:</strong> Calculates what future cash flows are worth in today's dollars, where growth must be funded by reinvested profits rather than assumed arbitrary growth percentages.
+            <strong>Plain English:</strong> Calculates what future cash flows are worth today. Growth must come from reinvested profits rather than assumed growth rates.
           </p>
         </div>
 
@@ -479,10 +479,10 @@
         <div class="card p-5 rounded-lg space-y-2">
           <div class="text-xs font-mono text-slate-400 font-semibold uppercase">2. Bottom-Up Operating Beta (Damodaran)</div>
           <div class="py-2 text-center text-slate-200 font-mono text-sm sm:text-base overflow-x-auto">
-            $$\beta_{\text{business}} = \frac{\beta_{\text{stock}}}{1 + (1 - \text{tax})\frac{\text{Debt}}{\text{Equity}}}$$
+            $$\beta_{\text{business}} = \beta_{\text{stock}} / \left[1 + (1 - \text{Tax Rate}) \times (\text{Debt} / \text{Equity})\right]$$
           </div>
           <p class="text-xs text-slate-300 pt-2 border-t border-slate-800 leading-relaxed font-sans">
-            <strong>Plain English:</strong> Strips out corporate debt to isolate the fundamental operating risk of the underlying business, preventing stock price noise from distorting cost of capital.
+            <strong>Plain English:</strong> Removes corporate debt to find the real operating risk of the business, keeping stock price noise from skewing the cost of capital.
           </p>
         </div>
 
@@ -490,10 +490,10 @@
         <div class="card p-5 rounded-lg space-y-2">
           <div class="text-xs font-mono text-slate-400 font-semibold uppercase">3. Market Impact Slippage Formulation</div>
           <div class="py-2 text-center text-slate-200 font-mono text-sm sm:text-base overflow-x-auto">
-            $$\text{Cost}_{\text{bps}} = \frac{\text{Spread}}{2} + \text{Fee} + \eta \cdot \sigma_{\text{daily}} \sqrt{\frac{\text{Trade Size}}{\text{ADV}}} \times 10{,}000$$
+            $$\text{Cost (bps)} = 0.5 \times \text{Spread} + \text{Base Fee} + 0.10 \times \sigma_{\text{daily}} \times \sqrt{\text{Trade Size} / \text{Daily Volume}} \times 10{,}000$$
           </div>
           <p class="text-xs text-slate-300 pt-2 border-t border-slate-800 leading-relaxed font-sans">
-            <strong>Plain English:</strong> Penalizes trading costs based on order size relative to average daily volume, ensuring realistic execution drag during volatile periods.
+            <strong>Plain English:</strong> Larger orders move prices against you. This models real execution costs based on trade size relative to daily market volume.
           </p>
         </div>
 
@@ -501,10 +501,10 @@
         <div class="card p-5 rounded-lg space-y-2">
           <div class="text-xs font-mono text-slate-400 font-semibold uppercase">4. Market Sensitivity (&beta;) &amp; Downside Deviation (Sortino)</div>
           <div class="py-2 text-center text-slate-200 font-mono text-sm sm:text-base overflow-x-auto">
-            $$\beta = \frac{\text{Cov}(R_{\text{portfolio}}, R_{\text{market}})}{\text{Var}(R_{\text{market}})}, \quad \text{Sortino} = \frac{\text{Return} - R_f}{\sqrt{\frac{1}{N}\sum_{t=1}^N \min(0, R_{p,t} - R_f)^2}}$$
+            $$\beta = \text{Cov}(R_p, R_m) / \text{Var}(R_m), \quad \text{Sortino} = (R_p - R_f) / \sigma_{\text{downside}}$$
           </div>
           <p class="text-xs text-slate-300 pt-2 border-t border-slate-800 leading-relaxed font-sans">
-            <strong>Plain English:</strong> Beta measures sensitivity to market swings (0.63 indicates 37% less drawdown exposure), while Sortino evaluates returns strictly against downside losses.
+            <strong>Plain English:</strong> Beta measures sensitivity to market swings (0.63 means 37% less market risk), while Sortino measures returns against harmful downside losses rather than upside volatility.
           </p>
         </div>
 
@@ -512,10 +512,10 @@
         <div class="card p-5 rounded-lg space-y-2">
           <div class="text-xs font-mono text-slate-400 font-semibold uppercase">5. Cross-Sectional Permutation Null Hypothesis Test (Spiegelhalter)</div>
           <div class="py-2 text-center text-slate-200 font-mono text-sm sm:text-base overflow-x-auto">
-            $$p\text{-value} = \frac{1}{B} \sum_{b=1}^{B} \mathbb{I}\left( \text{Sharpe}_{\text{null}, b} \ge \text{Sharpe}_{\text{strategy}} \right)$$
+            $$p\text{-value} = (\text{Count of Random Shuffles Beating Strategy}) / 10{,}000$$
           </div>
           <p class="text-xs text-slate-300 pt-2 border-t border-slate-800 leading-relaxed font-sans">
-            <strong>Plain English:</strong> Randomly shuffles asset selections 10,000 times under identical market dates to test whether strategy performance reflects a valid signal or random chance.
+            <strong>Plain English:</strong> Shuffles stock picks 10,000 times across identical dates to verify whether returns come from a real signal or just luck.
           </p>
         </div>
       </div>

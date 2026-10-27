@@ -8,24 +8,24 @@
 * **Interactive Research Monograph & Retrospective:** [https://valrivn.github.io/Value-Investing-Engine-/](https://valrivn.github.io/Value-Investing-Engine-/)
 * **Core Language & Framework:** Python 3.11+ | Polars & NumPy | PyArrow Parquet | SEC EDGAR XBRL
 
-Quant-Py is a three-pillar quantitative equity research platform designed to investigate whether classical **Graham-and-Dodd Value Investing** and **Damodaran Discounted Cash Flow (DCF)** frameworks can be systematically automated in code—combining fundamental balance sheet data with qualitative business durability indicators to evaluate risk-adjusted performance against the S&P 500.
+Quant-Py is a three-pillar quantitative equity research platform built to test whether classical **Graham-and-Dodd Value Investing** and **Damodaran Discounted Cash Flow (DCF)** frameworks can be automated in code—combining balance sheet fundamentals with qualitative business indicators to evaluate risk-adjusted performance against the S&P 500.
 
-Rather than optimizing a simulation to maximize cosmetic headline returns, Quant-Py was developed around **adversarial falsification**: systematically auditing quantitative codebases for lookahead bias, silent fallback defaults, survivorship artifacts, and microstructure execution drag.
+Rather than designing a backtest to show flattering paper returns, Quant-Py was developed around **adversarial falsification**: systematically auditing the code for lookahead bias, silent fallback defaults, survivorship gaps, and real-world trading friction.
 
 ---
 
 ## 1. Core Philosophy: Intrinsic Value vs. Market Noise
 
-The system separates the investment process into two decoupled domains:
+The system separates the investment process into two clear domains:
 
-* **The Intrinsic Value Layer (Damodaran & Graham Framework):** Dictates *what* to buy. Strips GAAP accounting distortions to evaluate Point-In-Time Economic Value Added ($\text{ROIC} - \text{WACC}$), capitalizes R&D over 3–5 year amortization schedules, de-levers industry peer betas to isolate operational risk, and calculates Free Cash Flow margin durability.
-* **The Regime & Friction Layer:** Dictates *when* and *how much* to buy. Evaluates macroeconomic cost-of-capital conditions and real-world execution drag, enforcing dynamic square-root slippage, 15% turnover hysteresis deadbands, and a mechanical 15% short-term Treasury (BIL) buffer to protect capital during market drawdowns.
+* **The Intrinsic Value Layer (Damodaran & Graham Framework):** Dictates *what* to buy. Adjusts standard accounting numbers to evaluate true Point-In-Time Economic Value Added ($\text{ROIC} - \text{WACC}$), capitalizes R&D over 3–5 year amortization schedules, removes company debt to measure real business operating risk, and calculates Free Cash Flow margin durability.
+* **The Regime & Friction Layer:** Dictates *when* and *how much* to buy. Evaluates cost-of-capital conditions and real execution drag, enforcing dynamic square-root slippage, 15% turnover hysteresis deadbands, and a mechanical 15% short-term Treasury (BIL) buffer to protect capital during market drawdowns.
 
 ---
 
 ## 2. Ingestion Architecture & Data Integrity
 
-All data ingestion paths rely exclusively on official public-sector REST APIs and open government datasets. **Zero brittle web scrapers or terms-of-service evasion scripts are permitted in the pipeline:**
+All data ingestion paths rely exclusively on official public-sector REST APIs and open government datasets. **Zero web scrapers or terms-of-service evasion scripts are permitted in the pipeline:**
 
 | Sector / Pillar | Data Provider | Provenance & Legal Classification | Temporal Depth & Protocol |
 | :--- | :--- | :--- | :--- |
@@ -35,20 +35,20 @@ All data ingestion paths rely exclusively on official public-sector REST APIs an
 | **Consumer Trust** | CFPB Open Data API | Public Domain (US Gov) | Consumer Financial Protection Bureau complaint velocity. |
 | **Public Visibility** | Wikimedia Foundation API | Open Data / CC BY-SA 4.0 | Official REST endpoints; used strictly for forward-walk evaluation. |
 
-> **Methodological Note on Qualitative Data:** While SEC EDGAR financial records provide audited depth back to 2010, alternative public APIs (such as patent acceleration and consumer complaint logs) only provide survivor-bias-free data beginning around 2022. To avoid lookahead and imputation bias, qualitative indicators are quarantined to prospective periods, while long-horizon historical backtests rely strictly on point-in-time financial statements.
+> **Methodological Note on Qualitative Data:** While SEC EDGAR financial records provide audited depth back to 2010, alternative public APIs (such as patent acceleration and consumer complaint logs) only provide clean data beginning around 2022. To avoid lookahead and imputation bias, qualitative indicators are quarantined to recent periods, while long-horizon historical backtests rely strictly on point-in-time financial statements.
 
 ---
 
 ## 3. The Adversarial Audit: How We Dismantled Our Own Backtest
 
-An initial prototype of this system produced headline returns of **21.70% CAGR (+289.08% cumulative net return)** with an apparent Fama-French $\alpha = +14.71\%$ ($t=4.70$). Because extreme backtest returns almost invariably signal hidden lookahead leakage or software fallbacks, an adversarial codebase audit was conducted via AST and regex static analysis (`backtesting/oos_evaluation.py`).
+An initial prototype of this system produced headline returns of **21.70% CAGR (+289.08% cumulative net return)** with an apparent Fama-French $\alpha = +14.71\%$ ($t=4.70$). Because extreme backtest returns almost always signal hidden lookahead leakage or software bugs, an adversarial codebase audit was conducted via AST and regex static analysis (`backtesting/oos_evaluation.py`).
 
 ### Failure Modes Uncovered:
-1. **Silent Fallback Contamination (Cardboard Dummies):** In `Quantitative/probationary_queue.py`, missing EPS revision data fell back to `return 0.05` and missing operating margin robustness fell back to `return 0.60`. Furthermore, `validation/boundary_hitrate.py` contained a hardcoded `oos_hit_rate = 0.62`. These placeholders granted ~411 unvetted assets free entry into the portfolio during historical market runs.
+1. **Placeholder Defaults (Cardboard Dummies):** In `Quantitative/probationary_queue.py`, missing EPS revision data fell back to `return 0.05` and missing operating margin robustness fell back to `return 0.60`. Furthermore, `validation/boundary_hitrate.py` contained a hardcoded `oos_hit_rate = 0.62`. These placeholders quietly granted ~411 unvetted assets free entry into the portfolio during historical market runs.
 2. **Restatement Lookahead Bias:** Standard vendor datasets index historical filings to fiscal quarter-end dates (e.g., Dec 31). Because corporate 10-K/10-Q statements are filed 30–60 days later (e.g., mid-February), evaluating trades on quarter-end dates allowed the engine to trade on financial reports that were not yet public.
-3. **Turnover Friction & Microstructure Drag:** Assuming flat 15 bps transaction fees severely underestimated execution drag. Under dynamic square-root slippage:
-   $$\text{Cost}_{\text{bps}} = \frac{\text{Spread}}{2} + \text{Fee} + \eta \cdot \sigma_{\text{daily}}\sqrt{\frac{\text{TradeSize}}{\text{ADV}}} \times 10{,}000$$
-   Unconstrained monthly rebalancing incurred severe friction during volatile regimes.
+3. **Trading Costs & Market Impact:** Assuming a flat 0.15% fee was unrealistic. In real markets, larger orders move prices against you. Under a dynamic square-root slippage model:
+   $$\text{Trading Cost (bps)} = 0.5 \times \text{Spread} + \text{Base Fee} + 0.10 \times \sigma_{\text{daily}} \times \sqrt{\text{Trade Size} / \text{Daily Volume}} \times 10{,}000$$
+   Without accounting for this market impact, frequent trading created severe fee drag during volatile months.
 
 ---
 
@@ -56,7 +56,7 @@ An initial prototype of this system produced headline returns of **21.70% CAGR (
 
 To eliminate structural self-deception, three core engineering mechanisms were enforced:
 
-* **Strict Fail-Closed Policy:** All placeholder defaults were permanently excised. If a candidate asset lacks authentic point-in-time fundamental records, the engine triggers an automatic rejection (`MissingDataException`) rather than an unearned pass.
+* **Strict Fail-Closed Policy:** All placeholder defaults were permanently removed. If a candidate asset lacks authentic point-in-time fundamental records, the engine triggers an automatic rejection (`MissingDataException`) rather than an unearned pass.
 * **Turnover Hysteresis Deadbands:** Implemented `apply_hysteresis_deadband()` to suppress rebalancing transactions where position drift $|\Delta w_i| \le 15\%$, capping portfolio turnover under 10% monthly.
 * **Dynamic Drawdown Regime Shield:** Implemented `apply_drawdown_regime_shield()` reacting to realized peak-to-trough drawdowns:
   * **Normal ($\text{DD} > -8\%$):** Standard 85% equity / 15% cash baseline.
@@ -85,7 +85,7 @@ To eliminate structural self-deception, three core engineering mechanisms were e
 *\*Note: Historical run Sortino divisor calculation corrected from monthly to standard $\sqrt{12}$ annualization.*
 
 ### Core Falsification Takeaway:
-Eliminating lookahead bias and placeholder defaults moderated nominal CAGR from ~21% to **11.57%–12.12%**. However, the sanitized strategy demonstrated true institutional capital preservation: **reducing market sensitivity to a 0.63 Beta, limiting maximum drawdown to &minus;17.78% (vs. SPY &minus;23.93%), and slashing down-market capture to 64.3%**.
+Eliminating lookahead bias and placeholder defaults moderated nominal CAGR from ~21% to **11.57%–12.12%**. However, the sanitized strategy demonstrated true capital preservation: **reducing market sensitivity to a 0.63 Beta, limiting maximum drawdown to &minus;17.78% (vs. SPY &minus;23.93%), and slashing down-market capture to 64.3%**.
 
 ---
 
@@ -93,8 +93,8 @@ Eliminating lookahead bias and placeholder defaults moderated nominal CAGR from 
 
 * **Multiple Testing Guard (Deflated Sharpe Ratio):** Strategy iterations are cataloged in an immutable ledger (`data/phase9_full/trial_ledger_v5.json`) tracking $N=513$ trials. DSR adjustments (Bailey & López de Prado) explicitly account for selection bias across the parameter space.
 * **Cross-Sectional Permutation Null:** Executes 10,000 cross-sectional asset shuffling passes under identical market dates to establish empirical $p$-values ($p < 0.05$) against the null hypothesis of unearned factor timing.
-* **Factor Neutralization:** Regressed against Fama-French 5-factor series (Market, SMB, HML, RMW, CMA) to verify that excess returns represent genuine idiosyncratic alpha rather than unhedged small-cap or momentum beta.
-* **Strict Temporal Embargo:** Holdout partitions enforce a 90-day embargo purge window to sever autoregressive signal leakage between training and out-of-sample periods.
+* **Factor Checks:** Regressed against Fama-French 5-factor series (Market, SMB, HML, RMW, CMA) to verify that excess returns represent genuine stock selection rather than taking unhedged market risk.
+* **Strict Temporal Embargo:** Holdout partitions enforce a 90-day embargo purge window to cut signal leakage between training and out-of-sample periods.
 
 ---
 
